@@ -1,18 +1,21 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '@mantine/core'
+import { useForm } from '@mantine/form'
 const Login = () => {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
     const navigate = useNavigate()
-
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault()
-        console.log('Logging in with:', email, password)
-
+    const form = useForm({
+        initialValues: {
+            email: '',
+            password: ''
+        },
+        validate: {
+            email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+            password: (value) => (value.length < 6 ? 'Password should be at least 6 characters' : null)
+        }
+    })
+    const handleSubmit = (values: typeof form.values) => {
         navigate('/dashboard')
     }
-
     return (
         <div className='flex h-screen'>
             {/* Left Side */}
@@ -42,22 +45,22 @@ const Login = () => {
                     <h1 className='text-3xl font-bold text-gray-900 mb-2'>Welcome Back!</h1>
                     <p className='text-gray-600 mb-8'>
                         Don't have an account?{' '}
-                        <button
+                        <Button
                             onClick={() => navigate('/register')}
                             className='text-blue-600 hover:underline bg-none border-none cursor-pointer'
                         >
                             Create a new account now
-                        </button>
+                        </Button>
                         , it's FREE! Takes less than a minute.
                     </p>
 
-                    <form onSubmit={handleLogin} className='space-y-4'>
+                    <form onSubmit={form.onSubmit(handleSubmit)} className='space-y-4'>
                         <div>
                             <input
                                 type='email'
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder='Email'
+                                key={form.key('email')}
+                                {...form.getInputProps('email')}
                                 className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition'
                                 required
                             />
@@ -65,11 +68,10 @@ const Login = () => {
                         <div>
                             <input
                                 type='password'
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
                                 placeholder='Password'
+                                key={form.key('password')}
+                                {...form.getInputProps('password')}
                                 className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition'
-                                required
                             />
                         </div>
 
@@ -80,22 +82,22 @@ const Login = () => {
                             Login Now
                         </Button>
 
-                        <button
+                        <Button
                             type='button'
-                            className='w-full border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition font-medium flex items-center justify-center gap-2'
+                            className='w-full border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition font-medium flex items-center justify-center gap-2 cursor-pointer'
                         >
                             <img src='/google-icon.png' alt='Google' className='w-5 h-5' />
                             Login with Google
-                        </button>
+                        </Button>
 
                         <p className='text-center text-gray-600'>
                             Forgot password{' '}
-                            <button
+                            <Button
                                 onClick={() => navigate('/forgot-password')}
                                 className='text-blue-600 hover:underline bg-none border-none cursor-pointer'
                             >
                                 Click here
-                            </button>
+                            </Button>
                         </p>
                     </form>
                 </div>
