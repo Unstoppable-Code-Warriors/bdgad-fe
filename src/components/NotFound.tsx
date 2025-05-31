@@ -1,22 +1,25 @@
 import { useNavigate } from 'react-router';
+import { Container, Title, Text, Button, Center } from '@mantine/core';
 
 const NotFound = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Page Not Found</h2>
-        <p className="text-gray-600 mb-8">The page you're looking for doesn't exist.</p>
-        <button
-          onClick={() => navigate('/')}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Go Home
-        </button>
-      </div>
-    </div>
+    <Container size="md" className="min-h-screen flex items-center">
+      <Center w="100%">
+        <div style={{ textAlign: 'center' }}>
+          <Title order={1} size={96} fw={700} c="gray.9" mb="lg">404</Title>
+          <Title order={2} size={32} fw={600} c="gray.7" mb="lg">Page Not Found</Title>
+          <Text c="dimmed" mb="xl">The page you're looking for doesn't exist.</Text>
+          <Button 
+            size="lg"
+            onClick={() => navigate('/')}
+          >
+            Go Home
+          </Button>
+        </div>
+      </Center>
+    </Container>
   );
 };
 
