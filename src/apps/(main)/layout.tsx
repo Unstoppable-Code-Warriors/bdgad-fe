@@ -2,17 +2,24 @@ import { AppShell } from '@mantine/core'
 import { useUser } from '@stackframe/react'
 import Header from './_components/header'
 import { Outlet } from 'react-router'
-
+import Navbar from './_components/navbar'
+import { useAppShell } from '@/stores/appshell.store'
 const MainLayout = () => {
     useUser({ or: 'redirect' })
+    const { header, navbar, padding } = useAppShell()
     return (
         <AppShell
-            header={{ height: 60 }}
-            navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: true } }}
-            padding='md'
+            header={{ height: 60, collapsed: !header }}
+            navbar={{ width: 200, breakpoint: 'sm', collapsed: { mobile: true, desktop: !navbar } }}
+            padding={padding}
+            styles={{
+                header: {
+                    zIndex: 49
+                }
+            }}
         >
             <Header />
-            <AppShell.Navbar p='md'></AppShell.Navbar>
+            <Navbar />
             <AppShell.Main>
                 <Outlet />
             </AppShell.Main>
