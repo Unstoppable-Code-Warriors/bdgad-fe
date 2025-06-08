@@ -16,8 +16,17 @@ import {
     Title,
     Alert
 } from '@mantine/core'
+import { DatePickerInput, DateTimePicker } from '@mantine/dates'
 import { useForm } from '@mantine/form'
-import { IconEdit, IconCheck, IconRefresh, IconTrash, IconPlus, IconAlertTriangle } from '@tabler/icons-react'
+import {
+    IconEdit,
+    IconCheck,
+    IconRefresh,
+    IconTrash,
+    IconPlus,
+    IconAlertTriangle,
+    IconCalendar
+} from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import type { MedicalTestRequisitionUploadResponse, TestOrder } from '@/types'
 
@@ -38,12 +47,74 @@ interface FormValues {
     age: number
     patient_type: string
     diagnosis: string
-    exam_date: string
+    exam_date: Date | null
     ordering_doctor: string
     sample_time: string
-    print_time: string
+    print_time: Date | null
     technician: string
     test_orders: TestOrder[]
+}
+
+// Helper function to parse date strings to Date objects
+const parseDate = (dateString: string | null): Date | null => {
+    if (!dateString) return null
+
+    // Normalize the string - trim whitespace and handle common variations
+    const normalized = dateString.trim()
+
+    // Handle datetime with A/P suffix (AM/PM)
+    const dateTimeWithAmPm = normalized.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})\s*([APap])$/i)
+    if (dateTimeWithAmPm) {
+        const [, day, month, year, hour, minute, ampm] = dateTimeWithAmPm
+        let parsedHour = parseInt(hour)
+
+        // Convert to 24-hour format
+        if (ampm.toUpperCase() === 'P' && parsedHour !== 12) {
+            parsedHour += 12
+        } else if (ampm.toUpperCase() === 'A' && parsedHour === 12) {
+            parsedHour = 0
+        }
+
+        return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parsedHour, parseInt(minute))
+    }
+
+    // Handle datetime without AM/PM (24-hour format)
+    const dateTimeRegular = normalized.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/)
+    if (dateTimeRegular) {
+        const [, day, month, year, hour, minute] = dateTimeRegular
+        return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute))
+    }
+
+    // Handle date only DD/MM/YYYY format
+    const ddmmyyyy = normalized.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+    if (ddmmyyyy) {
+        const [, day, month, year] = ddmmyyyy
+        return new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+    }
+
+    // Try to parse other common formats
+    const date = new Date(normalized)
+    return isNaN(date.getTime()) ? null : date
+}
+
+// Helper function to format Date objects to DD/MM/YYYY or DD/MM/YYYY HH:mm strings
+const formatDate = (date: Date | null): string => {
+    if (!date) return ''
+
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear()
+
+    // Check if the date has time information (not midnight)
+    const hasTime = date.getHours() !== 0 || date.getMinutes() !== 0
+
+    if (hasTime) {
+        const hour = date.getHours().toString().padStart(2, '0')
+        const minute = date.getMinutes().toString().padStart(2, '0')
+        return `${day}/${month}/${year} ${hour}:${minute}`
+    }
+
+    return `${day}/${month}/${year}`
 }
 
 const ResultStep = ({ data, onReset }: ResultStepProps) => {
@@ -82,10 +153,10 @@ const ResultStep = ({ data, onReset }: ResultStepProps) => {
         age: data.ocrResult?.age || 0,
         patient_type: data.ocrResult?.patient_type || '',
         diagnosis: data.ocrResult?.diagnosis || '',
-        exam_date: data.ocrResult?.exam_date || '',
+        exam_date: parseDate(data.ocrResult?.exam_date),
         ordering_doctor: data.ocrResult?.ordering_doctor || '',
         sample_time: data.ocrResult?.sample_time || '',
-        print_time: data.ocrResult?.print_time || '',
+        print_time: parseDate(data.ocrResult?.print_time),
         technician: data.ocrResult?.technician || '',
         test_orders: data.ocrResult?.test_orders || []
     }
@@ -101,7 +172,14 @@ const ResultStep = ({ data, onReset }: ResultStepProps) => {
     })
 
     const handleSubmit = (values: FormValues) => {
-        console.log('Form submitted:', values)
+        // Convert dates back to strings for submission
+        const submitValues = {
+            ...values,
+            exam_date: formatDate(values.exam_date),
+            print_time: formatDate(values.print_time)
+        }
+
+        console.log('Form submitted:', submitValues)
         notifications.show({
             title: 'Data saved successfully',
             message: 'Medical test requisition data has been processed and saved',
@@ -284,9 +362,11 @@ const ResultStep = ({ data, onReset }: ResultStepProps) => {
                     </Title>
                     <Grid>
                         <Grid.Col span={{ base: 12, md: 4 }}>
-                            <TextInput
+                            <DatePickerInput
                                 label='Exam Date'
-                                placeholder='DD/MM/YYYY'
+                                placeholder='Select exam date'
+                                leftSection={<IconCalendar size='1rem' />}
+                                valueFormat='DD/MM/YYYY'
                                 {...form.getInputProps('exam_date')}
                             />
                         </Grid.Col>
@@ -298,9 +378,11 @@ const ResultStep = ({ data, onReset }: ResultStepProps) => {
                             />
                         </Grid.Col>
                         <Grid.Col span={{ base: 12, md: 4 }}>
-                            <TextInput
+                            <DateTimePicker
                                 label='Print Time'
-                                placeholder='DD/MM/YYYY HH:mm'
+                                placeholder='Select print date and time'
+                                leftSection={<IconCalendar size='1rem' />}
+                                valueFormat='DD/MM/YYYY HH:mm'
                                 {...form.getInputProps('print_time')}
                             />
                         </Grid.Col>

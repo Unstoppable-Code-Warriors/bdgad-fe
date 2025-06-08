@@ -114,9 +114,14 @@ const InputInfoPage = () => {
                 </div>
             </Center>
 
-            <Stepper active={activeStep} onStepClick={setActiveStep} allowNextStepsSelect={false} size='lg' mb='xl'>
+            <Stepper active={activeStep} size='lg' mb='xl'>
                 {steps.map((step, index) => (
-                    <Stepper.Step key={index} label={step.label} description={step.description} />
+                    <Stepper.Step
+                        key={index}
+                        label={step.label}
+                        description={step.description}
+                        allowStepSelect={false}
+                    />
                 ))}
             </Stepper>
 
