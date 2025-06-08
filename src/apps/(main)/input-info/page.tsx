@@ -121,7 +121,7 @@ const InputInfoPage = () => {
             </Stepper>
 
             {activeStep === 0 && <UploadStep onFileUpload={handleFileUpload} loading={isLoading} error={error} />}
-            {activeStep === 1 && <ProcessingStep loading={isLoading} />}
+            {activeStep === 1 && <ProcessingStep />}
             {activeStep === 2 && <ResultStep data={uploadResult} onReset={handleReset} />}
         </Container>
     )
