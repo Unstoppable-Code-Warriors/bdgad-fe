@@ -1,11 +1,7 @@
 import { Stack, Text, Loader, Paper, Group } from '@mantine/core'
 import { IconScan } from '@tabler/icons-react'
 
-interface ProcessingStepProps {
-    loading: boolean
-}
-
-const ProcessingStep = ({ loading }: ProcessingStepProps) => {
+const ProcessingStep = () => {
     return (
         <Stack gap='xl' align='center' mt='xl'>
             <Paper p='xl' radius='md' bg='blue.0' w='100%' maw={400}>
