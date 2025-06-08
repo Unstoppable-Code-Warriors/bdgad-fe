@@ -10,7 +10,7 @@ import { nonAuthLoader, authLoader } from '@/utils/loader'
 import ForgotPasswordPage from '@/apps/auth/forgot-password/page'
 import ResetPasswordPage from '@/apps/auth/reset-password/page'
 import { TanstackQueryProvider } from '../tanstack-query'
-
+import InputInfoPage from '@/apps/(main)/input-info/page'
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <Suspense fallback={null}>
@@ -67,6 +67,10 @@ export const router = createBrowserRouter([
                     {
                         index: true,
                         element: <HomePage />
+                    },
+                    {
+                        path: 'input-info',
+                        element: <InputInfoPage />
                     }
                 ]
             }
