@@ -28,9 +28,6 @@ const ResetPasswordPage = () => {
             newPassword: (value) => {
                 if (!value) return 'Password is required'
                 if (value.length < 8) return 'Password must be at least 8 characters'
-                if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
-                    return 'Password must contain at least one uppercase letter, one lowercase letter, and one number'
-                }
                 return null
             },
             confirmPassword: (value, values) => {
