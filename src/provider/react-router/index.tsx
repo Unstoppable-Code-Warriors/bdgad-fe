@@ -9,11 +9,14 @@ import LoginPage from '@/apps/auth/login/page'
 import { nonAuthLoader, authLoader } from '@/utils/loader'
 import ForgotPasswordPage from '@/apps/auth/forgot-password/page'
 import ResetPasswordPage from '@/apps/auth/reset-password/page'
+import { TanstackQueryProvider } from '../tanstack-query'
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <Suspense fallback={null}>
-            <BaseMantineProvider>{children}</BaseMantineProvider>
+            <TanstackQueryProvider>
+                <BaseMantineProvider>{children}</BaseMantineProvider>
+            </TanstackQueryProvider>
         </Suspense>
     )
 }

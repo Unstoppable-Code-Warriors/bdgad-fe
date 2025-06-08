@@ -1,10 +1,15 @@
+export interface Role {
+    id: number
+    name: string
+}
+
 // User interface based on the actual API response
 export interface User {
     id: number
     email: string
     name: string
-    roles: string[]
-    status: 'active' | 'inactive' | 'pending'
+    roles: Role[]
+    status: 'active' | 'inactive'
     [key: string]: any
 }
 

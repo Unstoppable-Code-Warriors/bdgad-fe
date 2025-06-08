@@ -14,7 +14,7 @@ import {
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { IconMail, IconLock, IconBrandGoogle, IconAlertCircle } from '@tabler/icons-react'
-import { authService } from '@/services/auth'
+import { authService } from '@/services/function/auth'
 import { setTokensOutside } from '@/stores/auth.store'
 import { Link, useNavigate } from 'react-router'
 import { notifications } from '@mantine/notifications'

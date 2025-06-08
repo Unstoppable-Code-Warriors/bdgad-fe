@@ -18,8 +18,8 @@ export const authService = {
     },
 
     // Get current user profile
-    me: async (): Promise<User> => {
-        return authUtils.get<User>(`${PREFIX}/auth/me`)
+    me: async (): Promise<{ success: boolean; user: User }> => {
+        return authUtils.get<{ success: boolean; user: User }>(`${PREFIX}/auth/me`)
     },
 
     // Change password

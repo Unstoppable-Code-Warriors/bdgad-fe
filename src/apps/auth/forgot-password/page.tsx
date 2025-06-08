@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Paper, TextInput, Button, Title, Text, Anchor, Container, Stack, Alert } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { IconMail, IconAlertCircle, IconCheck } from '@tabler/icons-react'
-import { authService } from '@/services/auth'
+import { authService } from '@/services/function/auth'
 import { Link } from 'react-router'
 import { notifications } from '@mantine/notifications'
 

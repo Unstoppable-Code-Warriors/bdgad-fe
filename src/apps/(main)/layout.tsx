@@ -5,6 +5,7 @@ import Navbar from './_components/navbar'
 import { useAppShell } from '@/stores/appshell.store'
 const MainLayout = () => {
     const { header, navbar, padding } = useAppShell()
+
     return (
         <AppShell
             header={{ height: 60, collapsed: !header }}

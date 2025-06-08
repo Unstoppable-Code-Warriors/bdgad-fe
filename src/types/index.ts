@@ -9,16 +9,6 @@ export type {
     ResetPasswordRequest
 } from './auth'
 
-// User types
-export type {
-    UserListResponse,
-    CreateUserRequest,
-    UpdateUserRequest,
-    UserQueryParams,
-    UserActivity,
-    UserActivityResponse
-} from './user'
-
 // API types
 export type {
     ApiError,
