@@ -17,5 +17,9 @@ export type {
     ApiResponseWithData,
     ListResponse,
     UploadResponse,
-    HealthCheckResponse
+    HealthCheckResponse,
+    TestOrder,
+    OCRResult,
+    UploadedFile,
+    MedicalTestRequisitionUploadResponse
 } from './api'

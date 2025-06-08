@@ -3,7 +3,7 @@ import { getAccessToken, getRefreshToken, setTokensOutside, logoutOutside } from
 
 // Environment variables or configuration
 const AUTH_BASE_URL = import.meta.env.VITE_AUTH_API_URL || 'https://auth.bdgad.bio'
-const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || 'https://be.bdagd.bio'
+const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || 'https://be.bdgad.bio'
 
 // Common configuration for all API instances
 const commonConfig: Options = {
