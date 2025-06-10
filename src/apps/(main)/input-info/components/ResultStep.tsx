@@ -25,7 +25,8 @@ import {
     IconTrash,
     IconPlus,
     IconAlertTriangle,
-    IconCalendar
+    IconCalendar,
+    IconArrowLeft
 } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import type { MedicalTestRequisitionUploadResponse, TestOrder } from '@/types'
@@ -125,7 +126,7 @@ const ResultStep = ({ data, onReset }: ResultStepProps) => {
         return (
             <Stack align='center' gap='lg' mt='xl'>
                 <Text c='dimmed'>No data available</Text>
-                <Button onClick={onReset} leftSection={<IconRefresh />}>
+                <Button onClick={onReset} leftSection={<IconArrowLeft />}>
                     Start Over
                 </Button>
             </Stack>

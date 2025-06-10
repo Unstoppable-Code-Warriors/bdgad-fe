@@ -16,7 +16,7 @@ const InputInfoPage = () => {
     const [uploadResult, setUploadResult] = useState<MedicalTestRequisitionUploadResponse | null>(null)
     const [error, setError] = useState<string | null>(null)
 
-    const handleFileUpload = async (file: File) => {
+    const handleFileUpload = async (files: File[]) => {
         setIsLoading(true)
         setError(null)
 
@@ -25,6 +25,7 @@ const InputInfoPage = () => {
             setActiveStep(1)
 
             // Upload and process file
+            const file = files[0]
             const result = await staffService.uploadMedicalTestRequisition(file)
 
             // Check if upload was successful
