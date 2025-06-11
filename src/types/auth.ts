@@ -1,6 +1,7 @@
 export interface Role {
     id: number
-    name: string
+    name: string,
+    code: string
 }
 
 // User interface based on the actual API response
