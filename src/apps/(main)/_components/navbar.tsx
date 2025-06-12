@@ -9,7 +9,7 @@ const navItems = [
     {
         label: 'Import File',
         icon: IconUpload,
-        href: '/input-info',
+        href: '/import-file',
         roles: [Role.STAFF],
         subItems: [
             {

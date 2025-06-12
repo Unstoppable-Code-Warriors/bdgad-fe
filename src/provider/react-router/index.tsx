@@ -69,7 +69,7 @@ export const router = createBrowserRouter([
                         element: <HomePage />
                     },
                     {
-                        path: 'input-info',
+                        path: 'import-file/input',
                         element: <InputInfoPage />
                     }
                 ]
