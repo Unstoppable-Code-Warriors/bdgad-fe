@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Paper, PasswordInput, Button, Title, Text, Anchor, Container, Stack, Alert } from '@mantine/core'
+import { Paper, PasswordInput, Button, Title, Text, Anchor, Container, Stack, Alert, List, Progress, Group } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import { IconLock, IconAlertCircle, IconCheck } from '@tabler/icons-react'
+import { IconLock, IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react'
 import { authService } from '@/services/function/auth'
 import { Link, useSearchParams, useNavigate } from 'react-router'
 import { notifications } from '@mantine/notifications'
+import { passwordValidator, validatePassword, getPasswordStrengthColor, getPasswordRequirementsText } from '@/utils/password'
 
 interface ResetPasswordFormValues {
     newPassword: string
@@ -25,11 +26,7 @@ const ResetPasswordPage = () => {
             confirmPassword: ''
         },
         validate: {
-            newPassword: (value) => {
-                if (!value) return 'Password is required'
-                if (value.length < 8) return 'Password must be at least 8 characters'
-                return null
-            },
+            newPassword: (value) => passwordValidator(value),
             confirmPassword: (value, values) => {
                 if (!value) return 'Please confirm your password'
                 if (value !== values.newPassword) return 'Passwords do not match'
@@ -38,7 +35,6 @@ const ResetPasswordPage = () => {
         }
     })
 
-    // Check if token exists on component mount
     useEffect(() => {
         if (!token) {
             setError('Invalid or missing reset token. Please request a new password reset.')
@@ -85,6 +81,13 @@ const ResetPasswordPage = () => {
     const handleGoToLogin = () => {
         navigate('/auth/login')
     }
+
+    // Get password validation result for display
+    const passwordValidation = form.values.newPassword 
+        ? validatePassword(form.values.newPassword) 
+        : null
+
+    const passwordRequirements = getPasswordRequirementsText()
 
     if (success) {
         return (
@@ -146,12 +149,82 @@ const ResetPasswordPage = () => {
                 ) : (
                     <form onSubmit={form.onSubmit(handleResetPassword)}>
                         <Stack gap='md'>
-                            <PasswordInput
-                                label='New Password'
-                                placeholder='Enter your new password'
-                                leftSection={<IconLock size='1rem' />}
-                                {...form.getInputProps('newPassword')}
-                            />
+                            <div>
+                                <PasswordInput
+                                    label='New Password'
+                                    placeholder='Enter your new password'
+                                    leftSection={<IconLock size='1rem' />}
+                                    {...form.getInputProps('newPassword')}
+                                />
+                                
+                                {/* Password Requirements */}
+                                <Paper p='sm' mt='xs' bg='gray.0' radius='sm'>
+                                    <Text size='xs' fw={500} mb='xs' c='dimmed'>
+                                        Password must contain:
+                                    </Text>
+                                    <List size='xs' spacing='2px'>
+                                        {passwordRequirements.map((req, index) => {
+                                            let isValid = false
+                                            if (form.values.newPassword && passwordValidation) {
+                                                switch (index) {
+                                                    case 0: // Length
+                                                        isValid = form.values.newPassword.length >= 8
+                                                        break
+                                                    case 1: // Lowercase
+                                                        isValid = /[a-z]/.test(form.values.newPassword)
+                                                        break
+                                                    case 2: // Uppercase
+                                                        isValid = /[A-Z]/.test(form.values.newPassword)
+                                                        break
+                                                    case 3: // Number
+                                                        isValid = /\d/.test(form.values.newPassword)
+                                                        break
+                                                    case 4: // Special char
+                                                        isValid = /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(form.values.newPassword)
+                                                        break
+                                                }
+                                            }
+                                            
+                                            return (
+                                                <List.Item 
+                                                    key={index}
+                                                    icon={
+                                                        isValid ? (
+                                                            <IconCheck size='0.8rem' color='green' />
+                                                        ) : (
+                                                            <IconX size='0.8rem' color='red' />
+                                                        )
+                                                    }
+                                                >
+                                                    <Text size='xs' c={isValid ? 'green' : 'red'}>
+                                                        {req}
+                                                    </Text>
+                                                </List.Item>
+                                            )
+                                        })}
+                                    </List>
+                                </Paper>
+
+                                {/* Password Strength Indicator */}
+                                {form.values.newPassword && passwordValidation && (
+                                    <div style={{ marginTop: '8px' }}>
+                                        <Group justify='space-between' mb='xs'>
+                                            <Text size='xs' c='dimmed'>Password strength:</Text>
+                                            <Text size='xs' fw={500} c={getPasswordStrengthColor(passwordValidation.strength)}>
+                                                {passwordValidation.strength.toUpperCase()}
+                                            </Text>
+                                        </Group>
+                                        <Progress 
+                                            value={
+                                                passwordValidation.strength === 'weak' ? 33 :
+                                                passwordValidation.strength === 'medium' ? 66 : 100
+                                            }
+                                            color={getPasswordStrengthColor(passwordValidation.strength)}
+                                            size='xs'
+                                        />
+                                    </div>
+                                )}
+                            </div>
 
                             <PasswordInput
                                 label='Confirm New Password'
@@ -160,7 +233,13 @@ const ResetPasswordPage = () => {
                                 {...form.getInputProps('confirmPassword')}
                             />
 
-                            <Button type='submit' fullWidth mt='md' loading={loading} disabled={loading}>
+                            <Button 
+                                type='submit' 
+                                fullWidth 
+                                mt='md' 
+                                loading={loading} 
+                                disabled={loading || !!(passwordValidation && !passwordValidation.isValid)}
+                            >
                                 Reset Password
                             </Button>
 

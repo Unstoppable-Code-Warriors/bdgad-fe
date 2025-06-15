@@ -18,6 +18,7 @@ import { authService } from '@/services/function/auth'
 import { setTokensOutside } from '@/stores/auth.store'
 import { Link, useNavigate } from 'react-router'
 import { notifications } from '@mantine/notifications'
+import { emailValidator, normalizeEmail, suggestEmailCorrection } from '@/utils/email'
 
 interface LoginFormValues {
     email: string
@@ -27,6 +28,7 @@ interface LoginFormValues {
 const LoginPage = () => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null)
     const navigate = useNavigate()
 
     const form = useForm<LoginFormValues>({
@@ -35,25 +37,43 @@ const LoginPage = () => {
             password: ''
         },
         validate: {
-            email: (value) => {
-                if (!value) return 'Email is required'
-                if (!/^\S+@\S+$/.test(value)) return 'Invalid email format'
-                return null
-            },
+            email: emailValidator,
             password: (value) => {
                 if (!value) return 'Password is required'
-                if (value.length < 8) return 'Password must be at least 8 characters'
                 return null
             }
         }
     })
 
+    const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const email = event.currentTarget.value
+        form.setFieldValue('email', email)
+        
+        // Check for email suggestions
+        const suggestion = suggestEmailCorrection(email)
+        setEmailSuggestion(suggestion)
+    }
+
+    const handleEmailSuggestionClick = () => {
+        if (emailSuggestion) {
+            form.setFieldValue('email', emailSuggestion)
+            setEmailSuggestion(null)
+        }
+    }
+
     const handleLogin = async (values: LoginFormValues) => {
         setLoading(true)
         setError(null)
+        setEmailSuggestion(null)
 
         try {
-            const response = await authService.login(values)
+            // Normalize email before sending to API
+            const normalizedValues = {
+                ...values,
+                email: normalizeEmail(values.email)
+            }
+
+            const response = await authService.login(normalizedValues)
             setTokensOutside(response.token)
             navigate('/')
             notifications.show({
@@ -113,12 +133,22 @@ const LoginPage = () => {
 
                 <form onSubmit={form.onSubmit(handleLogin)}>
                     <Stack gap='md'>
-                        <TextInput
-                            label='Email'
-                            placeholder='your@email.com'
-                            leftSection={<IconMail size='1rem' />}
-                            {...form.getInputProps('email')}
-                        />
+                        <div>
+                            <TextInput
+                                label='Email'
+                                placeholder='your@email.com'
+                                leftSection={<IconMail size='1rem' />}
+                                {...form.getInputProps('email')}
+                                onChange={handleEmailChange}
+                            />
+                            
+                            {/* Email suggestion */}
+                            {emailSuggestion && (
+                                <Text size='xs' c='blue' mt='xs' style={{ cursor: 'pointer' }} onClick={handleEmailSuggestionClick}>
+                                    Did you mean: {emailSuggestion}?
+                                </Text>
+                            )}
+                        </div>
 
                         <PasswordInput
                             label='Password'
