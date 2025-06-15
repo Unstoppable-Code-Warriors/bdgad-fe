@@ -17,8 +17,8 @@ import { IconMail, IconLock, IconBrandGoogle, IconAlertCircle } from '@tabler/ic
 import { authService } from '@/services/function/auth'
 import { setTokensOutside } from '@/stores/auth.store'
 import { Link, useNavigate } from 'react-router'
-import { notifications } from '@mantine/notifications'
 import { emailValidator, normalizeEmail, suggestEmailCorrection } from '@/utils/validateEmail'
+import { authNotifications, showErrorNotification } from '@/utils/notifications'
 
 interface LoginFormValues {
     email: string
@@ -67,7 +67,6 @@ const LoginPage = () => {
         setEmailSuggestion(null)
 
         try {
-            // Normalize email before sending to API
             const normalizedValues = {
                 ...values,
                 email: normalizeEmail(values.email)
@@ -76,20 +75,10 @@ const LoginPage = () => {
             const response = await authService.login(normalizedValues)
             setTokensOutside(response.token)
             navigate('/')
-            notifications.show({
-                title: 'Login successful',
-                message: 'You have been logged in successfully',
-                color: 'green'
-            })
+            authNotifications.loginSuccess()
         } catch (err) {
             console.error(err)
-
             setError('Invalid email or password. Please try again.')
-            notifications.show({
-                title: 'Login failed',
-                message: 'Invalid email or password. Please try again.',
-                color: 'red'
-            })
         } finally {
             setLoading(false)
         }
@@ -103,13 +92,14 @@ const LoginPage = () => {
             // TODO: Implement Google OAuth logic here
             console.log('Google login attempt')
 
-            // Simulate API call
             await new Promise((resolve) => setTimeout(resolve, 1000))
 
-            // For demo purposes - you'll need to implement actual Google OAuth
-            // Example: const response = await authService.loginWithGoogle()
         } catch (err) {
             setError('Failed to login with Google. Please try again.')
+            showErrorNotification({
+                title: 'Google login failed',
+                message: 'Failed to login with Google. Please try again.'
+            })
         } finally {
             setLoading(false)
         }

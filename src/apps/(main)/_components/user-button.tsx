@@ -29,8 +29,8 @@ const UserButton = () => {
                 </Avatar>
             </Menu.Target>
 
-            <Menu.Dropdown>
-                <Menu.Label>{data.user.email}</Menu.Label>
+            <Menu.Dropdown>    
+                <Menu.Label>{data.user.name}</Menu.Label>
                 <Menu.Label>
                     {data.user.roles.map((role) => (
                         <Badge>{role.name}</Badge>

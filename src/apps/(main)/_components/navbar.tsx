@@ -47,7 +47,7 @@ const Navbar = () => {
             <Stack gap={4} px='md' pb='md'>
                 {navItems.map((item) => {              
                     const isActive = location.pathname.startsWith(item.href)
-                    const hasPermission = data.user.roles.some((role) => item.roles.includes(role.id))
+                    const hasPermission = data.user.roles.some((role) => item.roles.includes(parseInt(role.code)))
                     const isOpen = openItems.includes(item.href)
 
                     if (!hasPermission) return null

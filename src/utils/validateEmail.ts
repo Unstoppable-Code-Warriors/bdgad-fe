@@ -61,16 +61,14 @@ export const validateEmail = (email: string): EmailValidationResult => {
     }
 }
 
-// Convenience function for form validation
 export const emailValidator = (value: string): string | null => {
     const validation = validateEmail(value)
     if (!validation.isValid) {
-        return validation.errors[0] // Return first error for form validation
+        return validation.errors[0] 
     }
     return null
 }
 
-// Function to check if email domain is common (for UX suggestions)
 export const isCommonEmailDomain = (email: string): boolean => {
     if (!email || !email.includes('@')) return false
     
