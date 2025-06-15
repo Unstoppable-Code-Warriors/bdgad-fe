@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Paper, PasswordInput, Button, Title, Text, Anchor, Container, Stack, Alert, List, Progress, Group } from '@mantine/core'
+import { Paper, PasswordInput, Button, Title, Text, Anchor, Container, Stack, Alert, List } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { IconLock, IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react'
 import { authService } from '@/services/function/auth'
 import { Link, useSearchParams, useNavigate } from 'react-router'
 import { notifications } from '@mantine/notifications'
-import { passwordValidator, validatePassword, getPasswordStrengthColor, getPasswordRequirementsText } from '@/utils/password'
+import { passwordValidator, validatePassword, getPasswordRequirementsText } from '@/utils/validatePassword'
 
 interface ResetPasswordFormValues {
     newPassword: string
@@ -204,26 +204,6 @@ const ResetPasswordPage = () => {
                                         })}
                                     </List>
                                 </Paper>
-
-                                {/* Password Strength Indicator */}
-                                {form.values.newPassword && passwordValidation && (
-                                    <div style={{ marginTop: '8px' }}>
-                                        <Group justify='space-between' mb='xs'>
-                                            <Text size='xs' c='dimmed'>Password strength:</Text>
-                                            <Text size='xs' fw={500} c={getPasswordStrengthColor(passwordValidation.strength)}>
-                                                {passwordValidation.strength.toUpperCase()}
-                                            </Text>
-                                        </Group>
-                                        <Progress 
-                                            value={
-                                                passwordValidation.strength === 'weak' ? 33 :
-                                                passwordValidation.strength === 'medium' ? 66 : 100
-                                            }
-                                            color={getPasswordStrengthColor(passwordValidation.strength)}
-                                            size='xs'
-                                        />
-                                    </div>
-                                )}
                             </div>
 
                             <PasswordInput
@@ -238,7 +218,7 @@ const ResetPasswordPage = () => {
                                 fullWidth 
                                 mt='md' 
                                 loading={loading} 
-                                disabled={loading || !!(passwordValidation && !passwordValidation.isValid)}
+                                disabled={loading || (!!passwordValidation && !passwordValidation.isValid)}
                             >
                                 Reset Password
                             </Button>

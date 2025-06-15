@@ -18,7 +18,7 @@ import { authService } from '@/services/function/auth'
 import { setTokensOutside } from '@/stores/auth.store'
 import { Link, useNavigate } from 'react-router'
 import { notifications } from '@mantine/notifications'
-import { emailValidator, normalizeEmail, suggestEmailCorrection } from '@/utils/email'
+import { emailValidator, normalizeEmail, suggestEmailCorrection } from '@/utils/validateEmail'
 
 interface LoginFormValues {
     email: string
