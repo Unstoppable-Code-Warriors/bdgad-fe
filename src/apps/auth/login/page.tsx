@@ -48,7 +48,7 @@ const LoginPage = () => {
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const email = event.currentTarget.value
         form.setFieldValue('email', email)
-        
+
         // Check for email suggestions
         const suggestion = suggestEmailCorrection(email)
         setEmailSuggestion(suggestion)
@@ -73,6 +73,12 @@ const LoginPage = () => {
             }
 
             const response = await authService.login(normalizedValues)
+
+            if (response?.code === 'ACCOUNT_INACTIVE') {
+                setError('Your account is inactive. Please contact support.')
+                return
+            }
+            
             setTokensOutside(response.token)
             navigate('/')
             authNotifications.loginSuccess()
@@ -93,7 +99,6 @@ const LoginPage = () => {
             console.log('Google login attempt')
 
             await new Promise((resolve) => setTimeout(resolve, 1000))
-
         } catch (err) {
             setError('Failed to login with Google. Please try again.')
             showErrorNotification({
@@ -131,10 +136,16 @@ const LoginPage = () => {
                                 {...form.getInputProps('email')}
                                 onChange={handleEmailChange}
                             />
-                            
+
                             {/* Email suggestion */}
                             {emailSuggestion && (
-                                <Text size='xs' c='blue' mt='xs' style={{ cursor: 'pointer' }} onClick={handleEmailSuggestionClick}>
+                                <Text
+                                    size='xs'
+                                    c='blue'
+                                    mt='xs'
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={handleEmailSuggestionClick}
+                                >
                                     Did you mean: {emailSuggestion}?
                                 </Text>
                             )}

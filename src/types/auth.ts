@@ -24,6 +24,7 @@ export interface ApiResponse<T = any> {
 
 // Login API response (actual structure from the API)
 export interface LoginApiResponse {
+    code: string
     success: boolean
     token: string
     user: User

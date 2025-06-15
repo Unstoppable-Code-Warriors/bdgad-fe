@@ -28,8 +28,8 @@ export const authService = {
     },
 
     // Request password reset
-    forgotPassword: async (data: ForgotPasswordRequest): Promise<void> => {
-        return authUtils.post<void>(`${PREFIX}/auth/forgot-password`, data)
+    forgotPassword: async (data: ForgotPasswordRequest): Promise<{ code?: string; message?: string }> => {
+        return authUtils.post<{ code?: string; message?: string }>(`${PREFIX}/auth/forgot-password`, data)
     },
 
     // Reset password with token

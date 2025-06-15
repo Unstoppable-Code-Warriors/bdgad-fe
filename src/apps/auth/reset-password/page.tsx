@@ -4,8 +4,8 @@ import { useForm } from '@mantine/form'
 import { IconLock, IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react'
 import { authService } from '@/services/function/auth'
 import { Link, useSearchParams, useNavigate } from 'react-router'
-import { notifications } from '@mantine/notifications'
 import { passwordValidator, validatePassword, getPasswordRequirementsText } from '@/utils/validatePassword'
+import { authNotifications } from '@/utils/notifications'
 
 interface ResetPasswordFormValues {
     newPassword: string
@@ -58,21 +58,12 @@ const ResetPasswordPage = () => {
             })
 
             setSuccess(true)
-            notifications.show({
-                title: 'Password reset successful',
-                message: 'Your password has been updated successfully',
-                color: 'green',
-                icon: <IconCheck size='1rem' />
-            })
+            authNotifications.passwordResetSuccess()
         } catch (err) {
             console.error(err)
             const errorMessage = 'Failed to reset password. The token may be expired or invalid.'
             setError(errorMessage)
-            notifications.show({
-                title: 'Password reset failed',
-                message: errorMessage,
-                color: 'red'
-            })
+            authNotifications.passwordResetError()
         } finally {
             setLoading(false)
         }

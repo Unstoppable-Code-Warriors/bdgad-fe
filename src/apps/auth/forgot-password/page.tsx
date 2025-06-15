@@ -4,7 +4,7 @@ import { useForm } from '@mantine/form'
 import { IconMail, IconAlertCircle, IconCheck } from '@tabler/icons-react'
 import { authService } from '@/services/function/auth'
 import { Link } from 'react-router'
-import { notifications } from '@mantine/notifications'
+import { authNotifications } from '@/utils/notifications'
 
 interface ForgotPasswordFormValues {
     email: string
@@ -35,27 +35,28 @@ const ForgotPasswordPage = () => {
         try {
             const redirectUrl = `${window.location.origin}/auth`
 
-            await authService.forgotPassword({
+            const response = await authService.forgotPassword({
                 email: values.email,
                 redirectUrl
             })
 
+            if (response.code === 'EMAIL_NOT_FOUND') {
+                setError('Email not found in the system. Please check your email address.')
+                return
+            }
+
+            if (response.code === 'ACCOUNT_INACTIVE') {
+                setError('Your account is inactive. Please contact support.')
+                return
+            }
+
             setSuccess(true)
-            notifications.show({
-                title: 'Reset email sent',
-                message: 'Check your email for password reset instructions',
-                color: 'green',
-                icon: <IconCheck size='1rem' />
-            })
+            authNotifications.forgotPasswordSuccess()
         } catch (err) {
             console.error(err)
             const errorMessage = 'Failed to send reset email. Please try again.'
             setError(errorMessage)
-            notifications.show({
-                title: 'Failed to send reset email',
-                message: errorMessage,
-                color: 'red'
-            })
+            authNotifications.forgotPasswordError()
         } finally {
             setLoading(false)
         }
