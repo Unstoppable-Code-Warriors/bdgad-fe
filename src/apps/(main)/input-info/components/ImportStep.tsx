@@ -1,94 +1,124 @@
 import { useState } from 'react'
-import { Dropzone } from '@mantine/dropzone'
 import type { FileWithPath } from '@mantine/dropzone'
-import { 
-    Stack, Text, Button, Alert, Group, rem, Card, Paper, Divider,
-} from '@mantine/core'
-import {
-    IconUpload, IconPhoto, IconX, IconAlertCircle, IconFile,
-    IconScan, IconDeviceFloppy, IconCheck, IconFileText
-} from '@tabler/icons-react'
+import { Stack, Alert } from '@mantine/core'
+import { IconAlertCircle } from '@tabler/icons-react'
+import FileUploadZone from './FileUploadZone'
+import SelectedFilesList from './SelectedFilesList'
+import SubmitButton from './SubmitButton'
+import SubmittedFilesTable from './SubmittedFilesTable'
+import SaveButton from './SaveButton'
 import OCRProcessor from './OCRProcessor'
-import AdditionalFiles from './AdditionalFiles'
+import { getFileType } from '../utils/fileUtils'
 
 interface ImportStepProps {
     onComplete?: (data: any) => void
+    onSave?: (files: SubmittedFile[]) => void
 }
 
-const ImportStep = ({ onComplete }: ImportStepProps) => {
-    const [selectedFile, setSelectedFile] = useState<FileWithPath | null>(null)
-    const [additionalFiles, setAdditionalFiles] = useState<FileWithPath[]>([])
+interface SubmittedFile {
+    id: string
+    file: FileWithPath
+    uploadedAt: string
+    status: 'uploaded' | 'processing' | 'completed'
+    type: 'image' | 'pdf' | 'document' | 'other'
+}
+
+const ImportStep = ({ onComplete, onSave }: ImportStepProps) => {
+    const [selectedFiles, setSelectedFiles] = useState<FileWithPath[]>([])
+    const [submittedFiles, setSubmittedFiles] = useState<SubmittedFile[]>([])
     const [currentStep, setCurrentStep] = useState<'upload' | 'ocr'>('upload')
+    const [selectedFileForOCR, setSelectedFileForOCR] = useState<FileWithPath | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const [isSaving, setIsSaving] = useState(false)
 
-    const handleMainFileDrop = (files: FileWithPath[]) => {
-        if (files.length > 0) {
-            setSelectedFile(files[0])
-            setError(null)
-        }
+    const handleFileDrop = (files: FileWithPath[]) => {
+        setSelectedFiles(prev => [...prev, ...files])
+        setError(null)
     }
 
-    const handleRemoveMainFile = () => {
-        setSelectedFile(null)
+    const handleRemoveFile = (index: number) => {
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index))
     }
 
-    const getFileIcon = (fileName: string) => {
-        const extension = fileName.split('.').pop()?.toLowerCase()
-        switch (extension) {
-            case 'pdf':
-                return <IconFile color="red" />
-            case 'doc':
-            case 'docx':
-                return <IconFile color="blue" />
-            case 'xls':
-            case 'xlsx':
-                return <IconFile color="green" />
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-            case 'gif':
-                return <IconPhoto color="purple" />
-            default:
-                return <IconFile color="gray" />
-        }
-    }
-
-    const handleStartOCR = () => {
-        if (!selectedFile) {
-            setError('Please select a medical requisition file first')
+    const handleSubmitFiles = () => {
+        if (selectedFiles.length === 0) {
+            setError('Please select at least one file')
             return
         }
+
+        const newSubmittedFiles: SubmittedFile[] = selectedFiles.map(file => ({
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            file,
+            uploadedAt: new Date().toLocaleString('vi-VN'),
+            status: 'uploaded',
+            type: getFileType(file)
+        }))
+
+        setSubmittedFiles(prev => [...prev, ...newSubmittedFiles])
+        setSelectedFiles([])
+        setError(null)
+
+        if (onComplete) {
+            onComplete({
+                files: newSubmittedFiles
+            })
+        }
+    }
+
+    const handleSaveFiles = async () => {
+        if (submittedFiles.length === 0) return
+
+        setIsSaving(true)
+        
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1500))
+            
+            if (onSave) {
+                onSave(submittedFiles)
+            }
+            
+        } catch (error) {
+            console.error('Error saving files:', error)
+            setError('Failed to save files. Please try again.')
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
+    const handleStartOCR = (file: FileWithPath) => {
+        setSelectedFileForOCR(file)
         setCurrentStep('ocr')
     }
 
     const handleOCRComplete = (data: any) => {
+        setSubmittedFiles(prev => prev.map(f => 
+            f.file === selectedFileForOCR 
+                ? { ...f, status: 'completed' as const }
+                : f
+        ))
+        
+        setCurrentStep('upload')
+        setSelectedFileForOCR(null)
+        
         if (onComplete) {
             onComplete(data)
         }
-        // Reset to upload step after completion
-        handleReset()
     }
 
     const handleBackToUpload = () => {
         setCurrentStep('upload')
+        setSelectedFileForOCR(null)
     }
 
-    const handleReset = () => {
-        setSelectedFile(null)
-        setAdditionalFiles([])
-        setCurrentStep('upload')
-        setError(null)
-    }
-
-    const handleAdditionalFilesChange = (files: FileWithPath[]) => {
-        setAdditionalFiles(files)
+    const handleDeleteSubmittedFile = (id: string) => {
+        setSubmittedFiles(prev => prev.filter(f => f.id !== id))
     }
 
     // OCR Step
-    if (currentStep === 'ocr' && selectedFile) {
+    if (currentStep === 'ocr' && selectedFileForOCR) {
         return (
             <OCRProcessor
-                selectedFile={selectedFile}
+                selectedFile={selectedFileForOCR}
                 onComplete={handleOCRComplete}
                 onBack={handleBackToUpload}
             />
@@ -104,176 +134,29 @@ const ImportStep = ({ onComplete }: ImportStepProps) => {
                 </Alert>
             )}
 
-            {/* Main Medical Requisition Upload */}
-            <Card withBorder padding="md" radius="md">
-                <Stack gap="sm">
-                    <Group justify="space-between" align="center">
-                        <Text size="lg" fw={600} c="blue.7">Medical Test Requisition</Text>
-                        {selectedFile && (
-                            <Button
-                                variant="gradient"
-                                gradient={{ from: 'blue', to: 'cyan', deg: 45 }}
-                                leftSection={<IconScan size="1rem" />}
-                                onClick={handleStartOCR}
-                                size="sm"
-                            >
-                                OCR Process
-                            </Button>
-                        )}
-                    </Group>
-
-                    {!selectedFile ? (
-                        <Dropzone
-                            onDrop={handleMainFileDrop}
-                            onReject={(files) => console.log('rejected files', files)}
-                            maxSize={10 * 1024 ** 2}
-                            accept={[
-                                'image/jpeg', 'image/png', 'image/jpg', 'image/gif',
-                                'application/pdf',
-                                'application/msword',
-                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                            ]}
-                            multiple={false}
-                        >
-                            <Group justify='center' gap='xl' mih={160} style={{ pointerEvents: 'none' }}>
-                                <Dropzone.Accept>
-                                    <IconUpload
-                                        style={{ width: rem(40), height: rem(40), color: 'var(--mantine-color-blue-6)' }}
-                                        stroke={1.5}
-                                    />
-                                </Dropzone.Accept>
-                                <Dropzone.Reject>
-                                    <IconX
-                                        style={{ width: rem(40), height: rem(40), color: 'var(--mantine-color-red-6)' }}
-                                        stroke={1.5}
-                                    />
-                                </Dropzone.Reject>
-                                <Dropzone.Idle>
-                                    <IconFile
-                                        style={{ width: rem(40), height: rem(40), color: 'var(--mantine-color-dimmed)' }}
-                                        stroke={1.5}
-                                    />
-                                </Dropzone.Idle>
-
-                                <div>
-                                    <Text size='lg' inline>
-                                        Drag medical requisition file here or click to select
-                                    </Text>
-                                    <Text size='sm' c='dimmed' inline mt={7}>
-                                        Supports: Images, PDF, Word documents (Max 10MB)
-                                    </Text>
-                                </div>
-                            </Group>
-                        </Dropzone>
-                    ) : (
-                        <Alert color='green' variant='light'>
-                            <Group justify='space-between'>
-                                <Group gap="sm">
-                                    {getFileIcon(selectedFile.name)}
-                                    <div>
-                                        <Text fw={500} size="sm">Medical Requisition Selected</Text>
-                                        <Text size='xs' c='dimmed'>
-                                            {selectedFile.name} ({Math.round(selectedFile.size / 1024)} KB)
-                                        </Text>
-                                    </div>
-                                </Group>
-                                <Button
-                                    variant='subtle'
-                                    color='red'
-                                    size='xs'
-                                    onClick={handleRemoveMainFile}
-                                >
-                                    Remove
-                                </Button>
-                            </Group>
-                        </Alert>
-                    )}
-                </Stack>
-            </Card>
-
-            {/* Additional Files Component */}
-            <AdditionalFiles 
-                files={additionalFiles}
-                onFilesChange={handleAdditionalFilesChange}
+            <FileUploadZone onDrop={handleFileDrop} />
+            
+            <SelectedFilesList 
+                files={selectedFiles} 
+                onRemove={handleRemoveFile} 
             />
 
-            {/* Enhanced Submit Section */}
-            <Paper p='xl' withBorder radius='lg' bg='gradient-to-r from-blue-50 to-cyan-50' style={{ 
-                background: 'linear-gradient(135deg, var(--mantine-color-blue-0) 0%, var(--mantine-color-cyan-0) 100%)',
-                border: '2px solid var(--mantine-color-blue-2)'
-            }}>
-                <Stack gap='lg'>
-                    <Group justify='space-between' align='flex-start'>
-                        <div>
-                            <Group gap='sm' mb='xs'>
-                                <IconFileText size='1.5rem' color='var(--mantine-color-blue-6)' />
-                                <Text size='xl' fw={700} c='blue.7'>
-                                    Ready to Submit
-                                </Text>
-                                {/* <Badge variant='light' color='green' size='lg'>
-                                    Complete
-                                </Badge> */}
-                            </Group>
-                            <Text size='md' c='dimmed' mb='md'>
-                                Review your uploaded files and submit to the system
-                            </Text>
-                            
-                            {/* File Summary */}
-                            <Stack gap='xs'>
-                                <Group gap='sm'>
-                                    <IconCheck size='1rem' color='var(--mantine-color-green-6)' />
-                                    <Text size='sm' fw={500}>
-                                        Medical Requisition: 
-                                        <Text span c='blue.6' ml='xs'>
-                                            {selectedFile ? selectedFile.name : 'Not selected'}
-                                        </Text>
-                                    </Text>
-                                </Group>
-                                
-                                <Group gap='sm'>
-                                    <IconCheck size='1rem' color='var(--mantine-color-green-6)' />
-                                    <Text size='sm' fw={500}>
-                                        Additional Files: 
-                                        <Text span c='blue.6' ml='xs'>
-                                            {additionalFiles.filter(f => f !== null).length} files attached
-                                        </Text>
-                                    </Text>
-                                </Group>
-                            </Stack>
-                        </div>
-                    </Group>
+            <SubmitButton 
+                fileCount={selectedFiles.length}
+                onSubmit={handleSubmitFiles}
+            />
 
-                    <Divider />
+            <SubmittedFilesTable
+                files={submittedFiles}
+                onStartOCR={handleStartOCR}
+                onDelete={handleDeleteSubmittedFile}
+            />
 
-                    <Group justify='space-between' align='center'>
-                        <Text size='sm' c='dimmed'>
-                            All files will be processed and saved to the system
-                        </Text>
-                        
-                        <Group gap='md'>
-                            <Button
-                                variant='gradient'
-                                gradient={{ from: 'blue', to: 'cyan', deg: 45 }}
-                                size='md'
-                                leftSection={<IconDeviceFloppy size='1.2rem' />}
-                                onClick={() => {
-                                    const submitData = {
-                                        mainFile: selectedFile,
-                                        additionalFiles: additionalFiles.filter(f => f !== null)
-                                    }
-                                    if (onComplete) {
-                                        onComplete(submitData)
-                                    }
-                                }}
-  
-                            >
-                                Submit file
-                            </Button>
-                        </Group>
-                    </Group>
-                </Stack>
-            </Paper>
-
+            <SaveButton
+                fileCount={submittedFiles.length}
+                onSave={handleSaveFiles}
+                disabled={isSaving}
+            />
         </Stack>
     )
 }

@@ -11,6 +11,10 @@ import ForgotPasswordPage from '@/apps/auth/forgot-password/page'
 import ResetPasswordPage from '@/apps/auth/reset-password/page'
 import { TanstackQueryProvider } from '../tanstack-query'
 import InputInfoPage from '@/apps/(main)/input-info/page'
+import PatientInfoPage from '@/apps/(main)/patient-info/page'
+import PatientDetailPage from '@/apps/(main)/patient-detail/page'
+import InputMasterDataPage from '@/apps/(main)/input-master-data/page'
+
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <Suspense fallback={null}>
@@ -71,6 +75,18 @@ export const router = createBrowserRouter([
                     {
                         path: 'import-file/input',
                         element: <InputInfoPage />
+                    },
+                    {
+                        path: '/patient-info',
+                        element: <PatientInfoPage />
+                    },
+                    {
+                        path: '/patient-detail/:id',
+                        element: <PatientDetailPage />
+                    },
+                    {
+                        path: '/input-master-data',
+                        element: <InputMasterDataPage />
                     }
                 ]
             }

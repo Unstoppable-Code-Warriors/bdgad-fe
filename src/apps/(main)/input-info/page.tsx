@@ -4,6 +4,11 @@ import ImportStep from './components/ImportStep'
 const InputInfoPage = () => {
     const handleComplete = (data: any) => {
         console.log('Form completed with data:', data)
+        if (data.files) {
+            console.log('Files submitted:', data.files)
+        } else {
+            console.log('OCR completed:', data)
+        }
     }
 
     return (
