@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
 import { Container, Stack } from '@mantine/core'
 import PageHeader from './components/PageHeader'
 import FileStatistics from './components/FileStatistics'
 import FileGrid from './components/FileGrid'
+import ImportFileModal from './components/ImportFileModal'
 
-// Mock data for import files
+type FileWithPath = File & { path?: string }
+
 const mockImportFiles = [
     {
         id: 'f1',
@@ -52,8 +53,8 @@ const mockImportFiles = [
 ]
 
 const InputMasterDataPage = () => {
-    const navigate = useNavigate()
     const [files, setFiles] = useState<any[]>(mockImportFiles)
+    const [importModalOpened, setImportModalOpened] = useState(false)
 
     const handleViewFile = (fileId: string) => {
         console.log('View file:', fileId)
@@ -68,18 +69,27 @@ const InputMasterDataPage = () => {
     }
 
     const handleImport = () => {
-        console.log('Start import process...')
+        setImportModalOpened(true)
     }
 
-    const handleNavigateToUpload = () => {
-        navigate('/import-file/input')
+    const handleImportFiles = async (uploadedFiles: FileWithPath[]) => {
+        // Simulate file upload and processing
+        const newFiles = uploadedFiles.map((file, index) => ({
+            id: `f${files.length + index + 1}`,
+            name: file.name,
+            type: file.name.split('.').pop()?.toLowerCase() || 'unknown',
+            size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+            uploadedAt: new Date().toISOString().split('T')[0]
+        }))
+
+        setFiles(prev => [...prev, ...newFiles])
+        console.log('Files imported successfully:', newFiles)
     }
 
     return (
         <Container size="xl" py="xl">
             <Stack gap="lg">
                 <PageHeader 
-                    onNavigateToUpload={handleNavigateToUpload}
                     onImport={handleImport}
                 />
 
@@ -90,6 +100,12 @@ const InputMasterDataPage = () => {
                     onViewFile={handleViewFile}
                     onDownloadFile={handleDownloadFile}
                     onDeleteFile={handleDeleteFile}
+                />
+
+                <ImportFileModal
+                    opened={importModalOpened}
+                    onClose={() => setImportModalOpened(false)}
+                    onImport={handleImportFiles}
                 />
             </Stack>
         </Container>
