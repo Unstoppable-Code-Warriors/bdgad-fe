@@ -14,6 +14,7 @@ import InputInfoPage from '@/apps/(main)/input-info/page'
 import PatientInfoPage from '@/apps/(main)/patient-info/page'
 import PatientDetailPage from '@/apps/(main)/patient-detail/page'
 import InputMasterDataPage from '@/apps/(main)/input-master-data/page'
+import NewPasswordPage from '@/apps/auth/new-password/page'
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -63,7 +64,7 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: 'new-password',
-                        element: <NotFound />   
+                        element: <NewPasswordPage />   
                     }
                 ]
             },
