@@ -67,7 +67,6 @@ export const showInfoNotification = ({
     })
 }
 
-// Predefined notifications for common use cases
 export const authNotifications = {
     loginSuccess: () => showSuccessNotification({
         title: 'Login successful',
@@ -113,5 +112,14 @@ export const authNotifications = {
     forgotPasswordError: () => showErrorNotification({
         title: 'Failed to send reset link',
         message: 'Please check your email address and try again.'
-    })
+    }),
+
+    passwordCreateSuccess: () => showSuccessNotification({
+        title: 'Mật khẩu đã được tạo',
+        message: 'Mật khẩu mới đã được tạo thành công',
+    }),
+    passwordCreateError: () => showErrorNotification({
+        title: 'Tạo mật khẩu thất bại',
+        message: 'Đã xảy ra lỗi khi tạo mật khẩu mới. Vui lòng thử lại.',
+    }),
 }
