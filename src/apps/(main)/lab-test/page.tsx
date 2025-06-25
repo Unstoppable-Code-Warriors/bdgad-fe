@@ -126,17 +126,20 @@ const LabTestPage = () => {
                 )
             },
             {
+                accessor: 'patient.personalId',
+                title: 'Số CCCD',
+                width: 140,
+                render: (record) => (
+                    <Text size='sm' ff='monospace'>
+                        {record.patient.personalId}
+                    </Text>
+                )
+            },
+            {
                 accessor: 'patient.fullName',
                 title: 'Tên bệnh nhân',
                 width: 180,
-                render: (record) => (
-                    <Stack gap={2}>
-                        <Text fw={500}>{record.patient.fullName}</Text>
-                        <Text size='xs' c='dimmed'>
-                            {record.patient.personalId}
-                        </Text>
-                    </Stack>
-                )
+                render: (record) => <Text fw={500}>{record.patient.fullName}</Text>
             },
             {
                 accessor: 'patient.healthInsuranceCode',
@@ -164,27 +167,28 @@ const LabTestPage = () => {
                 title: 'FastQ File',
                 width: 120,
                 textAlign: 'center',
-                render: (record) => (
-                    <Button
-                        component='a'
-                        href={record.latestFastqFile.filePath}
-                        target='_blank'
-                        variant='light'
-                        color='teal'
-                        size='xs'
-                        leftSection={<IconFileDescription size={14} />}
-                    >
-                        FastQ
-                    </Button>
-                )
+                render: (record) =>
+                    record?.latestFastqFile?.filePath && (
+                        <Button
+                            component='a'
+                            href={record?.latestFastqFile?.filePath}
+                            target='_blank'
+                            variant='light'
+                            color='teal'
+                            size='xs'
+                            leftSection={<IconFileDescription size={14} />}
+                        >
+                            FastQ
+                        </Button>
+                    )
             },
             {
                 accessor: 'latestFastqFile.status',
                 title: 'Trạng thái',
                 width: 120,
                 render: (record) => (
-                    <Badge color={getStatusColor(record.latestFastqFile.status)} variant='light' size='sm'>
-                        {getStatusLabel(record.latestFastqFile.status)}
+                    <Badge color={getStatusColor(record?.latestFastqFile?.status || '')} variant='light' size='sm'>
+                        {getStatusLabel(record?.latestFastqFile?.status || '')}
                     </Badge>
                 )
             },
