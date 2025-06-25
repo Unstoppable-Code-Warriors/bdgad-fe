@@ -74,29 +74,29 @@ export interface LabTestResponse {
 
 // Status configuration
 export const LAB_TEST_STATUS = {
-    PENDING: 'pending',
-    PROCESSING: 'processing',
-    COMPLETED: 'completed',
-    REDO: 'redo'
+    UPLOADED: 'uploaded',
+    WAIT_FOR_APPROVAL: 'wait_for_approval',
+    APPROVED: 'approved',
+    REJECTED: 'rejected'
 } as const
 
 export type LabTestStatus = (typeof LAB_TEST_STATUS)[keyof typeof LAB_TEST_STATUS]
 
 export const statusConfig = {
-    [LAB_TEST_STATUS.PENDING]: {
-        label: 'Chưa xử lý',
+    [LAB_TEST_STATUS.UPLOADED]: {
+        label: 'Đã tải lên',
         color: 'orange'
     },
-    [LAB_TEST_STATUS.PROCESSING]: {
-        label: 'Đang xử lý',
+    [LAB_TEST_STATUS.WAIT_FOR_APPROVAL]: {
+        label: 'Chờ duyệt',
         color: 'blue'
     },
-    [LAB_TEST_STATUS.COMPLETED]: {
-        label: 'Hoàn thành',
+    [LAB_TEST_STATUS.APPROVED]: {
+        label: 'Đã duyệt',
         color: 'green'
     },
-    [LAB_TEST_STATUS.REDO]: {
-        label: 'Làm lại',
-        color: 'yellow'
+    [LAB_TEST_STATUS.REJECTED]: {
+        label: 'Từ chối',
+        color: 'red'
     }
 } as const

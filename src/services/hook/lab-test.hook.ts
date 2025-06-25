@@ -29,9 +29,9 @@ export const useLabTestSessions = ({
     })
 }
 
-export const useLabTestSessionDetail = (id: number) => {
+export const useLabTestSessionDetail = (personalId: string | undefined) => {
     return useQuery({
-        queryKey: ['lab-test-session-detail', id],
-        queryFn: () => labTestService.getSessionDetail(id)
+        queryKey: ['lab-test-session-detail', personalId],
+        queryFn: () => labTestService.getSessionDetail(personalId)
     })
 }

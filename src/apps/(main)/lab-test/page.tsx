@@ -11,7 +11,7 @@ import {
     IconX,
     IconRefresh,
     IconAlertCircle,
-    IconFileDescription
+    IconDownload
 } from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
 import { useLabTestSessions } from '@/services/hook/lab-test.hook'
@@ -176,7 +176,7 @@ const LabTestPage = () => {
                             variant='light'
                             color='teal'
                             size='xs'
-                            leftSection={<IconFileDescription size={14} />}
+                            leftSection={<IconDownload size={14} />}
                         >
                             FastQ
                         </Button>
@@ -231,7 +231,7 @@ const LabTestPage = () => {
             )}
 
             {/* Search and Filters */}
-            <Paper p='md' withBorder>
+            <Paper p='md' withBorder shadow='sm'>
                 <Stack gap='md'>
                     <Group>
                         <TextInput
@@ -305,7 +305,7 @@ const LabTestPage = () => {
             </Paper>
 
             {/* Data Table */}
-            <Paper withBorder>
+            <Paper withBorder shadow='sm'>
                 <DataTable
                     records={labTestData}
                     columns={columns}
@@ -328,6 +328,7 @@ const LabTestPage = () => {
                     highlightOnHover
                     withTableBorder
                     withColumnBorders
+                    striped
                     fetching={isLoading}
                     sortStatus={{
                         sortKey: sortBy,

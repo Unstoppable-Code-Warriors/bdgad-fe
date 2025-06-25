@@ -53,7 +53,10 @@ export const labTestService = {
             })
             .json()
     },
-    getSessionDetail: async (id: number): Promise<LabTestSessionDetail> => {
-        return await backendApi.get<LabTestSessionDetail>(`${PREFIX}/sessions/${id}`).json()
+    getSessionDetail: async (personalId: string | undefined): Promise<LabTestSessionDetail> => {
+        if (!personalId) {
+            throw new Error('Personal ID is required')
+        }
+        return await backendApi.get<LabTestSessionDetail>(`${PREFIX}/sessions/${personalId}`).json()
     }
 }
