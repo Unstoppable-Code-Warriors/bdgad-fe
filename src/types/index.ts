@@ -1,3 +1,15 @@
+export interface BaseListResponse<T> {
+    data: T[]
+    meta: {
+        page: number
+        limit: number
+        total: number
+        totalPages: number
+    }
+    success: boolean
+    timestamp: string
+}
+
 // Auth types
 export type {
     User,

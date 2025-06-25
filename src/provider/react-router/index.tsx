@@ -15,7 +15,8 @@ import PatientInfoPage from '@/apps/(main)/patient-info/page'
 import PatientDetailPage from '@/apps/(main)/patient-detail/page'
 import InputMasterDataPage from '@/apps/(main)/input-master-data/page'
 import NewPasswordPage from '@/apps/auth/new-password/page'
-
+import LabTestPage from '@/apps/(main)/lab-test/page'
+import LabTestDetailPage from '@/apps/(main)/lab-test/[id]/page'
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <Suspense fallback={null}>
@@ -64,7 +65,7 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: 'new-password',
-                        element: <NewPasswordPage />   
+                        element: <NewPasswordPage />
                     }
                 ]
             },
@@ -92,6 +93,20 @@ export const router = createBrowserRouter([
                     {
                         path: '/input-master-data',
                         element: <InputMasterDataPage />
+                    },
+                    {
+                        path: '/lab-test',
+                        element: <Outlet />,
+                        children: [
+                            {
+                                index: true,
+                                element: <LabTestPage />
+                            },
+                            {
+                                path: ':id',
+                                element: <LabTestDetailPage />
+                            }
+                        ]
                     }
                 ]
             }

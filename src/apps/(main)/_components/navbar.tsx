@@ -4,7 +4,7 @@ import { AppShell, Loader, Stack, UnstyledButton, Text, Box } from '@mantine/cor
 import { IconUser } from '@tabler/icons-react'
 import { Link, useLocation } from 'react-router'
 
-const navItems = [
+export const navItems = [
     {
         label: 'Danh sách bệnh nhân',
         icon: IconUser,
@@ -12,10 +12,16 @@ const navItems = [
         roles: [Role.STAFF]
     },
     {
-        label:"Import master data",
+        label: 'Import master data',
         icon: IconUser,
         href: '/input-master-data',
         roles: [Role.STAFF]
+    },
+    {
+        label: 'Lab Testing',
+        icon: IconUser,
+        href: '/lab-test',
+        roles: [Role.LAB_TESTING_TECHNICIAN]
     }
 ]
 
@@ -31,7 +37,7 @@ const Navbar = () => {
             <Box p='md'></Box>
 
             <Stack gap={4} px='md' pb='md'>
-                {navItems.map((item) => {              
+                {navItems.map((item) => {
                     const isActive = location.pathname.startsWith(item.href)
                     const hasPermission = data.user.roles.some((role) => item.roles.includes(parseInt(role.code)))
 
