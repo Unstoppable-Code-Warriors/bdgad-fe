@@ -39,7 +39,7 @@ export interface FastQFile {
     id: number
     filePath: string
     createdAt: string
-    status: 'pending' | 'processing' | 'completed' | 'failed' | 'rejected'
+    status: 'uploaded' | 'wait_for_approval' | 'approved' | 'rejected'
     redoReason: string | null
     creator: {
         id: number

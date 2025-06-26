@@ -85,5 +85,8 @@ export const labTestService = {
     },
     deleteFastQ: async (fastqFileId: number): Promise<{ message: string }> => {
         return await backendApi.delete(`${PREFIX}/fastq/${fastqFileId}`).json<{ message: string }>()
+    },
+    sendToAnalysis: async (fastqFileId: number): Promise<{ message: string }> => {
+        return await backendApi.post(`${PREFIX}/fastq/${fastqFileId}/send-to-analysis`).json<{ message: string }>()
     }
 }

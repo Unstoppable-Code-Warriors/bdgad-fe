@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useLabTestSessionDetail } from '@/services/hook/lab-test.hook'
+import { useLabTestSessionDetail, useSendToAnalysis } from '@/services/hook/lab-test.hook'
 import { useParams, useNavigate } from 'react-router'
-import { Container, Stack, Grid, Alert, Loader, Center, Text } from '@mantine/core'
-import { IconAlertCircle } from '@tabler/icons-react'
+import { Container, Stack, Grid, Alert, Loader, Center, Text, Group, Button } from '@mantine/core'
+import { IconAlertCircle, IconSend } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { PageHeader, LabTestInfo, PatientInfo, FileUpload, FileHistory } from './_components'
 
@@ -11,6 +11,7 @@ const LabTestDetailPage = () => {
     const navigate = useNavigate()
     const { data, isLoading, error } = useLabTestSessionDetail(id)
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+    const sendToAnalysisMutation = useSendToAnalysis()
 
     // Get the latest FastQ file
     const latestFastQFile =
@@ -34,12 +35,31 @@ const LabTestDetailPage = () => {
         setUploadedFiles([])
     }
 
-    const handleSave = () => {
-        // Mock save functionality
-        notifications.show({
-            title: 'Đã lưu',
-            message: 'Thông tin đã được lưu thành công',
-            color: 'green'
+    const handleSendToAnalysis = async () => {
+        if (!latestFastQFile?.id) {
+            notifications.show({
+                title: 'Lỗi',
+                message: 'Không tìm thấy file FastQ để gửi phân tích',
+                color: 'red'
+            })
+            return
+        }
+
+        sendToAnalysisMutation.mutate(latestFastQFile.id, {
+            onSuccess: () => {
+                notifications.show({
+                    title: 'Thành công',
+                    message: 'File FastQ đã được gửi phân tích thành công',
+                    color: 'green'
+                })
+            },
+            onError: (error: any) => {
+                notifications.show({
+                    title: 'Lỗi gửi phân tích',
+                    message: error.message || 'Không thể gửi file FastQ để phân tích',
+                    color: 'red'
+                })
+            }
         })
     }
 
@@ -79,7 +99,7 @@ const LabTestDetailPage = () => {
     return (
         <Stack gap='lg'>
             {/* Header */}
-            <PageHeader onBack={handleBack} onSave={handleSave} />
+            <PageHeader onBack={handleBack} />
 
             <Grid>
                 {/* Left Column - Lab Test & Patient Info */}
@@ -104,6 +124,19 @@ const LabTestDetailPage = () => {
                         onRemoveFile={handleRemoveFile}
                         onUploadSuccess={handleUploadSuccess}
                     />
+                    {latestFastQFile?.status === 'uploaded' && (
+                        <Group justify='flex-end' mt={'lg'}>
+                            <Button
+                                color='green'
+                                onClick={handleSendToAnalysis}
+                                leftSection={<IconSend size={16} />}
+                                loading={sendToAnalysisMutation.isPending}
+                                disabled={sendToAnalysisMutation.isPending}
+                            >
+                                Phân tích FastQ
+                            </Button>
+                        </Group>
+                    )}
                 </Grid.Col>
             </Grid>
 

@@ -67,8 +67,21 @@ export const useDeleteFastQ = () => {
 
     return useMutation({
         mutationFn: (fastqFileId: number) => labTestService.deleteFastQ(fastqFileId),
-        onSuccess: (_, fastqFileId) => {
+        onSuccess: (_, __) => {
             // Invalidate and refetch related queries
+            queryClient.invalidateQueries({ queryKey: ['lab-test-sessions'] })
+            queryClient.invalidateQueries({ queryKey: ['lab-test-session-detail'] })
+        }
+    })
+}
+
+export const useSendToAnalysis = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (fastqFileId: number) => labTestService.sendToAnalysis(fastqFileId),
+        onSuccess: (_, __) => {
+            // Invalidate and refetch related queries to update the status
             queryClient.invalidateQueries({ queryKey: ['lab-test-sessions'] })
             queryClient.invalidateQueries({ queryKey: ['lab-test-session-detail'] })
         }
