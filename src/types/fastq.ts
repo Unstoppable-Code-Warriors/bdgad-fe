@@ -7,4 +7,5 @@ export interface FastQ {
     status: string
     redoReason: string | null
     creator: Omit<User, 'metadata'>
+    rejector?: Omit<User, 'metadata'>
 }

@@ -1,4 +1,4 @@
-import { Group, Button, Title } from '@mantine/core'
+import { Group, Button, Title, Stack } from '@mantine/core'
 import { IconArrowLeft } from '@tabler/icons-react'
 
 interface PageHeaderProps {
@@ -7,11 +7,15 @@ interface PageHeaderProps {
 
 export const PageHeader = ({ onBack }: PageHeaderProps) => {
     return (
-        <Group justify='space-between' my='md'>
-            <Button variant='subtle' leftSection={<IconArrowLeft size={16} />} onClick={onBack}>
-                Quay lại danh sách
-            </Button>
-            <Title order={2}>Chi tiết xét nghiệm</Title>
-        </Group>
+        <Stack gap='sm'>
+            <Group justify='flex-start'>
+                <Button variant='subtle' leftSection={<IconArrowLeft size={16} />} onClick={onBack}>
+                    Quay lại danh sách
+                </Button>
+            </Group>
+            <Title order={1} size='h2'>
+                Chi tiết xét nghiệm
+            </Title>
+        </Stack>
     )
 }

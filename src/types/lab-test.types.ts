@@ -46,6 +46,11 @@ export interface FastQFile {
         name: string
         email: string
     }
+    rejector?: {
+        id: number
+        name: string
+        email: string
+    }
 }
 
 export interface LabTestSession {

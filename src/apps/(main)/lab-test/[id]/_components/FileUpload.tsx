@@ -299,6 +299,14 @@ export const FileUpload = ({
                                     </Text>
                                 </Group>
 
+                                {latestFastQFile.rejector && (
+                                    <Group gap='sm'>
+                                        <Text size='sm' c='red'>
+                                            Từ chối bởi: {latestFastQFile.rejector.name}
+                                        </Text>
+                                    </Group>
+                                )}
+
                                 {latestFastQFile.redoReason && (
                                     <Text size='sm' c='red'>
                                         Lý do làm lại: {latestFastQFile.redoReason}

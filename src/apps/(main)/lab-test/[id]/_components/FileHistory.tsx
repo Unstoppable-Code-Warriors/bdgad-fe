@@ -1,5 +1,5 @@
-import { Paper, Stack, Group, Title, Badge, Table, Text, ActionIcon } from '@mantine/core'
-import { IconFileDescription, IconDownload, IconTrash } from '@tabler/icons-react'
+import { Paper, Stack, Group, Title, Badge, Table, Text, ActionIcon, Button } from '@mantine/core'
+import { IconFileDescription, IconDownload, IconTrash, IconEye } from '@tabler/icons-react'
 import { statusConfig } from '@/types/lab-test.types'
 import { labTestService } from '@/services/function/lab-test'
 import { notifications } from '@mantine/notifications'
@@ -82,6 +82,35 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
         })
     }
 
+    const handleViewReason = (file: FastQ) => {
+        modals.open({
+            title: 'Chi tiết từ chối',
+            children: (
+                <Stack gap='md'>
+                    <Text size='sm' fw={500}>
+                        File FastQ #{file.id}
+                    </Text>
+                    <Text size='sm'>{file.redoReason || 'Không có lý do được ghi nhận'}</Text>
+                    {file.rejector && (
+                        <Stack gap='xs'>
+                            <Text size='sm' fw={500} c='red'>
+                                Người từ chối:
+                            </Text>
+                            <Text size='sm'>
+                                {file.rejector.name} ({file.rejector.email})
+                            </Text>
+                        </Stack>
+                    )}
+                    <Group justify='flex-end' mt='md'>
+                        <Button variant='light' onClick={() => modals.closeAll()}>
+                            Đóng
+                        </Button>
+                    </Group>
+                </Stack>
+            )
+        })
+    }
+
     const canDeleteFile = (file: FastQ) => {
         return file.status === 'uploaded'
     }
@@ -106,6 +135,7 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
                                 <Table.Th>Trạng thái</Table.Th>
                                 <Table.Th>Ngày tạo</Table.Th>
                                 <Table.Th>Người tạo</Table.Th>
+                                <Table.Th>Người từ chối</Table.Th>
                                 <Table.Th>Lý do làm lại</Table.Th>
                                 <Table.Th>Thao tác</Table.Th>
                             </Table.Tr>
@@ -130,9 +160,30 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
                                         <Text size='sm'>{file.creator.name}</Text>
                                     </Table.Td>
                                     <Table.Td>
-                                        <Text size='sm' c={file.redoReason ? 'red' : 'dimmed'}>
-                                            {file.redoReason || '-'}
-                                        </Text>
+                                        {file.rejector ? (
+                                            <Text size='sm'>{file.rejector.name}</Text>
+                                        ) : (
+                                            <Text size='sm' c='dimmed'>
+                                                -
+                                            </Text>
+                                        )}
+                                    </Table.Td>
+                                    <Table.Td>
+                                        {file.redoReason ? (
+                                            <Button
+                                                variant='light'
+                                                color='orange'
+                                                size='xs'
+                                                leftSection={<IconEye size={14} />}
+                                                onClick={() => handleViewReason(file)}
+                                            >
+                                                Xem lý do
+                                            </Button>
+                                        ) : (
+                                            <Text size='sm' c='dimmed'>
+                                                -
+                                            </Text>
+                                        )}
                                     </Table.Td>
                                     <Table.Td>
                                         <Group gap='xs'>

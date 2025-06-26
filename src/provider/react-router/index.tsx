@@ -17,6 +17,9 @@ import InputMasterDataPage from '@/apps/(main)/input-master-data/page'
 import NewPasswordPage from '@/apps/auth/new-password/page'
 import LabTestPage from '@/apps/(main)/lab-test/page'
 import LabTestDetailPage from '@/apps/(main)/lab-test/[id]/page'
+import AnalysisPage from '@/apps/(main)/analysis/page'
+import AnalysisDetailPage from '@/apps/(main)/analysis/[id]/page'
+
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <Suspense fallback={null}>
@@ -105,6 +108,20 @@ export const router = createBrowserRouter([
                             {
                                 path: ':id',
                                 element: <LabTestDetailPage />
+                            }
+                        ]
+                    },
+                    {
+                        path: '/analysis',
+                        element: <Outlet />,
+                        children: [
+                            {
+                                index: true,
+                                element: <AnalysisPage />
+                            },
+                            {
+                                path: ':id',
+                                element: <AnalysisDetailPage />
                             }
                         ]
                     }

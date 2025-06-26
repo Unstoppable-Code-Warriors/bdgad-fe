@@ -135,7 +135,9 @@ const LabTestPage = () => {
                     <Text fw={500} c='blue'>
                         {record.labcode}
                     </Text>
-                )
+                ),
+                titleClassName: 'bg-white',
+                cellsClassName: 'bg-white'
             },
             {
                 accessor: 'barcode',
@@ -223,12 +225,14 @@ const LabTestPage = () => {
                 width: 100,
                 textAlign: 'center',
                 render: (record) => (
-                    <Group gap='xs' justify='center'>
+                    <Group gap='xs' justify='center' bg={'white'}>
                         <ActionIcon variant='light' color='blue' onClick={() => handleViewDetail(record.id)}>
                             <IconEye size={16} />
                         </ActionIcon>
                     </Group>
-                )
+                ),
+                titleClassName: 'bg-white',
+                cellsClassName: 'bg-white'
             }
         ],
         [handleDownloadFastQ, isDownloading, handleViewDetail]
@@ -361,6 +365,8 @@ const LabTestPage = () => {
                         direction: sortOrder as 'asc' | 'desc'
                     }}
                     onSortStatusChange={handleSort}
+                    pinLastColumn
+                    pinFirstColumn
                 />
             </Paper>
         </Stack>
