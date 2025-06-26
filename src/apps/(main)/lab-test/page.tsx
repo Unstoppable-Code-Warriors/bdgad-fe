@@ -15,8 +15,10 @@ import {
 } from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
 import { useLabTestSessions } from '@/services/hook/lab-test.hook'
+import { labTestService } from '@/services/function/lab-test'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useSearchParamState } from '@/hooks/use-search-params'
+import { notifications } from '@mantine/notifications'
 import type { LabTestSessionListItem } from '@/types/lab-test'
 
 const getStatusColor = (status: string) => {
@@ -29,6 +31,8 @@ const getStatusLabel = (status: string) => {
 
 const LabTestPage = () => {
     const navigate = useNavigate()
+    const [isDownloading, setIsDownloading] = useState(false)
+
     const [searchTerm, setSearchTerm] = useSearchParamState({
         key: 'search',
         initValue: ''
@@ -56,6 +60,7 @@ const LabTestPage = () => {
     const [dateRanges, setDateRanges] = useState<[string | null, string | null]>([null, null])
     const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm)
     const [debouncedSearchTerm] = useDebouncedValue(localSearchTerm, 500)
+
     useEffect(() => {
         setSearchTerm(debouncedSearchTerm)
     }, [debouncedSearchTerm, setSearchTerm])
@@ -96,6 +101,23 @@ const LabTestPage = () => {
         },
         [setSortBy, setSortOrder]
     )
+
+    const handleDownloadFastQ = useCallback(async (fastqFileId: number) => {
+        try {
+            setIsDownloading(true)
+            const response = await labTestService.downloadFastQ(fastqFileId)
+            // Open the download URL in a new window/tab
+            window.open(response.downloadUrl, '_blank')
+        } catch (error: any) {
+            notifications.show({
+                title: 'Lỗi tải file',
+                message: error.message || 'Không thể tạo link tải xuống',
+                color: 'red'
+            })
+        } finally {
+            setIsDownloading(false)
+        }
+    }, [])
 
     const recordsPerPageOptions = [5, 10, 20, 50]
 
@@ -168,18 +190,21 @@ const LabTestPage = () => {
                 width: 120,
                 textAlign: 'center',
                 render: (record) =>
-                    record?.latestFastqFile?.filePath && (
+                    record?.latestFastqFile?.id ? (
                         <Button
-                            component='a'
-                            href={record?.latestFastqFile?.filePath}
-                            target='_blank'
                             variant='light'
                             color='teal'
                             size='xs'
                             leftSection={<IconDownload size={14} />}
+                            onClick={() => handleDownloadFastQ(record.latestFastqFile.id)}
+                            loading={isDownloading}
                         >
                             FastQ
                         </Button>
+                    ) : (
+                        <Text size='xs' c='dimmed'>
+                            -
+                        </Text>
                     )
             },
             {
@@ -206,7 +231,7 @@ const LabTestPage = () => {
                 )
             }
         ],
-        []
+        [handleDownloadFastQ, isDownloading, handleViewDetail]
     )
     return (
         <Stack gap='lg'>

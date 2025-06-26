@@ -58,5 +58,32 @@ export const labTestService = {
             throw new Error('Personal ID is required')
         }
         return await backendApi.get<LabTestSessionDetail>(`${PREFIX}/sessions/${personalId}`).json()
+    },
+    uploadFastQ: async (sessionId: number, file: File): Promise<{ message: string }> => {
+        const formData = new FormData()
+        formData.append('fastq', file)
+
+        return await backendApi
+            .post(`${PREFIX}/session/${sessionId}/fastq`, {
+                body: formData,
+                headers: {}
+            })
+            .json<{ message: string }>()
+    },
+    downloadFastQ: async (
+        fastqFileId: number
+    ): Promise<{
+        downloadUrl: string
+        expiresIn: number
+        expiresAt: string
+    }> => {
+        return await backendApi.get(`${PREFIX}/fastq/${fastqFileId}/download`).json<{
+            downloadUrl: string
+            expiresIn: number
+            expiresAt: string
+        }>()
+    },
+    deleteFastQ: async (fastqFileId: number): Promise<{ message: string }> => {
+        return await backendApi.delete(`${PREFIX}/fastq/${fastqFileId}`).json<{ message: string }>()
     }
 }

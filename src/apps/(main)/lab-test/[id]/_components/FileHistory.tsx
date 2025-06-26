@@ -1,13 +1,21 @@
 import { Paper, Stack, Group, Title, Badge, Table, Text, ActionIcon } from '@mantine/core'
-import { IconFileDescription, IconEye, IconDownload } from '@tabler/icons-react'
+import { IconFileDescription, IconDownload, IconTrash } from '@tabler/icons-react'
 import { statusConfig } from '@/types/lab-test.types'
+import { labTestService } from '@/services/function/lab-test'
+import { notifications } from '@mantine/notifications'
+import { modals } from '@mantine/modals'
 import type { FastQ } from '@/types/fastq'
+import { useState } from 'react'
+import { useDeleteFastQ } from '@/services/hook/lab-test.hook'
 
 interface FileHistoryProps {
     fastqFiles?: FastQ[]
 }
 
 export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
+    const [isDownloading, setIsDownloading] = useState(false)
+    const deleteFastQMutation = useDeleteFastQ()
+
     const getStatusColor = (status: string) => {
         return statusConfig[status as keyof typeof statusConfig]?.color || 'gray'
     }
@@ -16,14 +24,66 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
         return statusConfig[status as keyof typeof statusConfig]?.label || status
     }
 
-    const handleDownload = (file: FastQ) => {
-        const link = document.createElement('a')
-        link.href = file.filePath
-        link.download = `fastq-${file.id}.fastq`
-        link.target = '_blank'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
+    const handleDownload = async (file: FastQ) => {
+        try {
+            setIsDownloading(true)
+            const response = await labTestService.downloadFastQ(file.id)
+            // Open the download URL in a new window/tab
+            window.open(response.downloadUrl, '_blank')
+        } catch (error: any) {
+            notifications.show({
+                title: 'Lỗi tải file',
+                message: error.message || 'Không thể tạo link tải xuống',
+                color: 'red'
+            })
+        } finally {
+            setIsDownloading(false)
+        }
+    }
+
+    const handleDelete = (file: FastQ) => {
+        // Check if file can be deleted (only uploaded status)
+        if (file.status !== 'uploaded') {
+            notifications.show({
+                title: 'Không thể xóa file',
+                message: 'Chỉ có thể xóa file có trạng thái "Đã tải lên"',
+                color: 'orange'
+            })
+            return
+        }
+
+        modals.openConfirmModal({
+            title: 'Xóa file FastQ',
+            children: (
+                <Text size='sm'>
+                    Bạn có chắc chắn muốn xóa file FastQ #{file.id}? Hành động này không thể hoàn tác.
+                </Text>
+            ),
+            labels: { confirm: 'Xóa', cancel: 'Hủy' },
+            confirmProps: { color: 'red' },
+            onConfirm: () => {
+                deleteFastQMutation.mutate(file.id, {
+                    onSuccess: () => {
+                        notifications.show({
+                            title: 'Xóa file thành công',
+                            message: `File FastQ #${file.id} đã được xóa`,
+                            color: 'green'
+                        })
+                    },
+                    onError: (error: any) => {
+                        notifications.show({
+                            title: 'Lỗi xóa file',
+                            message: error.message || 'Không thể xóa file FastQ',
+                            color: 'red'
+                        })
+                    }
+                })
+            }
+        })
+    }
+
+    const canDeleteFile = (file: FastQ) => {
+        return file.status === 'uploaded'
     }
 
     return (
@@ -78,20 +138,24 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
                                         <Group gap='xs'>
                                             <ActionIcon
                                                 variant='light'
-                                                color='blue'
-                                                size='sm'
-                                                onClick={() => window.open(file.filePath, '_blank')}
-                                            >
-                                                <IconEye size={14} />
-                                            </ActionIcon>
-                                            <ActionIcon
-                                                variant='light'
                                                 color='teal'
                                                 size='sm'
                                                 onClick={() => handleDownload(file)}
+                                                loading={isDownloading}
                                             >
                                                 <IconDownload size={14} />
                                             </ActionIcon>
+                                            {canDeleteFile(file) && (
+                                                <ActionIcon
+                                                    variant='light'
+                                                    color='red'
+                                                    size='sm'
+                                                    onClick={() => handleDelete(file)}
+                                                    loading={deleteFastQMutation.isPending}
+                                                >
+                                                    <IconTrash size={14} />
+                                                </ActionIcon>
+                                            )}
                                         </Group>
                                     </Table.Td>
                                 </Table.Tr>

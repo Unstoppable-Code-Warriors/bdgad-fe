@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { labTestService } from '../function/lab-test'
 import type { DateValue } from '@mantine/dates'
 
@@ -32,6 +32,45 @@ export const useLabTestSessions = ({
 export const useLabTestSessionDetail = (personalId: string | undefined) => {
     return useQuery({
         queryKey: ['lab-test-session-detail', personalId],
-        queryFn: () => labTestService.getSessionDetail(personalId)
+        queryFn: () => labTestService.getSessionDetail(personalId),
+        enabled: !!personalId
+    })
+}
+
+export const useUploadFastQ = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ sessionId, file }: { sessionId: number; file: File }) =>
+            labTestService.uploadFastQ(sessionId, file),
+        onSuccess: (_, { sessionId }) => {
+            // Invalidate and refetch the session detail to get updated data
+            queryClient.invalidateQueries({ queryKey: ['lab-test-session-detail', sessionId.toString()] })
+            // Also invalidate the sessions list to update the latest FastQ file
+            queryClient.invalidateQueries({ queryKey: ['lab-test-sessions'] })
+        }
+    })
+}
+
+export const useDownloadFastQ = () => {
+    return useMutation({
+        mutationFn: (fastqFileId: number) => labTestService.downloadFastQ(fastqFileId),
+        onSuccess: (data) => {
+            // Open the download URL in a new window/tab
+            window.open(data.downloadUrl, '_blank')
+        }
+    })
+}
+
+export const useDeleteFastQ = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (fastqFileId: number) => labTestService.deleteFastQ(fastqFileId),
+        onSuccess: (_, fastqFileId) => {
+            // Invalidate and refetch related queries
+            queryClient.invalidateQueries({ queryKey: ['lab-test-sessions'] })
+            queryClient.invalidateQueries({ queryKey: ['lab-test-session-detail'] })
+        }
     })
 }

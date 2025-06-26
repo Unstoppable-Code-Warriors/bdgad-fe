@@ -21,11 +21,17 @@ const LabTestDetailPage = () => {
     }
 
     const handleFileDrop = (files: File[]) => {
-        setUploadedFiles((prev) => [...prev, ...files])
+        // Replace existing files with new files (only one file allowed)
+        setUploadedFiles(files)
     }
 
     const handleRemoveFile = (index: number) => {
         setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
+    }
+
+    const handleUploadSuccess = () => {
+        // Clear uploaded files after successful upload
+        setUploadedFiles([])
     }
 
     const handleSave = () => {
@@ -53,12 +59,9 @@ const LabTestDetailPage = () => {
     if (error) {
         return (
             <Container size='xl' py='xl'>
-                <Stack gap='lg'>
-                    <PageHeader onBack={handleBack} onSave={handleSave} />
-                    <Alert icon={<IconAlertCircle size={16} />} title='Lỗi tải dữ liệu' color='red' variant='light'>
-                        {error?.message || 'Không thể tải thông tin xét nghiệm. Vui lòng thử lại.'}
-                    </Alert>
-                </Stack>
+                <Alert variant='light' color='red' title='Lỗi' icon={<IconAlertCircle size={16} />}>
+                    Không thể tải thông tin xét nghiệm. Vui lòng thử lại sau.
+                </Alert>
             </Container>
         )
     }
@@ -66,17 +69,9 @@ const LabTestDetailPage = () => {
     if (!data) {
         return (
             <Container size='xl' py='xl'>
-                <Stack gap='lg'>
-                    <PageHeader onBack={handleBack} onSave={handleSave} />
-                    <Alert
-                        icon={<IconAlertCircle size={16} />}
-                        title='Không tìm thấy dữ liệu'
-                        color='yellow'
-                        variant='light'
-                    >
-                        Không tìm thấy thông tin xét nghiệm
-                    </Alert>
-                </Stack>
+                <Alert variant='light' color='orange' title='Không tìm thấy' icon={<IconAlertCircle size={16} />}>
+                    Không tìm thấy thông tin xét nghiệm với ID này.
+                </Alert>
             </Container>
         )
     }
@@ -101,10 +96,13 @@ const LabTestDetailPage = () => {
                 {/* Right Column - FastQ File Upload */}
                 <Grid.Col span={{ base: 12, lg: 6 }}>
                     <FileUpload
+                        sessionId={parseInt(id || '0', 10)}
                         latestFastQFile={latestFastQFile}
+                        fastqFiles={data.fastqFiles}
                         uploadedFiles={uploadedFiles}
                         onFileDrop={handleFileDrop}
                         onRemoveFile={handleRemoveFile}
+                        onUploadSuccess={handleUploadSuccess}
                     />
                 </Grid.Col>
             </Grid>
