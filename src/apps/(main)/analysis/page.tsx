@@ -57,8 +57,7 @@ const AnalysisPage = () => {
 
     // Filters
     const [etlStatusFilter, setEtlStatusFilter] = useState<string>('')
-    const [dateFromFilter, setDateFromFilter] = useState<Date | null>(null)
-    const [dateToFilter, setDateToFilter] = useState<Date | null>(null)
+    const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
 
     // Debounced search
     const [debouncedSearch] = useDebouncedValue(search, 500)
@@ -84,8 +83,8 @@ const AnalysisPage = () => {
         sortBy: sortBy as string,
         sortOrder: sortOrder as string,
         filter,
-        dateFrom: dateFromFilter,
-        dateTo: dateToFilter
+        dateFrom: dateRange[0],
+        dateTo: dateRange[1]
     })
 
     // Mutations
@@ -95,7 +94,7 @@ const AnalysisPage = () => {
     // Reset page when search or filters change
     useEffect(() => {
         if (page > 1) setPage(1)
-    }, [debouncedSearch, filter, dateFromFilter, dateToFilter])
+    }, [debouncedSearch, filter, dateRange])
 
     const handleViewDetail = useCallback(
         (id: number) => {
@@ -167,23 +166,13 @@ const AnalysisPage = () => {
     const columns: DataTableColumn<AnalysisSessionListItem>[] = useMemo(
         () => [
             {
-                accessor: 'labcode',
-                title: 'Mã phòng thí nghiệm',
-                sortable: true,
-                width: 180
-            },
-            {
-                accessor: 'barcode',
-                title: 'Mã vạch',
-                sortable: true,
-                width: 150
-            },
-            {
                 accessor: 'patient.personalId',
                 title: 'CCCD/CMND',
                 sortable: true,
                 width: 150,
-                render: (record) => record.patient?.personalId || '-'
+                render: (record) => record.patient?.personalId || '-',
+                titleClassName: 'bg-white',
+                cellsClassName: 'bg-white'
             },
             {
                 accessor: 'patient.fullName',
@@ -271,7 +260,9 @@ const AnalysisPage = () => {
                             </ActionIcon>
                         )}
                     </Group>
-                )
+                ),
+                titleClassName: 'bg-white',
+                cellsClassName: 'bg-white'
             }
         ],
         [
@@ -335,24 +326,33 @@ const AnalysisPage = () => {
                                 )
                             }
                         />
+                        <DatePickerInput
+                            type='range'
+                            placeholder='Chọn khoảng thời gian'
+                            leftSection={<IconCalendar size={16} />}
+                            value={dateRange}
+                            onChange={setDateRange}
+                            clearable
+                            maxDate={new Date()}
+                        />
                     </Group>
 
-                    <Group grow>
-                        <DatePickerInput
-                            placeholder='Từ ngày'
-                            leftSection={<IconCalendar size={16} />}
-                            value={dateFromFilter}
-                            onChange={setDateFromFilter}
-                            clearable
-                        />
-                        <DatePickerInput
-                            placeholder='Đến ngày'
-                            leftSection={<IconCalendar size={16} />}
-                            value={dateToFilter}
-                            onChange={setDateToFilter}
-                            clearable
-                        />
-                    </Group>
+                    {(etlStatusFilter || dateRange[0] || dateRange[1]) && (
+                        <Group>
+                            <Button
+                                variant='light'
+                                color='gray'
+                                leftSection={<IconX size={16} />}
+                                onClick={() => {
+                                    setEtlStatusFilter('')
+                                    setDateRange([null, null])
+                                }}
+                                size='sm'
+                            >
+                                Xóa bộ lọc
+                            </Button>
+                        </Group>
+                    )}
                 </Stack>
             </Paper>
 
@@ -378,6 +378,8 @@ const AnalysisPage = () => {
                     verticalSpacing='md'
                     striped
                     highlightOnHover
+                    pinFirstColumn
+                    pinLastColumn
                 />
             </Paper>
         </Stack>

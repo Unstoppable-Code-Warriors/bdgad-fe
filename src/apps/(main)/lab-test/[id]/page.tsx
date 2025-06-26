@@ -14,8 +14,7 @@ const LabTestDetailPage = () => {
     const sendToAnalysisMutation = useSendToAnalysis()
 
     // Get the latest FastQ file
-    const latestFastQFile =
-        data?.fastqFiles && data.fastqFiles.length > 0 ? data.fastqFiles[data.fastqFiles.length - 1] : null
+    const latestFastQFile = data?.fastqFiles && data.fastqFiles.length > 0 ? data.fastqFiles[0] : null
 
     const handleBack = () => {
         navigate('/lab-test')

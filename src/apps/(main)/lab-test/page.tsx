@@ -11,10 +11,11 @@ import {
     IconX,
     IconRefresh,
     IconAlertCircle,
-    IconDownload
+    IconDownload,
+    IconSend
 } from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
-import { useLabTestSessions } from '@/services/hook/lab-test.hook'
+import { useLabTestSessions, useSendToAnalysis } from '@/services/hook/lab-test.hook'
 import { labTestService } from '@/services/function/lab-test'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useSearchParamState } from '@/hooks/use-search-params'
@@ -82,7 +83,7 @@ const LabTestPage = () => {
         dateFrom: dateRanges[0],
         dateTo: dateRanges[1]
     })
-
+    const sendToAnalysisMutation = useSendToAnalysis()
     const handleViewDetail = useCallback(
         (id: number) => {
             navigate(`/lab-test/${id}`)
@@ -117,6 +118,34 @@ const LabTestPage = () => {
         } finally {
             setIsDownloading(false)
         }
+    }, [])
+
+    const handleSendToAnalysis = useCallback(async (fastqFileId: number) => {
+        if (!fastqFileId) {
+            notifications.show({
+                title: 'Lỗi',
+                message: 'Không tìm thấy file FastQ để gửi phân tích',
+                color: 'red'
+            })
+            return
+        }
+
+        sendToAnalysisMutation.mutate(fastqFileId, {
+            onSuccess: () => {
+                notifications.show({
+                    title: 'Thành công',
+                    message: 'File FastQ đã được gửi phân tích thành công',
+                    color: 'green'
+                })
+            },
+            onError: (error: any) => {
+                notifications.show({
+                    title: 'Lỗi gửi phân tích',
+                    message: error.message || 'Không thể gửi file FastQ để phân tích',
+                    color: 'red'
+                })
+            }
+        })
     }, [])
 
     const recordsPerPageOptions = [5, 10, 20, 50]
@@ -229,6 +258,15 @@ const LabTestPage = () => {
                         <ActionIcon variant='light' color='blue' onClick={() => handleViewDetail(record.id)}>
                             <IconEye size={16} />
                         </ActionIcon>
+                        {record.latestFastqFile?.status === 'uploaded' && (
+                            <ActionIcon
+                                variant='light'
+                                color='green'
+                                onClick={() => handleSendToAnalysis(record.latestFastqFile.id)}
+                            >
+                                <IconSend size={16} />
+                            </ActionIcon>
+                        )}
                     </Group>
                 ),
                 titleClassName: 'bg-white',
