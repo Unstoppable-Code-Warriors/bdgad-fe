@@ -1,6 +1,6 @@
 import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert } from '@mantine/core'
+import { Title, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert, Tooltip } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
 import { IconEye, IconRefresh, IconAlertCircle, IconDownload, IconSend } from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
@@ -232,17 +232,21 @@ const LabTestPage = () => {
                 textAlign: 'center',
                 render: (record) => (
                     <Group gap='xs' justify='center' bg={'white'}>
-                        <ActionIcon variant='light' color='blue' onClick={() => handleViewDetail(record.id)}>
-                            <IconEye size={16} />
-                        </ActionIcon>
-                        {record.latestFastqFile?.status === 'uploaded' && (
-                            <ActionIcon
-                                variant='light'
-                                color='green'
-                                onClick={() => handleSendToAnalysis(record.latestFastqFile.id)}
-                            >
-                                <IconSend size={16} />
+                        <Tooltip label='Xem chi tiết'>
+                            <ActionIcon variant='light' color='blue' onClick={() => handleViewDetail(record.id)}>
+                                <IconEye size={16} />
                             </ActionIcon>
+                        </Tooltip>
+                        {record.latestFastqFile?.status === 'uploaded' && (
+                            <Tooltip label='Gửi phân tích'>
+                                <ActionIcon
+                                    variant='light'
+                                    color='green'
+                                    onClick={() => handleSendToAnalysis(record.latestFastqFile.id)}
+                                >
+                                    <IconSend size={16} />
+                                </ActionIcon>
+                            </Tooltip>
                         )}
                     </Group>
                 ),

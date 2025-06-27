@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, TextInput, Select, Group, Stack, Paper, Button, Badge, ActionIcon, Alert } from '@mantine/core'
+import { Title, TextInput, Select, Group, Stack, Paper, Button, Badge, ActionIcon, Alert, Tooltip } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { DataTable, type DataTableColumn, type DataTableSortStatus } from 'mantine-datatable'
 import {
@@ -266,57 +266,65 @@ const AnalysisPage = () => {
                 textAlign: 'center',
                 render: (record) => (
                     <Group gap='xs' justify='center'>
-                        <ActionIcon variant='light' color='blue' onClick={() => handleViewDetail(record.id)}>
-                            <IconEye size={16} />
-                        </ActionIcon>
+                        <Tooltip label='Xem chi tiết'>
+                            <ActionIcon variant='light' color='blue' onClick={() => handleViewDetail(record.id)}>
+                                <IconEye size={16} />
+                            </ActionIcon>
+                        </Tooltip>
 
                         {/* Process Analysis Button - only show for approved FastQ files */}
                         {record.latestFastqFile?.status === FastQFileStatus.WAIT_FOR_APPROVAL && (
-                            <ActionIcon
-                                variant='light'
-                                color='green'
-                                onClick={() => handleProcessAnalysis(record.latestFastqFile!.id)}
-                                loading={processAnalysisMutation.isPending}
-                            >
-                                <IconPlayerPlay size={16} />
-                            </ActionIcon>
+                            <Tooltip label='Bắt đầu phân tích'>
+                                <ActionIcon
+                                    variant='light'
+                                    color='green'
+                                    onClick={() => handleProcessAnalysis(record.latestFastqFile!.id)}
+                                    loading={processAnalysisMutation.isPending}
+                                >
+                                    <IconPlayerPlay size={16} />
+                                </ActionIcon>
+                            </Tooltip>
                         )}
 
                         {/* Reject FastQ Button - only show for files waiting for approval */}
                         {record.latestFastqFile?.status === FastQFileStatus.WAIT_FOR_APPROVAL && (
-                            <ActionIcon
-                                variant='light'
-                                color='red'
-                                onClick={() => handleRejectFastq(record.latestFastqFile!.id)}
-                                title='Từ chối FastQ'
-                            >
-                                <IconX size={16} />
-                            </ActionIcon>
+                            <Tooltip label='Từ chối FastQ'>
+                                <ActionIcon
+                                    variant='light'
+                                    color='red'
+                                    onClick={() => handleRejectFastq(record.latestFastqFile!.id)}
+                                >
+                                    <IconX size={16} />
+                                </ActionIcon>
+                            </Tooltip>
                         )}
 
                         {/* Download ETL Result - only show for completed results */}
                         {record.latestEtlResult?.status === AnalysisStatus.COMPLETED && (
-                            <ActionIcon
-                                variant='light'
-                                color='teal'
-                                onClick={() => handleDownloadEtlResult(record.latestEtlResult!.id)}
-                                loading={isDownloading}
-                            >
-                                <IconDownload size={16} />
-                            </ActionIcon>
+                            <Tooltip label='Tải xuống kết quả'>
+                                <ActionIcon
+                                    variant='light'
+                                    color='teal'
+                                    onClick={() => handleDownloadEtlResult(record.latestEtlResult!.id)}
+                                    loading={isDownloading}
+                                >
+                                    <IconDownload size={16} />
+                                </ActionIcon>
+                            </Tooltip>
                         )}
 
                         {/* Retry ETL Result - only show for failed results with available FastQ */}
                         {record.latestEtlResult?.status === AnalysisStatus.FAILED && record.latestFastqFile?.id && (
-                            <ActionIcon
-                                variant='light'
-                                color='orange'
-                                onClick={() => handleRetryEtlResult(record.latestFastqFile!.id)}
-                                loading={processAnalysisMutation.isPending}
-                                title='Thử lại phân tích'
-                            >
-                                <IconRefresh size={16} />
-                            </ActionIcon>
+                            <Tooltip label='Thử lại phân tích'>
+                                <ActionIcon
+                                    variant='light'
+                                    color='orange'
+                                    onClick={() => handleRetryEtlResult(record.latestFastqFile!.id)}
+                                    loading={processAnalysisMutation.isPending}
+                                >
+                                    <IconRefresh size={16} />
+                                </ActionIcon>
+                            </Tooltip>
                         )}
                     </Group>
                 ),

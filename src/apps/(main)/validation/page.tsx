@@ -1,6 +1,6 @@
 import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, Group, Stack, Paper, Button, Badge, ActionIcon, Alert, Text } from '@mantine/core'
+import { Title, Group, Stack, Paper, Button, Badge, ActionIcon, Alert, Text, Tooltip } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
 import {
     IconRefresh,
@@ -241,15 +241,16 @@ const ValidationPage = () => {
 
                     return (
                         <Group gap='xs'>
-                            <ActionIcon
-                                size='sm'
-                                variant='light'
-                                color='blue'
-                                onClick={() => handleViewDetail(record.id)}
-                                title='Xem chi tiết'
-                            >
-                                <IconEye size={14} />
-                            </ActionIcon>
+                            <Tooltip label='Xem chi tiết'>
+                                <ActionIcon
+                                    size='sm'
+                                    variant='light'
+                                    color='blue'
+                                    onClick={() => handleViewDetail(record.id)}
+                                >
+                                    <IconEye size={14} />
+                                </ActionIcon>
+                            </Tooltip>
 
                             {etlResult && (
                                 <>
@@ -258,38 +259,41 @@ const ValidationPage = () => {
                                         ValidationEtlStatus.REJECTED,
                                         ValidationEtlStatus.APPROVED
                                     ].includes(etlResult.status as ValidationEtlStatus) && (
-                                        <ActionIcon
-                                            size='sm'
-                                            variant='light'
-                                            color='blue'
-                                            loading={isDownloading}
-                                            onClick={() => handleDownloadEtlResult(etlResult.id)}
-                                            title='Tải xuống kết quả'
-                                        >
-                                            <IconDownload size={14} />
-                                        </ActionIcon>
+                                        <Tooltip label='Tải xuống kết quả'>
+                                            <ActionIcon
+                                                size='sm'
+                                                variant='light'
+                                                color='blue'
+                                                loading={isDownloading}
+                                                onClick={() => handleDownloadEtlResult(etlResult.id)}
+                                            >
+                                                <IconDownload size={14} />
+                                            </ActionIcon>
+                                        </Tooltip>
                                     )}
 
                                     {etlResult.status === ValidationEtlStatus.WAIT_FOR_APPROVAL && (
                                         <>
-                                            <ActionIcon
-                                                size='sm'
-                                                variant='light'
-                                                color='green'
-                                                onClick={() => handleOpenAcceptModal(etlResult.id)}
-                                                title='Phê duyệt'
-                                            >
-                                                <IconCheck size={14} />
-                                            </ActionIcon>
-                                            <ActionIcon
-                                                size='sm'
-                                                variant='light'
-                                                color='red'
-                                                onClick={() => handleOpenRejectModal(etlResult.id)}
-                                                title='Từ chối'
-                                            >
-                                                <IconReject size={14} />
-                                            </ActionIcon>
+                                            <Tooltip label='Phê duyệt'>
+                                                <ActionIcon
+                                                    size='sm'
+                                                    variant='light'
+                                                    color='green'
+                                                    onClick={() => handleOpenAcceptModal(etlResult.id)}
+                                                >
+                                                    <IconCheck size={14} />
+                                                </ActionIcon>
+                                            </Tooltip>
+                                            <Tooltip label='Từ chối'>
+                                                <ActionIcon
+                                                    size='sm'
+                                                    variant='light'
+                                                    color='red'
+                                                    onClick={() => handleOpenRejectModal(etlResult.id)}
+                                                >
+                                                    <IconReject size={14} />
+                                                </ActionIcon>
+                                            </Tooltip>
                                         </>
                                     )}
                                 </>
