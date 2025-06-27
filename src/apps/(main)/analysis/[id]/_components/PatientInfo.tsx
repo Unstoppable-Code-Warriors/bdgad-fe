@@ -1,14 +1,5 @@
-import { Card, Text, Group, Stack, Divider, ThemeIcon, Box, Grid, Paper, Avatar } from '@mantine/core'
-import {
-    IconUser,
-    IconId,
-    IconCalendar,
-    IconPhone,
-    IconMapPin,
-    IconShield,
-    IconStethoscope,
-    IconMail
-} from '@tabler/icons-react'
+import { Card, Text, Group, Stack, ThemeIcon, Box, Grid, Paper, Avatar } from '@mantine/core'
+import { IconUser, IconId, IconPhone, IconMapPin, IconStethoscope, IconMail } from '@tabler/icons-react'
 import type { Patient } from '@/types/patient'
 import type { User } from '@/types/user'
 

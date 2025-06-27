@@ -7,7 +7,8 @@ import {
     IconAlertTriangle,
     IconMessage,
     IconCheck,
-    IconRefresh
+    IconRefresh,
+    IconSend
 } from '@tabler/icons-react'
 import type { EtlResultResponse } from '@/types/analysis'
 import { analysisStatusConfig, AnalysisStatus } from '@/types/analysis'
@@ -16,7 +17,8 @@ import { RejectionDisplay } from '@/components/RejectionDisplay'
 interface EtlResultHistoryProps {
     etlResults: EtlResultResponse[]
     onDownload: (etlResultId: number) => void
-    onRetry?: () => void
+    onRetry?: (etlResultId: number) => void
+    onSendToValidation?: (etlResultId: number) => void
     latestFastQFile?: any
 }
 
@@ -28,7 +30,13 @@ const getStatusLabel = (status: string) => {
     return analysisStatusConfig[status as keyof typeof analysisStatusConfig]?.label || status
 }
 
-export const EtlResultHistory = ({ etlResults, onDownload, onRetry, latestFastQFile }: EtlResultHistoryProps) => {
+export const EtlResultHistory = ({
+    etlResults,
+    onDownload,
+    onRetry,
+    onSendToValidation,
+    latestFastQFile
+}: EtlResultHistoryProps) => {
     if (!etlResults || etlResults.length === 0) {
         return (
             <Card shadow='sm' padding='xl' radius='lg' withBorder>
@@ -180,6 +188,21 @@ export const EtlResultHistory = ({ etlResults, onDownload, onRetry, latestFastQF
                                                         </Button>
                                                     )}
 
+                                                    {/* Send to Validation button for completed results */}
+                                                    {result.status === AnalysisStatus.COMPLETED &&
+                                                        onSendToValidation && (
+                                                            <Button
+                                                                variant='light'
+                                                                color='blue'
+                                                                leftSection={<IconSend size={16} />}
+                                                                onClick={() => onSendToValidation(result.id)}
+                                                                size='sm'
+                                                                radius='md'
+                                                            >
+                                                                Gửi xác thực
+                                                            </Button>
+                                                        )}
+
                                                     {/* Retry button for failed results */}
                                                     {result.status === AnalysisStatus.FAILED &&
                                                         latestFastQFile?.id &&
@@ -188,7 +211,7 @@ export const EtlResultHistory = ({ etlResults, onDownload, onRetry, latestFastQF
                                                                 variant='light'
                                                                 color='orange'
                                                                 leftSection={<IconRefresh size={16} />}
-                                                                onClick={() => onRetry()}
+                                                                onClick={() => onRetry(result.id)}
                                                                 size='sm'
                                                                 radius='md'
                                                             >

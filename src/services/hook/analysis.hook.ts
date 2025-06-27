@@ -76,3 +76,27 @@ export const useDownloadEtlResult = () => {
         mutationFn: (etlResultId: number) => analysisService.downloadEtlResult(etlResultId)
     })
 }
+
+export const useSendEtlResultToValidation = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (etlResultId: number) => analysisService.sendEtlResultToValidation(etlResultId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['analysis-sessions'] })
+            queryClient.invalidateQueries({ queryKey: ['analysis-session-detail'] })
+        }
+    })
+}
+
+export const useRetryEtlProcess = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (etlResultId: number) => analysisService.retryEtlProcess(etlResultId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['analysis-sessions'] })
+            queryClient.invalidateQueries({ queryKey: ['analysis-session-detail'] })
+        }
+    })
+}

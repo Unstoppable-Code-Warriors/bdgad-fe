@@ -3,7 +3,9 @@ import {
     useAnalysisSessionDetail,
     useProcessAnalysis,
     useRejectFastq,
-    useDownloadEtlResult
+    useDownloadEtlResult,
+    useSendEtlResultToValidation,
+    useRetryEtlProcess
 } from '@/services/hook/analysis.hook'
 import { useParams, useNavigate } from 'react-router'
 import {
@@ -24,7 +26,15 @@ import {
     Divider,
     ThemeIcon
 } from '@mantine/core'
-import { IconAlertCircle, IconPlayerPlay, IconX, IconDownload, IconXboxX, IconRefresh } from '@tabler/icons-react'
+import {
+    IconAlertCircle,
+    IconPlayerPlay,
+    IconX,
+    IconDownload,
+    IconXboxX,
+    IconRefresh,
+    IconSend
+} from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { AnalysisInfo, PatientInfo, FastqHistory, EtlResultHistory } from './_components'
 import { PageHeader } from '@/components/PageHeader'
@@ -44,6 +54,8 @@ const AnalysisDetailPage = () => {
     const processAnalysisMutation = useProcessAnalysis()
     const rejectFastqMutation = useRejectFastq()
     const downloadEtlResultMutation = useDownloadEtlResult()
+    const sendEtlResultToValidationMutation = useSendEtlResultToValidation()
+    const retryEtlProcessMutation = useRetryEtlProcess()
 
     // Get the latest FastQ file waiting for approval
     const latestFastQFile =
@@ -148,17 +160,8 @@ const AnalysisDetailPage = () => {
         }
     }
 
-    const handleRetryEtlResult = async () => {
-        if (!latestFastQFile?.id) {
-            notifications.show({
-                title: 'Lỗi',
-                message: 'Không tìm thấy file FastQ để thử lại phân tích',
-                color: 'red'
-            })
-            return
-        }
-
-        processAnalysisMutation.mutate(latestFastQFile.id, {
+    const handleRetryEtlResult = async (etlResultId: number) => {
+        retryEtlProcessMutation.mutate(etlResultId, {
             onSuccess: () => {
                 notifications.show({
                     title: 'Thành công',
@@ -170,6 +173,25 @@ const AnalysisDetailPage = () => {
                 notifications.show({
                     title: 'Lỗi thử lại phân tích',
                     message: error.message || 'Không thể thử lại quá trình phân tích',
+                    color: 'red'
+                })
+            }
+        })
+    }
+
+    const handleSendEtlResultToValidation = async (etlResultId: number) => {
+        sendEtlResultToValidationMutation.mutate(etlResultId, {
+            onSuccess: () => {
+                notifications.show({
+                    title: 'Thành công',
+                    message: 'Kết quả phân tích đã được gửi để xác thực',
+                    color: 'green'
+                })
+            },
+            onError: (error: any) => {
+                notifications.show({
+                    title: 'Lỗi gửi xác thực',
+                    message: error.message || 'Không thể gửi kết quả để xác thực',
                     color: 'red'
                 })
             }
@@ -336,6 +358,19 @@ const AnalysisDetailPage = () => {
                                         >
                                             Tải xuống kết quả
                                         </Button>
+                                        <Button
+                                            color='blue'
+                                            variant='light'
+                                            onClick={() => handleSendEtlResultToValidation(latestEtlResult.id)}
+                                            leftSection={<IconSend size={16} />}
+                                            loading={sendEtlResultToValidationMutation.isPending}
+                                            disabled={sendEtlResultToValidationMutation.isPending}
+                                            fullWidth
+                                            size='md'
+                                            radius='lg'
+                                        >
+                                            Gửi để xác thực
+                                        </Button>
                                     </Stack>
                                 )}
 
@@ -370,16 +405,27 @@ const AnalysisDetailPage = () => {
                                         </Text>
                                         <Button
                                             color='orange'
-                                            onClick={handleRetryEtlResult}
+                                            onClick={() => handleRetryEtlResult(latestEtlResult!.id)}
                                             leftSection={<IconRefresh size={16} />}
-                                            loading={processAnalysisMutation.isPending}
-                                            disabled={processAnalysisMutation.isPending}
+                                            loading={retryEtlProcessMutation.isPending}
+                                            disabled={retryEtlProcessMutation.isPending}
                                             fullWidth
                                             size='md'
                                             radius='lg'
                                         >
                                             Phân tích lại
                                         </Button>
+                                    </Stack>
+                                )}
+
+                                {latestEtlResult?.status === AnalysisStatus.WAIT_FOR_APPROVAL && (
+                                    <Stack gap='md' align='center'>
+                                        <Text size='sm' ta='center' c='orange' fw={500}>
+                                            Đang chờ xác thực
+                                        </Text>
+                                        <Text size='xs' ta='center' c='dimmed'>
+                                            Kết quả đã được gửi để xác thực
+                                        </Text>
                                     </Stack>
                                 )}
 
@@ -414,7 +460,8 @@ const AnalysisDetailPage = () => {
                         <EtlResultHistory
                             etlResults={data.etlResults}
                             onDownload={handleDownloadEtlResult}
-                            onRetry={handleRetryEtlResult}
+                            onRetry={() => handleRetryEtlResult(latestEtlResult!.id)}
+                            onSendToValidation={handleSendEtlResultToValidation}
                             latestFastQFile={latestFastQFile}
                         />
                     </Grid.Col>

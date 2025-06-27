@@ -78,5 +78,15 @@ export const analysisService = {
 
     downloadEtlResult: async (etlResultId: number): Promise<EtlResultDownloadResponse> => {
         return await backendApi.get(`${PREFIX}/etl-result/${etlResultId}/download`).json<EtlResultDownloadResponse>()
+    },
+
+    sendEtlResultToValidation: async (etlResultId: number): Promise<{ message: string }> => {
+        return await backendApi
+            .post(`${PREFIX}/etl-result/${etlResultId}/send-to-validation`)
+            .json<{ message: string }>()
+    },
+
+    retryEtlProcess: async (etlResultId: number): Promise<{ message: string }> => {
+        return await backendApi.post(`${PREFIX}/etl-result/${etlResultId}/retry`).json<{ message: string }>()
     }
 }
