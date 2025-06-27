@@ -1,26 +1,15 @@
-import { useCallback, useEffect, useState, useMemo } from 'react'
+import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, TextInput, Select, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert } from '@mantine/core'
-import { DatePickerInput } from '@mantine/dates'
-import { DataTable, type DataTableColumn, type DataTableSortStatus } from 'mantine-datatable'
-import {
-    IconSearch,
-    IconCalendar,
-    IconEye,
-    IconFilter,
-    IconX,
-    IconRefresh,
-    IconAlertCircle,
-    IconDownload,
-    IconSend
-} from '@tabler/icons-react'
+import { Title, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert } from '@mantine/core'
+import { DataTable, type DataTableColumn } from 'mantine-datatable'
+import { IconEye, IconRefresh, IconAlertCircle, IconDownload, IconSend } from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
 import { useLabTestSessions, useSendToAnalysis } from '@/services/hook/lab-test.hook'
 import { labTestService } from '@/services/function/lab-test'
-import { useDebouncedValue } from '@mantine/hooks'
-import { useSearchParamState } from '@/hooks/use-search-params'
 import { notifications } from '@mantine/notifications'
 import type { LabTestSessionListItem } from '@/types/lab-test'
+import { ListSearchFilter, type SelectOption } from '@/components/ListSearchFilter'
+import { useListState } from '@/hooks/use-list-state'
 
 const getStatusColor = (status: string) => {
     return statusConfig[status as keyof typeof statusConfig]?.color || 'gray'
@@ -34,37 +23,25 @@ const LabTestPage = () => {
     const navigate = useNavigate()
     const [isDownloading, setIsDownloading] = useState(false)
 
-    const [searchTerm, setSearchTerm] = useSearchParamState({
-        key: 'search',
-        initValue: ''
+    // Use the new list state hook
+    const {
+        search,
+        debouncedSearch,
+        setSearch,
+        page,
+        setPage,
+        limit,
+        setLimit,
+        sortStatus,
+        handleSort,
+        filter,
+        updateFilter,
+        dateRange,
+        setDateRange
+    } = useListState<LabTestFilter>({
+        defaultSortBy: 'createdAt',
+        defaultSortOrder: 'desc'
     })
-    const [page, setPage] = useSearchParamState({
-        key: 'page',
-        initValue: 1
-    })
-    const [recordsPerPage, setRecordsPerPage] = useSearchParamState({
-        key: 'recordsPerPage',
-        initValue: 10
-    })
-    const [sortBy, setSortBy] = useSearchParamState({
-        key: 'sortBy',
-        initValue: 'createdAt'
-    })
-    const [sortOrder, setSortOrder] = useSearchParamState({
-        key: 'sortOrder',
-        initValue: 'desc'
-    })
-    const [filters, setFilters] = useSearchParamState<LabTestFilter>({
-        key: 'filters',
-        initValue: {}
-    })
-    const [dateRanges, setDateRanges] = useState<[string | null, string | null]>([null, null])
-    const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm)
-    const [debouncedSearchTerm] = useDebouncedValue(localSearchTerm, 500)
-
-    useEffect(() => {
-        setSearchTerm(debouncedSearchTerm)
-    }, [debouncedSearchTerm, setSearchTerm])
 
     // Fetch data using the hook with proper search params
     const {
@@ -74,16 +51,24 @@ const LabTestPage = () => {
         error,
         refetch
     } = useLabTestSessions({
-        search: searchTerm,
+        search: debouncedSearch,
         page,
-        limit: recordsPerPage,
-        sortBy,
-        sortOrder,
-        filter: filters,
-        dateFrom: dateRanges[0],
-        dateTo: dateRanges[1]
+        limit,
+        sortBy: sortStatus.columnAccessor,
+        sortOrder: sortStatus.direction,
+        filter,
+        dateFrom: dateRange[0],
+        dateTo: dateRange[1]
     })
+
     const sendToAnalysisMutation = useSendToAnalysis()
+
+    // Status options for the filter
+    const statusOptions: SelectOption[] = Object.values(LAB_TEST_STATUS).map((status) => ({
+        value: status,
+        label: statusConfig[status as keyof typeof statusConfig]?.label || status
+    }))
+
     const handleViewDetail = useCallback(
         (id: number) => {
             navigate(`/lab-test/${id}`)
@@ -94,14 +79,6 @@ const LabTestPage = () => {
     const handleRefresh = useCallback(() => {
         refetch()
     }, [refetch])
-
-    const handleSort = useCallback(
-        (sortStatus: DataTableSortStatus<LabTestSessionListItem>) => {
-            setSortBy(sortStatus.columnAccessor)
-            setSortOrder(sortStatus.direction)
-        },
-        [setSortBy, setSortOrder]
-    )
 
     const handleDownloadFastQ = useCallback(async (fastqFileId: number) => {
         try {
@@ -275,6 +252,7 @@ const LabTestPage = () => {
         ],
         [handleDownloadFastQ, isDownloading, handleViewDetail]
     )
+
     return (
         <Stack gap='lg'>
             {/* Header */}
@@ -297,79 +275,22 @@ const LabTestPage = () => {
                 </Alert>
             )}
 
-            {/* Search and Filters */}
-            <Paper p='md' withBorder shadow='sm'>
-                <Stack gap='md'>
-                    <Group>
-                        <TextInput
-                            placeholder='Tìm kiếm theo tên, CCCD...'
-                            leftSection={<IconSearch size={16} />}
-                            value={localSearchTerm}
-                            onChange={(e) => setLocalSearchTerm(e.currentTarget.value)}
-                            rightSection={
-                                localSearchTerm ? (
-                                    <ActionIcon variant='subtle' onClick={() => setLocalSearchTerm('')}>
-                                        <IconX size={16} />
-                                    </ActionIcon>
-                                ) : null
-                            }
-                            disabled={isLoading}
-                            data-autofocus
-                            className='grow-1'
-                        />
-
-                        <Select
-                            placeholder='Lọc theo trạng thái'
-                            leftSection={<IconFilter size={16} />}
-                            data={Object.values(LAB_TEST_STATUS).map((status) => ({
-                                value: status,
-                                label: statusConfig[status as keyof typeof statusConfig]?.label || status
-                            }))}
-                            value={filters.status}
-                            onChange={(value) => {
-                                if (!value) {
-                                    setFilters({})
-                                } else {
-                                    setFilters({ ...filters, status: value as LabTestStatus })
-                                }
-                            }}
-                            clearable
-                            disabled={isLoading}
-                        />
-
-                        <DatePickerInput
-                            type='range'
-                            placeholder='Chọn khoảng thời gian'
-                            leftSection={<IconCalendar size={16} />}
-                            value={dateRanges}
-                            onChange={setDateRanges}
-                            clearable
-                            maxDate={new Date()}
-                            disabled={isLoading}
-                        />
-                    </Group>
-                    {(Object.keys(filters).length > 0 || dateRanges[0] || dateRanges[1]) && (
-                        <Group>
-                            <Button
-                                variant='light'
-                                color='gray'
-                                leftSection={<IconX size={16} />}
-                                onClick={() => {
-                                    setFilters({})
-                                    setDateRanges([null, null])
-                                }}
-                                size='sm'
-                                disabled={isLoading}
-                            >
-                                Xóa bộ lọc
-                            </Button>
-                            <Text size='sm' c='dimmed'>
-                                Tìm thấy {totalRecords} kết quả
-                            </Text>
-                        </Group>
-                    )}
-                </Stack>
-            </Paper>
+            {/* Reusable Search and Filter Component */}
+            <ListSearchFilter
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchPlaceholder='Tìm kiếm theo tên, CCCD...'
+                statusFilter={filter.status}
+                onStatusFilterChange={(value) => updateFilter({ status: (value as LabTestStatus) || undefined })}
+                statusOptions={statusOptions}
+                statusPlaceholder='Lọc theo trạng thái'
+                dateRange={dateRange}
+                onDateRangeChange={setDateRange}
+                onRefresh={handleRefresh}
+                isLoading={isLoading}
+                totalRecords={totalRecords}
+                showRefreshButton={false} // We have it in the header
+            />
 
             {/* Data Table */}
             <Paper withBorder shadow='sm'>
@@ -377,9 +298,9 @@ const LabTestPage = () => {
                     records={labTestData}
                     columns={columns}
                     totalRecords={totalRecords}
-                    recordsPerPage={recordsPerPage}
+                    recordsPerPage={limit}
                     recordsPerPageOptions={recordsPerPageOptions}
-                    onRecordsPerPageChange={setRecordsPerPage}
+                    onRecordsPerPageChange={setLimit}
                     page={page}
                     onPageChange={setPage}
                     paginationActiveBackgroundColor='blue'
@@ -397,11 +318,7 @@ const LabTestPage = () => {
                     withColumnBorders
                     striped
                     fetching={isLoading}
-                    sortStatus={{
-                        sortKey: sortBy,
-                        columnAccessor: sortBy,
-                        direction: sortOrder as 'asc' | 'desc'
-                    }}
+                    sortStatus={sortStatus}
                     onSortStatusChange={handleSort}
                     pinLastColumn
                     pinFirstColumn

@@ -1,27 +1,8 @@
-import { useCallback, useEffect, useState, useMemo } from 'react'
+import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
+import { Title, Group, Stack, Paper, Button, Badge, ActionIcon, Alert, Modal, Text, Textarea } from '@mantine/core'
+import { DataTable, type DataTableColumn } from 'mantine-datatable'
 import {
-    Title,
-    TextInput,
-    Select,
-    Group,
-    Stack,
-    Paper,
-    Button,
-    Badge,
-    ActionIcon,
-    Alert,
-    Modal,
-    Text,
-    Textarea
-} from '@mantine/core'
-import { DatePickerInput } from '@mantine/dates'
-import { DataTable, type DataTableColumn, type DataTableSortStatus } from 'mantine-datatable'
-import {
-    IconSearch,
-    IconCalendar,
-    IconFilter,
-    IconX,
     IconRefresh,
     IconAlertCircle,
     IconDownload,
@@ -41,10 +22,10 @@ import {
     useRejectEtlResult,
     useAcceptEtlResult
 } from '@/services/hook/validation.hook'
-import { useDebouncedValue } from '@mantine/hooks'
-import { useSearchParamState } from '@/hooks/use-search-params'
 import { notifications } from '@mantine/notifications'
 import { useForm } from '@mantine/form'
+import { ListSearchFilter, type SelectOption } from '@/components/ListSearchFilter'
+import { useListState } from '@/hooks/use-list-state'
 
 const getStatusColor = (status: string) => {
     return validationEtlStatusConfig[status as keyof typeof validationEtlStatusConfig]?.color || 'gray'
@@ -61,41 +42,28 @@ const ValidationPage = () => {
     const [acceptModalOpened, setAcceptModalOpened] = useState(false)
     const [selectedEtlResult, setSelectedEtlResult] = useState<number | null>(null)
 
-    // URL state management
-    const [page, setPage] = useSearchParamState({
-        key: 'page',
-        initValue: 1
-    })
-    const [limit, setLimit] = useSearchParamState({
-        key: 'limit',
-        initValue: 10
-    })
-    const [search, setSearch] = useSearchParamState({
-        key: 'search',
-        initValue: ''
-    })
-    const [sortBy, setSortBy] = useSearchParamState({
-        key: 'sortBy',
-        initValue: 'createdAt'
-    })
-    const [sortOrder, setSortOrder] = useSearchParamState({
-        key: 'sortOrder',
-        initValue: 'DESC'
+    // Use the new list state hook
+    const {
+        search,
+        debouncedSearch,
+        setSearch,
+        page,
+        setPage,
+        limit,
+        setLimit,
+        sortStatus,
+        handleSort,
+        filter,
+        updateFilter,
+        dateRange,
+        setDateRange
+    } = useListState<ValidationFilter>({
+        defaultSortBy: 'createdAt',
+        defaultSortOrder: 'DESC'
     })
 
-    // Filters
-    const [statusFilter, setStatusFilter] = useState<string>('')
-    const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
-
-    // Debounced search
-    const [debouncedSearch] = useDebouncedValue(search, 500)
-
-    // Build filter object
-    const filter: ValidationFilter = useMemo(() => {
-        const filterObj: ValidationFilter = {}
-        if (statusFilter) filterObj.status = statusFilter
-        return filterObj
-    }, [statusFilter])
+    // Status filter from the main filter object
+    const statusFilter = filter.status || ''
 
     // Fetch data
     const {
@@ -105,11 +73,11 @@ const ValidationPage = () => {
         isError,
         refetch
     } = useValidationPatients({
-        page: page as number,
-        limit: limit as number,
-        search: debouncedSearch as string,
-        sortBy: sortBy as string,
-        sortOrder: sortOrder as string,
+        page,
+        limit,
+        search: debouncedSearch,
+        sortBy: sortStatus.columnAccessor,
+        sortOrder: sortStatus.direction.toUpperCase(),
         filter,
         dateFrom: dateRange[0],
         dateTo: dateRange[1]
@@ -136,10 +104,21 @@ const ValidationPage = () => {
         }
     })
 
-    // Reset page when search or filters change
-    useEffect(() => {
-        if (page > 1) setPage(1)
-    }, [debouncedSearch, filter, dateRange])
+    // Status options for the filter
+    const statusOptions: SelectOption[] = [
+        {
+            value: ValidationEtlStatus.WAIT_FOR_APPROVAL,
+            label: validationEtlStatusConfig[ValidationEtlStatus.WAIT_FOR_APPROVAL].label
+        },
+        {
+            value: ValidationEtlStatus.REJECTED,
+            label: validationEtlStatusConfig[ValidationEtlStatus.REJECTED].label
+        },
+        {
+            value: ValidationEtlStatus.APPROVED,
+            label: validationEtlStatusConfig[ValidationEtlStatus.APPROVED].label
+        }
+    ]
 
     const handleViewDetail = useCallback(
         (id: number) => {
@@ -151,14 +130,6 @@ const ValidationPage = () => {
     const handleRefresh = useCallback(() => {
         refetch()
     }, [refetch])
-
-    const handleSort = useCallback(
-        (sortStatus: DataTableSortStatus<ValidationSessionWithLatestEtlResponse>) => {
-            setSortBy(sortStatus.columnAccessor)
-            setSortOrder(sortStatus.direction.toUpperCase())
-        },
-        [setSortBy, setSortOrder]
-    )
 
     const handleDownloadEtlResult = useCallback(
         async (etlResultId: number) => {
@@ -410,68 +381,34 @@ const ValidationPage = () => {
 
     return (
         <Stack>
-            <Title order={2}>Xác thực kết quả ETL</Title>
+            <Group justify='space-between'>
+                <Title order={2}>Xác thực kết quả ETL</Title>
+                <Button
+                    leftSection={<IconRefresh size={16} />}
+                    variant='light'
+                    onClick={handleRefresh}
+                    loading={isLoading}
+                >
+                    Làm mới
+                </Button>
+            </Group>
 
-            {/* Filters */}
-            <Paper p='md' withBorder>
-                <Stack gap='md'>
-                    <Group>
-                        <TextInput
-                            placeholder='Tìm kiếm theo tên, CCCD, mã xét nghiệm...'
-                            leftSection={<IconSearch size={16} />}
-                            value={search}
-                            onChange={(e) => setSearch(e.currentTarget.value)}
-                            style={{ flexGrow: 1 }}
-                        />
-                        <Button variant='light' leftSection={<IconRefresh size={16} />} onClick={handleRefresh}>
-                            Làm mới
-                        </Button>
-                    </Group>
-
-                    <Group>
-                        <Select
-                            placeholder='Trạng thái'
-                            leftSection={<IconFilter size={16} />}
-                            data={[
-                                { value: '', label: 'Tất cả trạng thái' },
-                                {
-                                    value: ValidationEtlStatus.WAIT_FOR_APPROVAL,
-                                    label: validationEtlStatusConfig[ValidationEtlStatus.WAIT_FOR_APPROVAL].label
-                                },
-                                {
-                                    value: ValidationEtlStatus.REJECTED,
-                                    label: validationEtlStatusConfig[ValidationEtlStatus.REJECTED].label
-                                },
-                                {
-                                    value: ValidationEtlStatus.APPROVED,
-                                    label: validationEtlStatusConfig[ValidationEtlStatus.APPROVED].label
-                                }
-                            ]}
-                            value={statusFilter}
-                            onChange={(value) => setStatusFilter(value || '')}
-                            clearable
-                            rightSection={
-                                statusFilter && (
-                                    <ActionIcon size='xs' variant='transparent' onClick={() => setStatusFilter('')}>
-                                        <IconX size={12} />
-                                    </ActionIcon>
-                                )
-                            }
-                        />
-
-                        <DatePickerInput
-                            type='range'
-                            placeholder='Chọn khoảng thời gian'
-                            leftSection={<IconCalendar size={16} />}
-                            value={dateRange as [Date | null, Date | null]}
-                            onChange={(value) =>
-                                setDateRange([value[0]?.toString() || null, value[1]?.toString() || null])
-                            }
-                            clearable
-                        />
-                    </Group>
-                </Stack>
-            </Paper>
+            {/* Reusable Search and Filter Component */}
+            <ListSearchFilter
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchPlaceholder='Tìm kiếm theo tên, CCCD, mã xét nghiệm...'
+                statusFilter={statusFilter}
+                onStatusFilterChange={(value) => updateFilter({ status: value || undefined })}
+                statusOptions={statusOptions}
+                statusPlaceholder='Trạng thái'
+                dateRange={dateRange}
+                onDateRangeChange={setDateRange}
+                onRefresh={handleRefresh}
+                isLoading={isLoading}
+                totalRecords={totalRecords}
+                showRefreshButton={false} // We have it in the header
+            />
 
             {/* Error Alert */}
             {isError && (
@@ -486,15 +423,12 @@ const ValidationPage = () => {
                     records={validationData}
                     columns={columns}
                     totalRecords={totalRecords}
-                    recordsPerPage={limit as number}
-                    page={page as number}
+                    recordsPerPage={limit}
+                    page={page}
                     onPageChange={setPage}
                     recordsPerPageOptions={recordsPerPageOptions}
                     onRecordsPerPageChange={setLimit}
-                    sortStatus={{
-                        columnAccessor: sortBy as string,
-                        direction: (sortOrder as string).toLowerCase() as 'asc' | 'desc'
-                    }}
+                    sortStatus={sortStatus}
                     onSortStatusChange={handleSort}
                     fetching={isLoading}
                     noRecordsText='Không có dữ liệu'
