@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import {
     useAnalysisSessionDetail,
     useProcessAnalysis,
@@ -39,6 +39,7 @@ import { notifications } from '@mantine/notifications'
 import { AnalysisInfo, PatientInfo, FastqHistory, EtlResultHistory } from './_components'
 import { PageHeader } from '@/components/PageHeader'
 import { AnalysisStatus } from '@/types/analysis'
+import { labTestService } from '@/services/function/lab-test'
 
 const AnalysisDetailPage = () => {
     const { id } = useParams()
@@ -198,6 +199,20 @@ const AnalysisDetailPage = () => {
         })
     }
 
+    const handleDownloadFastQ = useCallback(async (fastqFileId: number) => {
+        try {
+            const response = await labTestService.downloadFastQ(fastqFileId)
+            // Open the download URL in a new window/tab
+            window.open(response.downloadUrl, '_blank')
+        } catch (error: any) {
+            notifications.show({
+                title: 'Lỗi tải file',
+                message: error.message || 'Không thể tạo link tải xuống',
+                color: 'red'
+            })
+        }
+    }, [])
+
     if (isLoading) {
         return (
             <Container size='xl' py='xl'>
@@ -313,6 +328,17 @@ const AnalysisDetailPage = () => {
                                         <Text size='sm' fw={500} c='blue'>
                                             FastQ đang chờ phê duyệt
                                         </Text>
+                                        <Button
+                                            variant='light'
+                                            color='blue'
+                                            leftSection={<IconDownload size={16} />}
+                                            onClick={() => handleDownloadFastQ(latestFastQFile.id)}
+                                            fullWidth
+                                            size='md'
+                                            radius='lg'
+                                        >
+                                            Tải file FastQ
+                                        </Button>
                                         <Button
                                             color='green'
                                             onClick={handleProcessAnalysis}
@@ -454,6 +480,7 @@ const AnalysisDetailPage = () => {
                             fastqFiles={data.fastqFiles}
                             onReject={handleOpenRejectModal}
                             onProcess={handleProcessAnalysis}
+                            onDownload={handleDownloadFastQ}
                         />
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, lg: 6 }}>

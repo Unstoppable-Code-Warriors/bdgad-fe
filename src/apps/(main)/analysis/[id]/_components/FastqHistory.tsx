@@ -1,5 +1,13 @@
 import { Card, Text, Badge, Group, Stack, Divider, ThemeIcon, Box, Timeline, Avatar, Button } from '@mantine/core'
-import { IconPlayerPlay, IconX, IconFileText, IconUser, IconClock, IconAlertTriangle } from '@tabler/icons-react'
+import {
+    IconPlayerPlay,
+    IconX,
+    IconFileText,
+    IconUser,
+    IconClock,
+    IconAlertTriangle,
+    IconDownload
+} from '@tabler/icons-react'
 import type { FastqFileResponse } from '@/types/analysis'
 import { analysisStatusConfig, AnalysisStatus } from '@/types/analysis'
 import { RejectionDisplay } from '@/components/RejectionDisplay'
@@ -8,6 +16,7 @@ interface FastqHistoryProps {
     fastqFiles: FastqFileResponse[]
     onReject: (fastqId: number) => void
     onProcess: (fastqId: number) => void
+    onDownload: (fastqId: number) => void
 }
 
 const getStatusColor = (status: string) => {
@@ -18,7 +27,7 @@ const getStatusLabel = (status: string) => {
     return analysisStatusConfig[status as keyof typeof analysisStatusConfig]?.label || status
 }
 
-export const FastqHistory = ({ fastqFiles, onReject, onProcess }: FastqHistoryProps) => {
+export const FastqHistory = ({ fastqFiles, onReject, onProcess, onDownload }: FastqHistoryProps) => {
     if (!fastqFiles || fastqFiles.length === 0) {
         return (
             <Card shadow='sm' padding='xl' radius='lg' withBorder>
@@ -138,13 +147,23 @@ export const FastqHistory = ({ fastqFiles, onReject, onProcess }: FastqHistoryPr
                                                 <Group gap='sm' justify='flex-end'>
                                                     <Button
                                                         variant='light'
+                                                        color='blue'
+                                                        leftSection={<IconDownload size={16} />}
+                                                        size='sm'
+                                                        radius='md'
+                                                        onClick={() => onDownload(file.id)}
+                                                    >
+                                                        Tải file FastQ
+                                                    </Button>
+                                                    <Button
+                                                        variant='light'
                                                         color='green'
                                                         leftSection={<IconPlayerPlay size={16} />}
                                                         onClick={() => onProcess(file.id)}
                                                         size='sm'
                                                         radius='md'
                                                     >
-                                                        Phê duyệt
+                                                        Bắt đầu phân tích
                                                     </Button>
                                                     <Button
                                                         variant='light'
