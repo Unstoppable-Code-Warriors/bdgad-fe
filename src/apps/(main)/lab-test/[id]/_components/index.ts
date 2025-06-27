@@ -1,4 +1,3 @@
 export { LabTestInfo } from './LabTestInfo'
-export { PatientInfo } from './PatientInfo'
 export { FileUpload } from './FileUpload'
 export { FileHistory } from './FileHistory'

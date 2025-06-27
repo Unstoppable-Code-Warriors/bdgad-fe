@@ -1,7 +1,7 @@
 import { useUser } from '@/services/hook/auth.hook'
 import { Role } from '@/utils/constant'
 import { AppShell, Loader, Stack, UnstyledButton, Text, Box } from '@mantine/core'
-import { IconUser, IconFlask, IconMicroscope } from '@tabler/icons-react'
+import { IconUser, IconFlask, IconMicroscope, IconClipboardCheck } from '@tabler/icons-react'
 import { Link, useLocation } from 'react-router'
 
 export const navItems = [
@@ -28,6 +28,12 @@ export const navItems = [
         icon: IconMicroscope,
         href: '/analysis',
         roles: [Role.ANALYSIS_TECHNICIAN]
+    },
+    {
+        label: 'Validation Management',
+        icon: IconClipboardCheck,
+        href: '/validation',
+        roles: [Role.VALIDATION_TECHNICIAN]
     }
 ]
 

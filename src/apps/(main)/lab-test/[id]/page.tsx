@@ -18,7 +18,8 @@ import {
 } from '@mantine/core'
 import { IconAlertCircle, IconSend } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
-import { LabTestInfo, PatientInfo, FileUpload, FileHistory } from './_components'
+import { LabTestInfo, FileUpload, FileHistory } from './_components'
+import { PatientInfo } from '@/components/PatientInfo'
 import { PageHeader } from '@/components/PageHeader'
 
 const LabTestDetailPage = () => {

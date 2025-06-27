@@ -33,12 +33,17 @@ import {
     IconDownload,
     IconXboxX,
     IconRefresh,
-    IconSend
+    IconSend,
+    IconFileText,
+    IconChartLine
 } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
-import { AnalysisInfo, PatientInfo, FastqHistory, EtlResultHistory } from './_components'
+import { AnalysisInfo } from './_components'
+import { PatientInfo } from '@/components/PatientInfo'
+import { FileHistory } from '@/components/FileHistory'
+import { EtlResultHistory } from '@/components/EtlResultHistory'
 import { PageHeader } from '@/components/PageHeader'
-import { AnalysisStatus } from '@/types/analysis'
+import { AnalysisStatus, analysisStatusConfig } from '@/types/analysis'
 import { labTestService } from '@/services/function/lab-test'
 
 const AnalysisDetailPage = () => {
@@ -339,6 +344,10 @@ const AnalysisDetailPage = () => {
                                         >
                                             Tải file FastQ
                                         </Button>
+                                        <Divider />
+                                        <Text size='sm' fw={500} c='teal'>
+                                            Phân tích mẫu
+                                        </Text>
                                         <Button
                                             color='green'
                                             onClick={handleProcessAnalysis}
@@ -444,6 +453,26 @@ const AnalysisDetailPage = () => {
                                     </Stack>
                                 )}
 
+                                {latestEtlResult?.status === AnalysisStatus.REJECTED && (
+                                    <Stack gap='md'>
+                                        <Text size='sm' fw={500} c='red'>
+                                            Kết quả phân tích bị từ chối
+                                        </Text>
+                                        <Button
+                                            color='orange'
+                                            onClick={() => handleRetryEtlResult(latestEtlResult!.id)}
+                                            leftSection={<IconRefresh size={16} />}
+                                            loading={retryEtlProcessMutation.isPending}
+                                            disabled={retryEtlProcessMutation.isPending}
+                                            fullWidth
+                                            size='md'
+                                            radius='lg'
+                                        >
+                                            Phân tích lại
+                                        </Button>
+                                    </Stack>
+                                )}
+
                                 {latestEtlResult?.status === AnalysisStatus.WAIT_FOR_APPROVAL && (
                                     <Stack gap='md' align='center'>
                                         <Text size='sm' ta='center' c='orange' fw={500}>
@@ -476,20 +505,96 @@ const AnalysisDetailPage = () => {
                 {/* History sections with better spacing */}
                 <Grid>
                     <Grid.Col span={{ base: 12, lg: 6 }}>
-                        <FastqHistory
-                            fastqFiles={data.fastqFiles}
-                            onReject={handleOpenRejectModal}
-                            onProcess={handleProcessAnalysis}
-                            onDownload={handleDownloadFastQ}
+                        <FileHistory
+                            files={data.fastqFiles}
+                            title='Lịch sử FastQ'
+                            subtitle='Theo dõi các file FastQ đã tải lên'
+                            emptyStateTitle='Chưa có file FastQ nào'
+                            emptyStateDescription='File FastQ sẽ xuất hiện ở đây sau khi được tải lên'
+                            icon={<IconFileText size={20} />}
+                            iconColor='orange'
+                            statusConfig={analysisStatusConfig}
+                            fileNamePrefix='File FastQ'
+                            actions={[
+                                {
+                                    type: 'download',
+                                    label: 'Tải file FastQ',
+                                    icon: <IconDownload size={16} />,
+                                    color: 'blue',
+                                    variant: 'light',
+                                    condition: (file) => file.status === AnalysisStatus.WAIT_FOR_APPROVAL,
+                                    handler: handleDownloadFastQ
+                                },
+                                {
+                                    type: 'process',
+                                    label: 'Bắt đầu phân tích',
+                                    icon: <IconPlayerPlay size={16} />,
+                                    color: 'green',
+                                    variant: 'light',
+                                    condition: (file) => file.status === AnalysisStatus.WAIT_FOR_APPROVAL,
+                                    handler: () => handleProcessAnalysis()
+                                },
+                                {
+                                    type: 'reject',
+                                    label: 'Từ chối',
+                                    icon: <IconX size={16} />,
+                                    color: 'red',
+                                    variant: 'light',
+                                    condition: (file) => file.status === AnalysisStatus.WAIT_FOR_APPROVAL,
+                                    handler: handleOpenRejectModal
+                                }
+                            ]}
                         />
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, lg: 6 }}>
                         <EtlResultHistory
-                            etlResults={data.etlResults}
-                            onDownload={handleDownloadEtlResult}
-                            onRetry={() => handleRetryEtlResult(latestEtlResult!.id)}
-                            onSendToValidation={handleSendEtlResultToValidation}
-                            latestFastQFile={latestFastQFile}
+                            results={data.etlResults}
+                            title='Lịch sử kết quả phân tích'
+                            subtitle='Theo dõi các kết quả phân tích đã hoàn thành'
+                            emptyStateTitle='Chưa có kết quả phân tích nào'
+                            emptyStateDescription='Kết quả phân tích sẽ xuất hiện ở đây sau khi hoàn thành xử lý'
+                            icon={<IconChartLine size={20} />}
+                            iconColor='teal'
+                            statusConfig={analysisStatusConfig}
+                            resultNamePrefix='Kết quả phân tích'
+                            actions={[
+                                {
+                                    type: 'download',
+                                    label: 'Tải xuống',
+                                    icon: <IconDownload size={16} />,
+                                    color: 'teal',
+                                    variant: 'light',
+                                    condition: (result) => result.status === AnalysisStatus.COMPLETED,
+                                    handler: handleDownloadEtlResult
+                                },
+                                {
+                                    type: 'send',
+                                    label: 'Gửi để xác thực',
+                                    icon: <IconSend size={16} />,
+                                    color: 'blue',
+                                    variant: 'light',
+                                    condition: (result) => result.status === AnalysisStatus.COMPLETED,
+                                    handler: handleSendEtlResultToValidation
+                                },
+                                {
+                                    type: 'retry',
+                                    label: 'Phân tích lại',
+                                    icon: <IconRefresh size={16} />,
+                                    color: 'orange',
+                                    variant: 'light',
+                                    condition: (result) => result.status === AnalysisStatus.FAILED,
+                                    handler: handleRetryEtlResult
+                                },
+                                {
+                                    type: 'retry',
+                                    label: 'Phân tích lại',
+                                    icon: <IconRefresh size={16} />,
+                                    color: 'orange',
+                                    variant: 'light',
+                                    condition: (result) => result.status === AnalysisStatus.REJECTED,
+                                    handler: handleRetryEtlResult
+                                }
+                            ]}
                         />
                     </Grid.Col>
                 </Grid>

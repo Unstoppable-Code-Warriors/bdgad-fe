@@ -19,6 +19,8 @@ import LabTestPage from '@/apps/(main)/lab-test/page'
 import LabTestDetailPage from '@/apps/(main)/lab-test/[id]/page'
 import AnalysisPage from '@/apps/(main)/analysis/page'
 import AnalysisDetailPage from '@/apps/(main)/analysis/[id]/page'
+import ValidationPage from '@/apps/(main)/validation/page'
+import ValidationDetailPage from '@/apps/(main)/validation/[id]/page'
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -122,6 +124,20 @@ export const router = createBrowserRouter([
                             {
                                 path: ':id',
                                 element: <AnalysisDetailPage />
+                            }
+                        ]
+                    },
+                    {
+                        path: '/validation',
+                        element: <Outlet />,
+                        children: [
+                            {
+                                index: true,
+                                element: <ValidationPage />
+                            },
+                            {
+                                path: ':id',
+                                element: <ValidationDetailPage />
                             }
                         ]
                     }

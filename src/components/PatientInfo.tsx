@@ -1,22 +1,27 @@
-import { Card, Text, Group, Stack, ThemeIcon, Box, Grid, Avatar } from '@mantine/core'
-import { IconUser, IconStethoscope, IconPhone, IconMapPin, IconId, IconMail } from '@tabler/icons-react'
+import { Card, Text, Group, Stack, ThemeIcon, Box, Grid, Paper, Avatar } from '@mantine/core'
+import { IconUser, IconId, IconPhone, IconMapPin, IconStethoscope, IconMail } from '@tabler/icons-react'
 
-interface PatientInfoProps {
-    patient: {
-        fullName: string
-        personalId: string
-        healthInsuranceCode: string
-        dateOfBirth: string
-        phone: string
-        address: string
-    }
-    doctor: {
-        name: string
-        email: string
-    }
+interface PatientData {
+    fullName: string
+    personalId: string
+    dateOfBirth: string
+    phone: string
+    address: string
+    healthInsuranceCode?: string
 }
 
-export const PatientInfo = ({ patient, doctor }: PatientInfoProps) => {
+interface DoctorData {
+    name: string
+    email: string
+}
+
+interface PatientInfoProps {
+    patient: PatientData
+    doctor?: DoctorData
+    doctorTitle?: string
+}
+
+export const PatientInfo = ({ patient, doctor, doctorTitle = 'Bác sĩ phụ trách' }: PatientInfoProps) => {
     const calculateAge = (dateOfBirth: string) => {
         const today = new Date()
         const birthDate = new Date(dateOfBirth)
@@ -40,13 +45,13 @@ export const PatientInfo = ({ patient, doctor }: PatientInfoProps) => {
                         Thông tin bệnh nhân
                     </Text>
                     <Text size='sm' c='dimmed'>
-                        Chi tiết về bệnh nhân và bác sĩ chỉ định
+                        {doctor ? 'Chi tiết về bệnh nhân và bác sĩ phụ trách' : 'Chi tiết về bệnh nhân'}
                     </Text>
                 </Box>
             </Group>
 
             {/* Patient Information */}
-            <Card p='lg' radius='md' bg='green.0' withBorder mb='xl'>
+            <Paper p='lg' radius='md' bg='green.0' withBorder mb='xl'>
                 <Stack gap='lg'>
                     <Group gap='sm'>
                         <Avatar size='lg' radius='md' color='green' variant='light'>
@@ -119,7 +124,7 @@ export const PatientInfo = ({ patient, doctor }: PatientInfoProps) => {
                     </Grid>
 
                     {patient.address && (
-                        <Card p='md' radius='md' bg='white' withBorder>
+                        <Paper p='md' radius='md' bg='white' withBorder>
                             <Group gap='xs' mb='xs'>
                                 <IconMapPin size={16} color='var(--mantine-color-teal-6)' />
                                 <Text size='sm' fw={500} c='teal'>
@@ -127,41 +132,43 @@ export const PatientInfo = ({ patient, doctor }: PatientInfoProps) => {
                                 </Text>
                             </Group>
                             <Text size='sm'>{patient.address}</Text>
-                        </Card>
+                        </Paper>
                     )}
                 </Stack>
-            </Card>
+            </Paper>
 
             {/* Doctor Information */}
-            <Card p='lg' radius='md' bg='blue.0' withBorder>
-                <Stack gap='lg'>
-                    <Group gap='xs'>
-                        <IconStethoscope size={18} color='var(--mantine-color-blue-6)' />
-                        <Text fw={700} size='lg' c='blue'>
-                            Bác sĩ chỉ định
-                        </Text>
-                    </Group>
-
-                    <Group gap='md'>
-                        <Avatar size='lg' radius='md' color='blue' variant='light'>
-                            <IconStethoscope size={24} />
-                        </Avatar>
-                        <Stack gap='xs' style={{ flex: 1 }}>
-                            <Text fw={600} size='md'>
-                                {doctor.name}
+            {doctor && (
+                <Paper p='lg' radius='md' bg='blue.0' withBorder>
+                    <Stack gap='lg'>
+                        <Group gap='xs'>
+                            <IconStethoscope size={18} color='var(--mantine-color-blue-6)' />
+                            <Text fw={700} size='lg' c='blue'>
+                                {doctorTitle}
                             </Text>
-                            <Group gap='lg'>
-                                <Group gap='xs'>
-                                    <IconMail size={14} color='var(--mantine-color-gray-6)' />
-                                    <Text size='sm' c='dimmed'>
-                                        {doctor.email}
-                                    </Text>
+                        </Group>
+
+                        <Group gap='md'>
+                            <Avatar size='lg' radius='md' color='blue' variant='light'>
+                                <IconStethoscope size={24} />
+                            </Avatar>
+                            <Stack gap='xs' style={{ flex: 1 }}>
+                                <Text fw={600} size='md'>
+                                    {doctor.name}
+                                </Text>
+                                <Group gap='lg'>
+                                    <Group gap='xs'>
+                                        <IconMail size={14} color='var(--mantine-color-gray-6)' />
+                                        <Text size='sm' c='dimmed'>
+                                            {doctor.email}
+                                        </Text>
+                                    </Group>
                                 </Group>
-                            </Group>
-                        </Stack>
-                    </Group>
-                </Stack>
-            </Card>
+                            </Stack>
+                        </Group>
+                    </Stack>
+                </Paper>
+            )}
         </Card>
     )
 }

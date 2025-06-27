@@ -35,3 +35,18 @@ export type {
     UploadedFile,
     MedicalTestRequisitionUploadResponse
 } from './api'
+
+// Analysis types
+export * from './analysis'
+
+// FastQ types
+export * from './fastq'
+
+// Lab test types
+export * from './lab-test'
+
+// Patient types
+export * from './patient'
+
+// Validation types
+export * from './validation'
