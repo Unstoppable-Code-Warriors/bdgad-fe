@@ -1,10 +1,5 @@
-import { useState, useCallback } from 'react'
-import {
-    useValidationSessionDetail,
-    useDownloadValidationEtlResult,
-    useRejectEtlResult,
-    useAcceptEtlResult
-} from '@/services/hook/validation.hook'
+import { useCallback } from 'react'
+import { useValidationSessionDetail, useDownloadValidationEtlResult } from '@/services/hook/validation.hook'
 import { useParams, useNavigate } from 'react-router'
 import {
     Container,
@@ -16,8 +11,6 @@ import {
     Text,
     Group,
     Button,
-    Modal,
-    Textarea,
     Box,
     Card,
     Divider,
@@ -30,40 +23,19 @@ import { ValidationInfo, EtlResultHistory } from './_components'
 import { PatientInfo } from '@/components/PatientInfo'
 import { PageHeader } from '@/components/PageHeader'
 import { ValidationEtlStatus } from '@/types/validation'
-import { useForm } from '@mantine/form'
+import { openRejectEtlResultModal } from '@/components/RejectEtlResultModal'
+import { openAcceptEtlResultModal } from '@/components/AcceptEtlResultModal'
 
 const ValidationDetailPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
-    const { data, isLoading, error } = useValidationSessionDetail(id)
-
-    // Modal states
-    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
-    const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false)
+    const { data, isLoading, error, refetch } = useValidationSessionDetail(id)
 
     // Mutations
     const downloadEtlResultMutation = useDownloadValidationEtlResult()
-    const rejectEtlResultMutation = useRejectEtlResult()
-    const acceptEtlResultMutation = useAcceptEtlResult()
 
     // Get the latest ETL result
     const latestEtlResult = data?.latestEtlResult
-
-    // Forms
-    const rejectForm = useForm({
-        initialValues: {
-            reason: ''
-        },
-        validate: {
-            reason: (value) => (!value ? 'Lý do từ chối là bắt buộc' : null)
-        }
-    })
-
-    const acceptForm = useForm({
-        initialValues: {
-            comment: ''
-        }
-    })
 
     const handleBack = () => {
         navigate('/validation')
@@ -92,70 +64,26 @@ const ValidationDetailPage = () => {
     }, [latestEtlResult?.id, downloadEtlResultMutation])
 
     const handleOpenRejectModal = useCallback(() => {
-        setIsRejectModalOpen(true)
-        rejectForm.reset()
-    }, [rejectForm])
+        if (!latestEtlResult?.id) return
+
+        openRejectEtlResultModal({
+            etlResultId: latestEtlResult.id,
+            onSuccess: () => {
+                refetch()
+            }
+        })
+    }, [latestEtlResult?.id, refetch])
 
     const handleOpenAcceptModal = useCallback(() => {
-        setIsAcceptModalOpen(true)
-        acceptForm.reset()
-    }, [acceptForm])
+        if (!latestEtlResult?.id) return
 
-    const handleRejectEtlResult = useCallback(
-        async (values: { reason: string }) => {
-            if (!latestEtlResult?.id) return
-
-            rejectEtlResultMutation.mutate(
-                { etlResultId: latestEtlResult.id, data: values },
-                {
-                    onSuccess: () => {
-                        notifications.show({
-                            title: 'Thành công',
-                            message: 'Kết quả ETL đã được từ chối',
-                            color: 'red'
-                        })
-                        setIsRejectModalOpen(false)
-                    },
-                    onError: (error: any) => {
-                        notifications.show({
-                            title: 'Lỗi từ chối',
-                            message: error.message || 'Không thể từ chối kết quả ETL',
-                            color: 'red'
-                        })
-                    }
-                }
-            )
-        },
-        [latestEtlResult?.id, rejectEtlResultMutation]
-    )
-
-    const handleAcceptEtlResult = useCallback(
-        async (values: { comment: string }) => {
-            if (!latestEtlResult?.id) return
-
-            acceptEtlResultMutation.mutate(
-                { etlResultId: latestEtlResult.id, data: values },
-                {
-                    onSuccess: () => {
-                        notifications.show({
-                            title: 'Thành công',
-                            message: 'Kết quả ETL đã được phê duyệt',
-                            color: 'green'
-                        })
-                        setIsAcceptModalOpen(false)
-                    },
-                    onError: (error: any) => {
-                        notifications.show({
-                            title: 'Lỗi phê duyệt',
-                            message: error.message || 'Không thể phê duyệt kết quả ETL',
-                            color: 'red'
-                        })
-                    }
-                }
-            )
-        },
-        [latestEtlResult?.id, acceptEtlResultMutation]
-    )
+        openAcceptEtlResultModal({
+            etlResultId: latestEtlResult.id,
+            onSuccess: () => {
+                refetch()
+            }
+        })
+    }, [latestEtlResult?.id, refetch])
 
     if (isLoading) {
         return (
@@ -282,8 +210,6 @@ const ValidationDetailPage = () => {
                                                 color='green'
                                                 onClick={handleOpenAcceptModal}
                                                 leftSection={<IconCheck size={16} />}
-                                                loading={acceptEtlResultMutation.isPending}
-                                                disabled={acceptEtlResultMutation.isPending}
                                                 fullWidth
                                                 size='md'
                                                 radius='lg'
@@ -295,8 +221,6 @@ const ValidationDetailPage = () => {
                                                 variant='light'
                                                 onClick={handleOpenRejectModal}
                                                 leftSection={<IconX size={16} />}
-                                                loading={rejectEtlResultMutation.isPending}
-                                                disabled={rejectEtlResultMutation.isPending}
                                                 fullWidth
                                                 size='md'
                                                 radius='lg'
@@ -357,138 +281,6 @@ const ValidationDetailPage = () => {
                 {/* ETL Result History */}
                 <EtlResultHistory validation={data} />
             </Stack>
-
-            {/* Enhanced Reject Modal */}
-            <Modal
-                opened={isRejectModalOpen}
-                onClose={() => setIsRejectModalOpen(false)}
-                title={
-                    <Group gap='sm'>
-                        <ThemeIcon size='lg' color='red' variant='light'>
-                            <IconX size={20} />
-                        </ThemeIcon>
-                        <Box>
-                            <Text fw={600} size='lg'>
-                                Từ chối kết quả ETL
-                            </Text>
-                            <Text size='sm' c='dimmed'>
-                                Nhập lý do để từ chối kết quả này
-                            </Text>
-                        </Box>
-                    </Group>
-                }
-                size='md'
-                radius='lg'
-                centered
-            >
-                <form onSubmit={rejectForm.onSubmit(handleRejectEtlResult)}>
-                    <Stack gap='lg'>
-                        <Alert color='orange' variant='light' icon={<IconAlertCircle size={16} />}>
-                            Kết quả ETL sẽ được đánh dấu là bị từ chối và cần phải xử lý lại.
-                        </Alert>
-
-                        <Textarea
-                            label='Lý do từ chối'
-                            placeholder='Nhập lý do từ chối kết quả ETL chi tiết...'
-                            required
-                            minRows={4}
-                            maxRows={8}
-                            maxLength={500}
-                            error={
-                                rejectForm.getInputProps('reason').error ||
-                                (rejectForm.values.reason.length > 500 ? 'Lý do không được quá 500 ký tự' : undefined)
-                            }
-                            radius='md'
-                            {...rejectForm.getInputProps('reason')}
-                        />
-
-                        <Group justify='space-between'>
-                            <Text size='xs' c='dimmed'>
-                                {rejectForm.values.reason.length}/500 ký tự
-                            </Text>
-                            <Group>
-                                <Button variant='light' onClick={() => setIsRejectModalOpen(false)} radius='lg'>
-                                    Hủy bỏ
-                                </Button>
-                                <Button
-                                    type='submit'
-                                    color='red'
-                                    loading={rejectEtlResultMutation.isPending}
-                                    disabled={!rejectForm.values.reason.trim() || rejectForm.values.reason.length > 500}
-                                    radius='lg'
-                                >
-                                    Xác nhận từ chối
-                                </Button>
-                            </Group>
-                        </Group>
-                    </Stack>
-                </form>
-            </Modal>
-
-            {/* Enhanced Accept Modal */}
-            <Modal
-                opened={isAcceptModalOpen}
-                onClose={() => setIsAcceptModalOpen(false)}
-                title={
-                    <Group gap='sm'>
-                        <ThemeIcon size='lg' color='green' variant='light'>
-                            <IconCheck size={20} />
-                        </ThemeIcon>
-                        <Box>
-                            <Text fw={600} size='lg'>
-                                Phê duyệt kết quả ETL
-                            </Text>
-                            <Text size='sm' c='dimmed'>
-                                Xác nhận phê duyệt kết quả này
-                            </Text>
-                        </Box>
-                    </Group>
-                }
-                size='md'
-                radius='lg'
-                centered
-            >
-                <form onSubmit={acceptForm.onSubmit(handleAcceptEtlResult)}>
-                    <Stack gap='lg'>
-                        <Alert color='green' variant='light' icon={<IconCheck size={16} />}>
-                            Kết quả ETL sẽ được đánh dấu là đã phê duyệt và hoàn tất quy trình.
-                        </Alert>
-
-                        <Textarea
-                            label='Ghi chú (tùy chọn)'
-                            placeholder='Nhập ghi chú về việc phê duyệt...'
-                            minRows={3}
-                            maxRows={6}
-                            maxLength={300}
-                            error={
-                                acceptForm.values.comment.length > 300 ? 'Ghi chú không được quá 300 ký tự' : undefined
-                            }
-                            radius='md'
-                            {...acceptForm.getInputProps('comment')}
-                        />
-
-                        <Group justify='space-between'>
-                            <Text size='xs' c='dimmed'>
-                                {acceptForm.values.comment.length}/300 ký tự
-                            </Text>
-                            <Group>
-                                <Button variant='light' onClick={() => setIsAcceptModalOpen(false)} radius='lg'>
-                                    Hủy bỏ
-                                </Button>
-                                <Button
-                                    type='submit'
-                                    color='green'
-                                    loading={acceptEtlResultMutation.isPending}
-                                    disabled={acceptForm.values.comment.length > 300}
-                                    radius='lg'
-                                >
-                                    Xác nhận phê duyệt
-                                </Button>
-                            </Group>
-                        </Group>
-                    </Stack>
-                </form>
-            </Modal>
         </Container>
     )
 }

@@ -1,8 +1,7 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import {
     useAnalysisSessionDetail,
     useProcessAnalysis,
-    useRejectFastq,
     useDownloadEtlResult,
     useSendEtlResultToValidation,
     useRetryEtlProcess
@@ -18,8 +17,6 @@ import {
     Text,
     Group,
     Button,
-    Modal,
-    Textarea,
     Title,
     Box,
     Card,
@@ -45,20 +42,15 @@ import { EtlResultHistory } from '@/components/EtlResultHistory'
 import { PageHeader } from '@/components/PageHeader'
 import { AnalysisStatus, analysisStatusConfig } from '@/types/analysis'
 import { labTestService } from '@/services/function/lab-test'
+import { openRejectFastqModal } from '@/components/RejectFastqModal'
 
 const AnalysisDetailPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
-    const { data, isLoading, error } = useAnalysisSessionDetail(id)
-
-    // Rejection modal state
-    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
-    const [rejectReason, setRejectReason] = useState('')
-    const [selectedFastqId, setSelectedFastqId] = useState<number | null>(null)
+    const { data, isLoading, error, refetch } = useAnalysisSessionDetail(id)
 
     // Mutations
     const processAnalysisMutation = useProcessAnalysis()
-    const rejectFastqMutation = useRejectFastq()
     const downloadEtlResultMutation = useDownloadEtlResult()
     const sendEtlResultToValidationMutation = useSendEtlResultToValidation()
     const retryEtlProcessMutation = useRetryEtlProcess()
@@ -105,47 +97,12 @@ const AnalysisDetailPage = () => {
     }
 
     const handleOpenRejectModal = (fastqId: number) => {
-        setSelectedFastqId(fastqId)
-        setRejectReason('')
-        setIsRejectModalOpen(true)
-    }
-
-    const handleCloseRejectModal = () => {
-        setIsRejectModalOpen(false)
-        setSelectedFastqId(null)
-        setRejectReason('')
-    }
-
-    const handleRejectFastq = async () => {
-        if (!selectedFastqId || !rejectReason.trim()) {
-            notifications.show({
-                title: 'Lỗi',
-                message: 'Vui lòng nhập lý do từ chối',
-                color: 'red'
-            })
-            return
-        }
-
-        rejectFastqMutation.mutate(
-            { fastqFileId: selectedFastqId, data: { redoReason: rejectReason.trim() } },
-            {
-                onSuccess: () => {
-                    notifications.show({
-                        title: 'Thành công',
-                        message: 'File FastQ đã được từ chối',
-                        color: 'green'
-                    })
-                    handleCloseRejectModal()
-                },
-                onError: (error: any) => {
-                    notifications.show({
-                        title: 'Lỗi từ chối file',
-                        message: error.message || 'Không thể từ chối file FastQ',
-                        color: 'red'
-                    })
-                }
+        openRejectFastqModal({
+            fastqFileId: fastqId,
+            onSuccess: () => {
+                refetch()
             }
-        )
+        })
     }
 
     const handleDownloadEtlResult = async (etlResultId: number) => {
@@ -346,27 +303,42 @@ const AnalysisDetailPage = () => {
                                         </Button>
                                         <Divider />
                                         <Text size='sm' fw={500} c='teal'>
-                                            Phân tích mẫu
+                                            {latestEtlResult?.status === AnalysisStatus.REJECTED
+                                                ? 'Phân tích lại'
+                                                : 'Phân tích mẫu'}
                                         </Text>
-                                        <Button
-                                            color='green'
-                                            onClick={handleProcessAnalysis}
-                                            leftSection={<IconPlayerPlay size={16} />}
-                                            loading={processAnalysisMutation.isPending}
-                                            disabled={processAnalysisMutation.isPending}
-                                            fullWidth
-                                            size='md'
-                                            radius='lg'
-                                        >
-                                            Bắt đầu phân tích
-                                        </Button>
+                                        {latestEtlResult?.status === AnalysisStatus.REJECTED ? (
+                                            <Button
+                                                color='orange'
+                                                onClick={() => handleRetryEtlResult(latestEtlResult!.id)}
+                                                leftSection={<IconRefresh size={16} />}
+                                                loading={retryEtlProcessMutation.isPending}
+                                                disabled={retryEtlProcessMutation.isPending}
+                                                fullWidth
+                                                size='md'
+                                                radius='lg'
+                                            >
+                                                Phân tích lại
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                color='green'
+                                                onClick={handleProcessAnalysis}
+                                                leftSection={<IconPlayerPlay size={16} />}
+                                                loading={processAnalysisMutation.isPending}
+                                                disabled={processAnalysisMutation.isPending}
+                                                fullWidth
+                                                size='md'
+                                                radius='lg'
+                                            >
+                                                Bắt đầu phân tích
+                                            </Button>
+                                        )}
                                         <Button
                                             color='red'
                                             variant='light'
                                             onClick={() => handleOpenRejectModal(latestFastQFile.id)}
                                             leftSection={<IconX size={16} />}
-                                            loading={rejectFastqMutation.isPending}
-                                            disabled={rejectFastqMutation.isPending}
                                             fullWidth
                                             size='md'
                                             radius='lg'
@@ -437,26 +409,6 @@ const AnalysisDetailPage = () => {
                                     <Stack gap='md'>
                                         <Text size='sm' fw={500} c='red'>
                                             Xử lý phân tích thất bại
-                                        </Text>
-                                        <Button
-                                            color='orange'
-                                            onClick={() => handleRetryEtlResult(latestEtlResult!.id)}
-                                            leftSection={<IconRefresh size={16} />}
-                                            loading={retryEtlProcessMutation.isPending}
-                                            disabled={retryEtlProcessMutation.isPending}
-                                            fullWidth
-                                            size='md'
-                                            radius='lg'
-                                        >
-                                            Phân tích lại
-                                        </Button>
-                                    </Stack>
-                                )}
-
-                                {latestEtlResult?.status === AnalysisStatus.REJECTED && (
-                                    <Stack gap='md'>
-                                        <Text size='sm' fw={500} c='red'>
-                                            Kết quả phân tích bị từ chối
                                         </Text>
                                         <Button
                                             color='orange'
@@ -599,67 +551,6 @@ const AnalysisDetailPage = () => {
                     </Grid.Col>
                 </Grid>
             </Stack>
-
-            {/* Enhanced Reject FastQ Modal */}
-            <Modal
-                opened={isRejectModalOpen}
-                onClose={handleCloseRejectModal}
-                title={
-                    <Group gap='sm'>
-                        <ThemeIcon size='lg' color='red' variant='light'>
-                            <IconX size={20} />
-                        </ThemeIcon>
-                        <Box>
-                            <Text fw={600} size='lg'>
-                                Từ chối file FastQ
-                            </Text>
-                            <Text size='sm' c='dimmed'>
-                                Nhập lý do để từ chối file này
-                            </Text>
-                        </Box>
-                    </Group>
-                }
-                size='md'
-                radius='lg'
-                centered
-            >
-                <Stack gap='lg'>
-                    <Alert color='orange' variant='light' icon={<IconAlertCircle size={16} />}>
-                        File FastQ sẽ được đánh dấu là bị từ chối và cần phải tải lên lại.
-                    </Alert>
-
-                    <Textarea
-                        placeholder='Nhập lý do từ chối chi tiết...'
-                        value={rejectReason}
-                        onChange={(event) => setRejectReason(event.currentTarget.value)}
-                        minRows={4}
-                        maxRows={8}
-                        maxLength={500}
-                        error={rejectReason.length > 500 ? 'Lý do không được quá 500 ký tự' : undefined}
-                        radius='md'
-                    />
-
-                    <Group justify='space-between'>
-                        <Text size='xs' c='dimmed'>
-                            {rejectReason.length}/500 ký tự
-                        </Text>
-                        <Group>
-                            <Button variant='light' onClick={handleCloseRejectModal} radius='lg'>
-                                Hủy bỏ
-                            </Button>
-                            <Button
-                                color='red'
-                                onClick={handleRejectFastq}
-                                loading={rejectFastqMutation.isPending}
-                                disabled={!rejectReason.trim() || rejectReason.length > 500}
-                                radius='lg'
-                            >
-                                Xác nhận từ chối
-                            </Button>
-                        </Group>
-                    </Group>
-                </Stack>
-            </Modal>
         </Container>
     )
 }

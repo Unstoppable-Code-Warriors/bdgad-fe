@@ -1,15 +1,27 @@
-import { useCallback, useState, useMemo } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, Group, Stack, Paper, Button, Badge, ActionIcon, Alert } from '@mantine/core'
-import { DataTable, type DataTableColumn } from 'mantine-datatable'
-import { IconEye, IconRefresh, IconAlertCircle, IconDownload, IconPlayerPlay } from '@tabler/icons-react'
+import { Title, TextInput, Select, Group, Stack, Paper, Button, Badge, ActionIcon, Alert } from '@mantine/core'
+import { DatePickerInput } from '@mantine/dates'
+import { DataTable, type DataTableColumn, type DataTableSortStatus } from 'mantine-datatable'
+import {
+    IconSearch,
+    IconCalendar,
+    IconEye,
+    IconFilter,
+    IconX,
+    IconRefresh,
+    IconAlertCircle,
+    IconDownload,
+    IconPlayerPlay
+} from '@tabler/icons-react'
 import { analysisStatusConfig, AnalysisStatus, type AnalysisFilter } from '@/types/analysis'
 import { useAnalysisSessions, useProcessAnalysis, useDownloadEtlResult } from '@/services/hook/analysis.hook'
+import { useDebouncedValue } from '@mantine/hooks'
+import { useSearchParamState } from '@/hooks/use-search-params'
 import { notifications } from '@mantine/notifications'
 import type { AnalysisSessionListItem } from '@/types/analysis'
 import { FastQFileStatus } from '@/types/lab-test.types'
-import { ListSearchFilter, type SelectOption } from '@/components/ListSearchFilter'
-import { useListState } from '@/hooks/use-list-state'
+import { openRejectFastqModal } from '@/components/RejectFastqModal'
 
 const getStatusColor = (status: string) => {
     return analysisStatusConfig[status as keyof typeof analysisStatusConfig]?.color || 'gray'
@@ -23,25 +35,41 @@ const AnalysisPage = () => {
     const navigate = useNavigate()
     const [isDownloading, setIsDownloading] = useState(false)
 
-    // Use the new list state hook
-    const {
-        search,
-        debouncedSearch,
-        setSearch,
-        page,
-        setPage,
-        limit,
-        setLimit,
-        sortStatus,
-        handleSort,
-        filter,
-        updateFilter,
-        dateRange,
-        setDateRange
-    } = useListState<AnalysisFilter>({
-        defaultSortBy: 'createdAt',
-        defaultSortOrder: 'DESC'
+    // URL state management
+    const [page, setPage] = useSearchParamState({
+        key: 'page',
+        initValue: 1
     })
+    const [limit, setLimit] = useSearchParamState({
+        key: 'limit',
+        initValue: 10
+    })
+    const [search, setSearch] = useSearchParamState({
+        key: 'search',
+        initValue: ''
+    })
+    const [sortBy, setSortBy] = useSearchParamState({
+        key: 'sortBy',
+        initValue: 'createdAt'
+    })
+    const [sortOrder, setSortOrder] = useSearchParamState({
+        key: 'sortOrder',
+        initValue: 'DESC'
+    })
+
+    // Filters
+    const [etlStatusFilter, setEtlStatusFilter] = useState<string>('')
+    const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
+
+    // Debounced search
+    const [debouncedSearch] = useDebouncedValue(search, 500)
+
+    // Build filter object
+    const filter: AnalysisFilter = useMemo(() => {
+        const filterObj: AnalysisFilter = {}
+        if (etlStatusFilter) filterObj.etlStatus = etlStatusFilter
+        return filterObj
+    }, [etlStatusFilter])
 
     // Fetch data
     const {
@@ -51,11 +79,11 @@ const AnalysisPage = () => {
         isError,
         refetch
     } = useAnalysisSessions({
-        page,
-        limit,
-        search: debouncedSearch,
-        sortBy: sortStatus.columnAccessor,
-        sortOrder: sortStatus.direction.toUpperCase(),
+        page: page as number,
+        limit: limit as number,
+        search: debouncedSearch as string,
+        sortBy: sortBy as string,
+        sortOrder: sortOrder as string,
         filter,
         dateFrom: dateRange[0],
         dateTo: dateRange[1]
@@ -65,12 +93,10 @@ const AnalysisPage = () => {
     const processAnalysisMutation = useProcessAnalysis()
     const downloadEtlResultMutation = useDownloadEtlResult()
 
-    // Status options for the filter
-    const statusOptions: SelectOption[] = [
-        { value: AnalysisStatus.PROCESSING, label: 'Đang xử lý' },
-        { value: AnalysisStatus.COMPLETED, label: 'Hoàn thành' },
-        { value: AnalysisStatus.FAILED, label: 'Thất bại' }
-    ]
+    // Reset page when search or filters change
+    useEffect(() => {
+        if (page > 1) setPage(1)
+    }, [debouncedSearch, filter, dateRange])
 
     const handleViewDetail = useCallback(
         (id: number) => {
@@ -82,6 +108,14 @@ const AnalysisPage = () => {
     const handleRefresh = useCallback(() => {
         refetch()
     }, [refetch])
+
+    const handleSort = useCallback(
+        (sortStatus: DataTableSortStatus<AnalysisSessionListItem>) => {
+            setSortBy(sortStatus.columnAccessor)
+            setSortOrder(sortStatus.direction.toUpperCase())
+        },
+        [setSortBy, setSortOrder]
+    )
 
     const handleProcessAnalysis = useCallback(
         async (fastqFileId: number) => {
@@ -145,6 +179,18 @@ const AnalysisPage = () => {
             })
         },
         [processAnalysisMutation]
+    )
+
+    const handleRejectFastq = useCallback(
+        (fastqFileId: number) => {
+            openRejectFastqModal({
+                fastqFileId,
+                onSuccess: () => {
+                    refetch()
+                }
+            })
+        },
+        [refetch]
     )
 
     const recordsPerPageOptions = [5, 10, 20, 50]
@@ -236,6 +282,18 @@ const AnalysisPage = () => {
                             </ActionIcon>
                         )}
 
+                        {/* Reject FastQ Button - only show for files waiting for approval */}
+                        {record.latestFastqFile?.status === FastQFileStatus.WAIT_FOR_APPROVAL && (
+                            <ActionIcon
+                                variant='light'
+                                color='red'
+                                onClick={() => handleRejectFastq(record.latestFastqFile!.id)}
+                                title='Từ chối FastQ'
+                            >
+                                <IconX size={16} />
+                            </ActionIcon>
+                        )}
+
                         {/* Download ETL Result - only show for completed results */}
                         {record.latestEtlResult?.status === AnalysisStatus.COMPLETED && (
                             <ActionIcon
@@ -269,6 +327,7 @@ const AnalysisPage = () => {
         [
             handleViewDetail,
             handleProcessAnalysis,
+            handleRejectFastq,
             handleDownloadEtlResult,
             handleRetryEtlResult,
             processAnalysisMutation.isPending,
@@ -298,22 +357,65 @@ const AnalysisPage = () => {
                 </Alert>
             )}
 
-            {/* Reusable Search and Filter Component */}
-            <ListSearchFilter
-                searchValue={search}
-                onSearchChange={setSearch}
-                searchPlaceholder='Tìm kiếm theo CCCD hoặc tên bệnh nhân...'
-                statusFilter={filter.etlStatus}
-                onStatusFilterChange={(value) => updateFilter({ etlStatus: value || undefined })}
-                statusOptions={statusOptions}
-                statusPlaceholder='Lọc theo trạng thái phân tích'
-                dateRange={dateRange}
-                onDateRangeChange={setDateRange}
-                onRefresh={handleRefresh}
-                isLoading={isLoading}
-                totalRecords={totalRecords}
-                showRefreshButton={false} // We have it in the header
-            />
+            {/* Search and Filters */}
+            <Paper shadow='sm' p='lg' withBorder>
+                <Stack gap='md'>
+                    <Group grow>
+                        <TextInput
+                            placeholder='Tìm kiếm theo CCCD hoặc tên bệnh nhân...'
+                            leftSection={<IconSearch size={16} />}
+                            value={search}
+                            onChange={(event) => setSearch(event.currentTarget.value)}
+                        />
+                        <Select
+                            placeholder='Lọc theo trạng thái phân tích'
+                            leftSection={<IconFilter size={16} />}
+                            data={[
+                                { value: '', label: 'Tất cả trạng thái' },
+                                { value: AnalysisStatus.PROCESSING, label: 'Đang xử lý' },
+                                { value: AnalysisStatus.COMPLETED, label: 'Hoàn thành' },
+                                { value: AnalysisStatus.FAILED, label: 'Thất bại' }
+                            ]}
+                            value={etlStatusFilter}
+                            onChange={(value) => setEtlStatusFilter(value || '')}
+                            clearable
+                            rightSection={
+                                etlStatusFilter && (
+                                    <ActionIcon size='sm' variant='transparent' onClick={() => setEtlStatusFilter('')}>
+                                        <IconX size={12} />
+                                    </ActionIcon>
+                                )
+                            }
+                        />
+                        <DatePickerInput
+                            type='range'
+                            placeholder='Chọn khoảng thời gian'
+                            leftSection={<IconCalendar size={16} />}
+                            value={dateRange}
+                            onChange={setDateRange}
+                            clearable
+                            maxDate={new Date()}
+                        />
+                    </Group>
+
+                    {(etlStatusFilter || dateRange[0] || dateRange[1]) && (
+                        <Group>
+                            <Button
+                                variant='light'
+                                color='gray'
+                                leftSection={<IconX size={16} />}
+                                onClick={() => {
+                                    setEtlStatusFilter('')
+                                    setDateRange([null, null])
+                                }}
+                                size='sm'
+                            >
+                                Xóa bộ lọc
+                            </Button>
+                        </Group>
+                    )}
+                </Stack>
+            </Paper>
 
             {/* Data Table */}
             <Paper shadow='sm' withBorder>
@@ -326,7 +428,10 @@ const AnalysisPage = () => {
                     onPageChange={setPage}
                     recordsPerPageOptions={recordsPerPageOptions}
                     onRecordsPerPageChange={setLimit}
-                    sortStatus={sortStatus}
+                    sortStatus={{
+                        columnAccessor: sortBy as string,
+                        direction: (sortOrder as string).toLowerCase() as 'asc' | 'desc'
+                    }}
                     onSortStatusChange={handleSort}
                     fetching={isLoading}
                     noRecordsText='Không có dữ liệu phân tích'

@@ -1,6 +1,6 @@
 import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, Group, Stack, Paper, Button, Badge, ActionIcon, Alert, Modal, Text, Textarea } from '@mantine/core'
+import { Title, Group, Stack, Paper, Button, Badge, ActionIcon, Alert, Text } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
 import {
     IconRefresh,
@@ -16,16 +16,12 @@ import {
     type ValidationFilter,
     type ValidationSessionWithLatestEtlResponse
 } from '@/types/validation'
-import {
-    useValidationPatients,
-    useDownloadValidationEtlResult,
-    useRejectEtlResult,
-    useAcceptEtlResult
-} from '@/services/hook/validation.hook'
+import { useValidationPatients, useDownloadValidationEtlResult } from '@/services/hook/validation.hook'
 import { notifications } from '@mantine/notifications'
-import { useForm } from '@mantine/form'
 import { ListSearchFilter, type SelectOption } from '@/components/ListSearchFilter'
 import { useListState } from '@/hooks/use-list-state'
+import { openRejectEtlResultModal } from '@/components/RejectEtlResultModal'
+import { openAcceptEtlResultModal } from '@/components/AcceptEtlResultModal'
 
 const getStatusColor = (status: string) => {
     return validationEtlStatusConfig[status as keyof typeof validationEtlStatusConfig]?.color || 'gray'
@@ -38,9 +34,6 @@ const getStatusLabel = (status: string) => {
 const ValidationPage = () => {
     const navigate = useNavigate()
     const [isDownloading, setIsDownloading] = useState(false)
-    const [rejectModalOpened, setRejectModalOpened] = useState(false)
-    const [acceptModalOpened, setAcceptModalOpened] = useState(false)
-    const [selectedEtlResult, setSelectedEtlResult] = useState<number | null>(null)
 
     // Use the new list state hook
     const {
@@ -85,24 +78,6 @@ const ValidationPage = () => {
 
     // Mutations
     const downloadEtlResultMutation = useDownloadValidationEtlResult()
-    const rejectEtlResultMutation = useRejectEtlResult()
-    const acceptEtlResultMutation = useAcceptEtlResult()
-
-    // Forms
-    const rejectForm = useForm({
-        initialValues: {
-            reason: ''
-        },
-        validate: {
-            reason: (value) => (!value ? 'Lý do từ chối là bắt buộc' : null)
-        }
-    })
-
-    const acceptForm = useForm({
-        initialValues: {
-            comment: ''
-        }
-    })
 
     // Status options for the filter
     const statusOptions: SelectOption[] = [
@@ -152,78 +127,26 @@ const ValidationPage = () => {
 
     const handleOpenRejectModal = useCallback(
         (etlResultId: number) => {
-            setSelectedEtlResult(etlResultId)
-            setRejectModalOpened(true)
-            rejectForm.reset()
+            openRejectEtlResultModal({
+                etlResultId,
+                onSuccess: () => {
+                    refetch()
+                }
+            })
         },
-        [rejectForm]
+        [refetch]
     )
 
     const handleOpenAcceptModal = useCallback(
         (etlResultId: number) => {
-            setSelectedEtlResult(etlResultId)
-            setAcceptModalOpened(true)
-            acceptForm.reset()
-        },
-        [acceptForm]
-    )
-
-    const handleRejectEtlResult = useCallback(
-        async (values: { reason: string }) => {
-            if (!selectedEtlResult) return
-
-            rejectEtlResultMutation.mutate(
-                { etlResultId: selectedEtlResult, data: values },
-                {
-                    onSuccess: () => {
-                        notifications.show({
-                            title: 'Thành công',
-                            message: 'Kết quả ETL đã được từ chối',
-                            color: 'red'
-                        })
-                        setRejectModalOpened(false)
-                        setSelectedEtlResult(null)
-                    },
-                    onError: (error: any) => {
-                        notifications.show({
-                            title: 'Lỗi từ chối',
-                            message: error.message || 'Không thể từ chối kết quả ETL',
-                            color: 'red'
-                        })
-                    }
+            openAcceptEtlResultModal({
+                etlResultId,
+                onSuccess: () => {
+                    refetch()
                 }
-            )
+            })
         },
-        [selectedEtlResult, rejectEtlResultMutation]
-    )
-
-    const handleAcceptEtlResult = useCallback(
-        async (values: { comment: string }) => {
-            if (!selectedEtlResult) return
-
-            acceptEtlResultMutation.mutate(
-                { etlResultId: selectedEtlResult, data: values },
-                {
-                    onSuccess: () => {
-                        notifications.show({
-                            title: 'Thành công',
-                            message: 'Kết quả ETL đã được phê duyệt',
-                            color: 'green'
-                        })
-                        setAcceptModalOpened(false)
-                        setSelectedEtlResult(null)
-                    },
-                    onError: (error: any) => {
-                        notifications.show({
-                            title: 'Lỗi phê duyệt',
-                            message: error.message || 'Không thể phê duyệt kết quả ETL',
-                            color: 'red'
-                        })
-                    }
-                }
-            )
-        },
-        [selectedEtlResult, acceptEtlResultMutation]
+        [refetch]
     )
 
     const recordsPerPageOptions = [5, 10, 20, 50]
@@ -437,61 +360,6 @@ const ValidationPage = () => {
                     minHeight={200}
                 />
             </Paper>
-
-            {/* Reject Modal */}
-            <Modal
-                opened={rejectModalOpened}
-                onClose={() => setRejectModalOpened(false)}
-                title='Từ chối kết quả ETL'
-                centered
-            >
-                <form onSubmit={rejectForm.onSubmit(handleRejectEtlResult)}>
-                    <Stack gap='md'>
-                        <Textarea
-                            label='Lý do từ chối'
-                            placeholder='Nhập lý do từ chối kết quả ETL...'
-                            required
-                            minRows={3}
-                            {...rejectForm.getInputProps('reason')}
-                        />
-                        <Group justify='flex-end'>
-                            <Button variant='light' onClick={() => setRejectModalOpened(false)}>
-                                Hủy
-                            </Button>
-                            <Button type='submit' color='red' loading={rejectEtlResultMutation.isPending}>
-                                Từ chối
-                            </Button>
-                        </Group>
-                    </Stack>
-                </form>
-            </Modal>
-
-            {/* Accept Modal */}
-            <Modal
-                opened={acceptModalOpened}
-                onClose={() => setAcceptModalOpened(false)}
-                title='Phê duyệt kết quả ETL'
-                centered
-            >
-                <form onSubmit={acceptForm.onSubmit(handleAcceptEtlResult)}>
-                    <Stack gap='md'>
-                        <Textarea
-                            label='Ghi chú (tùy chọn)'
-                            placeholder='Nhập ghi chú về việc phê duyệt...'
-                            minRows={3}
-                            {...acceptForm.getInputProps('comment')}
-                        />
-                        <Group justify='flex-end'>
-                            <Button variant='light' onClick={() => setAcceptModalOpened(false)}>
-                                Hủy
-                            </Button>
-                            <Button type='submit' color='green' loading={acceptEtlResultMutation.isPending}>
-                                Phê duyệt
-                            </Button>
-                        </Group>
-                    </Stack>
-                </form>
-            </Modal>
         </Stack>
     )
 }
