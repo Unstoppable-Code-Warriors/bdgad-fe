@@ -1,4 +1,3 @@
-export { PageHeader } from './PageHeader'
 export { LabTestInfo } from './LabTestInfo'
 export { PatientInfo } from './PatientInfo'
 export { FileUpload } from './FileUpload'

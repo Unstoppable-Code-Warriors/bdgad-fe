@@ -1,6 +1,5 @@
-import { Paper, Stack, Group, Title, Badge, Grid, Text } from '@mantine/core'
-import { IconBarcode, IconCalendar } from '@tabler/icons-react'
-import { statusConfig } from '@/types/lab-test.types'
+import { Card, Text, Group, Divider, Stack, ThemeIcon, Box, Grid } from '@mantine/core'
+import { IconFlask, IconBarcode, IconCalendar } from '@tabler/icons-react'
 import type { FastQ } from '@/types/fastq'
 
 interface LabTestInfoProps {
@@ -14,75 +13,113 @@ interface LabTestInfoProps {
 }
 
 export const LabTestInfo = ({ data, latestFastQFile }: LabTestInfoProps) => {
-    const getCurrentStatus = () => {
-        return latestFastQFile?.status || 'UPLOADED'
-    }
-
-    const getStatusColor = (status: string) => {
-        return statusConfig[status as keyof typeof statusConfig]?.color || 'gray'
-    }
-
-    const getStatusLabel = (status: string) => {
-        return statusConfig[status as keyof typeof statusConfig]?.label || status
-    }
-
     return (
-        <Paper p='lg' withBorder radius='md' shadow='sm'>
-            <Stack gap='md'>
-                <Group justify='space-between'>
-                    <Title order={3} c='blue.7'>
+        <Card shadow='sm' padding='xl' radius='lg' withBorder>
+            <Group gap='sm' mb='xl'>
+                <ThemeIcon size='lg' radius='md' variant='light' color='blue'>
+                    <IconFlask size={20} />
+                </ThemeIcon>
+                <Box>
+                    <Text fw={700} size='xl'>
                         Thông tin xét nghiệm
-                    </Title>
-                    {latestFastQFile && (
-                        <Badge color={getStatusColor(getCurrentStatus())} variant='light' size='lg'>
-                            {getStatusLabel(getCurrentStatus())}
-                        </Badge>
-                    )}
-                </Group>
+                    </Text>
+                    <Text size='sm' c='dimmed'>
+                        Chi tiết về mẫu xét nghiệm và trạng thái
+                    </Text>
+                </Box>
+            </Group>
 
-                <Grid>
-                    <Grid.Col span={6}>
-                        <Group gap='xs'>
-                            <IconBarcode size={16} color='var(--mantine-color-blue-6)' />
-                            <Text size='sm' c='dimmed'>
-                                Mã xét nghiệm:
+            <Grid gutter='lg'>
+                {/* Basic Information */}
+                <Grid.Col span={6}>
+                    <Card p='lg' radius='md' bg='gray.0' withBorder>
+                        <Stack gap='md'>
+                            <Group gap='xs'>
+                                <IconBarcode size={16} color='var(--mantine-color-blue-6)' />
+                                <Text size='sm' fw={600} c='blue'>
+                                    Mã định danh
+                                </Text>
+                            </Group>
+
+                            <Stack gap='sm'>
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        Mã xét nghiệm:
+                                    </Text>
+                                    <Text fw={600} size='sm' ff='monospace'>
+                                        {data.labcode}
+                                    </Text>
+                                </Group>
+
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        Mã vạch:
+                                    </Text>
+                                    <Text fw={600} size='sm' ff='monospace'>
+                                        {data.barcode}
+                                    </Text>
+                                </Group>
+                            </Stack>
+                        </Stack>
+                    </Card>
+                </Grid.Col>
+
+                {/* Date Information */}
+                <Grid.Col span={6}>
+                    <Card p='lg' radius='md' bg='gray.0' withBorder>
+                        <Stack gap='md'>
+                            <Group gap='xs'>
+                                <IconCalendar size={16} color='var(--mantine-color-green-6)' />
+                                <Text size='sm' fw={600} c='green'>
+                                    Thời gian
+                                </Text>
+                            </Group>
+
+                            <Stack gap='sm'>
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        Ngày chỉ định:
+                                    </Text>
+                                    <Text fw={600} size='sm'>
+                                        {new Date(data.requestDate).toLocaleDateString('vi-VN')}
+                                    </Text>
+                                </Group>
+
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        Ngày tạo:
+                                    </Text>
+                                    <Text fw={600} size='sm'>
+                                        {new Date(data.createdAt).toLocaleDateString('vi-VN')}
+                                    </Text>
+                                </Group>
+                            </Stack>
+                        </Stack>
+                    </Card>
+                </Grid.Col>
+            </Grid>
+
+            {/* Additional Information */}
+            {latestFastQFile?.redoReason && (
+                <>
+                    <Divider my='xl' />
+                    <Card p='lg' radius='md' bg='red.0' withBorder>
+                        <Stack gap='xs'>
+                            <Text size='sm' fw={600} c='red'>
+                                Lý do từ chối:
                             </Text>
-                        </Group>
-                        <Text fw={600} c='blue' size='lg'>
-                            {data.labcode}
-                        </Text>
-                    </Grid.Col>
-                    <Grid.Col span={6}>
-                        <Group gap='xs'>
-                            <IconBarcode size={16} color='var(--mantine-color-green-6)' />
-                            <Text size='sm' c='dimmed'>
-                                Barcode:
+                            <Text size='sm' c='red.7'>
+                                {latestFastQFile.redoReason}
                             </Text>
-                        </Group>
-                        <Text fw={600} ff='monospace' size='lg'>
-                            {data.barcode}
-                        </Text>
-                    </Grid.Col>
-                    <Grid.Col span={6}>
-                        <Group gap='xs'>
-                            <IconCalendar size={16} color='var(--mantine-color-orange-6)' />
-                            <Text size='sm' c='dimmed'>
-                                Ngày chỉ định:
-                            </Text>
-                        </Group>
-                        <Text fw={500}>{new Date(data.requestDate).toLocaleDateString('vi-VN')}</Text>
-                    </Grid.Col>
-                    <Grid.Col span={6}>
-                        <Group gap='xs'>
-                            <IconCalendar size={16} color='var(--mantine-color-gray-6)' />
-                            <Text size='sm' c='dimmed'>
-                                Ngày tạo:
-                            </Text>
-                        </Group>
-                        <Text fw={500}>{new Date(data.createdAt).toLocaleDateString('vi-VN')}</Text>
-                    </Grid.Col>
-                </Grid>
-            </Stack>
-        </Paper>
+                            {latestFastQFile.rejector && (
+                                <Text size='xs' c='red.6' mt='xs'>
+                                    Từ chối bởi: {latestFastQFile.rejector.name}
+                                </Text>
+                            )}
+                        </Stack>
+                    </Card>
+                </>
+            )}
+        </Card>
     )
 }

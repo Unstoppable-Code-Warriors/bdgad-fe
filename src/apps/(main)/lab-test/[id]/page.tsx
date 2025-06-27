@@ -1,10 +1,25 @@
 import { useState } from 'react'
 import { useLabTestSessionDetail, useSendToAnalysis } from '@/services/hook/lab-test.hook'
 import { useParams, useNavigate } from 'react-router'
-import { Container, Stack, Grid, Alert, Loader, Center, Text, Group, Button } from '@mantine/core'
+import {
+    Container,
+    Stack,
+    Grid,
+    Alert,
+    Loader,
+    Center,
+    Text,
+    Group,
+    Button,
+    Box,
+    Card,
+    Divider,
+    ThemeIcon
+} from '@mantine/core'
 import { IconAlertCircle, IconSend } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
-import { PageHeader, LabTestInfo, PatientInfo, FileUpload, FileHistory } from './_components'
+import { LabTestInfo, PatientInfo, FileUpload, FileHistory } from './_components'
+import { PageHeader } from '@/components/PageHeader'
 
 const LabTestDetailPage = () => {
     const { id } = useParams()
@@ -65,10 +80,15 @@ const LabTestDetailPage = () => {
     if (isLoading) {
         return (
             <Container size='xl' py='xl'>
-                <Center>
-                    <Stack align='center' gap='md'>
-                        <Loader size='lg' />
-                        <Text>Đang tải thông tin xét nghiệm...</Text>
+                <Center h={400}>
+                    <Stack align='center' gap='lg'>
+                        <Loader size='lg' color='blue' />
+                        <Text size='lg' fw={500}>
+                            Đang tải thông tin xét nghiệm...
+                        </Text>
+                        <Text size='sm' c='dimmed'>
+                            Vui lòng chờ trong giây lát
+                        </Text>
                     </Stack>
                 </Center>
             </Container>
@@ -78,9 +98,21 @@ const LabTestDetailPage = () => {
     if (error) {
         return (
             <Container size='xl' py='xl'>
-                <Alert variant='light' color='red' title='Lỗi' icon={<IconAlertCircle size={16} />}>
-                    Không thể tải thông tin xét nghiệm. Vui lòng thử lại sau.
-                </Alert>
+                <Center h={400}>
+                    <Alert
+                        variant='light'
+                        color='red'
+                        title='Có lỗi xảy ra'
+                        icon={<IconAlertCircle size={20} />}
+                        maw={500}
+                        radius='lg'
+                    >
+                        <Text mb='md'>Không thể tải thông tin xét nghiệm. Vui lòng thử lại sau.</Text>
+                        <Button variant='light' color='red' onClick={() => window.location.reload()}>
+                            Thử lại
+                        </Button>
+                    </Alert>
+                </Center>
             </Container>
         )
     }
@@ -88,60 +120,108 @@ const LabTestDetailPage = () => {
     if (!data) {
         return (
             <Container size='xl' py='xl'>
-                <Alert variant='light' color='orange' title='Không tìm thấy' icon={<IconAlertCircle size={16} />}>
-                    Không tìm thấy thông tin xét nghiệm với ID này.
-                </Alert>
+                <Center h={400}>
+                    <Alert
+                        variant='light'
+                        color='orange'
+                        title='Không tìm thấy dữ liệu'
+                        icon={<IconAlertCircle size={20} />}
+                        maw={500}
+                        radius='lg'
+                    >
+                        <Text mb='md'>Không tìm thấy thông tin xét nghiệm với ID này.</Text>
+                        <Button variant='light' color='orange' onClick={handleBack}>
+                            Quay lại danh sách
+                        </Button>
+                    </Alert>
+                </Center>
             </Container>
         )
     }
 
     return (
-        <Stack gap='lg'>
-            {/* Header */}
-            <PageHeader onBack={handleBack} />
+        <Container size='xl' py='lg'>
+            <Stack gap='xl'>
+                {/* Page Header */}
+                <PageHeader
+                    onBack={handleBack}
+                    title='Chi tiết xét nghiệm'
+                    pageType='lab-test'
+                    labcode={data.labcode}
+                    barcode={data.barcode}
+                />
 
-            <Grid>
-                {/* Left Column - Lab Test & Patient Info */}
-                <Grid.Col span={{ base: 12, lg: 6 }}>
-                    <Stack gap='lg'>
-                        {/* Lab Test Information */}
-                        <LabTestInfo data={data} latestFastQFile={latestFastQFile} />
+                {/* Main Content Grid */}
+                <Grid gutter='xl'>
+                    {/* Left Column - Lab Test & Patient Info */}
+                    <Grid.Col span={{ base: 12, lg: 8 }}>
+                        <Stack gap='xl'>
+                            {/* Lab Test Information */}
+                            <LabTestInfo data={data} latestFastQFile={latestFastQFile} />
 
-                        {/* Patient Information with Doctor */}
-                        <PatientInfo patient={data.patient} doctor={data.doctor} />
-                    </Stack>
-                </Grid.Col>
+                            {/* Patient Information */}
+                            <PatientInfo patient={data.patient} doctor={data.doctor} />
+                        </Stack>
+                    </Grid.Col>
 
-                {/* Right Column - FastQ File Upload */}
-                <Grid.Col span={{ base: 12, lg: 6 }}>
-                    <FileUpload
-                        sessionId={parseInt(id || '0', 10)}
-                        latestFastQFile={latestFastQFile}
-                        fastqFiles={data.fastqFiles}
-                        uploadedFiles={uploadedFiles}
-                        onFileDrop={handleFileDrop}
-                        onRemoveFile={handleRemoveFile}
-                        onUploadSuccess={handleUploadSuccess}
-                    />
-                    {latestFastQFile?.status === 'uploaded' && (
-                        <Group justify='flex-end' mt={'lg'}>
-                            <Button
-                                color='green'
-                                onClick={handleSendToAnalysis}
-                                leftSection={<IconSend size={16} />}
-                                loading={sendToAnalysisMutation.isPending}
-                                disabled={sendToAnalysisMutation.isPending}
-                            >
-                                Phân tích FastQ
-                            </Button>
-                        </Group>
-                    )}
-                </Grid.Col>
-            </Grid>
+                    {/* Right Column - File Upload & Actions */}
+                    <Grid.Col span={{ base: 12, lg: 4 }}>
+                        <Box pos='sticky' top={80}>
+                            <Stack gap='lg'>
+                                <FileUpload
+                                    sessionId={parseInt(id || '0', 10)}
+                                    latestFastQFile={latestFastQFile}
+                                    fastqFiles={data.fastqFiles}
+                                    uploadedFiles={uploadedFiles}
+                                    onFileDrop={handleFileDrop}
+                                    onRemoveFile={handleRemoveFile}
+                                    onUploadSuccess={handleUploadSuccess}
+                                />
 
-            {/* FastQ History */}
-            <FileHistory fastqFiles={data.fastqFiles} />
-        </Stack>
+                                {/* Action Panel */}
+                                {latestFastQFile?.status === 'uploaded' && (
+                                    <Card shadow='sm' radius='lg' p='lg' withBorder>
+                                        <Stack gap='lg'>
+                                            <Group gap='sm'>
+                                                <ThemeIcon size='lg' radius='md' variant='light' color='green'>
+                                                    <IconSend size={20} />
+                                                </ThemeIcon>
+                                                <Box>
+                                                    <Text fw={600} size='md'>
+                                                        Sẵn sàng phân tích
+                                                    </Text>
+                                                    <Text size='sm' c='dimmed'>
+                                                        File FastQ đã sẵn sàng để gửi phân tích
+                                                    </Text>
+                                                </Box>
+                                            </Group>
+
+                                            <Divider />
+
+                                            <Button
+                                                color='green'
+                                                onClick={handleSendToAnalysis}
+                                                leftSection={<IconSend size={16} />}
+                                                loading={sendToAnalysisMutation.isPending}
+                                                disabled={sendToAnalysisMutation.isPending}
+                                                fullWidth
+                                                size='md'
+                                                radius='lg'
+                                            >
+                                                Gửi phân tích FastQ
+                                            </Button>
+                                        </Stack>
+                                    </Card>
+                                )}
+                            </Stack>
+                        </Box>
+                    </Grid.Col>
+                </Grid>
+
+                {/* FastQ File History */}
+                <FileHistory fastqFiles={data.fastqFiles} />
+            </Stack>
+        </Container>
     )
 }
 

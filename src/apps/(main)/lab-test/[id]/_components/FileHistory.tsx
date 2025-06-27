@@ -1,5 +1,12 @@
-import { Paper, Stack, Group, Title, Badge, Table, Text, ActionIcon, Button } from '@mantine/core'
-import { IconFileDescription, IconDownload, IconTrash, IconEye } from '@tabler/icons-react'
+import { Card, Text, Badge, Group, Stack, Divider, ThemeIcon, Box, Timeline, Avatar, Button } from '@mantine/core'
+import {
+    IconFileDescription,
+    IconDownload,
+    IconTrash,
+    IconUser,
+    IconClock,
+    IconAlertTriangle
+} from '@tabler/icons-react'
 import { statusConfig } from '@/types/lab-test.types'
 import { labTestService } from '@/services/function/lab-test'
 import { notifications } from '@mantine/notifications'
@@ -7,22 +14,23 @@ import { modals } from '@mantine/modals'
 import type { FastQ } from '@/types/fastq'
 import { useState } from 'react'
 import { useDeleteFastQ } from '@/services/hook/lab-test.hook'
+import { RejectionDisplay } from '@/components/RejectionDisplay'
 
 interface FileHistoryProps {
     fastqFiles?: FastQ[]
 }
 
+const getStatusColor = (status: string) => {
+    return statusConfig[status as keyof typeof statusConfig]?.color || 'gray'
+}
+
+const getStatusLabel = (status: string) => {
+    return statusConfig[status as keyof typeof statusConfig]?.label || status
+}
+
 export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
     const [isDownloading, setIsDownloading] = useState(false)
     const deleteFastQMutation = useDeleteFastQ()
-
-    const getStatusColor = (status: string) => {
-        return statusConfig[status as keyof typeof statusConfig]?.color || 'gray'
-    }
-
-    const getStatusLabel = (status: string) => {
-        return statusConfig[status as keyof typeof statusConfig]?.label || status
-    }
 
     const handleDownload = async (file: FastQ) => {
         try {
@@ -84,23 +92,75 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
 
     const handleViewReason = (file: FastQ) => {
         modals.open({
-            title: 'Chi tiết từ chối',
-            children: (
-                <Stack gap='md'>
-                    <Text size='sm' fw={500}>
-                        File FastQ #{file.id}
+            title: (
+                <Group gap='sm'>
+                    <IconAlertTriangle size={20} color='var(--mantine-color-red-6)' />
+                    <Text fw={600} c='red.7'>
+                        Chi tiết từ chối
                     </Text>
-                    <Text size='sm'>{file.redoReason || 'Không có lý do được ghi nhận'}</Text>
-                    {file.rejector && (
-                        <Stack gap='xs'>
-                            <Text size='sm' fw={500} c='red'>
-                                Người từ chối:
-                            </Text>
-                            <Text size='sm'>
-                                {file.rejector.name} ({file.rejector.email})
-                            </Text>
-                        </Stack>
-                    )}
+                </Group>
+            ),
+            children: (
+                <Stack gap='lg'>
+                    <Card p='md' bg='red.0' radius='md' withBorder>
+                        <Group gap='sm' mb='md'>
+                            <Avatar size='md' radius='xl' color='red' variant='light'>
+                                <IconUser size={14} />
+                            </Avatar>
+                            <Box>
+                                <Text size='sm' fw={500} c='red.8'>
+                                    File FastQ #{file.id}
+                                </Text>
+                                <Text size='xs' c='red.6'>
+                                    Từ chối lúc: {new Date(file.createdAt).toLocaleString('vi-VN')}
+                                </Text>
+                            </Box>
+                        </Group>
+
+                        {file.rejector && (
+                            <Box>
+                                <Text size='sm' fw={500} c='red.7' mb='xs'>
+                                    Người từ chối:
+                                </Text>
+                                <Group gap='sm'>
+                                    <Avatar size='sm' radius='xl' color='red' variant='light'>
+                                        <IconUser size={12} />
+                                    </Avatar>
+                                    <Box>
+                                        <Text size='sm' fw={500}>
+                                            {file.rejector.name}
+                                        </Text>
+                                        <Text size='xs' c='dimmed'>
+                                            {file.rejector.email}
+                                        </Text>
+                                    </Box>
+                                </Group>
+                            </Box>
+                        )}
+                    </Card>
+
+                    <Box>
+                        <Text size='sm' fw={500} mb='xs'>
+                            Lý do từ chối:
+                        </Text>
+                        {file.redoReason ? (
+                            <Card p='md' bg='gray.0' radius='md' withBorder>
+                                <Text size='sm' style={{ lineHeight: 1.6 }}>
+                                    {file.redoReason}
+                                </Text>
+                            </Card>
+                        ) : (
+                            <Card p='md' bg='gray.1' radius='md' withBorder style={{ borderStyle: 'dashed' }}>
+                                <Group gap='sm'>
+                                    <IconAlertTriangle size={16} color='var(--mantine-color-orange-6)' />
+                                    <Text size='sm' c='orange.7' fs='italic'>
+                                        Không có lý do từ chối được ghi nhận
+                                    </Text>
+                                </Group>
+                            </Card>
+                        )}
+                    </Box>
+
                     <Group justify='flex-end' mt='md'>
                         <Button variant='light' onClick={() => modals.closeAll()}>
                             Đóng
@@ -115,115 +175,154 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
         return file.status === 'uploaded'
     }
 
-    return (
-        <Paper p='lg' withBorder radius='md' shadow='sm'>
-            <Stack gap='md'>
-                <Group justify='space-between'>
-                    <Title order={3} c='gray.7'>
-                        Lịch sử File FastQ
-                    </Title>
-                    <Badge variant='light' color='gray'>
-                        {fastqFiles?.length || 0} file(s)
-                    </Badge>
+    if (!fastqFiles || fastqFiles.length === 0) {
+        return (
+            <Card shadow='sm' padding='xl' radius='lg' withBorder>
+                <Group gap='sm' mb='lg'>
+                    <ThemeIcon size='lg' radius='md' variant='light' color='orange'>
+                        <IconFileDescription size={20} />
+                    </ThemeIcon>
+                    <Box>
+                        <Text fw={700} size='xl'>
+                            Lịch sử File FastQ
+                        </Text>
+                        <Text size='sm' c='dimmed'>
+                            Theo dõi các file FastQ đã tải lên
+                        </Text>
+                    </Box>
                 </Group>
+                <Card p='xl' radius='md' bg='gray.0' ta='center'>
+                    <Stack align='center' gap='md'>
+                        <ThemeIcon size={60} radius='xl' variant='light' color='gray'>
+                            <IconFileDescription size={30} />
+                        </ThemeIcon>
+                        <Text c='dimmed' fw={500}>
+                            Chưa có file FastQ nào
+                        </Text>
+                        <Text size='sm' c='dimmed'>
+                            File FastQ sẽ xuất hiện ở đây sau khi được tải lên
+                        </Text>
+                    </Stack>
+                </Card>
+            </Card>
+        )
+    }
 
-                {fastqFiles && fastqFiles.length > 0 ? (
-                    <Table striped highlightOnHover>
-                        <Table.Thead>
-                            <Table.Tr>
-                                <Table.Th>File ID</Table.Th>
-                                <Table.Th>Trạng thái</Table.Th>
-                                <Table.Th>Ngày tạo</Table.Th>
-                                <Table.Th>Người tạo</Table.Th>
-                                <Table.Th>Người từ chối</Table.Th>
-                                <Table.Th>Lý do làm lại</Table.Th>
-                                <Table.Th>Thao tác</Table.Th>
-                            </Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>
-                            {fastqFiles.map((file) => (
-                                <Table.Tr key={file.id}>
-                                    <Table.Td>
-                                        <Text fw={500} ff='monospace'>
-                                            #{file.id}
-                                        </Text>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Badge color={getStatusColor(file.status)} variant='light' size='sm'>
-                                            {getStatusLabel(file.status)}
-                                        </Badge>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Text size='sm'>{new Date(file.createdAt).toLocaleDateString('vi-VN')}</Text>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Text size='sm'>{file.creator.name}</Text>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        {file.rejector ? (
-                                            <Text size='sm'>{file.rejector.name}</Text>
-                                        ) : (
+    return (
+        <Card shadow='sm' padding='xl' radius='lg' withBorder>
+            <Group gap='sm' mb='xl'>
+                <ThemeIcon size='lg' radius='md' variant='light' color='orange'>
+                    <IconFileDescription size={20} />
+                </ThemeIcon>
+                <Box>
+                    <Text fw={700} size='xl'>
+                        Lịch sử File FastQ
+                    </Text>
+                    <Text size='sm' c='dimmed'>
+                        {fastqFiles.length} file đã được tải lên
+                    </Text>
+                </Box>
+            </Group>
+
+            <Timeline active={fastqFiles.length} bulletSize={32} lineWidth={3}>
+                {fastqFiles.map((file) => (
+                    <Timeline.Item
+                        key={file.id}
+                        bullet={
+                            <ThemeIcon size='lg' radius='xl' color={getStatusColor(file.status || '')}>
+                                {file.status === 'rejected' ? (
+                                    <IconAlertTriangle size={16} />
+                                ) : (
+                                    <IconFileDescription size={16} />
+                                )}
+                            </ThemeIcon>
+                        }
+                        title={
+                            <Box w='100%'>
+                                <Group gap='sm' mb='sm'>
+                                    <Text fw={600} size='md'>
+                                        File FastQ #{file.id}
+                                    </Text>
+                                    <Badge
+                                        color={getStatusColor(file.status || '')}
+                                        variant='light'
+                                        size='md'
+                                        radius='md'
+                                    >
+                                        {getStatusLabel(file.status || '')}
+                                    </Badge>
+                                </Group>
+
+                                <Card p='md' radius='md' bg='gray.0' withBorder>
+                                    <Stack gap='sm'>
+                                        <Group gap='xs'>
+                                            <IconClock size={14} color='var(--mantine-color-gray-6)' />
                                             <Text size='sm' c='dimmed'>
-                                                -
+                                                Tải lên: {new Date(file.createdAt).toLocaleString('vi-VN')}
                                             </Text>
+                                        </Group>
+
+                                        <Group gap='sm'>
+                                            <Avatar size='sm' radius='xl' color='blue' variant='light'>
+                                                <IconUser size={12} />
+                                            </Avatar>
+                                            <Stack gap={2}>
+                                                <Text size='sm' fw={500}>
+                                                    {file.creator.name}
+                                                </Text>
+                                                <Text size='xs' c='dimmed'>
+                                                    {file.creator.email}
+                                                </Text>
+                                            </Stack>
+                                        </Group>
+
+                                        {file.rejector && (
+                                            <RejectionDisplay
+                                                rejector={file.rejector}
+                                                redoReason={file.redoReason}
+                                                rejectionDate={file.createdAt}
+                                                itemType='File FastQ'
+                                                itemId={file.id}
+                                                onViewDetails={() => handleViewReason(file)}
+                                            />
                                         )}
-                                    </Table.Td>
-                                    <Table.Td>
-                                        {file.redoReason ? (
+
+                                        {/* Action buttons */}
+                                        <Divider my='xs' />
+                                        <Group gap='sm' justify='flex-end'>
                                             <Button
                                                 variant='light'
-                                                color='orange'
-                                                size='xs'
-                                                leftSection={<IconEye size={14} />}
-                                                onClick={() => handleViewReason(file)}
-                                            >
-                                                Xem lý do
-                                            </Button>
-                                        ) : (
-                                            <Text size='sm' c='dimmed'>
-                                                -
-                                            </Text>
-                                        )}
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <Group gap='xs'>
-                                            <ActionIcon
-                                                variant='light'
                                                 color='teal'
-                                                size='sm'
+                                                leftSection={<IconDownload size={16} />}
                                                 onClick={() => handleDownload(file)}
                                                 loading={isDownloading}
+                                                size='sm'
+                                                radius='md'
                                             >
-                                                <IconDownload size={14} />
-                                            </ActionIcon>
+                                                Tải xuống
+                                            </Button>
+
                                             {canDeleteFile(file) && (
-                                                <ActionIcon
+                                                <Button
                                                     variant='light'
                                                     color='red'
-                                                    size='sm'
+                                                    leftSection={<IconTrash size={16} />}
                                                     onClick={() => handleDelete(file)}
                                                     loading={deleteFastQMutation.isPending}
+                                                    size='sm'
+                                                    radius='md'
                                                 >
-                                                    <IconTrash size={14} />
-                                                </ActionIcon>
+                                                    Xóa
+                                                </Button>
                                             )}
                                         </Group>
-                                    </Table.Td>
-                                </Table.Tr>
-                            ))}
-                        </Table.Tbody>
-                    </Table>
-                ) : (
-                    <Paper p='xl' bg='gray.0' radius='sm'>
-                        <Stack align='center' gap='sm'>
-                            <IconFileDescription size={48} color='var(--mantine-color-gray-5)' />
-                            <Text c='dimmed' ta='center'>
-                                Chưa có file FastQ nào trong lịch sử
-                            </Text>
-                        </Stack>
-                    </Paper>
-                )}
-            </Stack>
-        </Paper>
+                                    </Stack>
+                                </Card>
+                            </Box>
+                        }
+                    />
+                ))}
+            </Timeline>
+        </Card>
     )
 }

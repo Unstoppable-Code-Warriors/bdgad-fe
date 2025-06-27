@@ -14,13 +14,13 @@ import {
     IconDownload,
     IconPlayerPlay
 } from '@tabler/icons-react'
-import { analysisStatusConfig, ANALYSIS_STATUS, type AnalysisFilter } from '@/types/analysis'
+import { analysisStatusConfig, AnalysisStatus, type AnalysisFilter } from '@/types/analysis'
 import { useAnalysisSessions, useProcessAnalysis, useDownloadEtlResult } from '@/services/hook/analysis.hook'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useSearchParamState } from '@/hooks/use-search-params'
 import { notifications } from '@mantine/notifications'
 import type { AnalysisSessionListItem } from '@/types/analysis'
-
+import { FastQFileStatus } from '@/types/lab-test.types'
 const getStatusColor = (status: string) => {
     return analysisStatusConfig[status as keyof typeof analysisStatusConfig]?.color || 'gray'
 }
@@ -157,6 +157,28 @@ const AnalysisPage = () => {
         [downloadEtlResultMutation]
     )
 
+    const handleRetryEtlResult = useCallback(
+        async (fastqFileId: number) => {
+            processAnalysisMutation.mutate(fastqFileId, {
+                onSuccess: () => {
+                    notifications.show({
+                        title: 'Thành công',
+                        message: 'Đã bắt đầu thử lại xử lý phân tích',
+                        color: 'green'
+                    })
+                },
+                onError: (error: any) => {
+                    notifications.show({
+                        title: 'Lỗi thử lại phân tích',
+                        message: error.message || 'Không thể thử lại quá trình phân tích',
+                        color: 'red'
+                    })
+                }
+            })
+        },
+        [processAnalysisMutation]
+    )
+
     const recordsPerPageOptions = [5, 10, 20, 50]
 
     // Extract data from response
@@ -211,7 +233,7 @@ const AnalysisPage = () => {
             },
             {
                 accessor: 'latestEtlResult.status',
-                title: 'Trạng thái ETL',
+                title: 'Trạng thái phân tích',
                 width: 140,
                 render: (record) => {
                     const status = record.latestEtlResult?.status
@@ -235,21 +257,19 @@ const AnalysisPage = () => {
                         </ActionIcon>
 
                         {/* Process Analysis Button - only show for approved FastQ files */}
-                        {record.latestFastqFile?.status === ANALYSIS_STATUS.APPROVED &&
-                            (!record.latestEtlResult ||
-                                record.latestEtlResult.status !== ANALYSIS_STATUS.PROCESSING) && (
-                                <ActionIcon
-                                    variant='light'
-                                    color='green'
-                                    onClick={() => handleProcessAnalysis(record.latestFastqFile!.id)}
-                                    loading={processAnalysisMutation.isPending}
-                                >
-                                    <IconPlayerPlay size={16} />
-                                </ActionIcon>
-                            )}
+                        {record.latestFastqFile?.status === FastQFileStatus.WAIT_FOR_APPROVAL && (
+                            <ActionIcon
+                                variant='light'
+                                color='green'
+                                onClick={() => handleProcessAnalysis(record.latestFastqFile!.id)}
+                                loading={processAnalysisMutation.isPending}
+                            >
+                                <IconPlayerPlay size={16} />
+                            </ActionIcon>
+                        )}
 
                         {/* Download ETL Result - only show for completed results */}
-                        {record.latestEtlResult?.status === ANALYSIS_STATUS.COMPLETED && (
+                        {record.latestEtlResult?.status === AnalysisStatus.COMPLETED && (
                             <ActionIcon
                                 variant='light'
                                 color='teal'
@@ -257,6 +277,19 @@ const AnalysisPage = () => {
                                 loading={isDownloading}
                             >
                                 <IconDownload size={16} />
+                            </ActionIcon>
+                        )}
+
+                        {/* Retry ETL Result - only show for failed results with available FastQ */}
+                        {record.latestEtlResult?.status === AnalysisStatus.FAILED && record.latestFastqFile?.id && (
+                            <ActionIcon
+                                variant='light'
+                                color='orange'
+                                onClick={() => handleRetryEtlResult(record.latestFastqFile!.id)}
+                                loading={processAnalysisMutation.isPending}
+                                title='Thử lại phân tích'
+                            >
+                                <IconRefresh size={16} />
                             </ActionIcon>
                         )}
                     </Group>
@@ -269,6 +302,7 @@ const AnalysisPage = () => {
             handleViewDetail,
             handleProcessAnalysis,
             handleDownloadEtlResult,
+            handleRetryEtlResult,
             processAnalysisMutation.isPending,
             isDownloading
         ]
@@ -307,13 +341,13 @@ const AnalysisPage = () => {
                             onChange={(event) => setSearch(event.currentTarget.value)}
                         />
                         <Select
-                            placeholder='Lọc theo trạng thái ETL'
+                            placeholder='Lọc theo trạng thái phân tích'
                             leftSection={<IconFilter size={16} />}
                             data={[
                                 { value: '', label: 'Tất cả trạng thái' },
-                                { value: ANALYSIS_STATUS.PROCESSING, label: 'Đang xử lý' },
-                                { value: ANALYSIS_STATUS.COMPLETED, label: 'Hoàn thành' },
-                                { value: ANALYSIS_STATUS.FAILED, label: 'Thất bại' }
+                                { value: AnalysisStatus.PROCESSING, label: 'Đang xử lý' },
+                                { value: AnalysisStatus.COMPLETED, label: 'Hoàn thành' },
+                                { value: AnalysisStatus.FAILED, label: 'Thất bại' }
                             ]}
                             value={etlStatusFilter}
                             onChange={(value) => setEtlStatusFilter(value || '')}

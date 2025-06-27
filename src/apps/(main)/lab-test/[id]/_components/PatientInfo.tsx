@@ -1,13 +1,5 @@
-import { Paper, Stack, Group, Title, Text, Grid, Divider } from '@mantine/core'
-import {
-    IconUser,
-    IconStethoscope,
-    IconPhone,
-    IconMapPin,
-    IconId,
-    IconCreditCard,
-    IconCalendar
-} from '@tabler/icons-react'
+import { Card, Text, Group, Stack, ThemeIcon, Box, Grid, Avatar } from '@mantine/core'
+import { IconUser, IconStethoscope, IconPhone, IconMapPin, IconId, IconMail } from '@tabler/icons-react'
 
 interface PatientInfoProps {
     patient: {
@@ -25,104 +17,151 @@ interface PatientInfoProps {
 }
 
 export const PatientInfo = ({ patient, doctor }: PatientInfoProps) => {
+    const calculateAge = (dateOfBirth: string) => {
+        const today = new Date()
+        const birthDate = new Date(dateOfBirth)
+        const age = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            return age - 1
+        }
+        return age
+    }
+
     return (
-        <Paper p='lg' withBorder radius='md' shadow='sm'>
-            <Stack gap='md'>
-                <Group gap='sm'>
-                    <IconUser size={20} color='var(--mantine-color-green-6)' />
-                    <Title order={3} c='green.7'>
+        <Card shadow='sm' padding='xl' radius='lg' withBorder>
+            <Group gap='sm' mb='xl'>
+                <ThemeIcon size='lg' radius='md' variant='light' color='green'>
+                    <IconUser size={20} />
+                </ThemeIcon>
+                <Box>
+                    <Text fw={700} size='xl'>
                         Thông tin bệnh nhân
-                    </Title>
-                </Group>
-
-                {/* Patient Details */}
-                <Stack gap='md'>
-                    <Text size='xl' fw={700} c='green.8'>
-                        {patient.fullName}
                     </Text>
+                    <Text size='sm' c='dimmed'>
+                        Chi tiết về bệnh nhân và bác sĩ chỉ định
+                    </Text>
+                </Box>
+            </Group>
 
-                    <Grid>
+            {/* Patient Information */}
+            <Card p='lg' radius='md' bg='green.0' withBorder mb='xl'>
+                <Stack gap='lg'>
+                    <Group gap='sm'>
+                        <Avatar size='lg' radius='md' color='green' variant='light'>
+                            <IconUser size={24} />
+                        </Avatar>
+                        <Box>
+                            <Text fw={700} size='lg'>
+                                {patient.fullName}
+                            </Text>
+                            <Text size='sm' c='dimmed'>
+                                {calculateAge(patient.dateOfBirth)} tuổi • ID: {patient.personalId}
+                            </Text>
+                        </Box>
+                    </Group>
+
+                    <Grid gutter='md'>
                         <Grid.Col span={6}>
-                            <Group gap='xs'>
+                            <Group gap='xs' mb='xs'>
                                 <IconId size={16} color='var(--mantine-color-blue-6)' />
-                                <Text size='sm' c='dimmed'>
-                                    Số CCCD:
+                                <Text size='sm' fw={500} c='blue'>
+                                    Thông tin cá nhân
                                 </Text>
                             </Group>
-                            <Text fw={500} ff='monospace'>
-                                {patient.personalId}
-                            </Text>
+                            <Stack gap='sm'>
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        CCCD/CMND:
+                                    </Text>
+                                    <Text fw={600} size='sm' ff='monospace'>
+                                        {patient.personalId}
+                                    </Text>
+                                </Group>
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        Ngày sinh:
+                                    </Text>
+                                    <Text fw={600} size='sm'>
+                                        {new Date(patient.dateOfBirth).toLocaleDateString('vi-VN')}
+                                    </Text>
+                                </Group>
+                            </Stack>
                         </Grid.Col>
+
                         <Grid.Col span={6}>
-                            <Group gap='xs'>
-                                <IconCreditCard size={16} color='var(--mantine-color-green-6)' />
-                                <Text size='sm' c='dimmed'>
-                                    Mã BHYT:
+                            <Group gap='xs' mb='xs'>
+                                <IconPhone size={16} color='var(--mantine-color-orange-6)' />
+                                <Text size='sm' fw={500} c='orange'>
+                                    Thông tin liên hệ
                                 </Text>
                             </Group>
-                            <Text fw={500} ff='monospace'>
-                                {patient.healthInsuranceCode}
-                            </Text>
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <Group gap='xs'>
-                                <IconCalendar size={16} color='var(--mantine-color-pink-6)' />
-                                <Text size='sm' c='dimmed'>
-                                    Ngày sinh:
-                                </Text>
-                            </Group>
-                            <Text fw={500}>{new Date(patient.dateOfBirth).toLocaleDateString('vi-VN')}</Text>
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <Group gap='xs'>
-                                <IconPhone size={16} color='var(--mantine-color-teal-6)' />
-                                <Text size='sm' c='dimmed'>
-                                    Điện thoại:
-                                </Text>
-                            </Group>
-                            <Text fw={500}>{patient.phone}</Text>
-                        </Grid.Col>
-                        <Grid.Col span={12}>
-                            <Group gap='xs' align='flex-start'>
-                                <IconMapPin size={16} color='var(--mantine-color-red-6)' />
-                                <Text size='sm' c='dimmed'>
-                                    Địa chỉ:
-                                </Text>
-                            </Group>
-                            <Text fw={500}>{patient.address}</Text>
+                            <Stack gap='sm'>
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        Số điện thoại:
+                                    </Text>
+                                    <Text fw={600} size='sm'>
+                                        {patient.phone || 'Chưa cập nhật'}
+                                    </Text>
+                                </Group>
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        Mã BHYT:
+                                    </Text>
+                                    <Text fw={600} size='sm' ff='monospace'>
+                                        {patient.healthInsuranceCode || 'Không có'}
+                                    </Text>
+                                </Group>
+                            </Stack>
                         </Grid.Col>
                     </Grid>
+
+                    {patient.address && (
+                        <Card p='md' radius='md' bg='white' withBorder>
+                            <Group gap='xs' mb='xs'>
+                                <IconMapPin size={16} color='var(--mantine-color-teal-6)' />
+                                <Text size='sm' fw={500} c='teal'>
+                                    Địa chỉ
+                                </Text>
+                            </Group>
+                            <Text size='sm'>{patient.address}</Text>
+                        </Card>
+                    )}
                 </Stack>
+            </Card>
 
-                <Divider />
-
-                {/* Doctor Information */}
-                <Stack gap='md'>
-                    <Group gap='sm'>
-                        <IconStethoscope size={18} />
-                        <Text fw={600} c='purple.7' size='lg'>
+            {/* Doctor Information */}
+            <Card p='lg' radius='md' bg='blue.0' withBorder>
+                <Stack gap='lg'>
+                    <Group gap='xs'>
+                        <IconStethoscope size={18} color='var(--mantine-color-blue-6)' />
+                        <Text fw={700} size='lg' c='blue'>
                             Bác sĩ chỉ định
                         </Text>
                     </Group>
 
-                    <Grid>
-                        <Grid.Col span={6}>
-                            <Text size='sm' c='dimmed'>
-                                Tên bác sĩ:
-                            </Text>
-                            <Text fw={600} c='purple.8'>
+                    <Group gap='md'>
+                        <Avatar size='lg' radius='md' color='blue' variant='light'>
+                            <IconStethoscope size={24} />
+                        </Avatar>
+                        <Stack gap='xs' style={{ flex: 1 }}>
+                            <Text fw={600} size='md'>
                                 {doctor.name}
                             </Text>
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <Text size='sm' c='dimmed'>
-                                Email:
-                            </Text>
-                            <Text fw={500}>{doctor.email}</Text>
-                        </Grid.Col>
-                    </Grid>
+                            <Group gap='lg'>
+                                <Group gap='xs'>
+                                    <IconMail size={14} color='var(--mantine-color-gray-6)' />
+                                    <Text size='sm' c='dimmed'>
+                                        {doctor.email}
+                                    </Text>
+                                </Group>
+                            </Group>
+                        </Stack>
+                    </Group>
                 </Stack>
-            </Stack>
-        </Paper>
+            </Card>
+        </Card>
     )
 }

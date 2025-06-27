@@ -1,4 +1,14 @@
-import { Card, Text, Group, Stack, Divider } from '@mantine/core'
+import { Card, Text, Group, Stack, Divider, ThemeIcon, Box, Grid, Paper, Avatar } from '@mantine/core'
+import {
+    IconUser,
+    IconId,
+    IconCalendar,
+    IconPhone,
+    IconMapPin,
+    IconShield,
+    IconStethoscope,
+    IconMail
+} from '@tabler/icons-react'
 import type { Patient } from '@/types/patient'
 import type { User } from '@/types/user'
 
@@ -8,75 +18,151 @@ interface PatientInfoProps {
 }
 
 export const PatientInfo = ({ patient, doctor }: PatientInfoProps) => {
+    const calculateAge = (dateOfBirth: string) => {
+        const today = new Date()
+        const birthDate = new Date(dateOfBirth)
+        const age = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            return age - 1
+        }
+        return age
+    }
+
     return (
-        <Card shadow='sm' padding='lg' radius='md' withBorder>
-            <Text fw={600} size='lg' mb='md'>
-                Thông tin bệnh nhân
-            </Text>
-
-            <Stack gap='sm'>
-                <Group justify='space-between'>
-                    <Text size='sm' c='dimmed'>
-                        Họ tên:
+        <Card shadow='sm' padding='xl' radius='lg' withBorder>
+            <Group gap='sm' mb='xl'>
+                <ThemeIcon size='lg' radius='md' variant='light' color='green'>
+                    <IconUser size={20} />
+                </ThemeIcon>
+                <Box>
+                    <Text fw={700} size='xl'>
+                        Thông tin bệnh nhân
                     </Text>
-                    <Text fw={500}>{patient.fullName}</Text>
-                </Group>
-
-                <Group justify='space-between'>
                     <Text size='sm' c='dimmed'>
-                        CCCD/CMND:
+                        Chi tiết về bệnh nhân và bác sĩ phụ trách
                     </Text>
-                    <Text fw={500}>{patient.personalId}</Text>
-                </Group>
+                </Box>
+            </Group>
 
-                <Group justify='space-between'>
-                    <Text size='sm' c='dimmed'>
-                        Ngày sinh:
-                    </Text>
-                    <Text fw={500}>{new Date(patient.dateOfBirth).toLocaleDateString('vi-VN')}</Text>
-                </Group>
+            {/* Patient Information */}
+            <Paper p='lg' radius='md' bg='green.0' withBorder mb='xl'>
+                <Stack gap='lg'>
+                    <Group gap='sm'>
+                        <Avatar size='lg' radius='md' color='green' variant='light'>
+                            <IconUser size={24} />
+                        </Avatar>
+                        <Box>
+                            <Text fw={700} size='lg'>
+                                {patient.fullName}
+                            </Text>
+                            <Text size='sm' c='dimmed'>
+                                {calculateAge(patient.dateOfBirth)} tuổi • ID: {patient.personalId}
+                            </Text>
+                        </Box>
+                    </Group>
 
-                <Group justify='space-between'>
-                    <Text size='sm' c='dimmed'>
-                        Số điện thoại:
-                    </Text>
-                    <Text fw={500}>{patient.phone || '-'}</Text>
-                </Group>
+                    <Grid gutter='md'>
+                        <Grid.Col span={6}>
+                            <Group gap='xs' mb='xs'>
+                                <IconId size={16} color='var(--mantine-color-blue-6)' />
+                                <Text size='sm' fw={500} c='blue'>
+                                    Thông tin cá nhân
+                                </Text>
+                            </Group>
+                            <Stack gap='sm'>
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        CCCD/CMND:
+                                    </Text>
+                                    <Text fw={600} size='sm'>
+                                        {patient.personalId}
+                                    </Text>
+                                </Group>
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        Ngày sinh:
+                                    </Text>
+                                    <Text fw={600} size='sm'>
+                                        {new Date(patient.dateOfBirth).toLocaleDateString('vi-VN')}
+                                    </Text>
+                                </Group>
+                            </Stack>
+                        </Grid.Col>
 
-                <Group justify='space-between'>
-                    <Text size='sm' c='dimmed'>
-                        Địa chỉ:
-                    </Text>
-                    <Text fw={500}>{patient.address || '-'}</Text>
-                </Group>
+                        <Grid.Col span={6}>
+                            <Group gap='xs' mb='xs'>
+                                <IconPhone size={16} color='var(--mantine-color-orange-6)' />
+                                <Text size='sm' fw={500} c='orange'>
+                                    Thông tin liên hệ
+                                </Text>
+                            </Group>
+                            <Stack gap='sm'>
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        Số điện thoại:
+                                    </Text>
+                                    <Text fw={600} size='sm'>
+                                        {patient.phone || 'Chưa cập nhật'}
+                                    </Text>
+                                </Group>
+                                <Group justify='space-between'>
+                                    <Text size='sm' c='dimmed'>
+                                        Mã BHYT:
+                                    </Text>
+                                    <Text fw={600} size='sm'>
+                                        {patient.healthInsuranceCode || 'Không có'}
+                                    </Text>
+                                </Group>
+                            </Stack>
+                        </Grid.Col>
+                    </Grid>
 
-                <Group justify='space-between'>
-                    <Text size='sm' c='dimmed'>
-                        Mã BHYT:
-                    </Text>
-                    <Text fw={500}>{patient.healthInsuranceCode || '-'}</Text>
-                </Group>
+                    {patient.address && (
+                        <Paper p='md' radius='md' bg='white' withBorder>
+                            <Group gap='xs' mb='xs'>
+                                <IconMapPin size={16} color='var(--mantine-color-teal-6)' />
+                                <Text size='sm' fw={500} c='teal'>
+                                    Địa chỉ
+                                </Text>
+                            </Group>
+                            <Text size='sm'>{patient.address}</Text>
+                        </Paper>
+                    )}
+                </Stack>
+            </Paper>
 
-                <Divider my='xs' />
+            {/* Doctor Information */}
+            <Paper p='lg' radius='md' bg='blue.0' withBorder>
+                <Stack gap='lg'>
+                    <Group gap='xs'>
+                        <IconStethoscope size={18} color='var(--mantine-color-blue-6)' />
+                        <Text fw={700} size='lg' c='blue'>
+                            Bác sĩ phụ trách
+                        </Text>
+                    </Group>
 
-                <Text fw={600} size='md' mb='sm'>
-                    Bác sĩ phụ trách
-                </Text>
-
-                <Group justify='space-between'>
-                    <Text size='sm' c='dimmed'>
-                        Tên bác sĩ:
-                    </Text>
-                    <Text fw={500}>{doctor.name}</Text>
-                </Group>
-
-                <Group justify='space-between'>
-                    <Text size='sm' c='dimmed'>
-                        Email:
-                    </Text>
-                    <Text fw={500}>{doctor.email}</Text>
-                </Group>
-            </Stack>
+                    <Group gap='md'>
+                        <Avatar size='lg' radius='md' color='blue' variant='light'>
+                            <IconStethoscope size={24} />
+                        </Avatar>
+                        <Stack gap='xs' style={{ flex: 1 }}>
+                            <Text fw={600} size='md'>
+                                {doctor.name}
+                            </Text>
+                            <Group gap='lg'>
+                                <Group gap='xs'>
+                                    <IconMail size={14} color='var(--mantine-color-gray-6)' />
+                                    <Text size='sm' c='dimmed'>
+                                        {doctor.email}
+                                    </Text>
+                                </Group>
+                            </Group>
+                        </Stack>
+                    </Group>
+                </Stack>
+            </Paper>
         </Card>
     )
 }

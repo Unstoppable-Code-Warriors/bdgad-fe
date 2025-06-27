@@ -70,39 +70,37 @@ export interface EtlResultDownloadResponse {
 }
 
 // Analysis status configurations
-export const ANALYSIS_STATUS = {
-    WAIT_FOR_APPROVAL: 'wait_for_approval',
-    APPROVED: 'approved',
-    REJECTED: 'rejected',
-    PROCESSING: 'processing',
-    COMPLETED: 'completed',
-    FAILED: 'failed'
-} as const
-
-export type AnalysisStatus = (typeof ANALYSIS_STATUS)[keyof typeof ANALYSIS_STATUS]
+export enum AnalysisStatus {
+    WAIT_FOR_APPROVAL = 'wait_for_approval',
+    APPROVED = 'approved',
+    REJECTED = 'rejected',
+    PROCESSING = 'processing',
+    COMPLETED = 'completed',
+    FAILED = 'failed'
+}
 
 export const analysisStatusConfig = {
-    [ANALYSIS_STATUS.WAIT_FOR_APPROVAL]: {
+    [AnalysisStatus.WAIT_FOR_APPROVAL]: {
         label: 'Chờ phê duyệt',
         color: 'orange'
     },
-    [ANALYSIS_STATUS.APPROVED]: {
+    [AnalysisStatus.APPROVED]: {
         label: 'Đã phê duyệt',
         color: 'green'
     },
-    [ANALYSIS_STATUS.REJECTED]: {
+    [AnalysisStatus.REJECTED]: {
         label: 'Từ chối',
         color: 'red'
     },
-    [ANALYSIS_STATUS.PROCESSING]: {
+    [AnalysisStatus.PROCESSING]: {
         label: 'Đang xử lý',
         color: 'blue'
     },
-    [ANALYSIS_STATUS.COMPLETED]: {
+    [AnalysisStatus.COMPLETED]: {
         label: 'Hoàn thành',
         color: 'green'
     },
-    [ANALYSIS_STATUS.FAILED]: {
+    [AnalysisStatus.FAILED]: {
         label: 'Thất bại',
         color: 'red'
     }

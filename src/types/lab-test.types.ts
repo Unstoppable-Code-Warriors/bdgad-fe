@@ -1,4 +1,11 @@
 // Based on API documentation
+export enum FastQFileStatus {
+    UPLOADED = 'uploaded',
+    WAIT_FOR_APPROVAL = 'wait_for_approval',
+    APPROVED = 'approved',
+    REJECTED = 'rejected'
+}
+
 export interface LabTestFilter {
     status?: LabTestStatus
     requestDate?: {
@@ -28,18 +35,13 @@ export interface Patient {
     createdAt: string
 }
 
-export interface Doctor {
-    id: number
-    name: string
-    email: string
-    metadata: any
-}
+export interface Doctor {}
 
 export interface FastQFile {
     id: number
     filePath: string
     createdAt: string
-    status: 'uploaded' | 'wait_for_approval' | 'approved' | 'rejected'
+    status: FastQFileStatus
     redoReason: string | null
     creator: {
         id: number

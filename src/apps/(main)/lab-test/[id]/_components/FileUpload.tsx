@@ -1,4 +1,4 @@
-import { Paper, Stack, Group, Title, Badge, Text, Card, ActionIcon, Button, Progress } from '@mantine/core'
+import { Stack, Group, Title, Badge, Text, Card, ActionIcon, Button, Progress } from '@mantine/core'
 import { Dropzone } from '@mantine/dropzone'
 import {
     IconFileDescription,
@@ -181,7 +181,7 @@ export const FileUpload = ({
     }
 
     return (
-        <Paper p='lg' withBorder radius='md' h='fit-content' shadow='sm'>
+        <Card p='lg' withBorder radius='md' h='fit-content' shadow='sm' pos='sticky'>
             <Stack gap='lg'>
                 <Group justify='space-between'>
                     <Group gap='sm'>
@@ -256,7 +256,7 @@ export const FileUpload = ({
                         </Dropzone>
                     ) : (
                         /* Show locked state for non-modifiable statuses */
-                        <Paper p='xl' bg='gray.0' radius='sm' withBorder style={{ borderStyle: 'dashed' }}>
+                        <Card p='xl' bg='gray.0' radius='sm' withBorder style={{ borderStyle: 'dashed' }}>
                             <Stack align='center' gap='md'>
                                 <IconLock size={48} color='var(--mantine-color-gray-5)' />
                                 <div style={{ textAlign: 'center' }}>
@@ -268,7 +268,7 @@ export const FileUpload = ({
                                     </Text>
                                 </div>
                             </Stack>
-                        </Paper>
+                        </Card>
                     )
                 ) : (
                     /* Show latest FastQ file information */
@@ -390,6 +390,6 @@ export const FileUpload = ({
                     </Stack>
                 )}
             </Stack>
-        </Paper>
+        </Card>
     )
 }
