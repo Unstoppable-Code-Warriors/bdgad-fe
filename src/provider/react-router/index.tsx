@@ -21,6 +21,7 @@ import AnalysisPage from '@/apps/(main)/analysis/page'
 import AnalysisDetailPage from '@/apps/(main)/analysis/[id]/page'
 import ValidationPage from '@/apps/(main)/validation/page'
 import ValidationDetailPage from '@/apps/(main)/validation/[id]/page'
+import ProfilePage from '@/apps/(main)/profile/page'
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -82,6 +83,10 @@ export const router = createBrowserRouter([
                     {
                         index: true,
                         element: <HomePage />
+                    },
+                    {
+                        path: 'profile',
+                        element: <ProfilePage />
                     },
                     {
                         path: 'import-file/input',

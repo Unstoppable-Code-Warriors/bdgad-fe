@@ -1,7 +1,7 @@
 import { logoutOutside } from '@/stores/auth.store'
 import { useNavigate } from 'react-router'
-import { Avatar, Badge, Loader, Menu } from '@mantine/core'
-import { IconUserCircle, IconLogout } from '@tabler/icons-react'
+import { Avatar, Loader, Menu } from '@mantine/core'
+import { IconUserCircle, IconLogout, IconUser } from '@tabler/icons-react'
 import { useUser } from '@/services/hook/auth.hook'
 
 const UserButton = () => {
@@ -13,6 +13,10 @@ const UserButton = () => {
         navigate('/auth/login')
     }
 
+    const handleProfile = () => {
+        navigate('/profile')
+    }
+
     if (isLoading) {
         return <Loader />
     }
@@ -20,7 +24,6 @@ const UserButton = () => {
     if (!data) {
         return null
     }
-
     return (
         <Menu shadow='md' width={200} withArrow>
             <Menu.Target>
@@ -29,15 +32,13 @@ const UserButton = () => {
                 </Avatar>
             </Menu.Target>
 
-            <Menu.Dropdown>    
-                <Menu.Label>{data.user.name}</Menu.Label>
-                <Menu.Label>
-                    {data.user.roles.map((role) => (
-                        <Badge>{role.name}</Badge>
-                    ))}
-                </Menu.Label>
-
+            <Menu.Dropdown>  
+                
                 <Menu.Divider />
+
+                <Menu.Item leftSection={<IconUser size={16} />} onClick={handleProfile}>
+                    Thông tin cá nhân
+                </Menu.Item>
 
                 <Menu.Item color='red' leftSection={<IconLogout size={16} />} onClick={handleLogout}>
                     Logout
