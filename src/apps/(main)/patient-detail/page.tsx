@@ -8,134 +8,110 @@ import {
     Stack,
     Button,
     Group,
-    Grid,
     Paper,
     ActionIcon,
     Badge,
     Flex,
-    Box,
-    Divider
+    Box
 } from '@mantine/core'
 import {
     IconArrowLeft,
-    IconFile,
-    IconDownload,
-    IconEye,
-    IconFileText,
-    IconPhoto,
-    IconFileWord,
     IconCalendarEvent,
-    IconFileImport,
-    IconFileExport,
-    IconUpload
+    IconMicroscope,
+    IconClipboardCheck,
+    IconUpload,
+    IconStethoscope,
+    IconUser
 } from '@tabler/icons-react'
 
-// Mock data for patient files
-const mockPatientFiles = {
+const mockPatientVisits = {
     '1': [
         {
-            id: 'f1',
-            name: 'Kết quả xét nghiệm',
-            type: 'pdf',
-            size: '2.5 MB',
-            uploadedAt: '2024-01-15',
-            category: 'File Input'
+            id: 'visit1',
+            visitDate: '2024-01-15',
+            visitNumber: 1,
+            doctor: 'BS. Trần Minh',
+            diagnosis: 'Khám tổng quát định kỳ',
+            type: 'test',
+            status: 'Hoàn thành',
+            fileCount: 5
         },
         {
-            id: 'f2',
-            name: 'Kết quả xét nghiệm',
-            type: 'image',
-            size: '1.8 MB',
-            uploadedAt: '2024-01-16',
-            category: 'File Output'
+            id: 'visit2',
+            visitDate: '2024-01-20',
+            visitNumber: 2,
+            doctor: 'BS. Lê Hòa',
+            diagnosis: 'Thẩm định kết quả xét nghiệm',
+            type: 'assessment',
+            status: 'Hoàn thành',
+            fileCount: 3
         },
         {
-            id: 'f3',
-            name: 'Phiếu chỉ định',
-            type: 'image',
-            size: '0.5 MB',
-            uploadedAt: '2024-01-17',
-            category: 'File Input'
-        },
-        {
-            id: 'f4',
-            name: 'Báo cáo xét nghiệm',
-            type: 'word',
-            size: '1.2 MB',
-            uploadedAt: '2024-01-18',
-            category: 'File Output'
+            id: 'visit3',
+            visitDate: '2024-02-01',
+            visitNumber: 3,
+            doctor: 'BS. Nguyễn Nam',
+            diagnosis: 'Siêu âm bụng',
+            type: 'test',
+            status: 'Hoàn thành',
+            fileCount: 7
         }
     ],
     '2': [
         {
-            id: 'f5',
-            name: 'Kết quả MRI não',
-            type: 'image',
-            size: '5.2 MB',
-            uploadedAt: '2024-01-16',
-            category: 'File Output'
-        },
-        {
-            id: 'f6',
-            name: 'Phiếu khám bệnh',
-            type: 'pdf',
-            size: '0.8 MB',
-            uploadedAt: '2024-01-17',
-            category: 'File Input'
-        }
-    ],
-    '3': [
-        {
-            id: 'f7',
-            name: 'Kết quả ECG',
-            type: 'pdf',
-            size: '1.1 MB',
-            uploadedAt: '2024-01-17',
-            category: 'File Input'
-        },
-        {
-            id: 'f8',
-            name: 'Ảnh nội soi',
-            type: 'image',
-            size: '3.4 MB',
-            uploadedAt: '2024-01-18',
-            category: 'File Output'
-        },
-        {
-            id: 'f9',
-            name: 'Toa thuốc điều trị',
-            type: 'word',
-            size: '0.7 MB',
-            uploadedAt: '2024-01-19',
-            category: 'File Input'
+            id: 'visit4',
+            visitDate: '2024-01-20',
+            visitNumber: 1,
+            doctor: 'BS. Lê Văn C',
+            diagnosis: 'Khám chuyên khoa tim mạch',
+            type: 'test',
+            status: 'Hoàn thành',
+            fileCount: 4
         }
     ]
 }
 
-const getFileIcon = (type: string) => {
-    switch (type) {
-        case 'pdf':
-            return <IconFileWord size={20} color='#e03131' />
-        case 'image':
-            return <IconPhoto size={20} color='#1971c2' />
-        case 'word':
-            return <IconFileWord size={20} color='#2f9e44' />
-        default:
-            return <IconFileText size={20} />
+const getStatusBadge = (status: string) => {
+    const statusColors = {
+        'Đã hoàn thành': 'green',
+        'Đang xử lý': 'yellow',
+        'Chờ thẩm định': 'blue',
+        'Hoàn thành': 'green'
+    }
+    return (
+        <Badge color={statusColors[status as keyof typeof statusColors] || 'gray'} variant='light' size='sm'>
+            {status}
+        </Badge>
+    )
+}
+
+const getVisitTypeIcon = (type: string) => {
+    if (type === 'test') {
+        return <IconMicroscope size={20} color='#1971c2' />
+    } else {
+        return <IconClipboardCheck size={20} color='#2f9e44' />
+    }
+}
+
+const getVisitTypeBadge = (type: string) => {
+    if (type === 'test') {
+        return <Badge color='blue' variant='light' size='sm'>Xét nghiệm</Badge>
+    } else {
+        return <Badge color='green' variant='light' size='sm'>Thẩm định</Badge>
     }
 }
 
 const PatientDetailPage = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const [files, setFiles] = useState<any[]>([])
+    const [visits, setVisits] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        if (id && mockPatientFiles[id as keyof typeof mockPatientFiles]) {
-            setFiles(mockPatientFiles[id as keyof typeof mockPatientFiles])
+        if (id && mockPatientVisits[id as keyof typeof mockPatientVisits]) {
+            setVisits(mockPatientVisits[id as keyof typeof mockPatientVisits])
         } else {
-            setFiles([])
+            setVisits([])
         }
         setLoading(false)
     }, [id])
@@ -150,82 +126,9 @@ const PatientDetailPage = () => {
         })
     }
 
-    const handleViewFile = (fileId: string) => {
-        console.log('View file:', fileId)
+    const handleVisitClick = (visitId: string) => {
+        navigate(`/patient-detail/${id}/visit/${visitId}`)
     }
-
-    const handleDownloadFile = (fileId: string) => {
-        console.log('Download file:', fileId)
-    }
-
-    const inputFiles = files.filter((file) => file.category === 'File Input')
-    const outputFiles = files.filter((file) => file.category === 'File Output')
-
-    const renderFileGrid = (fileList: any[]) => (
-        <Grid>
-            {fileList.map((file) => (
-                <Grid.Col key={file.id} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
-                    <Card
-                        shadow='sm'
-                        padding='lg'
-                        withBorder
-                        style={{
-                            height: '100%',
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-                            }
-                        }}
-                    >
-                        <Stack gap='sm' h='100%'>
-                            {/* File Icon */}
-                            <Group justify='center'>{getFileIcon(file.type)}</Group>
-
-                            {/* File Name */}
-                            <Box style={{ flexGrow: 1 }}>
-                                <Text fw={600} size='sm' lineClamp={2} ta='center'>
-                                    {file.name}
-                                </Text>
-                            </Box>
-
-                            {/* File Info */}
-                            <Stack gap='xs'>
-                                <Text size='xs' c='dimmed' ta='center'>
-                                    Kích thước: {file.size}
-                                </Text>
-                                <Flex align='center' gap='xs' justify='center'>
-                                    <IconCalendarEvent size={12} />
-                                    <Text size='xs' c='dimmed'>
-                                        {new Date(file.uploadedAt).toLocaleDateString('vi-VN')}
-                                    </Text>
-                                </Flex>
-                            </Stack>
-
-                            {/* Action Buttons */}
-                            <Group justify='center' mt='auto'>
-                                <ActionIcon variant='light' color='blue' onClick={() => handleViewFile(file.id)}>
-                                    <IconEye size={16} />
-                                </ActionIcon>
-                                <ActionIcon variant='light' color='green' onClick={() => handleDownloadFile(file.id)}>
-                                    <IconDownload size={16} />
-                                </ActionIcon>
-                            </Group>
-                        </Stack>
-                    </Card>
-                </Grid.Col>
-            ))}
-        </Grid>
-    )
-
-    const renderEmptyState = (type: string) => (
-        <Paper p='xl' ta='center' withBorder>
-            <IconFile size={48} color='gray' />
-            <Text size='sm' c='dimmed' mt='md'>
-                Chưa có {type.toLowerCase()} nào
-            </Text>
-        </Paper>
-    )
 
     if (loading) {
         return (
@@ -253,58 +156,124 @@ const PatientDetailPage = () => {
                 </Group>
 
                 {/* Overall Statistics */}
-                {files.length > 0 && (
-                    <Card shadow='sm' padding='lg' withBorder>
-                        <Group justify='space-between'>
-                            <div>
-                                <Text fw={600}>Tổng quan</Text>
-                                <Text size='sm' c='dimmed'>
-                                    Tổng cộng {files.length} file
-                                </Text>
-                            </div>
+                {visits.length > 0 && (
+                    <Card shadow='md' padding='xl' withBorder radius='lg'>
+                        <Group justify='space-between' align='center'>
+                            {/* Left Side - Overview */}
                             <Group>
-                                <Badge color='blue' variant='light'>
-                                    Input: {inputFiles.length}
-                                </Badge>
-                                <Badge color='green' variant='light'>
-                                    Output: {outputFiles.length}
-                                </Badge>
+                                <Box 
+                                    p='lg' 
+                                    bg='linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                                    style={{ borderRadius: '16px' }}
+                                >
+                                    <IconStethoscope size={32} color='white' />
+                                </Box>
+                                <div>
+                                    <Text fw={700} size='xl' c='dark'>
+                                        Tổng quan hồ sơ
+                                    </Text>
+                                    <Text size='md' c='dimmed'>
+                                        {visits.length} lần khám
+                                    </Text>
+                                </div>
+                            </Group>
+
+                            {/* Right Side - Quick Stats */}
+                            <Group gap='xl'>
+                                <div style={{ textAlign: 'center' }}>
+                                    <Group gap='xs' justify='center' mb='xs'>
+                                        <IconMicroscope size={20} color='#1971c2' />
+                                        <Text fw={700} size='lg' c='blue'>
+                                            {visits.filter(visit => visit.type === 'test').length}
+                                        </Text>
+                                    </Group>
+                                    <Text size='sm' c='dimmed' fw={500}>
+                                        Xét nghiệm
+                                    </Text>
+                                </div>
+
+                                <div style={{ textAlign: 'center' }}>
+                                    <Group gap='xs' justify='center' mb='xs'>
+                                        <IconClipboardCheck size={20} color='#2f9e44' />
+                                        <Text fw={700} size='lg' c='green'>
+                                            {visits.filter(visit => visit.type === 'assessment').length}
+                                        </Text>
+                                    </Group>
+                                    <Text size='sm' c='dimmed' fw={500}>
+                                        Thẩm định
+                                    </Text>
+                                </div>
                             </Group>
                         </Group>
                     </Card>
                 )}
 
-                {/* File Input Section */}
-                <Stack gap='md'>
-                    <Group>
-                        <IconFileImport size={24} color='#1971c2' />
-                        <Title order={3} c='blue'>
-                            File Input
-                        </Title>
-                        <Badge color='blue' variant='light'>
-                            {inputFiles.length} file{inputFiles.length !== 1 ? 's' : ''}
-                        </Badge>
-                    </Group>
+                {/* Visits List */}
+                {visits.length > 0 ? (
+                    <Stack gap='md'>
+                        {visits.map((visit) => (
+                            <Card 
+                                key={visit.id} 
+                                shadow='sm' 
+                                padding='lg' 
+                                withBorder
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => handleVisitClick(visit.id)}
+                            >
+                                <Group justify='space-between' align='flex-start'>
+                                    <Group align='flex-start'>
+                                        <Box p='sm' bg={visit.type === 'test' ? 'blue.0' : 'green.0'} style={{ borderRadius: '8px' }}>
+                                            {getVisitTypeIcon(visit.type)}
+                                        </Box>
+                                        
+                                        <div>
+                                            <Group gap='sm' mb='xs'>
+                                                <Text fw={600} size='lg'>
+                                                    Lần {visit.visitNumber}
+                                                </Text>
+                                                {getVisitTypeBadge(visit.type)}
+                                            </Group>
+                                            
+                                            <Text fw={500} mb='xs'>
+                                                {visit.diagnosis}
+                                            </Text>
+                                            
+                                            <Group gap='md'>
+                                                <Flex align='center' gap='xs'>
+                                                    <IconCalendarEvent size={14} />
+                                                    <Text size='sm' c='dimmed'>
+                                                        {new Date(visit.visitDate).toLocaleDateString('vi-VN')}
+                                                    </Text>
+                                                </Flex>
+                                                <Flex align='center' gap='xs'>
+                                                    <IconUser size={14} />
+                                                    <Text size='sm' c='dimmed'>
+                                                        {visit.doctor}
+                                                    </Text>
+                                                </Flex>
+                                                <Text size='sm' c='dimmed'>
+                                                    {visit.fileCount} file
+                                                </Text>
+                                            </Group>
+                                        </div>
+                                    </Group>
 
-                    {inputFiles.length > 0 ? renderFileGrid(inputFiles) : renderEmptyState('File Input')}
-                </Stack>
-
-                <Divider my='xl' />
-
-                {/* File Output Section */}
-                <Stack gap='md'>
-                    <Group>
-                        <IconFileExport size={24} color='#2f9e44' />
-                        <Title order={3} c='green'>
-                            File Output
-                        </Title>
-                        <Badge color='green' variant='light'>
-                            {outputFiles.length} file{outputFiles.length !== 1 ? 's' : ''}
-                        </Badge>
-                    </Group>
-
-                    {outputFiles.length > 0 ? renderFileGrid(outputFiles) : renderEmptyState('File Output')}
-                </Stack>
+                                    {getStatusBadge(visit.status)}
+                                </Group>
+                            </Card>
+                        ))}
+                    </Stack>
+                ) : (
+                    <Paper p='xl' ta='center' withBorder>
+                        <IconStethoscope size={48} color='gray' />
+                        <Text size='lg' fw={600} mt='md'>
+                            Chưa có lần khám nào
+                        </Text>
+                        <Text size='sm' c='dimmed' mt='xs'>
+                            Bệnh nhân chưa có lịch sử khám bệnh
+                        </Text>
+                    </Paper>
+                )}
             </Stack>
         </Container>
     )

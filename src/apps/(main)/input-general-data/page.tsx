@@ -10,7 +10,7 @@ type FileWithPath = File & { path?: string }
 const mockImportFiles = [
     {
         id: 'f1',
-        name: 'Patient_Master_Data.xlsx',
+        name: 'Patient_General_Data.xlsx',
         type: 'excel',
         size: '2.5 MB',
         uploadedAt: '2024-01-15'
@@ -52,7 +52,7 @@ const mockImportFiles = [
     }
 ]
 
-const InputMasterDataPage = () => {
+const InputGeneralDataPage = () => {
     const [files, setFiles] = useState<any[]>(mockImportFiles)
     const [importModalOpened, setImportModalOpened] = useState(false)
 
@@ -112,4 +112,4 @@ const InputMasterDataPage = () => {
     )
 }
 
-export default InputMasterDataPage
+export default InputGeneralDataPage
