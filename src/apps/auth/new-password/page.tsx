@@ -5,7 +5,8 @@ import { IconLock, IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react
 import { authService } from '@/services/function/auth'
 import { Link, useSearchParams, useNavigate } from 'react-router'
 import { passwordValidator, validatePassword, getPasswordRequirementsText } from '@/utils/validatePassword'
-import { authNotifications } from '@/utils/notifications'
+import { authNotifications, showSuccessNotification } from '@/utils/notifications'
+import { HTTPError } from 'ky'
 
 interface NewPasswordFormValues {
     newPassword: string
@@ -51,39 +52,27 @@ const NewPasswordPage = () => {
         setError(null)
 
         try {
+            await new Promise(resolve => setTimeout(resolve, 1000))
             const response = await authService.resetPassword({
                 token,
                 newPassword: values.newPassword,
                 confirmPassword: values.confirmPassword
             })
 
-            if (response?.code === 'INTERNAL_SERVER_ERROR') {
-                setError('Internal server error for reset password. Please try again later.')
-                return
-            }
-
-            if (response?.code === 'INVALID_TOKEN') {
-                setError('Invalid token. Please try again.')
-                return
-            }
-
-            if (response?.code === 'INVALID_CREDENTIALS') {
-                setError('Invalid email or password. Please try again.')
-                return
-            }
-
-            if (response?.code === 'EMAIL_SEND_FAILED') {
-                setError('Failed to send reset email. Please try again.')
-                return
-            }
+            showSuccessNotification({
+                title: 'Tạo mật khẩu thành công',
+                message: response.message || 'Mật khẩu của bạn đã được tạo thành công'
+            })
 
             setSuccess(true)
-            authNotifications.passwordCreateSuccess()
         } catch (err) {
-            console.error(err)
-            const errorMessage = 'Không thể tạo mật khẩu. Link có thể đã hết hạn hoặc không hợp lệ.'
-            setError(errorMessage)
-            authNotifications.passwordCreateError()
+            console.error("Lỗi tạo lại mật khẩu :",err)
+            if (err instanceof HTTPError) {
+                const errorData = (err as any).errorData
+                if (errorData && typeof errorData === 'object') {
+                    setError(errorData.message || 'Mật khẩu của bạn đã được tạo thành công')
+                }
+            }
         } finally {
             setLoading(false)
         }
