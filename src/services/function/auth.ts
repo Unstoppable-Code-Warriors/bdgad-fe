@@ -7,6 +7,7 @@ import type {
     ForgotPasswordRequest,
     ResetPasswordRequest
 } from '@/types'
+import type { ApiResponse, UpdateProfileRequest } from '@/types/auth'
 
 const PREFIX = 'api/v1'
 
@@ -18,22 +19,26 @@ export const authService = {
     },
 
     // Get current user profile
-    me: async (): Promise<{ data: { user: User }; message: string }> => {
-        return authUtils.get<{ data: { user: User }; message: string }>(`${PREFIX}/auth/me`)
+    me: async (): Promise<ApiResponse<{ user: User }>> => {
+        return authUtils.get<ApiResponse<{ user: User }>>(`${PREFIX}/auth/me`)
+    },
+
+    updateProfile: async (data: UpdateProfileRequest): Promise<ApiResponse<{ user: User }>> => {
+        return authUtils.put<{ data: {user: User},message: string }>(`${PREFIX}/auth/update-profile`, data)
     },
 
     // Change password
-    changePassword: async (data: ChangePasswordRequest): Promise<{ code?: string, message?: string }> => {
-        return authUtils.put<{ code?: string, message?: string }>(`${PREFIX}/auth/change-password`, data)
+    changePassword: async (data: ChangePasswordRequest): Promise<ApiResponse> => {
+        return authUtils.put<ApiResponse>(`${PREFIX}/auth/change-password`, data)
     },
 
     // Request password reset
-    forgotPassword: async (data: ForgotPasswordRequest): Promise<{ code?: string; message?: string }> => {
-        return authUtils.post<{ code?: string; message?: string }>(`${PREFIX}/auth/forgot-password`, data)
+    forgotPassword: async (data: ForgotPasswordRequest): Promise<ApiResponse> => {
+        return authUtils.post<ApiResponse>(`${PREFIX}/auth/forgot-password`, data)
     },
 
     // Reset password with token
-    resetPassword: async (data: ResetPasswordRequest): Promise<{code?: string; message?: string  }> => {
-        return authUtils.post<{ code?: string; message?: string }>(`${PREFIX}/auth/reset-password`, data)
+    resetPassword: async (data: ResetPasswordRequest): Promise<ApiResponse> => {
+        return authUtils.post<ApiResponse>(`${PREFIX}/auth/reset-password`, data)
     }
 }

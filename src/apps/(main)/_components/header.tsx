@@ -6,7 +6,6 @@ const Header = () => {
     const { data , isLoading } = useUser()
     const userProfile = data?.data?.user
 
-    console.log("data from react query",userProfile)
     return (
         <AppShell.Header>
             <Group h='100%' px='md' justify='space-between'>
