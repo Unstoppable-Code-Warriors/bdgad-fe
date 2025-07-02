@@ -5,7 +5,7 @@ import { IconLock, IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react
 import { authService } from '@/services/function/auth'
 import { Link, useSearchParams, useNavigate } from 'react-router'
 import { passwordValidator, validatePassword, getPasswordRequirementsText } from '@/utils/validatePassword'
-import { authNotifications, showSuccessNotification } from '@/utils/notifications'
+import { showSuccessNotification } from '@/utils/notifications'
 import { HTTPError } from 'ky'
 
 interface NewPasswordFormValues {
