@@ -19,6 +19,7 @@ import { setTokensOutside } from '@/stores/auth.store'
 import { Link, useNavigate } from 'react-router'
 import { emailValidator, normalizeEmail, suggestEmailCorrection } from '@/utils/validateEmail'
 import { authNotifications, showErrorNotification } from '@/utils/notifications'
+import { HTTPError } from 'ky'
 
 interface LoginFormValues {
     email: string
@@ -74,17 +75,17 @@ const LoginPage = () => {
 
             const response = await authService.login(normalizedValues)
 
-            if (response?.code === 'ACCOUNT_INACTIVE') {
-                setError('Your account is inactive. Please contact support.')
-                return
-            }
-            
-            setTokensOutside(response.token)
+            setTokensOutside(response.data.token)
             navigate('/')
             authNotifications.loginSuccess()
         } catch (err) {
-            console.error(err)
-            setError('Invalid email or password. Please try again.')
+            console.error('Error login:', err)
+            if (err instanceof HTTPError) {
+                const errorData = (err as any).errorData
+                if (errorData && typeof errorData === 'object') {
+                    setError(errorData.message || 'Lỗi xác thực')
+                }
+            }
         } finally {
             setLoading(false)
         }

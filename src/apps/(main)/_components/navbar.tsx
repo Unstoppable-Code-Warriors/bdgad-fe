@@ -39,6 +39,7 @@ export const navItems = [
 
 const Navbar = () => {
     const { data, isLoading } = useUser()
+    const userProfile = data?.data?.user
     const location = useLocation()
 
     if (isLoading) return <Loader />
@@ -51,7 +52,7 @@ const Navbar = () => {
             <Stack gap={4} px='md' pb='md'>
                 {navItems.map((item) => {
                     const isActive = location.pathname.startsWith(item.href)
-                    const hasPermission = data.user.roles.some((role) => item.roles.includes(parseInt(role.code)))
+                    const hasPermission = userProfile?.roles.some((role) => item.roles.includes(parseInt(role.code)))
 
                     if (!hasPermission) return null
 

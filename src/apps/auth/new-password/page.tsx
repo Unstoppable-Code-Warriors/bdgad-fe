@@ -51,11 +51,31 @@ const NewPasswordPage = () => {
         setError(null)
 
         try {
-            await authService.resetPassword({
+            const response = await authService.resetPassword({
                 token,
                 newPassword: values.newPassword,
                 confirmPassword: values.confirmPassword
             })
+
+            if (response?.code === 'INTERNAL_SERVER_ERROR') {
+                setError('Internal server error for reset password. Please try again later.')
+                return
+            }
+
+            if (response?.code === 'INVALID_TOKEN') {
+                setError('Invalid token. Please try again.')
+                return
+            }
+
+            if (response?.code === 'INVALID_CREDENTIALS') {
+                setError('Invalid email or password. Please try again.')
+                return
+            }
+
+            if (response?.code === 'EMAIL_SEND_FAILED') {
+                setError('Failed to send reset email. Please try again.')
+                return
+            }
 
             setSuccess(true)
             authNotifications.passwordCreateSuccess()

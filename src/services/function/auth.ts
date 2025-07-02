@@ -18,13 +18,13 @@ export const authService = {
     },
 
     // Get current user profile
-    me: async (): Promise<{ success: boolean; user: User }> => {
-        return authUtils.get<{ success: boolean; user: User }>(`${PREFIX}/auth/me`)
+    me: async (): Promise<{ data: { user: User }; message: string }> => {
+        return authUtils.get<{ data: { user: User }; message: string }>(`${PREFIX}/auth/me`)
     },
 
     // Change password
     changePassword: async (data: ChangePasswordRequest): Promise<{ code?: string, message?: string }> => {
-        return authUtils.post<{ code?: string, message?: string }>(`${PREFIX}/auth/change-password`, data)
+        return authUtils.put<{ code?: string, message?: string }>(`${PREFIX}/auth/change-password`, data)
     },
 
     // Request password reset
@@ -33,7 +33,7 @@ export const authService = {
     },
 
     // Reset password with token
-    resetPassword: async (data: ResetPasswordRequest): Promise<void> => {
-        return authUtils.post<void>(`${PREFIX}/auth/reset-password`, data)
+    resetPassword: async (data: ResetPasswordRequest): Promise<{code?: string; message?: string  }> => {
+        return authUtils.post<{ code?: string; message?: string }>(`${PREFIX}/auth/reset-password`, data)
     }
 }

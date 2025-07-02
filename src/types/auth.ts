@@ -16,7 +16,6 @@ export interface User {
 
 // API Response wrapper
 export interface ApiResponse<T = any> {
-    success: boolean
     data?: T
     message?: string
     error?: string
@@ -24,10 +23,11 @@ export interface ApiResponse<T = any> {
 
 // Login API response (actual structure from the API)
 export interface LoginApiResponse {
-    code: string
-    success: boolean
-    token: string
-    user: User
+    data: {
+        token: string
+        user: User
+    }
+    message: string
 }
 
 // Auth service request/response types

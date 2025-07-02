@@ -19,10 +19,12 @@ import { IconUser, IconMail, IconPhone, IconMapPin, IconLock, IconEdit, IconShie
 //import { useNavigate } from 'react-router'
 import { useState } from 'react'
 import { authService } from '@/services/function/auth'
-import { authNotifications } from '@/utils/notifications'
+import { showErrorNotification, showSuccessNotification } from '@/utils/notifications'
+import { HTTPError } from 'ky';
 
 const ProfilePage = () => {
     const { data, isLoading } = useUser()
+    const userProfile = data?.data?.user
     //const navigate = useNavigate()
     const [changePasswordOpened, setChangePasswordOpened] = useState(false)
     const [currentPassword, setCurrentPassword] = useState('')
@@ -36,29 +38,31 @@ const ProfilePage = () => {
                 newPassword,
                 confirmPassword
             })
-
-            if (response?.code === 'PASSWORD_MISMATCH') {
-                authNotifications.currentPasswordError()
-                return
-            }
-
-            if (response?.code === 'SAME_PASSWORD') {
-                authNotifications.changeSamePassword()
-                return
-            }
-
             // Show success notification
-            authNotifications.changePasswordSuccess()
+            showSuccessNotification({
+                title: 'Đổi mật khẩu',
+                message: response.message || 'Đổi mật khẩu thành công'
+            })
 
             setChangePasswordOpened(false)
             // Reset form
             setCurrentPassword('')
             setNewPassword('')
             setConfirmPassword('')
-        } catch (err) {
+        } catch (err: unknown) {
             console.error('Error changing password:', err)
-            // Show error notification
-            authNotifications.changePasswordError()
+
+            // Handle ky HTTPError to get response body
+            if (err instanceof HTTPError) {
+                // Check if the beforeError hook attached error data
+                const errorData = (err as any).errorData
+                if (errorData && typeof errorData === 'object') {
+                    showErrorNotification({
+                        title: 'Đổi mật khẩu thất bại',
+                        message: errorData.message || 'Đổi mật khẩu thất bại'
+                    })
+                }
+            }
         }
     }
 
@@ -84,7 +88,7 @@ const ProfilePage = () => {
         )
     }
 
-    const user = data.user
+    const user = userProfile
 
     return (
         <Container size='lg' py='xl'>
@@ -136,7 +140,7 @@ const ProfilePage = () => {
                                 }}
                             >
                                 <Text size='sm' c='dark'>
-                                    {user.email}
+                                    {user?.email}
                                 </Text>
                             </Box>
                         </Box>
@@ -154,14 +158,14 @@ const ProfilePage = () => {
                             </Group>
                             <Badge
                                 size='lg'
-                                color={user.status === 'active' ? 'green' : 'red'}
+                                color={user?.status === 'active' ? 'green' : 'red'}
                                 variant='light'
                                 radius='md'
                                 px='md'
                                 py='sm'
                                 style={{ fontSize: '14px' }}
                             >
-                                {user.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                                {user?.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                             </Badge>
                         </Box>
                     </Grid.Col>
@@ -175,7 +179,7 @@ const ProfilePage = () => {
                                 </Text>
                             </Group>
                             <Group gap='xs'>
-                                {user.roles.map((role) => (
+                                {user?.roles.map((role) => (
                                     <Badge
                                         key={role.id}
                                         size='lg'
@@ -210,13 +214,13 @@ const ProfilePage = () => {
                                 }}
                             >
                                 <Text size='sm' c='dark'>
-                                    {user.name}
+                                    {user?.name}
                                 </Text>
                             </Box>
                         </Box>
                     </Grid.Col>
 
-                    {user.metadata?.phone && (
+                    {user?.metadata?.phone && (
                         <Grid.Col span={{ base: 12, md: 6 }}>
                             <Box mb='lg'>
                                 <Group gap='xs' mb='xs'>
@@ -241,8 +245,8 @@ const ProfilePage = () => {
                         </Grid.Col>
                     )}
 
-                    {user.metadata?.address && (
-                        <Grid.Col span={{ base: 12, md: user.metadata?.phone ? 6 : 12 }}>
+                    {user?.metadata?.address && (
+                        <Grid.Col span={{ base: 12, md: user?.metadata?.phone ? 6 : 12 }}>
                             <Box mb='lg'>
                                 <Group gap='xs' mb='xs'>
                                     <IconMapPin size={16} color='#228be6' />

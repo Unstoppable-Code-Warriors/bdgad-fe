@@ -4,7 +4,8 @@ import { useForm } from '@mantine/form'
 import { IconMail, IconAlertCircle, IconCheck } from '@tabler/icons-react'
 import { authService } from '@/services/function/auth'
 import { Link } from 'react-router'
-import { authNotifications } from '@/utils/notifications'
+import { showSuccessNotification } from '@/utils/notifications'
+import { HTTPError } from 'ky';
 
 interface ForgotPasswordFormValues {
     email: string
@@ -39,24 +40,22 @@ const ForgotPasswordPage = () => {
                 email: values.email,
                 redirectUrl
             })
-
-            if (response.code === 'EMAIL_NOT_FOUND') {
-                setError('Email not found in the system. Please check your email address.')
-                return
-            }
-
-            if (response.code === 'ACCOUNT_INACTIVE') {
-                setError('Your account is inactive. Please contact support.')
-                return
-            }
-
+            showSuccessNotification({
+                title: 'Đặt lại mật khẩu',
+                message: response.message || 'Đặt lại mật khẩu thành công'
+            })
             setSuccess(true)
-            authNotifications.forgotPasswordSuccess()
+            
+
         } catch (err) {
-            console.error(err)
-            const errorMessage = 'Failed to send reset email. Please try again.'
-            setError(errorMessage)
-            authNotifications.forgotPasswordError()
+            console.error('Error forgot password:', err)
+            if (err instanceof HTTPError) {
+                const errorData = (err as any).errorData
+                if (errorData && typeof errorData === 'object') {
+                    setError(errorData.message || 'Đặt lại mật khẩu thất bại')
+                }
+            }
+
         } finally {
             setLoading(false)
         }

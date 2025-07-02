@@ -22,7 +22,13 @@ const commonConfig: Options = {
                 const { response } = error
                 if (response && response.body) {
                     try {
-                        const errorData = (await response.json()) as unknown
+                        // Clone the response to avoid consuming the original stream
+                        const clonedResponse = response.clone()
+                        const errorData = (await clonedResponse.json()) as unknown
+                        
+                        // Attach the parsed error data to the error object
+                        ;(error as any).errorData = errorData
+                        
                         error.name = 'APIError'
                         error.message = (errorData as any)?.message || (errorData as any)?.error || 'An error occurred'
                     } catch {
@@ -47,7 +53,7 @@ export const authApi = parentApi.extend({
                 // For auth API, we might not always need the access token
                 // Only add it for specific endpoints that require it (like refresh, logout)
                 const url = request.url
-                const requiresAuth = url.includes('/refresh') || url.includes('/logout') || url.includes('/me')
+                const requiresAuth = url.includes('/refresh') || url.includes('/logout') || url.includes('/me') || url.includes('/change-password')
 
                 if (requiresAuth) {
                     const token = getAccessToken()
@@ -203,6 +209,10 @@ export const authUtils = {
     // POST request for auth endpoints
     post: async <T = any>(url: string, data?: any, options?: Options): Promise<T> => {
         return authApi.post(url, { json: data, ...options }).json<T>()
+    },
+
+    put: async <T = any>(url: string, data?: any, options?: Options): Promise<T> => {
+        return authApi.put(url, { json: data, ...options }).json<T>()
     },
 
     // GET request for auth endpoints
