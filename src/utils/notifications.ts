@@ -69,49 +69,49 @@ export const showInfoNotification = ({
 
 export const authNotifications = {
     loginSuccess: () => showSuccessNotification({
-        title: 'Login successful',
-        message: 'You have been logged in successfully',
+        title: 'Đăng nhập thành công',
+        message: 'Bạn đã đăng nhập thành công',
         autoClose: 1000
     }),
     
     loginError: () => showErrorNotification({
-        title: 'Login failed',
-        message: 'Invalid email or password. Please try again.'
+        title: 'Đăng nhập thất bại',
+        message: 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.'
     }),
     
     logoutSuccess: () => showSuccessNotification({
-        title: 'Logged out',
-        message: 'You have been logged out successfully'
+        title: 'Đăng xuất thành công',
+        message: 'Bạn đã đăng xuất thành công'
     }),
     
     registerSuccess: () => showSuccessNotification({
-        title: 'Registration successful',
-        message: 'Your account has been created successfully'
+        title: 'Đăng ký thành công',
+        message: 'Tài khoản của bạn đã được tạo thành công'
     }),
     
     registerError: () => showErrorNotification({
-        title: 'Registration failed',
-        message: 'Failed to create account. Please try again.'
+        title: 'Đăng ký thất bại',
+        message: 'Không thể tạo tài khoản. Vui lòng thử lại.'
     }),
     
     passwordResetSuccess: () => showSuccessNotification({
-        title: 'Password reset successful',
-        message: 'Your password has been updated successfully'
+        title: 'Đặt lại mật khẩu thành công',
+        message: 'Mật khẩu của bạn đã được cập nhật thành công'
     }),
     
     passwordResetError: () => showErrorNotification({
-        title: 'Password reset failed',
-        message: 'Failed to reset password. The token may be expired or invalid.'
+        title: 'Đặt lại mật khẩu thất bại',
+        message: 'Không thể đặt lại mật khẩu. Token có thể đã hết hạn hoặc không hợp lệ.'
     }),
     
     forgotPasswordSuccess: () => showSuccessNotification({
-        title: 'Reset link sent',
-        message: 'Check your email for password reset instructions'
+        title: 'Đã gửi liên kết đặt lại',
+        message: 'Kiểm tra email của bạn để biết hướng dẫn đặt lại mật khẩu'
     }),
     
     forgotPasswordError: () => showErrorNotification({
-        title: 'Failed to send reset link',
-        message: 'Please check your email address and try again.'
+        title: 'Không thể gửi liên kết đặt lại',
+        message: 'Vui lòng kiểm tra địa chỉ email và thử lại.'
     }),
 
     passwordCreateSuccess: () => showSuccessNotification({
@@ -121,5 +121,21 @@ export const authNotifications = {
     passwordCreateError: () => showErrorNotification({
         title: 'Tạo mật khẩu thất bại',
         message: 'Đã xảy ra lỗi khi tạo mật khẩu mới. Vui lòng thử lại.',
+    }),
+    changePasswordSuccess: () => showSuccessNotification({
+        title: 'Đổi mật khẩu thành công',
+        message: 'Mật khẩu của bạn đã được đổi thành công',
+    }),
+    changePasswordError: () => showErrorNotification({
+        title: 'Đổi mật khẩu thất bại',
+        message: 'Không thể đổi mật khẩu. Vui lòng thử lại.',
+    }),
+    currentPasswordError: () => showErrorNotification({
+        title: 'Mật khẩu hiện tại không đúng',
+        message: 'Không thể đổi mật khẩu. Vui lòng thử lại.',
+    }),
+    changeSamePassword: () => showWarningNotification({
+        title: 'Mật khẩu mới giống mật khẩu cũ',
+        message: 'Vui lòng nhập mật khẩu mới khác với mật khẩu hiện tại.',
     }),
 }

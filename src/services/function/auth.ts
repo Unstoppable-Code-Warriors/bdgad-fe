@@ -23,8 +23,8 @@ export const authService = {
     },
 
     // Change password
-    changePassword: async (data: ChangePasswordRequest): Promise<void> => {
-        return authUtils.post<void>(`${PREFIX}/auth/change-password`, data)
+    changePassword: async (data: ChangePasswordRequest): Promise<{ code?: string, message?: string }> => {
+        return authUtils.post<{ code?: string, message?: string }>(`${PREFIX}/auth/change-password`, data)
     },
 
     // Request password reset

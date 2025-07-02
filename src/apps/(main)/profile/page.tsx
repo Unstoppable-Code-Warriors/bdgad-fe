@@ -15,9 +15,11 @@ import {
     Modal,
     PasswordInput
 } from '@mantine/core'
-import { IconUser, IconMail, IconPhone, IconMapPin, IconLock, IconEdit, IconShield   } from '@tabler/icons-react'
+import { IconUser, IconMail, IconPhone, IconMapPin, IconLock, IconEdit, IconShield } from '@tabler/icons-react'
 //import { useNavigate } from 'react-router'
 import { useState } from 'react'
+import { authService } from '@/services/function/auth'
+import { authNotifications } from '@/utils/notifications'
 
 const ProfilePage = () => {
     const { data, isLoading } = useUser()
@@ -27,12 +29,37 @@ const ProfilePage = () => {
     const [newPassword, setNewPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
 
-    const handleChangePassword = () => {
-        setChangePasswordOpened(false)
-        // Reset form
-        setCurrentPassword('')
-        setNewPassword('')
-        setConfirmPassword('')
+    const handleChangePassword = async () => {
+        try {
+            const response = await authService.changePassword({
+                currentPassword,
+                newPassword,
+                confirmPassword
+            })
+
+            if (response?.code === 'PASSWORD_MISMATCH') {
+                authNotifications.currentPasswordError()
+                return
+            }
+
+            if (response?.code === 'SAME_PASSWORD') {
+                authNotifications.changeSamePassword()
+                return
+            }
+
+            // Show success notification
+            authNotifications.changePasswordSuccess()
+
+            setChangePasswordOpened(false)
+            // Reset form
+            setCurrentPassword('')
+            setNewPassword('')
+            setConfirmPassword('')
+        } catch (err) {
+            console.error('Error changing password:', err)
+            // Show error notification
+            authNotifications.changePasswordError()
+        }
     }
 
     if (isLoading) {
@@ -85,12 +112,7 @@ const ProfilePage = () => {
                         >
                             Đổi mật khẩu
                         </Button>
-                        <Button
-                            variant='filled'
-                            color='dark'
-                            radius='md'
-                            leftSection={<IconEdit size={16} />}
-                        >
+                        <Button variant='filled' color='dark' radius='md' leftSection={<IconEdit size={16} />}>
                             Chỉnh sửa hồ sơ
                         </Button>
                     </Group>
@@ -328,7 +350,7 @@ const ProfilePage = () => {
                             variant='outline'
                             onClick={() => setChangePasswordOpened(false)}
                             radius='md'
-                            color='gray'
+                            color='red'
                         >
                             Hủy
                         </Button>
