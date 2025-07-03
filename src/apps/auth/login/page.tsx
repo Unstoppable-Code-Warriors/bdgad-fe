@@ -74,10 +74,25 @@ const LoginPage = () => {
             }
 
             const response = await authService.login(normalizedValues)
+            if ('code' in response) {
+            switch (response.code) {
+                case 'INVALID_CREDENTIALS':
+                    setError('Email hoặc mật khẩu không chính xác')
+                    break
+                case 'ACCOUNT_INACTIVE':
+                    setError('Tài khoản đã bị vô hiệu hóa')
+                    break
+                default:
+                    setError('Lỗi đăng nhập không xác định')
+            }
 
-            setTokensOutside(response.data.token)
-            navigate('/')
-            authNotifications.loginSuccess()
+            } else {
+                setTokensOutside(response.data.token)
+                authNotifications.loginSuccess()
+                navigate('/')
+            }
+
+            
         } catch (err) {
             console.error('Error login:', err)
             if (err instanceof HTTPError) {

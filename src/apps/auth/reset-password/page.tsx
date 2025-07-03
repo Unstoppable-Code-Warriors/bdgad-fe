@@ -5,7 +5,8 @@ import { IconLock, IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react
 import { authService } from '@/services/function/auth'
 import { Link, useSearchParams, useNavigate } from 'react-router'
 import { passwordValidator, validatePassword, getPasswordRequirementsText } from '@/utils/validatePassword'
-import { authNotifications } from '@/utils/notifications'
+import { authNotifications, showSuccessNotification } from '@/utils/notifications'
+import { showErrorResetPasswordNotification } from '@/utils/errorNotification'
 
 interface ResetPasswordFormValues {
     newPassword: string
@@ -51,11 +52,21 @@ const ResetPasswordPage = () => {
         setError(null)
 
         try {
-            await authService.resetPassword({
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            const response = await authService.resetPassword({
                 token,
                 newPassword: values.newPassword,
                 confirmPassword: values.confirmPassword
             })
+
+            if ('code' in response) {
+                showErrorResetPasswordNotification(response.code as string)
+            } else {
+                showSuccessNotification({
+                    title: 'Đặt lại mật khẩu',
+                    message: 'Đặt lại mật khẩu thành công'
+                })
+            }
 
             setSuccess(true)
             authNotifications.passwordResetSuccess()

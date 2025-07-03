@@ -14,8 +14,8 @@ const PREFIX = 'api/v1'
 // Auth service functions
 export const authService = {
     // Login user with email and password
-    login: async (credentials: LoginRequest): Promise<LoginApiResponse> => {
-        return authUtils.post<LoginApiResponse>(`${PREFIX}/auth/login`, credentials)
+    login: async (credentials: LoginRequest): Promise<LoginApiResponse | {code: string, message: string, status: number}> => {
+        return authUtils.post<LoginApiResponse | {code: string, message: string, status: number}>(`${PREFIX}/auth/login`, credentials)
     },
 
     // Get current user profile

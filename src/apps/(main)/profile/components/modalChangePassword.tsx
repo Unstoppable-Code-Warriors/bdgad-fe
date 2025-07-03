@@ -5,12 +5,17 @@ import {
     Button,
     Group,
     Stack,
-    Text
+    Text,
+    List,
+    ThemeIcon,
+    Box
 } from '@mantine/core'
-import { IconLock } from '@tabler/icons-react'
+import { IconLock, IconCheck, IconX } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
 import { authService } from '@/services/function/auth'
-import { showErrorNotification, showSuccessNotification } from '@/utils/notifications'
+import { showSuccessNotification } from '@/utils/notifications'
+import { showErrorChangePasswordNotification } from '@/utils/errorNotification'
+import { validatePassword } from '@/utils/validatePassword'
 import { HTTPError } from 'ky'
 
 interface ModalChangePasswordProps {
@@ -20,7 +25,7 @@ interface ModalChangePasswordProps {
 
 const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
     const [isLoading, setIsLoading] = useState(false)
-
+    const [error, setError] = useState<string | null>(null)
     const form = useForm({
         initialValues: {
             currentPassword: '',
@@ -30,17 +35,9 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
         validate: {
             currentPassword: (value) => (value.length === 0 ? 'Mật khẩu hiện tại không được để trống' : null),
             newPassword: (value) => {
-                if (value.length < 8) {
-                    return 'Mật khẩu phải có ít nhất 8 ký tự'
-                }
-                if (!/(?=.*[a-z])/.test(value)) {
-                    return 'Mật khẩu phải chứa ít nhất một chữ cái thường'
-                }
-                if (!/(?=.*[A-Z])/.test(value)) {
-                    return 'Mật khẩu phải chứa ít nhất một chữ cái hoa'
-                }
-                if (!/(?=.*\d)/.test(value)) {
-                    return 'Mật khẩu phải chứa ít nhất một số'
+                const validation = validatePassword(value)
+                if (!validation.isValid) {
+                    return validation.errors[0]
                 }
                 return null
             },
@@ -56,32 +53,55 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
         }
     })
 
+
     const handleChangePassword = async (values: typeof form.values) => {
         try {
             setIsLoading(true)
-            await new Promise(resolve => setTimeout(resolve, 1000))
             const response = await authService.changePassword({
                 currentPassword: values.currentPassword,
                 newPassword: values.newPassword,
                 confirmPassword: values.confirmPassword
             })
             
-            showSuccessNotification({
-                title: 'Đổi mật khẩu',
-                message: response.message || 'Đổi mật khẩu thành công'
-            })
+            if (response.code) {
+              switch (response.code) {
+                case 'USER_NOT_AUTHENTICATED':
+                    setError('Bạn chưa đăng nhập tài khoản')
+                  break
+                case 'USER_NOT_FOUND':
+                  setError('Không tìm thấy thông tin tài khoản')
+                  break
+                case 'ACCOUNT_INACTIVE':
+                  setError('Tài khoản đã bị vô hiệu hóa')
+                  break
+                case 'PASSWORD_MISMATCH':
+                  setError('Mật khẩu hiện tại không chính xác')
+                  break
+                case 'SAME_PASSWORD':
+                  setError('Mật khẩu mới không được trùng với mật khẩu hiện tại')
+                  break
+                default:
+                  setError('Lỗi đổi mật khẩu không xác định')
+              }
+            } else {
+                showSuccessNotification({
+                    title: 'Đổi mật khẩu',
+                    message: 'Đổi mật khẩu thành công'
+                })
+                handleClose()
+            }
             
-            handleClose()
         } catch (err: unknown) {
             console.error('Error changing password:', err)
             if (err instanceof HTTPError) {
                 const errorData = (err as any).errorData
-                if (errorData && typeof errorData === 'object') {
-                    showErrorNotification({
-                        title: 'Đổi mật khẩu thất bại',
-                        message: errorData.message || 'Đổi mật khẩu thất bại'
-                    })
+                if (errorData && typeof errorData === 'object' && errorData.code) {
+                    showErrorChangePasswordNotification(errorData.code)
+                } else {
+                    showErrorChangePasswordNotification('UNKNOWN_ERROR')
                 }
+            } else {
+                showErrorChangePasswordNotification('UNKNOWN_ERROR')
             }
         } finally {
             setIsLoading(false)
@@ -112,6 +132,7 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
                     <Text size='sm' c='dimmed'>
                         Cập nhật mật khẩu của bạn để bảo vệ tài khoản
                     </Text>
+                    {error && <Text size='sm' c='red'>{error}</Text>}
 
                     <PasswordInput
                         label='Mật khẩu hiện tại'
@@ -148,6 +169,46 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
                             }
                         }}
                     />
+
+                    {form.values.newPassword && (
+                        <Box>
+                            <Text size='sm' fw={500} mb={5}>
+                                Yêu cầu mật khẩu:
+                            </Text>
+                            <List spacing='xs' size='sm'>
+                                {[
+                                    { text: 'Ít nhất 8 ký tự', test: (pwd: string) => pwd.length >= 8 },
+                                    { text: 'Một chữ cái thường (a-z)', test: (pwd: string) => /[a-z]/.test(pwd) },
+                                    { text: 'Một chữ cái hoa (A-Z)', test: (pwd: string) => /[A-Z]/.test(pwd) },
+                                    { text: 'Một chữ số (0-9)', test: (pwd: string) => /\d/.test(pwd) },
+                                    { text: 'Một ký tự đặc biệt (!@#$%^&*)', test: (pwd: string) => /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(pwd) }
+                                ].map((req, index) => {
+                                    const isMet = req.test(form.values.newPassword)
+                                    
+                                    return (
+                                        <List.Item
+                                            key={index}
+                                            icon={
+                                                <ThemeIcon
+                                                    color={isMet ? 'green' : 'red'}
+                                                    size={16}
+                                                    radius='xl'
+                                                    variant='light'
+                                                >
+                                                    {isMet ? <IconCheck size={10} /> : <IconX size={10} />}
+                                                </ThemeIcon>
+                                            }
+                                        >
+                                            <Text size='sm' c={isMet ? 'green' : 'red'}>
+                                                {req.text}
+                                            </Text>
+                                        </List.Item>
+                                    )
+                                })}
+                            </List>
+                        </Box>
+                    )}
+                    
 
                     <PasswordInput
                         label='Xác nhận mật khẩu mới'

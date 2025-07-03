@@ -19,6 +19,7 @@ export interface ApiResponse<T = any> {
     data?: T
     message?: string
     error?: string
+    code?: string
 }
 
 // Login API response (actual structure from the API)

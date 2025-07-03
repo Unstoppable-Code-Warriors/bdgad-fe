@@ -6,6 +6,7 @@ import { authService } from '@/services/function/auth'
 import { Link } from 'react-router'
 import { showSuccessNotification } from '@/utils/notifications'
 import { HTTPError } from 'ky';
+import { showErrorForgotPasswordNotification } from '@/utils/errorNotification'
 
 interface ForgotPasswordFormValues {
     email: string
@@ -40,10 +41,13 @@ const ForgotPasswordPage = () => {
                 email: values.email,
                 redirectUrl
             })
+            if ('code' in response) {
+                showErrorForgotPasswordNotification(response.code as string)
+            } else {
             showSuccessNotification({
                 title: 'Đặt lại mật khẩu',
-                message: response.message || 'Đặt lại mật khẩu thành công'
-            })
+                message: 'Đặt lại mật khẩu thành công'
+            })}
             setSuccess(true)
             
 

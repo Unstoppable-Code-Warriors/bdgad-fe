@@ -7,6 +7,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router'
 import { passwordValidator, validatePassword, getPasswordRequirementsText } from '@/utils/validatePassword'
 import { showSuccessNotification } from '@/utils/notifications'
 import { HTTPError } from 'ky'
+import { showErrorResetPasswordNotification } from '@/utils/errorNotification'
 
 interface NewPasswordFormValues {
     newPassword: string
@@ -59,10 +60,13 @@ const NewPasswordPage = () => {
                 confirmPassword: values.confirmPassword
             })
 
+            if ('code' in response) {
+                showErrorResetPasswordNotification(response.code as string)
+            } else {
             showSuccessNotification({
                 title: 'Tạo mật khẩu thành công',
-                message: response.message || 'Mật khẩu của bạn đã được tạo thành công'
-            })
+                message: 'Mật khẩu của bạn đã được tạo thành công'
+            })}
 
             setSuccess(true)
         } catch (err) {

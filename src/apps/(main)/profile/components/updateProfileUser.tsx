@@ -16,6 +16,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { authService } from '@/services/function/auth'
 import { showErrorNotification, showSuccessNotification } from '@/utils/notifications'
 import { HTTPError } from 'ky'
+import { showErrorUpdateProfileNotification } from '@/utils/errorNotification'
 
 interface UpdateProfileUserProps {
     userProfile: any
@@ -98,11 +99,14 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
                 address: values.address
             })
 
+            if ('code' in response) {
+                showErrorUpdateProfileNotification(response.code as string)
+            } else {
             showSuccessNotification({
                 title: 'Cập nhật thông tin',
-                message: response.message || 'Cập nhật thông tin thành công'
+                message: 'Cập nhật thông tin thành công'
             })
-
+            }
             // Refresh user data
             queryClient.invalidateQueries({ queryKey: ['user'] })
         } catch (err: unknown) {
