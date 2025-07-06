@@ -1,71 +1,101 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Container, Stack } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
 import PageHeader from './components/PageHeader'
 import FileStatistics from './components/FileStatistics'
 import FileGrid from './components/FileGrid'
 import ImportFileModal from './components/ImportFileModal'
+import { staffService } from '@/services/function/staff'
 
 type FileWithPath = File & { path?: string }
 
-const mockImportFiles = [
-    {
-        id: 'f1',
-        name: 'Patient_General_Data.xlsx',
-        type: 'excel',
-        size: '2.5 MB',
-        uploadedAt: '2024-01-15'
-    },
-    {
-        id: 'f2',
-        name: 'Processed_Patient_Data.xlsx',
-        type: 'excel',
-        size: '1.8 MB',
-        uploadedAt: '2024-01-16'
-    },
-    {
-        id: 'f3',
-        name: 'Hospital_Data_Import.csv',
-        type: 'csv',
-        size: '0.5 MB',
-        uploadedAt: '2024-01-17'
-    },
-    {
-        id: 'f4',
-        name: 'Import_Report.pdf',
-        type: 'pdf',
-        size: '1.2 MB',
-        uploadedAt: '2024-01-18'
-    },
-    {
-        id: 'f5',
-        name: 'Medical_Records_Batch.xlsx',
-        type: 'excel',
-        size: '5.2 MB',
-        uploadedAt: '2024-01-16'
-    },
-    {
-        id: 'f6',
-        name: 'Error_Log.txt',
-        type: 'text',
-        size: '0.8 MB',
-        uploadedAt: '2024-01-17'
-    }
-]
-
 const InputGeneralDataPage = () => {
-    const [files, setFiles] = useState<any[]>(mockImportFiles)
+    const [files, setFiles] = useState<any[]>([])
     const [importModalOpened, setImportModalOpened] = useState(false)
+    const [, setLoading] = useState(false)
 
-    const handleViewFile = (fileId: string) => {
-        console.log('View file:', fileId)
+    // Load files on component mount
+    useEffect(() => {
+        loadFiles()
+    }, [])
+
+    const loadFiles = async () => {
+        try {
+            setLoading(true)
+            const response = await staffService.getAllGeneralFiles()
+            setFiles(response.data || response || [])
+        } catch (error) {
+            console.error('Error loading files:', error)
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to load files',
+                color: 'red'
+            })
+        } finally {
+            setLoading(false)
+        }
     }
 
-    const handleDownloadFile = (fileId: string) => {
-        console.log('Download file:', fileId)
+    const handleViewFile = async (fileId: string) => {
+        try {
+            const fileData = await staffService.getGeneralFile(fileId)
+            console.log('File data:', fileData)
+            // Handle file viewing logic here
+        } catch (error) {
+            console.error('Error viewing file:', error)
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to view file',
+                color: 'red'
+            })
+        }
     }
 
-    const handleDeleteFile = (fileId: string) => {
-        setFiles(prev => prev.filter(file => file.id !== fileId))
+    const handleDownloadFile = async (fileId: string) => {
+        try {
+            const blob = await staffService.downloadGeneralFile(fileId)
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `file-${fileId}`
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+            
+            notifications.show({
+                title: 'Success',
+                message: 'File downloaded successfully',
+                color: 'green'
+            })
+        } catch (error) {
+            console.error('Error downloading file:', error)
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to download file',
+                color: 'red'
+            })
+        }
+    }
+
+    const handleDeleteFile = async (fileId: string) => {
+        try {
+            await staffService.deleteGeneralFile(fileId)
+            setFiles(prev => prev.filter(file => file.id !== fileId))
+            
+            notifications.show({
+                title: 'Success',
+                message: 'File deleted successfully',
+                color: 'green'
+            })
+        } catch (error) {
+            console.error('Error deleting file:', error)
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to delete file',
+                color: 'red'
+            })
+        }
     }
 
     const handleImport = () => {
@@ -73,17 +103,36 @@ const InputGeneralDataPage = () => {
     }
 
     const handleImportFiles = async (uploadedFiles: FileWithPath[]) => {
-        // Simulate file upload and processing
-        const newFiles = uploadedFiles.map((file, index) => ({
-            id: `f${files.length + index + 1}`,
-            name: file.name,
-            type: file.name.split('.').pop()?.toLowerCase() || 'unknown',
-            size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-            uploadedAt: new Date().toISOString().split('T')[0]
-        }))
-
-        setFiles(prev => [...prev, ...newFiles])
-        console.log('Files imported successfully:', newFiles)
+        try {
+            setLoading(true)
+            
+            // Upload each file using the API
+            const uploadPromises = uploadedFiles.map(file => 
+                staffService.uploadGeneralFile(file)
+            )
+            
+            await Promise.all(uploadPromises)
+            
+            // Reload files after successful upload
+            await loadFiles()
+            
+            notifications.show({
+                title: 'Success',
+                message: `${uploadedFiles.length} file(s) uploaded successfully`,
+                color: 'green'
+            })
+            
+            setImportModalOpened(false)
+        } catch (error) {
+            console.error('Error uploading files:', error)
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to upload files',
+                color: 'red'
+            })
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
