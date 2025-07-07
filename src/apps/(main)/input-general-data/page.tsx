@@ -14,7 +14,7 @@ const InputGeneralDataPage = () => {
     const [importModalOpened, setImportModalOpened] = useState(false)
     const [, setLoading] = useState(false)
     const [viewModalOpened, setViewModalOpened] = useState(false)
-    const [selectedFile, setSelectedFile] = useState<any>(null)
+    const [selectedFile, ] = useState<any>(null)
 
     // Load files on component mount
     useEffect(() => {
@@ -38,20 +38,6 @@ const InputGeneralDataPage = () => {
         }
     }
 
-    const handleViewFile = async (fileId: string) => {
-        try {
-            const fileData = await staffService.getGeneralFile(fileId)
-            setSelectedFile(fileData.data || fileData)
-            setViewModalOpened(true)
-        } catch (error) {
-            console.error('Error viewing file:', error)
-            notifications.show({
-                title: 'Lỗi',
-                message: 'Không thể xem thông tin tệp tin',
-                color: 'red'
-            })
-        }
-    }
 
     const handleDownloadFile = async (fileId: string) => {
         try {
@@ -154,7 +140,6 @@ const InputGeneralDataPage = () => {
 
                 <FileGrid
                     files={files}
-                    onViewFile={handleViewFile}
                     onDownloadFile={handleDownloadFile}
                     onDeleteFile={handleDeleteFile}
                 />

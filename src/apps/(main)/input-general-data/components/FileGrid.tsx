@@ -5,23 +5,25 @@ import FileCard from './FileCard'
 interface FileGridProps {
     files: Array<{
         id: string
-        name: string
-        type: string
-        size: string
+        fileName: string
+        fileType: string
+        filePath: string 
+        fileSize: string
         uploadedAt: string
+        uploader?: any
     }>
-    onViewFile: (fileId: string) => void
     onDownloadFile: (fileId: string) => void
     onDeleteFile: (fileId: string) => void
+    loading?: boolean
 }
 
-const FileGrid = ({ files, onViewFile, onDownloadFile, onDeleteFile }: FileGridProps) => {
+const FileGrid = ({ files, onDownloadFile, onDeleteFile, loading }: FileGridProps) => {
     if (files.length === 0) {
         return (
             <Paper p="xl" ta="center" withBorder>
                 <IconFile size={48} color="gray" />
                 <Text size="sm" c="dimmed" mt="md">
-                    Chưa có file nào
+                    {loading ? 'Đang tải...' : 'Chưa có file nào'}
                 </Text>
             </Paper>
         )
@@ -32,8 +34,15 @@ const FileGrid = ({ files, onViewFile, onDownloadFile, onDeleteFile }: FileGridP
             {files.map((file) => (
                 <Grid.Col key={file.id} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
                     <FileCard
-                        file={file}
-                        onView={onViewFile}
+                        file={{
+                            id: file.id,
+                            fileName: file.fileName,
+                            filePath: file.filePath, 
+                            fileType: file.fileType,
+                            fileSize: file.fileSize,
+                            uploadedAt: file.uploadedAt,
+                            uploader: file.uploader || null
+                        }}
                         onDownload={onDownloadFile}
                         onDelete={onDeleteFile}
                     />
