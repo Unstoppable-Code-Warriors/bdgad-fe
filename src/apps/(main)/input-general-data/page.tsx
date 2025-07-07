@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Container, Stack, Modal, Text, Button, Group } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
-import { modals } from '@mantine/modals'
 import PageHeader from './components/PageHeader'
 import FileStatistics from './components/FileStatistics'
 import FileGrid from './components/FileGrid'
@@ -13,7 +12,7 @@ type FileWithPath = File & { path?: string }
 const InputGeneralDataPage = () => {
     const [files, setFiles] = useState<any[]>([])
     const [importModalOpened, setImportModalOpened] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [, setLoading] = useState(false)
     const [viewModalOpened, setViewModalOpened] = useState(false)
     const [selectedFile, setSelectedFile] = useState<any>(null)
 
