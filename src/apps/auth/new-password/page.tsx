@@ -5,9 +5,8 @@ import { IconLock, IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react
 import { authService } from '@/services/function/auth'
 import { Link, useSearchParams, useNavigate } from 'react-router'
 import { passwordValidator, validatePassword, getPasswordRequirementsText } from '@/utils/validatePassword'
-import { showSuccessNotification } from '@/utils/notifications'
-import { HTTPError } from 'ky'
-import { showErrorResetPasswordNotification } from '@/utils/errorNotification'
+import { authNotifications } from '@/utils/notifications'
+import { getResetPasswordErrorMessage } from '@/utils/error'
 
 interface NewPasswordFormValues {
     newPassword: string
@@ -45,7 +44,7 @@ const NewPasswordPage = () => {
 
     const handleCreatePassword = async (values: NewPasswordFormValues) => {
         if (!token) {
-            setError('Link tạo mất khẩu không hợp lệ.')
+            setError('Link tạo mật khẩu không hợp lệ.')
             return
         }
 
@@ -61,22 +60,14 @@ const NewPasswordPage = () => {
             })
 
             if ('code' in response) {
-                showErrorResetPasswordNotification(response.code as string)
+                setError(getResetPasswordErrorMessage(response.code as string))
             } else {
-            showSuccessNotification({
-                title: 'Tạo mật khẩu thành công',
-                message: 'Mật khẩu của bạn đã được tạo thành công'
-            })}
-
-            setSuccess(true)
+                authNotifications.passwordResetSuccess()
+                setSuccess(true)
+            }
         } catch (err) {
             console.error("Lỗi tạo lại mật khẩu :",err)
-            if (err instanceof HTTPError) {
-                const errorData = (err as any).errorData
-                if (errorData && typeof errorData === 'object') {
-                    setError(errorData.message || 'Mật khẩu của bạn đã được tạo thành công')
-                }
-            }
+            setError('Đã xảy ra lỗi khi tạo mật khẩu mới. Vui lòng thử lại.')
         } finally {
             setLoading(false)
         }

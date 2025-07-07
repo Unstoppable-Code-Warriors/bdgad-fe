@@ -19,8 +19,7 @@ import { setTokensOutside } from '@/stores/auth.store'
 import { Link, useNavigate } from 'react-router'
 import { emailValidator, normalizeEmail, suggestEmailCorrection } from '@/utils/validateEmail'
 import { authNotifications, showErrorNotification } from '@/utils/notifications'
-import { handleAuthError } from '@/utils/error'
-import { HTTPError } from 'ky'
+import { getLoginErrorMessage } from '@/utils/error'
 
 interface LoginFormValues {
     email: string
@@ -41,7 +40,7 @@ const LoginPage = () => {
         validate: {
             email: emailValidator,
             password: (value) => {
-                if (!value) return 'Password is required'
+                if (!value) return 'Mật khẩu là bắt buộc'
                 return null
             }
         }
@@ -76,7 +75,7 @@ const LoginPage = () => {
 
             const response = await authService.login(normalizedValues)
             if ('code' in response) {
-                setError(handleAuthError(response))
+                setError(getLoginErrorMessage(response.code as string))
             } else {
                 setTokensOutside(response.data.token)
                 authNotifications.loginSuccess()
@@ -84,12 +83,7 @@ const LoginPage = () => {
             }
         } catch (err) {
             console.error('Error login:', err)
-            if (err instanceof HTTPError) {
-                const errorData = (err as any).errorData
-                setError(handleAuthError(errorData))
-            } else {
-                setError('Đã xảy ra lỗi không xác định')
-            }
+            setError('Lỗi đăng nhập. Vui lòng thử lại.')
         } finally {
             setLoading(false)
         }
@@ -105,10 +99,10 @@ const LoginPage = () => {
 
             await new Promise((resolve) => setTimeout(resolve, 1000))
         } catch (err) {
-            setError('Failed to login with Google. Please try again.')
+            setError('Đăng nhập với Google thất bại. Vui lòng thử lại.')
             showErrorNotification({
-                title: 'Google login failed',
-                message: 'Failed to login with Google. Please try again.'
+                title: 'Đăng nhập Google thất bại',
+                message: 'Đăng nhập với Google thất bại. Vui lòng thử lại.'
             })
         } finally {
             setLoading(false)
@@ -118,10 +112,10 @@ const LoginPage = () => {
     return (
         <Container size={420} my={40}>
             <Title ta='center' order={1} mb='md'>
-                Welcome back!
+                Chào mừng trở lại!
             </Title>
             <Text c='dimmed' size='sm' ta='center' mb='xl'>
-                Sign in to your account to continue
+                Đăng nhập vào tài khoản của bạn để tiếp tục
             </Text>
 
             <Paper withBorder shadow='md' p={30} mt={30} radius='md'>
@@ -151,29 +145,29 @@ const LoginPage = () => {
                                     style={{ cursor: 'pointer' }}
                                     onClick={handleEmailSuggestionClick}
                                 >
-                                    Did you mean: {emailSuggestion}?
+                                    Ý bạn là: {emailSuggestion}?
                                 </Text>
                             )}
                         </div>
 
                         <PasswordInput
-                            label='Password'
-                            placeholder='Your password'
+                            label='Mật khẩu'
+                            placeholder='Mật khẩu của bạn'
                             leftSection={<IconLock size='1rem' />}
                             {...form.getInputProps('password')}
                         />
 
                         <Button type='submit' fullWidth mt='md' loading={loading} disabled={loading}>
-                            Sign in
+                            Đăng nhập
                         </Button>
 
                         <Text ta='center' mt='xs'>
                             <Anchor component={Link} to='/auth/forgot-password' c='dimmed' size='sm'>
-                                Forgot your password?
+                                Quên mật khẩu?
                             </Anchor>
                         </Text>
 
-                        <Divider label='Or continue with' labelPosition='center' my='lg' />
+                        <Divider label='Hoặc tiếp tục với' labelPosition='center' my='lg' />
 
                         <Button
                             variant='outline'
@@ -183,7 +177,7 @@ const LoginPage = () => {
                             loading={loading}
                             disabled={loading}
                         >
-                            Continue with Google
+                            Đăng nhập với Google
                         </Button>
                     </Stack>
                 </form>

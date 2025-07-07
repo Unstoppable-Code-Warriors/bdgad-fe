@@ -13,11 +13,9 @@ import {
 import { IconLock, IconCheck, IconX } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
 import { authService } from '@/services/function/auth'
-import { showSuccessNotification } from '@/utils/notifications'
-import { showErrorChangePasswordNotification } from '@/utils/errorNotification'
+import { authNotifications } from '@/utils/notifications'
 import { validatePassword } from '@/utils/validatePassword'
-import { HTTPError } from 'ky'
-
+import { getChangePasswordErrorMessage } from '@/utils/error'
 interface ModalChangePasswordProps {
     opened: boolean
     onClose: () => void
@@ -64,45 +62,15 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
             })
             
             if (response.code) {
-              switch (response.code) {
-                case 'USER_NOT_AUTHENTICATED':
-                    setError('Bạn chưa đăng nhập tài khoản')
-                  break
-                case 'USER_NOT_FOUND':
-                  setError('Không tìm thấy thông tin tài khoản')
-                  break
-                case 'ACCOUNT_INACTIVE':
-                  setError('Tài khoản đã bị vô hiệu hóa')
-                  break
-                case 'PASSWORD_MISMATCH':
-                  setError('Mật khẩu hiện tại không chính xác')
-                  break
-                case 'SAME_PASSWORD':
-                  setError('Mật khẩu mới không được trùng với mật khẩu hiện tại')
-                  break
-                default:
-                  setError('Lỗi đổi mật khẩu không xác định')
-              }
+                setError(getChangePasswordErrorMessage(response.code))
             } else {
-                showSuccessNotification({
-                    title: 'Đổi mật khẩu',
-                    message: 'Đổi mật khẩu thành công'
-                })
+                authNotifications.changePasswordSuccess()
                 handleClose()
             }
             
         } catch (err: unknown) {
             console.error('Error changing password:', err)
-            if (err instanceof HTTPError) {
-                const errorData = (err as any).errorData
-                if (errorData && typeof errorData === 'object' && errorData.code) {
-                    showErrorChangePasswordNotification(errorData.code)
-                } else {
-                    showErrorChangePasswordNotification('UNKNOWN_ERROR')
-                }
-            } else {
-                showErrorChangePasswordNotification('UNKNOWN_ERROR')
-            }
+            setError('Đã xảy ra lỗi khi đổi mật khẩu. Vui lòng thử lại.')
         } finally {
             setIsLoading(false)
         }
@@ -253,4 +221,4 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
     )
 }
 
-export default ModalChangePassword 
+export default ModalChangePassword

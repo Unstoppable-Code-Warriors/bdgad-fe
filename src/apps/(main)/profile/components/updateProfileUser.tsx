@@ -8,15 +8,16 @@ import {
     Button,
     Grid,
     Box,
-    TextInput
+    TextInput,
+    Alert
 } from '@mantine/core'
-import { IconUser, IconMail, IconPhone, IconMapPin, IconLock, IconShield, IconDeviceFloppy } from '@tabler/icons-react'
+import { IconUser, IconMail, IconPhone, IconMapPin, IconLock, IconShield, IconDeviceFloppy, IconAlertCircle } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
 import { useQueryClient } from '@tanstack/react-query'
 import { authService } from '@/services/function/auth'
-import { showErrorNotification, showSuccessNotification } from '@/utils/notifications'
-import { HTTPError } from 'ky'
-import { showErrorUpdateProfileNotification } from '@/utils/errorNotification'
+import { showSuccessNotification } from '@/utils/notifications'
+import { getUpdateProfileErrorMessage } from '@/utils/error'
+import { validatePhone, normalizePhone } from '@/utils/validatePhone'
 
 interface UpdateProfileUserProps {
     userProfile: any
@@ -26,6 +27,7 @@ interface UpdateProfileUserProps {
 const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onChangePassword }) => {
     const queryClient = useQueryClient()
     const [isLoadingUpdateProfile, setIsLoadingUpdateProfile] = useState<boolean>(false)
+    const [error, setError] = useState<string | null>(null)
 
     // Form for profile updates
     const form = useForm({
@@ -48,21 +50,7 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
                 }
                 return null
             },
-            phone: (value) => {
-                if (!value) return null // Phone is optional
-                
-                if (!value.startsWith('+')) {
-                    return 'Số điện thoại phải bắt đầu bằng dấu + và mã quốc gia'
-                }
-                if (value.length < 12 || value.length > 13) {
-                    return 'Số điện thoại phải có từ 12 đến 13 ký tự'
-                }
-                // Check if contains only + at start and numbers, no spaces
-                if (!/^\+\d{11,12}$/.test(value)) {
-                    return 'Số điện thoại chỉ được chứa dấu + và các chữ số, không có khoảng trắng'
-                }
-                return null
-            },
+            phone: validatePhone,
             address: (value) => {
                 if (!value) return null // Address is optional
                 
@@ -92,34 +80,27 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
     const handleUpdateProfile = async (values: typeof form.values) => {
         try {
             setIsLoadingUpdateProfile(true)
+            setError(null)
             await new Promise(resolve => setTimeout(resolve, 1000))
             const response = await authService.updateProfile({
                 name: values.name,
-                phone: values.phone,
+                phone: values.phone ? normalizePhone(values.phone) : '',
                 address: values.address
             })
 
             if ('code' in response) {
-                showErrorUpdateProfileNotification(response.code as string)
+                setError(getUpdateProfileErrorMessage(response.code as string))
             } else {
-            showSuccessNotification({
-                title: 'Cập nhật thông tin',
-                message: 'Cập nhật thông tin thành công'
-            })
+                showSuccessNotification({
+                    title: 'Cập nhật thông tin',
+                    message: 'Cập nhật thông tin thành công'
+                })
+                // Refresh user data
+                queryClient.invalidateQueries({ queryKey: ['user'] })
             }
-            // Refresh user data
-            queryClient.invalidateQueries({ queryKey: ['user'] })
         } catch (err: unknown) {
             console.error('Error updating profile:', err)
-            if (err instanceof HTTPError) {
-                const errorData = (err as any).errorData
-                if (errorData && typeof errorData === 'object') {
-                    showErrorNotification({
-                        title: 'Cập nhật thất bại',
-                        message: errorData.message || 'Không thể cập nhật thông tin'
-                    })
-                }
-            }
+            setError('Đã xảy ra lỗi khi cập nhật thông tin. Vui lòng thử lại sau.')
         } finally {
             setIsLoadingUpdateProfile(false)
         }
@@ -153,6 +134,12 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
                         </Button>
                     </Group>
                 </Group>
+
+                {error && (
+                    <Alert icon={<IconAlertCircle size='1rem' />} color='red' mb='md' variant='light'>
+                        {error}
+                    </Alert>
+                )}
 
                 <Grid>
                     <Grid.Col span={{ base: 12, md: 6 }}>
@@ -255,8 +242,6 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
                         </Box>
                     </Grid.Col>
 
-                    
-
                     <Grid.Col span={{ base: 12, md: 6 }}>
                         <TextInput
                             label={
@@ -267,7 +252,7 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
                                     </Text>
                                 </Group>
                             }
-                            placeholder='Nhập số điện thoại'
+                            placeholder='Nhập số điện thoại (10 chữ số)'
                             radius='md'
                             {...form.getInputProps('phone')}
                             disabled={isLoadingUpdateProfile}
@@ -329,4 +314,4 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
     )
 }
 
-export default UpdateProfileUser 
+export default UpdateProfileUser

@@ -5,8 +5,8 @@ import { IconLock, IconAlertCircle, IconCheck, IconX } from '@tabler/icons-react
 import { authService } from '@/services/function/auth'
 import { Link, useSearchParams, useNavigate } from 'react-router'
 import { passwordValidator, validatePassword, getPasswordRequirementsText } from '@/utils/validatePassword'
-import { authNotifications, showSuccessNotification } from '@/utils/notifications'
-import { showErrorResetPasswordNotification } from '@/utils/errorNotification'
+import { authNotifications } from '@/utils/notifications'
+import { getResetPasswordErrorMessage } from '@/utils/error'
 
 interface ResetPasswordFormValues {
     newPassword: string
@@ -29,8 +29,8 @@ const ResetPasswordPage = () => {
         validate: {
             newPassword: (value) => passwordValidator(value),
             confirmPassword: (value, values) => {
-                if (!value) return 'Please confirm your password'
-                if (value !== values.newPassword) return 'Passwords do not match'
+                if (!value) return 'Vui lòng xác nhận mật khẩu'
+                if (value !== values.newPassword) return 'Mật khẩu xác nhận không khớp'
                 return null
             }
         }
@@ -38,13 +38,13 @@ const ResetPasswordPage = () => {
 
     useEffect(() => {
         if (!token) {
-            setError('Invalid or missing reset token. Please request a new password reset.')
+            setError('Mã xác thực không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu đặt lại mật khẩu mới.')
         }
     }, [token])
 
     const handleResetPassword = async (values: ResetPasswordFormValues) => {
         if (!token) {
-            setError('Invalid or missing reset token.')
+            setError('Mã xác thực không hợp lệ hoặc đã hết hạn.')
             return
         }
 
@@ -60,21 +60,14 @@ const ResetPasswordPage = () => {
             })
 
             if ('code' in response) {
-                showErrorResetPasswordNotification(response.code as string)
+                setError(getResetPasswordErrorMessage(response.code as string))
             } else {
-                showSuccessNotification({
-                    title: 'Đặt lại mật khẩu',
-                    message: 'Đặt lại mật khẩu thành công'
-                })
+                authNotifications.passwordResetSuccess()
+                setSuccess(true)
             }
-
-            setSuccess(true)
-            authNotifications.passwordResetSuccess()
         } catch (err) {
             console.error(err)
-            const errorMessage = 'Failed to reset password. The token may be expired or invalid.'
-            setError(errorMessage)
-            authNotifications.passwordResetError()
+            setError('Đã xảy ra lỗi khi đặt lại mật khẩu. Mã xác thực có thể đã hết hạn hoặc không hợp lệ.')
         } finally {
             setLoading(false)
         }
@@ -95,24 +88,24 @@ const ResetPasswordPage = () => {
         return (
             <Container size={420} my={40}>
                 <Title ta='center' order={1} mb='md'>
-                    Password Reset Complete
+                    Đặt lại mật khẩu thành công
                 </Title>
                 <Text c='dimmed' size='sm' ta='center' mb='xl'>
-                    Your password has been successfully updated
+                    Mật khẩu của bạn đã được cập nhật thành công
                 </Text>
 
                 <Paper withBorder shadow='md' p={30} mt={30} radius='md'>
                     <Alert icon={<IconCheck size='1rem' />} color='green' mb='md' variant='light'>
-                        Your password has been reset successfully!
+                        Mật khẩu của bạn đã được đặt lại thành công!
                     </Alert>
 
                     <Stack gap='md'>
                         <Text size='sm' c='dimmed' ta='center'>
-                            You can now sign in with your new password.
+                            Bạn có thể đăng nhập với mật khẩu mới của mình.
                         </Text>
 
                         <Button fullWidth onClick={handleGoToLogin}>
-                            Go to Login
+                            Đi đến trang đăng nhập
                         </Button>
                     </Stack>
                 </Paper>
@@ -123,10 +116,10 @@ const ResetPasswordPage = () => {
     return (
         <Container size={420} my={40}>
             <Title ta='center' order={1} mb='md'>
-                Reset Your Password
+                Đặt lại mật khẩu
             </Title>
             <Text c='dimmed' size='sm' ta='center' mb='xl'>
-                Enter your new password below
+                Nhập mật khẩu mới của bạn bên dưới
             </Text>
 
             <Paper withBorder shadow='md' p={30} mt={30} radius='md'>
@@ -139,13 +132,13 @@ const ResetPasswordPage = () => {
                 {!token ? (
                     <Stack gap='md'>
                         <Text ta='center' c='dimmed'>
-                            This reset link is invalid or has expired.
+                            Liên kết đặt lại này không hợp lệ hoặc đã hết hạn.
                         </Text>
                         <Anchor component={Link} to='/auth/forgot-password' ta='center'>
-                            Request a new password reset
+                            Yêu cầu đặt lại mật khẩu mới
                         </Anchor>
                         <Anchor component={Link} to='/auth/login' ta='center' c='dimmed' size='sm'>
-                            Back to login
+                            Quay lại đăng nhập
                         </Anchor>
                     </Stack>
                 ) : (
@@ -153,8 +146,8 @@ const ResetPasswordPage = () => {
                         <Stack gap='md'>
                             <div>
                                 <PasswordInput
-                                    label='New Password'
-                                    placeholder='Enter your new password'
+                                    label='Mật khẩu mới'
+                                    placeholder='Nhập mật khẩu mới của bạn'
                                     leftSection={<IconLock size='1rem' />}
                                     {...form.getInputProps('newPassword')}
                                 />
@@ -162,7 +155,7 @@ const ResetPasswordPage = () => {
                                 {/* Password Requirements */}
                                 <Paper p='sm' mt='xs' bg='gray.0' radius='sm'>
                                     <Text size='xs' fw={500} mb='xs' c='dimmed'>
-                                        Password must contain:
+                                        Mật khẩu phải chứa:
                                     </Text>
                                     <List size='xs' spacing='2px'>
                                         {passwordRequirements.map((req, index) => {
@@ -209,8 +202,8 @@ const ResetPasswordPage = () => {
                             </div>
 
                             <PasswordInput
-                                label='Confirm New Password'
-                                placeholder='Confirm your new password'
+                                label='Xác nhận mật khẩu mới'
+                                placeholder='Xác nhận mật khẩu mới của bạn'
                                 leftSection={<IconLock size='1rem' />}
                                 {...form.getInputProps('confirmPassword')}
                             />
@@ -222,12 +215,12 @@ const ResetPasswordPage = () => {
                                 loading={loading} 
                                 disabled={loading || (!!passwordValidation && !passwordValidation.isValid)}
                             >
-                                Reset Password
+                                Đặt lại mật khẩu
                             </Button>
 
                             <Text ta='center' mt='xs'>
                                 <Anchor component={Link} to='/auth/login' c='dimmed' size='sm'>
-                                    Back to login
+                                    Quay lại đăng nhập
                                 </Anchor>
                             </Text>
                         </Stack>

@@ -4,8 +4,7 @@ import { useForm } from '@mantine/form'
 import { IconMail, IconAlertCircle, IconCheck } from '@tabler/icons-react'
 import { authService } from '@/services/function/auth'
 import { Link } from 'react-router'
-import { showSuccessNotification } from '@/utils/notifications'
-import { HTTPError } from 'ky'
+import { authNotifications } from '@/utils/notifications'
 import { getForgotPasswordErrorMessage } from '@/utils/error'
 import { emailValidator, normalizeEmail, suggestEmailCorrection } from '@/utils/validateEmail'
 
@@ -65,23 +64,13 @@ const ForgotPasswordPage = () => {
             if ('code' in response) {
                 setError(getForgotPasswordErrorMessage(response.code as string))
             } else {
-                showSuccessNotification({
-                    title: 'Đặt lại mật khẩu',
-                    message: 'Đặt lại mật khẩu thành công'
-                })
+                authNotifications.forgotPasswordSuccess()
                 setSuccess(true)
             }
 
         } catch (err) {
             console.error('Error forgot password:', err)
-            if (err instanceof HTTPError) {
-                const errorData = (err as any).errorData
-                if (errorData && typeof errorData === 'object') {
-                    setError(errorData.message || 'Đặt lại mật khẩu thất bại')
-                }
-            } else {
-                setError('Đã xảy ra lỗi không xác định')
-            }
+            setError('Đã xảy ra lỗi khi gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại.')
         } finally {
             setLoading(false)
         }
@@ -91,20 +80,20 @@ const ForgotPasswordPage = () => {
         return (
             <Container size={420} my={40}>
                 <Title ta='center' order={1} mb='md'>
-                    Check your email
+                    Kiểm tra email của bạn
                 </Title>
                 <Text c='dimmed' size='sm' ta='center' mb='xl'>
-                    We've sent a password reset link to {form.values.email}
+                    Chúng tôi đã gửi liên kết đặt lại mật khẩu đến {form.values.email}
                 </Text>
 
                 <Paper withBorder shadow='md' p={30} mt={30} radius='md'>
                     <Alert icon={<IconCheck size='1rem' />} color='green' mb='md' variant='light'>
-                        Password reset email sent successfully!
+                        Đã gửi email đặt lại mật khẩu thành công!
                     </Alert>
 
                     <Stack gap='md'>
                         <Text size='sm' c='dimmed' ta='center'>
-                            Didn't receive the email? Check your spam folder or try again.
+                            Không nhận được email? Kiểm tra thư mục spam hoặc thử lại.
                         </Text>
 
                         <Button
@@ -117,12 +106,12 @@ const ForgotPasswordPage = () => {
                                 setEmailSuggestion(null)
                             }}
                         >
-                            Try again
+                            Thử lại
                         </Button>
 
                         <Text ta='center' mt='xs'>
                             <Anchor component={Link} to='/auth/login' c='dimmed' size='sm'>
-                                Back to login
+                                Quay lại đăng nhập
                             </Anchor>
                         </Text>
                     </Stack>
@@ -134,10 +123,10 @@ const ForgotPasswordPage = () => {
     return (
         <Container size={420} my={40}>
             <Title ta='center' order={1} mb='md'>
-                Forgot your password?
+                Quên mật khẩu?
             </Title>
             <Text c='dimmed' size='sm' ta='center' mb='xl'>
-                Enter your email address and we'll send you a link to reset your password
+                Nhập địa chỉ email của bạn và chúng tôi sẽ gửi cho bạn liên kết để đặt lại mật khẩu
             </Text>
 
             <Paper withBorder shadow='md' p={30} mt={30} radius='md'>
@@ -167,18 +156,18 @@ const ForgotPasswordPage = () => {
                                     style={{ cursor: 'pointer' }}
                                     onClick={handleEmailSuggestionClick}
                                 >
-                                    Did you mean: {emailSuggestion}?
+                                    Ý bạn là: {emailSuggestion}?
                                 </Text>
                             )}
                         </div>
 
                         <Button type='submit' fullWidth mt='md' loading={loading} disabled={loading}>
-                            Send reset link
+                            Gửi liên kết đặt lại
                         </Button>
 
                         <Text ta='center' mt='xs'>
                             <Anchor component={Link} to='/auth/login' c='dimmed' size='sm'>
-                                Back to login
+                                Quay lại đăng nhập
                             </Anchor>
                         </Text>
                     </Stack>
