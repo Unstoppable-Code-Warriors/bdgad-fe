@@ -8,14 +8,12 @@ export const staffService = {
     // Upload general file
     uploadGeneralFile: async (file: File): Promise<any> => {
         const formData = new FormData()
-        formData.append('generalFile', file)
+        formData.append('files', file)
 
         return backendApi
-            .post(`${PREFIX}/upload-general-file`, {
+            .post(`${PREFIX}/general-files`, {
                 body: formData,
-                headers: {
-                    'Content-Type': undefined
-                }
+                headers: {}
             })
             .json()
     },
@@ -23,21 +21,21 @@ export const staffService = {
     // Download general file by ID
     downloadGeneralFile: async (id: string): Promise<Blob> => {
         return backendApi
-            .get(`${PREFIX}/download-general-file/${id}`)
+            .get(`${PREFIX}/general-files/${id}/download`)
             .blob()
     },
 
     // Delete general file by ID
     deleteGeneralFile: async (id: string): Promise<any> => {
         return backendApi
-            .delete(`${PREFIX}/delete-general-file/${id}`)
+            .delete(`${PREFIX}/general-files/${id}`)
             .json()
     },
 
     // Get general file by ID
     getGeneralFile: async (id: string): Promise<any> => {
         return backendApi
-            .get(`${PREFIX}/get-general-file/${id}`)
+            .get(`${PREFIX}/general-file/${id}`)
             .json()
     },
 
@@ -56,7 +54,7 @@ export const staffService = {
         if (params?.filter) searchParams.append('filter', params.filter)
 
         const queryString = searchParams.toString()
-        const url = queryString ? `${PREFIX}/get-all-general-files?${queryString}` : `${PREFIX}/get-all-general-files`
+        const url = queryString ? `${PREFIX}/general-files?${queryString}` : `${PREFIX}/general-files`
 
         return backendApi
             .get(url)

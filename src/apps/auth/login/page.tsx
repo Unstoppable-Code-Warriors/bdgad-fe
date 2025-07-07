@@ -19,6 +19,7 @@ import { setTokensOutside } from '@/stores/auth.store'
 import { Link, useNavigate } from 'react-router'
 import { emailValidator, normalizeEmail, suggestEmailCorrection } from '@/utils/validateEmail'
 import { authNotifications, showErrorNotification } from '@/utils/notifications'
+import { handleAuthError } from '@/utils/error'
 import { HTTPError } from 'ky'
 
 interface LoginFormValues {
@@ -75,31 +76,19 @@ const LoginPage = () => {
 
             const response = await authService.login(normalizedValues)
             if ('code' in response) {
-            switch (response.code) {
-                case 'INVALID_CREDENTIALS':
-                    setError('Email hoặc mật khẩu không chính xác')
-                    break
-                case 'ACCOUNT_INACTIVE':
-                    setError('Tài khoản đã bị vô hiệu hóa')
-                    break
-                default:
-                    setError('Lỗi đăng nhập không xác định')
-            }
-
+                setError(handleAuthError(response))
             } else {
                 setTokensOutside(response.data.token)
                 authNotifications.loginSuccess()
                 navigate('/')
             }
-
-            
         } catch (err) {
             console.error('Error login:', err)
             if (err instanceof HTTPError) {
                 const errorData = (err as any).errorData
-                if (errorData && typeof errorData === 'object') {
-                    setError(errorData.message || 'Lỗi xác thực')
-                }
+                setError(handleAuthError(errorData))
+            } else {
+                setError('Đã xảy ra lỗi không xác định')
             }
         } finally {
             setLoading(false)
