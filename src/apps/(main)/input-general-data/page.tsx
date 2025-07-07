@@ -1,71 +1,97 @@
-import { useState } from 'react'
-import { Container, Stack } from '@mantine/core'
+import { useState, useEffect } from 'react'
+import { Container, Stack, Modal, Text, Button, Group } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
 import PageHeader from './components/PageHeader'
 import FileStatistics from './components/FileStatistics'
 import FileGrid from './components/FileGrid'
 import ImportFileModal from './components/ImportFileModal'
+import { staffService } from '@/services/function/staff'
 
 type FileWithPath = File & { path?: string }
 
-const mockImportFiles = [
-    {
-        id: 'f1',
-        name: 'Patient_General_Data.xlsx',
-        type: 'excel',
-        size: '2.5 MB',
-        uploadedAt: '2024-01-15'
-    },
-    {
-        id: 'f2',
-        name: 'Processed_Patient_Data.xlsx',
-        type: 'excel',
-        size: '1.8 MB',
-        uploadedAt: '2024-01-16'
-    },
-    {
-        id: 'f3',
-        name: 'Hospital_Data_Import.csv',
-        type: 'csv',
-        size: '0.5 MB',
-        uploadedAt: '2024-01-17'
-    },
-    {
-        id: 'f4',
-        name: 'Import_Report.pdf',
-        type: 'pdf',
-        size: '1.2 MB',
-        uploadedAt: '2024-01-18'
-    },
-    {
-        id: 'f5',
-        name: 'Medical_Records_Batch.xlsx',
-        type: 'excel',
-        size: '5.2 MB',
-        uploadedAt: '2024-01-16'
-    },
-    {
-        id: 'f6',
-        name: 'Error_Log.txt',
-        type: 'text',
-        size: '0.8 MB',
-        uploadedAt: '2024-01-17'
-    }
-]
-
 const InputGeneralDataPage = () => {
-    const [files, setFiles] = useState<any[]>(mockImportFiles)
+    const [files, setFiles] = useState<any[]>([])
     const [importModalOpened, setImportModalOpened] = useState(false)
+    const [, setLoading] = useState(false)
+    const [viewModalOpened, setViewModalOpened] = useState(false)
+    const [selectedFile, ] = useState<any>(null)
 
-    const handleViewFile = (fileId: string) => {
-        console.log('View file:', fileId)
+    // Load files on component mount
+    useEffect(() => {
+        loadFiles()
+    }, [])
+
+    const loadFiles = async () => {
+        try {
+            setLoading(true)
+            const response = await staffService.getAllGeneralFiles()
+            setFiles(response.data || response || [])
+        } catch (error) {
+            console.error('Error loading files:', error)
+            notifications.show({
+                title: 'Lỗi',
+                message: 'Không thể tải danh sách tệp tin',
+                color: 'red'
+            })
+        } finally {
+            setLoading(false)
+        }
     }
 
-    const handleDownloadFile = (fileId: string) => {
-        console.log('Download file:', fileId)
+
+    const handleDownloadFile = async (fileId: string) => {
+        try {
+            const blob = await staffService.downloadGeneralFile(fileId)
+            
+            // Find file info for better filename
+            const fileInfo = files.find(f => f.id === fileId)
+            const fileName = fileInfo?.fileName || `file-${fileId}`
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = fileName
+            document.body.appendChild(a)
+            a.click()
+            
+            // Cleanup
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+            
+            notifications.show({
+                title: 'Thành công',
+                message: 'Tệp tin đã được tải xuống thành công',
+                color: 'green'
+            })
+        } catch (error) {
+            console.error('Error downloading file:', error)
+            notifications.show({
+                title: 'Lỗi',
+                message: 'Không thể tải xuống tệp tin',
+                color: 'red'
+            })
+        }
     }
 
-    const handleDeleteFile = (fileId: string) => {
-        setFiles(prev => prev.filter(file => file.id !== fileId))
+    const handleDeleteFile = async (fileId: string) => {
+        try {
+            await staffService.deleteGeneralFile(fileId)
+            setFiles(prev => prev.filter(file => file.id !== fileId))
+            
+            notifications.show({
+                title: 'Thành công',
+                message: 'Tệp tin đã được xóa thành công',
+                color: 'green'
+            })
+        } catch (error) {
+            console.error('Error deleting file:', error)
+            notifications.show({
+                title: 'Lỗi',
+                message: 'Không thể xóa tệp tin',
+                color: 'red'
+            })
+        }
     }
 
     const handleImport = () => {
@@ -73,31 +99,47 @@ const InputGeneralDataPage = () => {
     }
 
     const handleImportFiles = async (uploadedFiles: FileWithPath[]) => {
-        // Simulate file upload and processing
-        const newFiles = uploadedFiles.map((file, index) => ({
-            id: `f${files.length + index + 1}`,
-            name: file.name,
-            type: file.name.split('.').pop()?.toLowerCase() || 'unknown',
-            size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-            uploadedAt: new Date().toISOString().split('T')[0]
-        }))
-
-        setFiles(prev => [...prev, ...newFiles])
-        console.log('Files imported successfully:', newFiles)
+        try {
+            setLoading(true)
+            
+            // Upload each file using the API
+            const uploadPromises = uploadedFiles.map(file => 
+                staffService.uploadGeneralFile(file)
+            )
+            
+            await Promise.all(uploadPromises)
+            
+            // Reload files after successful upload
+            await loadFiles()
+            
+            notifications.show({
+                title: 'Thành công',
+                message: `${uploadedFiles.length} tệp tin đã được tải lên thành công`,
+                color: 'green'
+            })
+            
+            setImportModalOpened(false)
+        } catch (error) {
+            console.error('Error uploading files:', error)
+            notifications.show({
+                title: 'Lỗi',
+                message: 'Không thể tải lên tệp tin',
+                color: 'red'
+            })
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
         <Container size="xl" py="xl">
             <Stack gap="lg">
-                <PageHeader 
-                    onImport={handleImport}
-                />
+                <PageHeader onImport={handleImport} />
 
                 <FileStatistics totalFiles={files.length} />
 
                 <FileGrid
                     files={files}
-                    onViewFile={handleViewFile}
                     onDownloadFile={handleDownloadFile}
                     onDeleteFile={handleDeleteFile}
                 />
@@ -107,6 +149,53 @@ const InputGeneralDataPage = () => {
                     onClose={() => setImportModalOpened(false)}
                     onImport={handleImportFiles}
                 />
+
+                {/* File View Modal */}
+                <Modal
+                    opened={viewModalOpened}
+                    onClose={() => setViewModalOpened(false)}
+                    title="Thông tin tệp tin"
+                    size="md"
+                >
+                    {selectedFile && (
+                        <Stack gap="md">
+                            <Group>
+                                <Text fw={500}>Tên tệp:</Text>
+                                <Text>{selectedFile.fileName}</Text>
+                            </Group>
+                            <Group>
+                                <Text fw={500}>Loại tệp:</Text>
+                                <Text>{selectedFile.fileType}</Text>
+                            </Group>
+                            <Group>
+                                <Text fw={500}>Kích thước:</Text>
+                                <Text>{(Number(selectedFile.fileSize) / 1024).toFixed(2)} KB</Text>
+                            </Group>
+                            <Group>
+                                <Text fw={500}>Đường dẫn:</Text>
+                                <Text>{selectedFile.filePath}</Text>
+                            </Group>
+                            <Group>
+                                <Text fw={500}>Ngày tải lên:</Text>
+                                <Text>{new Date(selectedFile.uploadedAt).toLocaleString('vi-VN')}</Text>
+                            </Group>
+                            
+                            <Group justify="flex-end" mt="md">
+                                <Button 
+                                    variant="outline" 
+                                    onClick={() => setViewModalOpened(false)}
+                                >
+                                    Đóng
+                                </Button>
+                                <Button 
+                                    onClick={() => handleDownloadFile(selectedFile.id)}
+                                >
+                                    Tải xuống
+                                </Button>
+                            </Group>
+                        </Stack>
+                    )}
+                </Modal>
             </Stack>
         </Container>
     )

@@ -13,7 +13,7 @@ import { TanstackQueryProvider } from '../tanstack-query'
 import InputInfoPage from '@/apps/(main)/input-info/page'
 import PatientInfoPage from '@/apps/(main)/patient-info/page'
 import PatientDetailPage from '@/apps/(main)/patient-detail/page'
-import InputMasterDataPage from '@/apps/(main)/input-general-data/page'
+import InputGeneralDataPage from '@/apps/(main)/input-general-data/page'
 import NewPasswordPage from '@/apps/auth/new-password/page'
 import LabTestPage from '@/apps/(main)/lab-test/page'
 import LabTestDetailPage from '@/apps/(main)/lab-test/[id]/page'
@@ -106,8 +106,8 @@ export const router = createBrowserRouter([
                         element: <VisitDetailPage />
                     },
                     {
-                        path: '/input-master-data',
-                        element: <InputMasterDataPage />
+                        path: '/input-general-data',
+                        element: <InputGeneralDataPage />
                     },
                     {
                         path: '/lab-test',

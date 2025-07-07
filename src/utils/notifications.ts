@@ -68,6 +68,7 @@ export const showInfoNotification = ({
 }
 
 export const authNotifications = {
+    // Auth
     loginSuccess: () => showSuccessNotification({
         title: 'Đăng nhập thành công',
         message: 'Bạn đã đăng nhập thành công',
@@ -122,6 +123,7 @@ export const authNotifications = {
         title: 'Tạo mật khẩu thất bại',
         message: 'Đã xảy ra lỗi khi tạo mật khẩu mới. Vui lòng thử lại.',
     }),
+    //Profile
     changePasswordSuccess: () => showSuccessNotification({
         title: 'Đổi mật khẩu thành công',
         message: 'Mật khẩu của bạn đã được đổi thành công',
@@ -138,4 +140,5 @@ export const authNotifications = {
         title: 'Mật khẩu mới giống mật khẩu cũ',
         message: 'Vui lòng nhập mật khẩu mới khác với mật khẩu hiện tại.',
     }),
+    // General Files
 }

@@ -12,9 +12,9 @@ export const navItems = [
         roles: [Role.STAFF]
     },
     {
-        label: 'Import master data',
+        label: 'Tải lên dữ liệu chung',
         icon: IconUser,
-        href: '/input-master-data',
+        href: '/input-general-data',
         roles: [Role.STAFF]
     },
     {

@@ -9,19 +9,6 @@ export const showErrorNotification = (message: string, title: string = 'Lỗi') 
     
 }
 
-export const showErrorLoginNotification = (code: string) => {
-    switch (code) {
-        case 'INVALID_CREDENTIALS':
-            showErrorNotification('Tài khoản hoặc mật khẩu không chính xác', 'Lỗi đăng nhập')
-            break
-        case 'ACCOUNT_INACTIVE':
-            showErrorNotification('Tài khoản đã bị vô hiệu hóa', 'Lỗi đăng nhập')
-            break
-        default:
-            showErrorNotification('Lỗi đăng nhập không xác định', 'Lỗi đăng nhập')
-    }
-}
-
 export const showErrorGetProfileNotification = (code: string) => {
     switch (code) {
         case 'USER_NOT_AUTHENTICATED':
@@ -67,19 +54,6 @@ export const showErrorChangePasswordNotification = (code: string) => {
             break
         default:
             showErrorNotification('Lỗi thay đổi mật khẩu không xác định', 'Lỗi thay đổi mật khẩu')
-    }
-}
-
-export const showErrorForgotPasswordNotification = (code: string) => {
-    switch (code) {
-        case 'EMAIL_NOT_FOUND':
-            showErrorNotification('Email không tồn tại', 'Lỗi quên mật khẩu')
-            break
-        case 'ACCOUNT_INACTIVE':
-            showErrorNotification('Tài khoản đã bị vô hiệu hóa', 'Lỗi quên mật khẩu')
-            break
-        default:
-            showErrorNotification('Lỗi quên mật khẩu không xác định', 'Lỗi quên mật khẩu')
     }
 }
 

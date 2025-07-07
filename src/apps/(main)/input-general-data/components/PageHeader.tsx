@@ -8,7 +8,7 @@ interface PageHeaderProps {
 const PageHeader = ({ onImport }: PageHeaderProps) => {
     return (
         <Group justify="space-between">
-            <Title order={2}>Import Master Data</Title>
+            <Title order={2}></Title>
             <Group>
                 <Button 
                     leftSection={<IconUpload size={16} />}
