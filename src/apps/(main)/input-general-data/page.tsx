@@ -30,9 +30,14 @@ const InputGeneralDataPage = () => {
     const handleDownloadFile = useCallback(async (fileId: string) => {
         try {
             // Fetch the file using the download mutation
-            const response = await downloadMutation.mutateAsync(fileId) 
-            
-            window.open(response.downloadUrl, '_blank')
+            const response = await downloadMutation.mutateAsync(fileId)
+
+            const link = document.createElement('a')
+            link.href = response.downloadUrl
+            link.download = 'abc.pdf'
+            link.click()
+
+            URL.revokeObjectURL(response.downloadUrl);
 
             notifications.show({
                 title: 'Thành công',
