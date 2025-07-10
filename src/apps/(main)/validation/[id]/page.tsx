@@ -133,7 +133,7 @@ const ValidationDetailPage = () => {
                 {/* Page Header */}
                 <PageHeader
                     onBack={handleBack}
-                    title='Chi tiết xác thực'
+                    title='Chi tiết thẩm định'
                     pageType='validation'
                     labcode={data.labcode}
                     barcode={data.barcode}

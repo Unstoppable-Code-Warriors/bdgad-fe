@@ -8,7 +8,7 @@ export const getLoginErrorMessage = (errorCode: string): string => {
         case 'INVALID_CREDENTIALS':
             return 'Email hoặc mật khẩu không chính xác'
         case 'ACCOUNT_INACTIVE':
-            return 'Tài khoản đã bị vô hiệu hóa'
+            return 'Tài khoản đã bị tạm ngừng hoạt động'
         case 'EMAIL_NOT_VERIFIED':
             return 'Email chưa được xác thực'
         case 'ACCOUNT_LOCKED':
@@ -25,7 +25,7 @@ export const getForgotPasswordErrorMessage = (errorCode: string): string => {
         case 'EMAIL_NOT_FOUND':
             return 'Email không tồn tại trong hệ thống'
         case 'ACCOUNT_INACTIVE':
-            return 'Tài khoản đã bị vô hiệu hóa'
+            return 'Tài khoản đã bị tạm ngừng hoạt động'
         case 'EMAIL_SEND_FAILED':
             return 'Lỗi gửi email đặt lại mật khẩu'
         default:
@@ -40,7 +40,7 @@ export const getChangePasswordErrorMessage = (errorCode: string): string => {
         case 'USER_NOT_FOUND':
             return 'Không tìm thấy thông tin tài khoản'
         case 'ACCOUNT_INACTIVE':
-            return 'Tài khoản đã bị vô hiệu hóa'
+            return 'Tài khoản đã bị tạm ngừng hoạt động'
         case 'PASSWORD_MISMATCH':
             return 'Mật khẩu hiện tại không chính xác'
         case 'SAME_PASSWORD':
@@ -59,7 +59,7 @@ export const getResetPasswordErrorMessage = (errorCode: string): string => {
         case 'USER_NOT_FOUND':
             return 'Không tìm thấy thông tin tài khoản'
         case 'ACCOUNT_INACTIVE':
-            return 'Tài khoản đã bị vô hiệu hóa'
+            return 'Tài khoản đã bị tạm ngừng hoạt động'
         case 'SAME_PASSWORD':
             return 'Mật khẩu mới không được trùng với mật khẩu hiện tại'
         case 'EMAIL_SEND_FAILED':
@@ -76,7 +76,7 @@ export const getUpdateProfileErrorMessage = (errorCode: string): string => {
         case 'USER_NOT_FOUND':
             return 'Không tìm thấy thông tin tài khoản'
         case 'ACCOUNT_INACTIVE':
-            return 'Tài khoản đã bị vô hiệu hóa'
+            return 'Tài khoản đã bị tạm ngừng hoạt động'
         case 'INVALID_PHONE':
             return 'Số điện thoại không hợp lệ'
         case 'INVALID_NAME':

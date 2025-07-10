@@ -43,12 +43,51 @@ const InputGeneralDataPage = () => {
         try {
             const blob = await staffService.downloadGeneralFile(fileId)
             
-            // Find file info for better filename
             const fileInfo = files.find(f => f.id === fileId)
-            const fileName = fileInfo?.fileName || `file-${fileId}`
+            let fileName = fileInfo?.fileName || `file-${fileId}`
+            
+            if (fileInfo?.fileType && !fileName.includes('.')) {
+                const extension = fileInfo.fileType.startsWith('.') ? fileInfo.fileType : `.${fileInfo.fileType}`
+                fileName = `${fileName}${extension}`
+            }
+            
+            const getMimeType = (fileType: string): string => {
+                const extension = fileType.toLowerCase().replace('.', '')
+                const mimeTypes: { [key: string]: string } = {
+                    'pdf': 'application/pdf',
+                    'doc': 'application/msword',
+                    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'xls': 'application/vnd.ms-excel',
+                    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'ppt': 'application/vnd.ms-powerpoint',
+                    'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'txt': 'text/plain',
+                    'csv': 'text/csv',
+                    'json': 'application/json',
+                    'xml': 'application/xml',
+                    'zip': 'application/zip',
+                    'rar': 'application/x-rar-compressed',
+                    'jpg': 'image/jpeg',
+                    'jpeg': 'image/jpeg',
+                    'png': 'image/png',
+                    'gif': 'image/gif',
+                    'bmp': 'image/bmp',
+                    'svg': 'image/svg+xml',
+                    'mp4': 'video/mp4',
+                    'avi': 'video/x-msvideo',
+                    'mov': 'video/quicktime',
+                    'mp3': 'audio/mpeg',
+                    'wav': 'audio/wav'
+                }
+                return mimeTypes[extension] || 'application/octet-stream'
+            }
+            
+            // Create blob with correct MIME type
+            const mimeType = getMimeType(fileInfo?.fileType || '')
+            const correctedBlob = new Blob([blob], { type: mimeType })
             
             // Create download link
-            const url = window.URL.createObjectURL(blob)
+            const url = window.URL.createObjectURL(correctedBlob)
             const a = document.createElement('a')
             a.href = url
             a.download = fileName
@@ -79,11 +118,6 @@ const InputGeneralDataPage = () => {
             await staffService.deleteGeneralFile(fileId)
             setFiles(prev => prev.filter(file => file.id !== fileId))
             
-            notifications.show({
-                title: 'Thành công',
-                message: 'Tệp tin đã được xóa thành công',
-                color: 'green'
-            })
         } catch (error) {
             console.error('Error deleting file:', error)
             notifications.show({

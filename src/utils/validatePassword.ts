@@ -30,29 +30,29 @@ export const validatePassword = (
 
     // Check minimum length
     if (password.length < config.minLength) {
-        errors.push(`Password must be at least ${config.minLength} characters long`)
+        errors.push(`Mật khẩu phải có ít nhất ${config.minLength} ký tự`)
     }
 
     // Check lowercase letters
     if (config.requireLowercase && !/[a-z]/.test(password)) {
-        errors.push('Password must contain at least one lowercase letter')
+        errors.push('Mật khẩu phải chứa ít nhất một chữ cái thường')
     }
 
     // Check uppercase letters
     if (config.requireUppercase && !/[A-Z]/.test(password)) {
-        errors.push('Password must contain at least one uppercase letter')
+        errors.push('Mật khẩu phải chứa ít nhất một chữ cái hoa')
     }
 
     // Check numbers
     if (config.requireNumbers && !/\d/.test(password)) {
-        errors.push('Password must contain at least one number')
+        errors.push('Mật khẩu phải chứa ít nhất một chữ số')
     }
 
     // Check special characters
     if (config.requireSpecialChars) {
         const specialCharRegex = new RegExp(`[${config.specialChars.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}]`)
         if (!specialCharRegex.test(password)) {
-            errors.push('Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?)')
+            errors.push('Mật khẩu phải chứa ít nhất một ký tự đặc biệt (!@#$%^&*()_+-=[]{}|;:,.<>?)')
         }
     }
 
@@ -64,7 +64,7 @@ export const validatePassword = (
 
 // Convenience function for form validation
 export const passwordValidator = (value: string, requirements?: PasswordRequirements): string | null => {
-    if (!value) return 'Password is required'
+    if (!value) return 'Mật khẩu là bắt buộc'
     
     const validation = validatePassword(value, requirements)
     if (!validation.isValid) {
@@ -79,22 +79,22 @@ export const getPasswordRequirementsText = (requirements: PasswordRequirements =
     const config = { ...DEFAULT_REQUIREMENTS, ...requirements }
     const texts: string[] = []
 
-    texts.push(`At least ${config.minLength} characters`)
+    texts.push(`Ít nhất ${config.minLength} ký tự`)
     
     if (config.requireLowercase) {
-        texts.push('One lowercase letter (a-z)')
+        texts.push('Một chữ cái thường (a-z)')
     }
     
     if (config.requireUppercase) {
-        texts.push('One uppercase letter (A-Z)')
+        texts.push('Một chữ cái hoa (A-Z)')
     }
     
     if (config.requireNumbers) {
-        texts.push('One number (0-9)')
+        texts.push('Một chữ số (0-9)')
     }
     
     if (config.requireSpecialChars) {
-        texts.push('One special character (!@#$%^&*()_+-=[]{}|;:,.<>?)')
+        texts.push('Một ký tự đặc biệt (!@#$%^&*()_+-=[]{}|;:,.<>?)')
     }
 
     return texts

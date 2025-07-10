@@ -17,7 +17,7 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                 </ThemeIcon>
                 <Box>
                     <Text fw={700} size='xl'>
-                        Thông tin xác thực
+                        Thông tin thẩm định
                     </Text>
                     <Text size='sm' c='dimmed'>
                         Chi tiết về phiên xác thực ETL

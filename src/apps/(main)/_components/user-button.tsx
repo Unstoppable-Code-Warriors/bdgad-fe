@@ -41,7 +41,7 @@ const UserButton = () => {
                 </Menu.Item>
 
                 <Menu.Item color='red' leftSection={<IconLogout size={16} />} onClick={handleLogout}>
-                    Logout
+                    Đăng xuất
                 </Menu.Item>
             </Menu.Dropdown>
         </Menu>
