@@ -26,7 +26,7 @@ export const PageHeader = ({ onBack, title, pageType, labcode, barcode }: PageHe
         } else {
             return [
                 { label: 'Trang chủ', href: '/', icon: <IconHome size={14} /> },
-                { label: 'Xác thực', href: '/validation' },
+                { label: 'Thẩm định', href: '/validation' },
                 { label: 'Chi tiết', href: '#', current: true }
             ]
         }
@@ -48,9 +48,9 @@ export const PageHeader = ({ onBack, title, pageType, labcode, barcode }: PageHe
 
     const getLabTitle = () => {
         if (pageType === 'validation') {
-            return 'Mã phòng lab'
+            return 'Labcode'
         }
-        return pageType === 'lab-test' ? 'Mã xét nghiệm' : 'Mã phòng lab'
+        return pageType === 'lab-test' ? 'Mã xét nghiệm' : 'Labcode'
     }
 
     const breadcrumbs = getBreadcrumbs()

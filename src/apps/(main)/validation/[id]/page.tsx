@@ -163,7 +163,7 @@ const ValidationDetailPage = () => {
                                     <Box>
                                         <Title order={4}>Hành động</Title>
                                         <Text size='sm' c='dimmed'>
-                                            Thao tác với kết quả xác thực
+                                            Thao tác với kết quả thẩm định
                                         </Text>
                                     </Box>
                                 </Group>
@@ -241,7 +241,7 @@ const ValidationDetailPage = () => {
                                             Kết quả đã được phê duyệt
                                         </Text>
                                         <Text size='xs' ta='center' c='dimmed'>
-                                            Quá trình xác thực hoàn tất
+                                            Quá trình thẩm định hoàn tất
                                         </Text>
                                     </Stack>
                                 )}

@@ -1,5 +1,7 @@
 import { backendApi } from '@/utils/api'
 import type { MedicalTestRequisitionUploadResponse } from '@/types'
+import type { GeneralFileDownloadResponse } from '@/types/general-file'
+
 
 const PREFIX = 'api/v1/staff'
 
@@ -19,10 +21,9 @@ export const staffService = {
     },
 
     // Download general file by ID
-    downloadGeneralFile: async (id: string): Promise<Blob> => {
-        return backendApi
-            .get(`${PREFIX}/general-files/${id}/download`)
-            .blob()
+    downloadGeneralFile: async (id: string): Promise<any> => {
+         return backendApi
+            .get(`${PREFIX}/general-files/${id}/download`).json<GeneralFileDownloadResponse>()
     },
 
     // Delete general file by ID
@@ -47,7 +48,7 @@ export const staffService = {
         filter?: string
     }): Promise<any> => {
         const searchParams = new URLSearchParams()
-        
+
         if (params?.page) searchParams.append('page', params.page.toString())
         if (params?.limit) searchParams.append('limit', params.limit.toString())
         if (params?.search) searchParams.append('search', params.search)

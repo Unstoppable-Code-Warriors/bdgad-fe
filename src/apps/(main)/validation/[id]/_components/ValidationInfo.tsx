@@ -19,9 +19,6 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                     <Text fw={700} size='xl'>
                         Thông tin thẩm định
                     </Text>
-                    <Text size='sm' c='dimmed'>
-                        Chi tiết về phiên xác thực ETL
-                    </Text>
                 </Box>
             </Group>
 

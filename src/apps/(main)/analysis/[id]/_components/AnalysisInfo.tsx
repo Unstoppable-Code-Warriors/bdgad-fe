@@ -49,7 +49,7 @@ export const AnalysisInfo = ({ data, latestFastQFile, latestEtlResult }: Analysi
                             <Stack gap='sm'>
                                 <Group justify='space-between'>
                                     <Text size='sm' c='dimmed'>
-                                        Mã phòng thí nghiệm:
+                                        Labcode:
                                     </Text>
                                     <Text fw={600} size='sm'>
                                         {data.labcode}

@@ -124,11 +124,6 @@ const FileCard = ({ file, onDownload, onDelete }: FileCardProps) => {
                 setLoading(true)
                 try {
                     await onDelete(file.id)
-                    notifications.show({
-                        title: 'Thành công',
-                        message: 'Tệp tin đã được xóa thành công',
-                        color: 'green'
-                    })
                 } catch (error) {
                     console.error('Error deleting file:', error)
                     notifications.show({

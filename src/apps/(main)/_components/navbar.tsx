@@ -18,19 +18,19 @@ export const navItems = [
         roles: [Role.STAFF]
     },
     {
-        label: 'Lab Testing',
+        label: 'Quản lý xét nghiệm',
         icon: IconFlask,
         href: '/lab-test',
         roles: [Role.LAB_TESTING_TECHNICIAN]
     },
     {
-        label: 'Analysis Management',
+        label: 'Quản lý kêt quả phân tích',
         icon: IconMicroscope,
         href: '/analysis',
         roles: [Role.ANALYSIS_TECHNICIAN]
     },
     {
-        label: 'Validation Management',
+        label: 'Quản lý kết quả thẩm định',
         icon: IconClipboardCheck,
         href: '/validation',
         roles: [Role.VALIDATION_TECHNICIAN]

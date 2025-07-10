@@ -1,123 +1,62 @@
-import { useState, useEffect } from 'react'
+import { useCallback, useState } from 'react'
 import { Container, Stack, Modal, Text, Button, Group } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import PageHeader from './components/PageHeader'
 import FileStatistics from './components/FileStatistics'
 import FileGrid from './components/FileGrid'
 import ImportFileModal from './components/ImportFileModal'
-import { staffService } from '@/services/function/staff'
+import {
+    useGeneralFiles,
+    useDownloadGeneralFile,
+    useDeleteGeneralFile,
+    useUploadGeneralFile
+} from '@/services/hook/staff.hook'
 
 type FileWithPath = File & { path?: string }
 
 const InputGeneralDataPage = () => {
-    const [files, setFiles] = useState<any[]>([])
     const [importModalOpened, setImportModalOpened] = useState(false)
-    const [, setLoading] = useState(false)
     const [viewModalOpened, setViewModalOpened] = useState(false)
-    const [selectedFile, ] = useState<any>(null)
+    const [selectedFile] = useState<any>(null)
 
-    // Load files on component mount
-    useEffect(() => {
-        loadFiles()
-    }, [])
+    // Use hooks
+    const { data: filesResponse, isLoading } = useGeneralFiles()
+    const downloadMutation = useDownloadGeneralFile()
+    const deleteMutation = useDeleteGeneralFile()
+    const uploadMutation = useUploadGeneralFile()
 
-    const loadFiles = async () => {
+    const files = filesResponse?.data || filesResponse || []
+
+    const handleDownloadFile = useCallback(async (fileId: string) => {
         try {
-            setLoading(true)
-            const response = await staffService.getAllGeneralFiles()
-            setFiles(response.data || response || [])
-        } catch (error) {
-            console.error('Error loading files:', error)
-            notifications.show({
-                title: 'Lỗi',
-                message: 'Không thể tải danh sách tệp tin',
-                color: 'red'
-            })
-        } finally {
-            setLoading(false)
-        }
-    }
+            // Fetch the file using the download mutation
+            const response = await downloadMutation.mutateAsync(fileId) 
+            
+            window.open(response.downloadUrl, '_blank')
 
-
-    const handleDownloadFile = async (fileId: string) => {
-        try {
-            const blob = await staffService.downloadGeneralFile(fileId)
-            
-            const fileInfo = files.find(f => f.id === fileId)
-            let fileName = fileInfo?.fileName || `file-${fileId}`
-            
-            if (fileInfo?.fileType && !fileName.includes('.')) {
-                const extension = fileInfo.fileType.startsWith('.') ? fileInfo.fileType : `.${fileInfo.fileType}`
-                fileName = `${fileName}${extension}`
-            }
-            
-            const getMimeType = (fileType: string): string => {
-                const extension = fileType.toLowerCase().replace('.', '')
-                const mimeTypes: { [key: string]: string } = {
-                    'pdf': 'application/pdf',
-                    'doc': 'application/msword',
-                    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                    'xls': 'application/vnd.ms-excel',
-                    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    'ppt': 'application/vnd.ms-powerpoint',
-                    'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                    'txt': 'text/plain',
-                    'csv': 'text/csv',
-                    'json': 'application/json',
-                    'xml': 'application/xml',
-                    'zip': 'application/zip',
-                    'rar': 'application/x-rar-compressed',
-                    'jpg': 'image/jpeg',
-                    'jpeg': 'image/jpeg',
-                    'png': 'image/png',
-                    'gif': 'image/gif',
-                    'bmp': 'image/bmp',
-                    'svg': 'image/svg+xml',
-                    'mp4': 'video/mp4',
-                    'avi': 'video/x-msvideo',
-                    'mov': 'video/quicktime',
-                    'mp3': 'audio/mpeg',
-                    'wav': 'audio/wav'
-                }
-                return mimeTypes[extension] || 'application/octet-stream'
-            }
-            
-            // Create blob with correct MIME type
-            const mimeType = getMimeType(fileInfo?.fileType || '')
-            const correctedBlob = new Blob([blob], { type: mimeType })
-            
-            // Create download link
-            const url = window.URL.createObjectURL(correctedBlob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = fileName
-            document.body.appendChild(a)
-            a.click()
-            
-            // Cleanup
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
-            
             notifications.show({
                 title: 'Thành công',
                 message: 'Tệp tin đã được tải xuống thành công',
                 color: 'green'
             })
         } catch (error) {
-            console.error('Error downloading file:', error)
+            console.error('Download failed:', error)
             notifications.show({
                 title: 'Lỗi',
                 message: 'Không thể tải xuống tệp tin',
                 color: 'red'
             })
         }
-    }
+    }, [])
 
     const handleDeleteFile = async (fileId: string) => {
         try {
-            await staffService.deleteGeneralFile(fileId)
-            setFiles(prev => prev.filter(file => file.id !== fileId))
-            
+            await deleteMutation.mutateAsync(fileId)
+            notifications.show({
+                title: 'Thành công',
+                message: 'Tệp tin đã được xóa thành công',
+                color: 'green'
+            })
         } catch (error) {
             console.error('Error deleting file:', error)
             notifications.show({
@@ -134,24 +73,17 @@ const InputGeneralDataPage = () => {
 
     const handleImportFiles = async (uploadedFiles: FileWithPath[]) => {
         try {
-            setLoading(true)
-            
-            // Upload each file using the API
-            const uploadPromises = uploadedFiles.map(file => 
-                staffService.uploadGeneralFile(file)
-            )
-            
+            // Upload each file using the mutation
+            const uploadPromises = uploadedFiles.map((file) => uploadMutation.mutateAsync(file))
+
             await Promise.all(uploadPromises)
-            
-            // Reload files after successful upload
-            await loadFiles()
-            
+
             notifications.show({
                 title: 'Thành công',
                 message: `${uploadedFiles.length} tệp tin đã được tải lên thành công`,
                 color: 'green'
             })
-            
+
             setImportModalOpened(false)
         } catch (error) {
             console.error('Error uploading files:', error)
@@ -160,14 +92,12 @@ const InputGeneralDataPage = () => {
                 message: 'Không thể tải lên tệp tin',
                 color: 'red'
             })
-        } finally {
-            setLoading(false)
         }
     }
 
     return (
-        <Container size="xl" py="xl">
-            <Stack gap="lg">
+        <Container size='xl' py='xl'>
+            <Stack gap='lg'>
                 <PageHeader onImport={handleImport} />
 
                 <FileStatistics totalFiles={files.length} />
@@ -176,6 +106,7 @@ const InputGeneralDataPage = () => {
                     files={files}
                     onDownloadFile={handleDownloadFile}
                     onDeleteFile={handleDeleteFile}
+                    loading={isLoading}
                 />
 
                 <ImportFileModal
@@ -188,11 +119,11 @@ const InputGeneralDataPage = () => {
                 <Modal
                     opened={viewModalOpened}
                     onClose={() => setViewModalOpened(false)}
-                    title="Thông tin tệp tin"
-                    size="md"
+                    title='Thông tin tệp tin'
+                    size='md'
                 >
                     {selectedFile && (
-                        <Stack gap="md">
+                        <Stack gap='md'>
                             <Group>
                                 <Text fw={500}>Tên tệp:</Text>
                                 <Text>{selectedFile.fileName}</Text>
@@ -213,16 +144,14 @@ const InputGeneralDataPage = () => {
                                 <Text fw={500}>Ngày tải lên:</Text>
                                 <Text>{new Date(selectedFile.uploadedAt).toLocaleString('vi-VN')}</Text>
                             </Group>
-                            
-                            <Group justify="flex-end" mt="md">
-                                <Button 
-                                    variant="outline" 
-                                    onClick={() => setViewModalOpened(false)}
-                                >
+
+                            <Group justify='flex-end' mt='md'>
+                                <Button variant='outline' onClick={() => setViewModalOpened(false)}>
                                     Đóng
                                 </Button>
-                                <Button 
+                                <Button
                                     onClick={() => handleDownloadFile(selectedFile.id)}
+                                    loading={downloadMutation.isPending}
                                 >
                                     Tải xuống
                                 </Button>
