@@ -1,91 +1,41 @@
-import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
-import {
-    Container,
-    Title,
-    Card,
-    Text,
-    Stack,
-    Button,
-    Group,
-    Paper,
-    ActionIcon,
-    Badge,
-    Flex,
-    Box
-} from '@mantine/core'
+import { Container, Title, Card, Text, Stack, Button, Group, Paper, ActionIcon, Badge, Flex, Box } from '@mantine/core'
 import {
     IconArrowLeft,
     IconCalendarEvent,
     IconMicroscope,
     IconClipboardCheck,
-    IconUpload,
     IconStethoscope,
-    IconUser
+    IconUser,
+    IconPlus
 } from '@tabler/icons-react'
-
-const mockPatientVisits = {
-    '1': [
-        {
-            id: 'visit1',
-            visitDate: '2024-01-15',
-            visitNumber: 1,
-            doctor: 'BS. Trần Minh',
-            diagnosis: 'Khám tổng quát định kỳ',
-            type: 'test',
-            status: 'Hoàn thành',
-            fileCount: 5
-        },
-        {
-            id: 'visit2',
-            visitDate: '2024-01-20',
-            visitNumber: 2,
-            doctor: 'BS. Lê Hòa',
-            diagnosis: 'Thẩm định kết quả xét nghiệm',
-            type: 'assessment',
-            status: 'Hoàn thành',
-            fileCount: 3
-        },
-        {
-            id: 'visit3',
-            visitDate: '2024-02-01',
-            visitNumber: 3,
-            doctor: 'BS. Nguyễn Nam',
-            diagnosis: 'Siêu âm bụng',
-            type: 'test',
-            status: 'Hoàn thành',
-            fileCount: 7
-        }
-    ],
-    '2': [
-        {
-            id: 'visit4',
-            visitDate: '2024-01-20',
-            visitNumber: 1,
-            doctor: 'BS. Lê Văn C',
-            diagnosis: 'Khám chuyên khoa tim mạch',
-            type: 'test',
-            status: 'Hoàn thành',
-            fileCount: 4
-        }
-    ]
-}
+import { usePatientLabSessions } from '@/services/hook/staff-patient-session.hook'
 
 const getStatusBadge = (status: string) => {
     const statusColors = {
-        'Đã hoàn thành': 'green',
-        'Đang xử lý': 'yellow',
-        'Chờ thẩm định': 'blue',
-        'Hoàn thành': 'green'
+        completed: 'green',
+        processing: 'yellow',
+        pending: 'blue',
+        test: 'blue',
+        assessment: 'green'
     }
+
+    const statusLabels = {
+        completed: 'Hoàn thành',
+        processing: 'Đang xử lý',
+        pending: 'Chờ thẩm định',
+        test: 'Xét nghiệm',
+        assessment: 'Thẩm định'
+    }
+
     return (
         <Badge color={statusColors[status as keyof typeof statusColors] || 'gray'} variant='light' size='sm'>
-            {status}
+            {statusLabels[status as keyof typeof statusLabels] || status}
         </Badge>
     )
 }
 
-const getVisitTypeIcon = (type: string) => {
+const getSessionTypeIcon = (type: string) => {
     if (type === 'test') {
         return <IconMicroscope size={20} color='#1971c2' />
     } else {
@@ -93,31 +43,33 @@ const getVisitTypeIcon = (type: string) => {
     }
 }
 
-const getVisitTypeBadge = (type: string) => {
+const getSessionTypeBadge = (type: string) => {
     if (type === 'test') {
-        return <Badge color='blue' variant='light' size='sm'>Xét nghiệm</Badge>
+        return (
+            <Badge color='blue' variant='light' size='sm'>
+                Xét nghiệm
+            </Badge>
+        )
     } else {
-        return <Badge color='green' variant='light' size='sm'>Thẩm định</Badge>
+        return (
+            <Badge color='green' variant='light' size='sm'>
+                Thẩm định
+            </Badge>
+        )
     }
 }
 
 const PatientDetailPage = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const [visits, setVisits] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        if (id && mockPatientVisits[id as keyof typeof mockPatientVisits]) {
-            setVisits(mockPatientVisits[id as keyof typeof mockPatientVisits])
-        } else {
-            setVisits([])
-        }
-        setLoading(false)
-    }, [id])
+    // Use API hook thay vì mock data
+    const { data: sessionsResponse, isLoading, error } = usePatientLabSessions(id!)
+
+    const sessions = sessionsResponse || []
 
     const handleBack = () => {
-        navigate('/patient-info')
+        navigate('/patient-folder')
     }
 
     const handleImport = () => {
@@ -126,14 +78,24 @@ const PatientDetailPage = () => {
         })
     }
 
-    const handleVisitClick = (visitId: string) => {
-        navigate(`/patient-detail/${id}/visit/${visitId}`)
+    const handleSessionClick = (sessionId: string) => {
+        navigate(`/patient-detail/session/${sessionId}`)
     }
 
-    if (loading) {
+    if (isLoading) {
         return (
             <Container size='xl' py='xl'>
                 <Text>Đang tải...</Text>
+            </Container>
+        )
+    }
+
+    if (error) {
+        return (
+            <Container size='xl' py='xl'>
+                <Paper p='xl' ta='center' withBorder>
+                    <Text color='red'>Có lỗi xảy ra khi tải dữ liệu</Text>
+                </Paper>
             </Container>
         )
     }
@@ -150,20 +112,20 @@ const PatientDetailPage = () => {
                         <Title order={2}>Hồ sơ bệnh nhân #{id}</Title>
                     </Group>
 
-                    <Button leftSection={<IconUpload size={16} />} onClick={handleImport}>
-                        Tải lên file mới
+                    <Button leftSection={<IconPlus size={16} />} onClick={handleImport}>
+                        Tạo lần khám mới
                     </Button>
                 </Group>
 
                 {/* Overall Statistics */}
-                {visits.length > 0 && (
+                {sessions.length > 0 && (
                     <Card shadow='md' padding='xl' withBorder radius='lg'>
                         <Group justify='space-between' align='center'>
                             {/* Left Side - Overview */}
                             <Group>
-                                <Box 
-                                    p='lg' 
-                                    bg='linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                                <Box
+                                    p='lg'
+                                    bg='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                                     style={{ borderRadius: '16px' }}
                                 >
                                     <IconStethoscope size={32} color='white' />
@@ -173,7 +135,7 @@ const PatientDetailPage = () => {
                                         Tổng quan hồ sơ
                                     </Text>
                                     <Text size='md' c='dimmed'>
-                                        {visits.length} lần khám
+                                        {sessions.length} lần khám
                                     </Text>
                                 </div>
                             </Group>
@@ -184,7 +146,10 @@ const PatientDetailPage = () => {
                                     <Group gap='xs' justify='center' mb='xs'>
                                         <IconMicroscope size={20} color='#1971c2' />
                                         <Text fw={700} size='lg' c='blue'>
-                                            {visits.filter(visit => visit.type === 'test').length}
+                                            {
+                                                sessions.filter((session: any) => session.typeLabSession === 'test')
+                                                    .length
+                                            }
                                         </Text>
                                     </Group>
                                     <Text size='sm' c='dimmed' fw={500}>
@@ -196,7 +161,11 @@ const PatientDetailPage = () => {
                                     <Group gap='xs' justify='center' mb='xs'>
                                         <IconClipboardCheck size={20} color='#2f9e44' />
                                         <Text fw={700} size='lg' c='green'>
-                                            {visits.filter(visit => visit.type === 'assessment').length}
+                                            {
+                                                sessions.filter(
+                                                    (session: any) => session.typeLabSession === 'assessment'
+                                                ).length
+                                            }
                                         </Text>
                                     </Group>
                                     <Text size='sm' c='dimmed' fw={500}>
@@ -208,57 +177,61 @@ const PatientDetailPage = () => {
                     </Card>
                 )}
 
-                {/* Visits List */}
-                {visits.length > 0 ? (
+                {/* Sessions List */}
+                {sessions.length > 0 ? (
                     <Stack gap='md'>
-                        {visits.map((visit) => (
-                            <Card 
-                                key={visit.id} 
-                                shadow='sm' 
-                                padding='lg' 
+                        {sessions.map((session: any, index: number) => (
+                            <Card
+                                key={session.id}
+                                shadow='sm'
+                                padding='lg'
                                 withBorder
                                 style={{ cursor: 'pointer' }}
-                                onClick={() => handleVisitClick(visit.id)}
+                                onClick={() => handleSessionClick(session.id)}
                             >
                                 <Group justify='space-between' align='flex-start'>
                                     <Group align='flex-start'>
-                                        <Box p='sm' bg={visit.type === 'test' ? 'blue.0' : 'green.0'} style={{ borderRadius: '8px' }}>
-                                            {getVisitTypeIcon(visit.type)}
+                                        <Box
+                                            p='sm'
+                                            bg={session.typeLabSession === 'test' ? 'blue.0' : 'green.0'}
+                                            style={{ borderRadius: '8px' }}
+                                        >
+                                            {getSessionTypeIcon(session.typeLabSession)}
                                         </Box>
-                                        
+
                                         <div>
                                             <Group gap='sm' mb='xs'>
                                                 <Text fw={600} size='lg'>
-                                                    Lần {visit.visitNumber}
+                                                    Lần {index + 1}
                                                 </Text>
-                                                {getVisitTypeBadge(visit.type)}
+                                                {getSessionTypeBadge(session.typeLabSession)}
                                             </Group>
-                                            
+
                                             <Text fw={500} mb='xs'>
-                                                {visit.diagnosis}
+                                                Barcode: {session.barcode}
                                             </Text>
-                                            
+
                                             <Group gap='md'>
                                                 <Flex align='center' gap='xs'>
                                                     <IconCalendarEvent size={14} />
                                                     <Text size='sm' c='dimmed'>
-                                                        {new Date(visit.visitDate).toLocaleDateString('vi-VN')}
+                                                        {new Date(session.requestDate).toLocaleDateString('vi-VN')}
                                                     </Text>
                                                 </Flex>
                                                 <Flex align='center' gap='xs'>
                                                     <IconUser size={14} />
                                                     <Text size='sm' c='dimmed'>
-                                                        {visit.doctor}
+                                                        {session.doctor?.name || 'Chưa có bác sĩ'}
                                                     </Text>
                                                 </Flex>
                                                 <Text size='sm' c='dimmed'>
-                                                    {visit.fileCount} file
+                                                    {session.patientFiles?.length || 0} file
                                                 </Text>
                                             </Group>
                                         </div>
                                     </Group>
 
-                                    {getStatusBadge(visit.status)}
+                                    {getStatusBadge(session.typeLabSession)}
                                 </Group>
                             </Card>
                         ))}

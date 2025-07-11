@@ -12,34 +12,52 @@ import {
     Button,
     Paper,
     Flex,
-    Box
+    Box,
+    Menu,
+    ActionIcon,
+    Modal
 } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
-import { IconSearch, IconCalendar, IconUser, IconCalendarEvent, IconPlus } from '@tabler/icons-react'
-import { usePatientFolders } from '@/services/hook/staff-patient-folder.hook' 
+import { 
+    IconSearch, 
+    IconCalendar, 
+    IconUser, 
+    IconCalendarEvent, 
+    IconPlus,
+    IconDots,
+    IconEdit,
+    IconTrash
+} from '@tabler/icons-react'
+import { notifications } from '@mantine/notifications'
+import { usePatientFolders, useDeletePatientFolder } from '@/services/hook/staff-patient-folder.hook' 
 import AddPatientModal from './components/AddPatientModal'
+import EditPatientModal from './components/EditPatientModal'
 
 const PatientFolderPage = () => {
     const navigate = useNavigate()
     const [searchTerm, setSearchTerm] = useState('')
     const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null])
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [selectedPatient, setSelectedPatient] = useState<any>(null)
 
     // Use hooks
     const {
         data: patientsResponse,
         isLoading,
-        refetch
     } = usePatientFolders({
         search: searchTerm
     })
+
+    const deletePatientMutation = useDeletePatientFolder()
 
     const patients = patientsResponse?.data || patientsResponse || []
 
     const filteredPatients = patients.filter((patient: any) => {
         const matchesSearch =
             patient.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            patient.healthInsuranceCode?.toLowerCase().includes(searchTerm.toLowerCase())
+            patient.citizenId?.toLowerCase().includes(searchTerm.toLowerCase())
 
         const patientDate = new Date(patient.createdAt)
         const [dateFrom, dateTo] = dateRange
@@ -68,9 +86,52 @@ const PatientFolderPage = () => {
         [navigate]
     )
 
-    const handleRefresh = useCallback(() => {
-        refetch()
-    }, [refetch])
+    // Handle Edit
+    const handleEditClick = useCallback((patient: any, event: React.MouseEvent) => {
+        event.stopPropagation()
+        setSelectedPatient(patient)
+        setIsEditModalOpen(true)
+    }, [])
+
+    const handleCloseEditModal = useCallback(() => {
+        setIsEditModalOpen(false)
+        setSelectedPatient(null)
+    }, [])
+
+    // Handle Delete
+    const handleDeleteClick = useCallback((patient: any, event: React.MouseEvent) => {
+        event.stopPropagation()
+        setSelectedPatient(patient)
+        setIsDeleteModalOpen(true)
+    }, [])
+
+    const handleCloseDeleteModal = useCallback(() => {
+        setIsDeleteModalOpen(false)
+        setSelectedPatient(null)
+    }, [])
+
+    const handleDeletePatient = useCallback(async () => {
+        if (selectedPatient) {
+            try {
+                await deletePatientMutation.mutateAsync(selectedPatient.id)
+
+                notifications.show({
+                    title: 'Thành công',
+                    message: 'Xóa bệnh nhân thành công',
+                    color: 'green'
+                })
+
+                handleCloseDeleteModal()
+            } catch (error) {
+                console.error('Error deleting patient:', error)
+                notifications.show({
+                    title: 'Lỗi',
+                    message: 'Không thể xóa bệnh nhân',
+                    color: 'red'
+                })
+            }
+        }
+    }, [selectedPatient, deletePatientMutation, handleCloseDeleteModal])
 
     return (
         <Container size='xl' py='xl'>
@@ -78,10 +139,7 @@ const PatientFolderPage = () => {
                 {/* Header */}
                 <Group justify='space-between'>
                     <Title order={2}>Thông tin bệnh nhân</Title>
-                    <Group>
-                        <Button variant='light' onClick={handleRefresh} loading={isLoading}>
-                            Làm mới
-                        </Button>
+                    <Group>                    
                         <Button leftSection={<IconPlus size={16} />} onClick={handleAddPatient}>
                             Thêm bệnh nhân
                         </Button>
@@ -92,7 +150,7 @@ const PatientFolderPage = () => {
                 <Paper p='md' withBorder>
                     <Group grow>
                         <TextInput
-                            placeholder='Tìm kiếm theo tên, số BHYT...'
+                            placeholder='Tìm kiếm theo tên, mã định danh...'
                             leftSection={<IconSearch size={16} />}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.currentTarget.value)}
@@ -128,10 +186,47 @@ const PatientFolderPage = () => {
                                 onClick={() => handlePatientClick(patient.id)}
                                 style={{
                                     cursor: 'pointer',
-                                    transition: 'all 0.2s ease'
+                                    transition: 'all 0.2s ease',
+                                    position: 'relative'
                                 }}
                                 className='hover:transform hover:-translate-y-1 hover:shadow-lg'
                             >
+                                {/* Menu ba chấm */}
+                                <Menu shadow="md" width={200} position="bottom-start">
+                                    <Menu.Target>
+                                        <ActionIcon
+                                            variant="subtle"
+                                            color="gray"
+                                            size="sm"
+                                            style={{
+                                                position: 'absolute',
+                                                top: 8,
+                                                right: 8,
+                                                zIndex: 10
+                                            }}
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <IconDots size={16} />
+                                        </ActionIcon>
+                                    </Menu.Target>
+
+                                    <Menu.Dropdown>
+                                        <Menu.Item
+                                            leftSection={<IconEdit size={14} />}
+                                            onClick={(e) => handleEditClick(patient, e)}
+                                        >
+                                            Chỉnh sửa
+                                        </Menu.Item>
+                                        <Menu.Item
+                                            leftSection={<IconTrash size={14} />}
+                                            color="red"
+                                            onClick={(e) => handleDeleteClick(patient, e)}
+                                        >
+                                            Xóa
+                                        </Menu.Item>
+                                    </Menu.Dropdown>
+                                </Menu>
+
                                 <Stack gap='xs' mt='sm'>
                                     <Stack gap={4}>
                                         <Box>
@@ -139,7 +234,7 @@ const PatientFolderPage = () => {
                                                 {patient.fullName}
                                             </Text>
                                             <Text size='xs' fw={500} c='blue' mt='xs'>
-                                                BHYT: {patient.healthInsuranceCode}
+                                                Mã định danh: {patient.citizenId}
                                             </Text>
                                         </Box>
 
@@ -181,6 +276,49 @@ const PatientFolderPage = () => {
                     opened={isAddModalOpen}
                     onClose={handleCloseAddModal}
                 />
+
+                {/* Edit Patient Modal */}
+                <EditPatientModal
+                    opened={isEditModalOpen}
+                    onClose={handleCloseEditModal}
+                    patient={selectedPatient}
+                />
+
+                {/* Delete Confirmation Modal */}
+                <Modal
+                    opened={isDeleteModalOpen}
+                    onClose={handleCloseDeleteModal}
+                    title="Xác nhận xóa"
+                    centered
+                    size="sm"
+                >
+                    <Stack gap="md">
+                        <Text>
+                            Bạn có chắc chắn muốn xóa bệnh nhân{' '}
+                            <Text span fw={600}>
+                                {selectedPatient?.fullName}
+                            </Text>
+                            ?
+                        </Text>
+                        <Text size="sm" c="dimmed">
+                            Hành động này không thể hoàn tác.
+                        </Text>
+
+                        <Group justify="flex-end" mt="md">
+                            <Button variant="light" onClick={handleCloseDeleteModal}>
+                                Hủy
+                            </Button>
+                            <Button
+                                color="red"
+                                leftSection={<IconTrash size={16} />}
+                                onClick={handleDeletePatient}
+                                loading={deletePatientMutation.isPending}
+                            >
+                                Xóa
+                            </Button>
+                        </Group>
+                    </Stack>
+                </Modal>
             </Stack>
         </Container>
     )

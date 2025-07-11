@@ -22,7 +22,7 @@ import AnalysisDetailPage from '@/apps/(main)/analysis/[id]/page'
 import ValidationPage from '@/apps/(main)/validation/page'
 import ValidationDetailPage from '@/apps/(main)/validation/[id]/page'
 import ProfilePage from '@/apps/(main)/profile/page'
-import VisitDetailPage from '@/apps/(main)/patient-detail/visit/[visitId]/page'
+import SessionDetailPage from '@/apps/(main)/patient-detail/session/[sessionId]/page'
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -94,7 +94,7 @@ export const router = createBrowserRouter([
                         element: <InputInfoPage />
                     },
                     {
-                        path: '/patient-info',
+                        path: '/patient-folder',
                         element: <PatientInfoPage />
                     },
                     {
@@ -102,8 +102,8 @@ export const router = createBrowserRouter([
                         element: <PatientDetailPage />
                     },
                     {
-                        path: '/patient-detail/:id/visit/:visitId',
-                        element: <VisitDetailPage />
+                        path: '/patient-detail/session/:sessionId',
+                        element: <SessionDetailPage />
                     },
                     {
                         path: '/input-general-data',

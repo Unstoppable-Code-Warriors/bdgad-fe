@@ -8,7 +8,7 @@ export const navItems = [
     {
         label: 'Danh sách bệnh nhân',
         icon: IconUser,
-        href: '/patient-info',
+        href: '/patient-folder',
         roles: [Role.STAFF]
     },
     {

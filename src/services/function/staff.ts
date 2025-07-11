@@ -62,28 +62,22 @@ export const staffService = {
             .json()
     },
 
-    // Upload medical test requisition file
-    uploadMedicalTestRequisition: async (file: File): Promise<MedicalTestRequisitionUploadResponse> => {
-        const formData = new FormData()
-        formData.append('medicalTestRequisition', file)
-
-        return backendApi
-            .post(`${PREFIX}/upload-medical-test-requisition`, {
-                body: formData,
-                headers: {
-                    'Content-Type': undefined // Remove default application/json content type
-                }
-            })
-            .json<MedicalTestRequisitionUploadResponse>()
-    },
     //Create folder patient
-    createPatientFolder: async (patientData: { fullName: string; healthInsuranceCode: string }): Promise<any> => {
+    createPatientFolder: async (patientData: { fullName: string; citizenId: string }): Promise<any> => {
         return backendApi
             .post(`${PREFIX}/patients`, {
                 json: patientData
             })
             .json()
     },
+
+    //Get patient folder by ID
+    getPatientFolder: async (id: string): Promise<any> => {
+        return backendApi
+            .get(`${PREFIX}/patients/${id}`)
+            .json()
+    },
+
     //Get all patient folders
     getAllPatientFolders: async (params?: {
         page?: number
@@ -106,7 +100,52 @@ export const staffService = {
             .json()
     },
 
+    //Update patient folder by ID
+    updatePatientFolder: async (id: string, patientData: {
+        fullName?: string
+        citizenId?: string
+    }): Promise<any> => {
+        return backendApi
+            .put(`${PREFIX}/patients/${id}`, {
+                json: patientData
+            })
+            .json()
+    },
 
+    //Delete patient folder by ID
+    deletePatientFolder: async (id: string): Promise<any> => {
+        return backendApi
+            .delete(`${PREFIX}/patients/${id}`)
+            .json()
+    },
 
+    // Upload medical test requisition file
+    uploadMedicalTestRequisition: async (file: File): Promise<MedicalTestRequisitionUploadResponse> => {
+        const formData = new FormData()
+        formData.append('medicalTestRequisition', file)
+
+        return backendApi
+            .post(`${PREFIX}/upload-medical-test-requisition`, {
+                body: formData,
+                headers: {
+                    'Content-Type': undefined // Remove default application/json content type
+                }
+            })
+            .json<MedicalTestRequisitionUploadResponse>()
+    },
+    // Get all lab sessions of a patient
+    getPatientLabSessions: async (patientId: string): Promise<any> => {
+        return backendApi
+            .get(`${PREFIX}/patients/${patientId}/sessions`)
+            .json()
+    },
+
+    // Get session detail by ID
+    getPatientLabSessionDetail: async ( sessionId: string): Promise<any> => {
+        return backendApi
+            .get(`${PREFIX}/sessions/${sessionId}`)
+            .json()
+    },
 
 }
+

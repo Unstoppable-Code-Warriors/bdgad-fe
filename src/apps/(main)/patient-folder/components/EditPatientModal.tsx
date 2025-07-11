@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
     Modal,
     TextInput,
@@ -6,25 +6,35 @@ import {
     Stack,
     Button
 } from '@mantine/core'
-import { IconPlus } from '@tabler/icons-react'
+import { IconEdit } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
-import { useCreatePatientFolder } from '@/services/hook/staff-patient-folder.hook' 
+import { useUpdatePatientFolder } from '@/services/hook/staff-patient-folder.hook'
 
-interface AddPatientModalProps {
+interface EditPatientModalProps {
     opened: boolean
     onClose: () => void
+    patient: any
 }
 
-const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
-    const [patientData, setPatientData] = useState({
+const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) => {
+    const [editPatientData, setEditPatientData] = useState({
         fullName: '',
         citizenId: ''
     })
 
-    const createPatientMutation = useCreatePatientFolder()
+    const updatePatientMutation = useUpdatePatientFolder()
+
+    useEffect(() => {
+        if (patient) {
+            setEditPatientData({
+                fullName: patient.fullName || '',
+                citizenId: patient.citizenId || ''
+            })
+        }
+    }, [patient])
 
     const handleClose = useCallback(() => {
-        setPatientData({
+        setEditPatientData({
             fullName: '',
             citizenId: ''
         })
@@ -32,49 +42,52 @@ const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
     }, [onClose])
 
     const handleFullNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        setPatientData(prev => ({
+        setEditPatientData(prev => ({
             ...prev,
             fullName: e.target.value
         }))
     }, [])
 
     const handleCitizenIdChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        setPatientData(prev => ({
+        setEditPatientData(prev => ({
             ...prev,
             citizenId: e.target.value
         }))
     }, [])
 
-    const handleSavePatient = useCallback(async () => {
-        if (patientData.fullName.trim() && patientData.citizenId.trim()) {
+    const handleUpdatePatient = useCallback(async () => {
+        if (patient && editPatientData.fullName.trim() && editPatientData.citizenId.trim()) {
             try {
-                await createPatientMutation.mutateAsync(patientData)
+                await updatePatientMutation.mutateAsync({
+                    id: patient.id,
+                    data: editPatientData
+                })
 
                 notifications.show({
                     title: 'Thành công',
-                    message: 'Thêm thư mục bệnh nhân thành công',
+                    message: 'Cập nhật thông tin bệnh nhân thành công',
                     color: 'green'
                 })
 
                 handleClose()
             } catch (error) {
-                console.error('Error creating patient:', error)
+                console.error('Error updating patient:', error)
                 notifications.show({
                     title: 'Lỗi',
-                    message: 'Không thể thêm bệnh nhân',
+                    message: 'Không thể cập nhật thông tin bệnh nhân',
                     color: 'red'
                 })
             }
         }
-    }, [patientData, createPatientMutation, handleClose])
+    }, [patient, editPatientData, updatePatientMutation, handleClose])
 
-    const isFormValid = patientData.fullName.trim() && patientData.citizenId.trim()
+    const isFormValid = editPatientData.fullName.trim() && editPatientData.citizenId.trim()
 
     return (
         <Modal
             opened={opened}
             onClose={handleClose}
-            title="Thêm thư mục bệnh nhân"
+            title="Chỉnh sửa thông tin bệnh nhân"
             centered
             size="md"
         >
@@ -82,16 +95,16 @@ const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
                 <TextInput
                     label="Họ và tên"
                     placeholder="Nhập họ và tên đầy đủ..."
-                    value={patientData.fullName}
+                    value={editPatientData.fullName}
                     onChange={handleFullNameChange}
                     required
                     size="md"
                 />
 
                 <TextInput
-                    label="Số CCCD"
-                    placeholder="Nhập số căn cước công dân..."
-                    value={patientData.citizenId}
+                    label="Mã định danh"
+                    placeholder="Nhập mã định danh..."
+                    value={editPatientData.citizenId}
                     onChange={handleCitizenIdChange}
                     required
                     size="md"
@@ -102,12 +115,12 @@ const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
                         Hủy
                     </Button>
                     <Button
-                        leftSection={<IconPlus size={16} />}
-                        onClick={handleSavePatient}
+                        leftSection={<IconEdit size={16} />}
+                        onClick={handleUpdatePatient}
                         disabled={!isFormValid}
-                        loading={createPatientMutation?.isPending}
+                        loading={updatePatientMutation?.isPending}
                     >
-                        Thêm bệnh nhân
+                        Cập nhật
                     </Button>
                 </Group>
             </Stack>
@@ -115,4 +128,4 @@ const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
     )
 }
 
-export default AddPatientModal
+export default EditPatientModal
