@@ -120,16 +120,36 @@ export const staffService = {
     },
 
     // Upload medical test requisition file
-    uploadMedicalTestRequisition: async (file: File): Promise<MedicalTestRequisitionUploadResponse> => {
-        const formData = new FormData()
-        formData.append('medicalTestRequisition', file)
+    uploadMedicalTestRequisition: async (formData: {
+        files: File[]
+        patientId: number
+        doctorId: number
+        labTestingId?: number
+        typeLabSession: string
+        ocrResult?: string
+    }): Promise<MedicalTestRequisitionUploadResponse> => {
+        const data = new FormData()
+        
+        // Append files
+        formData.files.forEach((file) => {
+            data.append('files', file)
+        })
+        
+        // Append other fields
+        data.append('patientId', formData.patientId.toString())
+        data.append('doctorId', formData.doctorId.toString())
+        if (formData.labTestingId) {
+            data.append('labTestingId', formData.labTestingId.toString())
+        }
+        data.append('typeLabSession', formData.typeLabSession)
+        if (formData.ocrResult) {
+            data.append('ocrResult', formData.ocrResult)
+        }
 
         return backendApi
-            .post(`${PREFIX}/upload-medical-test-requisition`, {
-                body: formData,
-                headers: {
-                    'Content-Type': undefined // Remove default application/json content type
-                }
+            .post(`${PREFIX}/patient-files/upload`, {
+                body: data,
+                headers: {}
             })
             .json<MedicalTestRequisitionUploadResponse>()
     },

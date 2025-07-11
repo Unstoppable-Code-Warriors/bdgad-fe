@@ -63,7 +63,6 @@ const PatientDetailPage = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
 
-    // Use API hook thay vì mock data
     const { data: sessionsResponse, isLoading, error } = usePatientLabSessions(id!)
 
     const sessions = sessionsResponse || []
@@ -79,7 +78,7 @@ const PatientDetailPage = () => {
     }
 
     const handleSessionClick = (sessionId: string) => {
-        navigate(`/patient-detail/session/${sessionId}`)
+        navigate(`/patient-detail/${id}/session/${sessionId}`)
     }
 
     if (isLoading) {

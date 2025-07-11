@@ -102,7 +102,7 @@ export const router = createBrowserRouter([
                         element: <PatientDetailPage />
                     },
                     {
-                        path: '/patient-detail/session/:sessionId',
+                        path: '/patient-detail/:id/session/:sessionId',
                         element: <SessionDetailPage />
                     },
                     {

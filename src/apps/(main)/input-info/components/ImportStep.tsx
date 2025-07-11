@@ -6,13 +6,12 @@ import FileUploadZone from './FileUploadZone'
 import SelectedFilesList from './SelectedFilesList'
 import SubmitButton from './SubmitButton'
 import SubmittedFilesTable from './SubmittedFilesTable'
-import SaveButton from './SaveButton'
 import OCRProcessor from './OCRProcessor'
 import { getFileType } from '../utils/fileUtils'
 
 interface ImportStepProps {
-    onComplete?: (data: any) => void
-    onSave?: (files: SubmittedFile[]) => void
+    onFilesSubmitted?: (files: SubmittedFile[]) => void
+    onOCRComplete?: (data: any) => void
 }
 
 interface SubmittedFile {
@@ -23,13 +22,12 @@ interface SubmittedFile {
     type: 'image' | 'pdf' | 'document' | 'other'
 }
 
-const ImportStep = ({ onComplete, onSave }: ImportStepProps) => {
+const ImportStep = ({ onFilesSubmitted, onOCRComplete }: ImportStepProps) => {
     const [selectedFiles, setSelectedFiles] = useState<FileWithPath[]>([])
     const [submittedFiles, setSubmittedFiles] = useState<SubmittedFile[]>([])
     const [currentStep, setCurrentStep] = useState<'upload' | 'ocr'>('upload')
     const [selectedFileForOCR, setSelectedFileForOCR] = useState<FileWithPath | null>(null)
     const [error, setError] = useState<string | null>(null)
-    const [isSaving, setIsSaving] = useState(false)
 
     const handleFileDrop = (files: FileWithPath[]) => {
         setSelectedFiles(prev => [...prev, ...files])
@@ -54,34 +52,14 @@ const ImportStep = ({ onComplete, onSave }: ImportStepProps) => {
             type: getFileType(file)
         }))
 
-        setSubmittedFiles(prev => [...prev, ...newSubmittedFiles])
+        const updatedSubmittedFiles = [...submittedFiles, ...newSubmittedFiles]
+        setSubmittedFiles(updatedSubmittedFiles)
         setSelectedFiles([])
         setError(null)
 
-        if (onComplete) {
-            onComplete({
-                files: newSubmittedFiles
-            })
-        }
-    }
-
-    const handleSaveFiles = async () => {
-        if (submittedFiles.length === 0) return
-
-        setIsSaving(true)
-        
-        try {
-            await new Promise(resolve => setTimeout(resolve, 1500))
-            
-            if (onSave) {
-                onSave(submittedFiles)
-            }
-            
-        } catch (error) {
-            console.error('Error saving files:', error)
-            setError('Failed to save files. Please try again.')
-        } finally {
-            setIsSaving(false)
+        // Notify parent component about the submitted files
+        if (onFilesSubmitted) {
+            onFilesSubmitted(updatedSubmittedFiles)
         }
     }
 
@@ -91,17 +69,24 @@ const ImportStep = ({ onComplete, onSave }: ImportStepProps) => {
     }
 
     const handleOCRComplete = (data: any) => {
-        setSubmittedFiles(prev => prev.map(f => 
+        const updatedSubmittedFiles = submittedFiles.map(f => 
             f.file === selectedFileForOCR 
                 ? { ...f, status: 'completed' as const }
                 : f
-        ))
+        )
+        setSubmittedFiles(updatedSubmittedFiles)
         
         setCurrentStep('upload')
         setSelectedFileForOCR(null)
         
-        if (onComplete) {
-            onComplete(data)
+        // Notify parent component about OCR completion
+        if (onOCRComplete) {
+            onOCRComplete(data)
+        }
+
+        // Update parent with new files state
+        if (onFilesSubmitted) {
+            onFilesSubmitted(updatedSubmittedFiles)
         }
     }
 
@@ -111,7 +96,13 @@ const ImportStep = ({ onComplete, onSave }: ImportStepProps) => {
     }
 
     const handleDeleteSubmittedFile = (id: string) => {
-        setSubmittedFiles(prev => prev.filter(f => f.id !== id))
+        const updatedSubmittedFiles = submittedFiles.filter(f => f.id !== id)
+        setSubmittedFiles(updatedSubmittedFiles)
+        
+        // Update parent component
+        if (onFilesSubmitted) {
+            onFilesSubmitted(updatedSubmittedFiles)
+        }
     }
 
     // OCR Step
@@ -150,12 +141,6 @@ const ImportStep = ({ onComplete, onSave }: ImportStepProps) => {
                 files={submittedFiles}
                 onStartOCR={handleStartOCR}
                 onDelete={handleDeleteSubmittedFile}
-            />
-
-            <SaveButton
-                fileCount={submittedFiles.length}
-                onSave={handleSaveFiles}
-                disabled={isSaving}
             />
         </Stack>
     )

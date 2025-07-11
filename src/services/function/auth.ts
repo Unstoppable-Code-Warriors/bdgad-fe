@@ -23,6 +23,11 @@ export const authService = {
         return authUtils.get<ApiResponse<{ user: User }>>(`${PREFIX}/auth/me`)
     },
 
+    // Get user by role
+    getUserByCode: async (code: string): Promise<ApiResponse<{ user: User }>> => {
+        return authUtils.get<ApiResponse<{ user: User }>>(`${PREFIX}/auth/users?code=${code}`)
+    },
+
     updateProfile: async (data: UpdateProfileRequest): Promise<ApiResponse<{ user: User }>> => {
         return authUtils.put<{ data: {user: User},message: string }>(`${PREFIX}/auth/update-profile`, data)
     },

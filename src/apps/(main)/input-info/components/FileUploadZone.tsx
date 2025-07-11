@@ -12,7 +12,7 @@ const FileUploadZone = ({ onDrop, onReject }: FileUploadZoneProps) => {
     return (
         <Card withBorder padding="md" radius="md">
             <Stack gap="sm">
-                <Text size="lg" fw={600} c="blue.7">Upload Files</Text>
+                <Text size="lg" fw={600} c="blue.7">Tải tập tin</Text>
 
                 <Dropzone
                     onDrop={onDrop}

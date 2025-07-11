@@ -94,7 +94,6 @@ const SessionDetailPage = () => {
     const { id: patientId, sessionId } = useParams<{ id: string; sessionId: string }>()
     const navigate = useNavigate()
 
-    // Use API hook thay vì mock data
     const { data: sessionData, isLoading, error } = usePatientLabSessionDetail(sessionId!)
 
     const handleBack = () => {
@@ -288,7 +287,7 @@ const SessionDetailPage = () => {
                                 Chưa có file nào
                             </Title>
                             <Text c='dimmed' mt='xs'>
-                                lầnkhám này chưa có file đính kèm
+                                Lần khám này chưa có file đính kèm
                             </Text>
                         </Paper>
                     )}
