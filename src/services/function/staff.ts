@@ -22,7 +22,7 @@ export const staffService = {
 
     // Download general file by ID
     downloadGeneralFile: async (id: string): Promise<any> => {
-         return backendApi
+        return backendApi
             .get(`${PREFIX}/general-files/${id}/download`).json<GeneralFileDownloadResponse>()
     },
 
@@ -75,5 +75,38 @@ export const staffService = {
                 }
             })
             .json<MedicalTestRequisitionUploadResponse>()
-    }
+    },
+    //Create folder patient
+    createPatientFolder: async (patientData: { fullName: string; healthInsuranceCode: string }): Promise<any> => {
+        return backendApi
+            .post(`${PREFIX}/patients`, {
+                json: patientData
+            })
+            .json()
+    },
+    //Get all patient folders
+    getAllPatientFolders: async (params?: {
+        page?: number
+        limit?: number
+        search?: string
+        filter?: string
+    }): Promise<any> => {
+        const searchParams = new URLSearchParams()
+
+        if (params?.page) searchParams.append('page', params.page.toString())
+        if (params?.limit) searchParams.append('limit', params.limit.toString())
+        if (params?.search) searchParams.append('search', params.search)
+        if (params?.filter) searchParams.append('filter', params.filter)
+
+        const queryString = searchParams.toString()
+        const url = queryString ? `${PREFIX}/patients?${queryString}` : `${PREFIX}/patients`
+
+        return backendApi
+            .get(url)
+            .json()
+    },
+
+
+
+
 }

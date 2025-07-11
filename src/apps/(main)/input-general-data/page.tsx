@@ -10,7 +10,7 @@ import {
     useDownloadGeneralFile,
     useDeleteGeneralFile,
     useUploadGeneralFile
-} from '@/services/hook/staff.hook'
+} from '@/services/hook/staff-general-files.hook'
 
 type FileWithPath = File & { path?: string }
 
