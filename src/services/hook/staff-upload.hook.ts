@@ -6,8 +6,6 @@ export const useUploadMedicalTestRequisition = () => {
         mutationFn: (formData: {
             files: File[]
             patientId: number
-            doctorId: number
-            labTestingId?: number
             typeLabSession: string
             ocrResult?: string
         }) => staffService.uploadMedicalTestRequisition(formData),

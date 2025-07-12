@@ -50,13 +50,9 @@ const InputInfoPage = () => {
             const formData = {
                 files: submittedFiles.map(sf => sf.file),
                 patientId: parseInt(patientId),
-                doctorId: 1, 
-                labTestingId: 1, 
                 typeLabSession: typeLabSession,
                 ocrResult: undefined 
             }
-
-            console.log('Saving files with data:', formData)
 
             // Call API
             await uploadMutation.mutateAsync(formData)

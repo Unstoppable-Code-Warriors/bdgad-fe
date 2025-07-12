@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import {
     Container,
@@ -26,9 +27,13 @@ import {
     IconClipboardCheck,
     IconUser,
     IconFileZip,
-    IconFile
+    IconFile,
+    IconSend,
+    IconCheck
 } from '@tabler/icons-react'
 import { usePatientLabSessionDetail } from '@/services/hook/staff-patient-session.hook'
+import SendFilesModal from '../components/SendFilesModal'
+
 
 const getFileIcon = (fileType: string) => {
     switch (fileType.toLowerCase()) {
@@ -93,6 +98,7 @@ const formatFileSize = (bytes: number) => {
 const SessionDetailPage = () => {
     const { id: patientId, sessionId } = useParams<{ id: string; sessionId: string }>()
     const navigate = useNavigate()
+    const [isSendModalOpen, setIsSendModalOpen] = useState(false)
 
     const { data: sessionData, isLoading, error } = usePatientLabSessionDetail(sessionId!)
 
@@ -105,13 +111,20 @@ const SessionDetailPage = () => {
     }
 
     const handleDownloadFile = (filePath: string, fileName: string) => {
-
         const link = document.createElement('a')
         link.href = filePath
         link.download = fileName
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
+    }
+
+    const handleSendFiles = () => {
+        setIsSendModalOpen(true)
+    }
+
+    const handleCloseSendModal = () => {
+        setIsSendModalOpen(false)
     }
 
     if (isLoading) {
@@ -158,9 +171,29 @@ const SessionDetailPage = () => {
                             <IconArrowLeft size={20} />
                         </ActionIcon>
                         <div>
-                            <Title order={2}>Lần khám</Title>
+                            <Title order={2}>Lần khám </Title>
                         </div>
                     </Group>
+
+                    {/* Send Files Button */}
+                    {sessionData?.patientFiles && sessionData.patientFiles.length > 0 && (() => {
+                        const hasDoctor = sessionData?.doctor?.id
+                        const hasLabTech = sessionData?.labTestingTechnician?.id || sessionData?.labTesting?.id
+                        const isAlreadyAssigned = sessionData.typeLabSession === 'test' 
+                            ? hasDoctor && hasLabTech 
+                            : hasDoctor
+
+                        return (
+                            <Button 
+                                leftSection={isAlreadyAssigned ? <IconCheck size={16} /> : <IconSend size={16} />} 
+                                onClick={handleSendFiles}
+                                color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
+                                variant={isAlreadyAssigned ? 'light' : 'filled'}
+                            >
+                                {isAlreadyAssigned ? 'Thông tin người nhận' : 'Gửi file đi'}
+                            </Button>
+                        )
+                    })()}
                 </Group>
 
                 {/* Session Info */}
@@ -181,7 +214,7 @@ const SessionDetailPage = () => {
                                 </Group>
 
                                 <Text fw={500} size='lg' mb='sm'>
-                                    Barcode: {sessionData.barcode}
+                                     Barcode: {sessionData.barcode}
                                 </Text>
 
                                 <Group gap='lg'>
@@ -218,68 +251,71 @@ const SessionDetailPage = () => {
                     </Group>
 
                     {sessionData.patientFiles && sessionData.patientFiles.length > 0 ? (
-                        <Grid>
-                            {sessionData.patientFiles.map((file: any) => (
-                                <Grid.Col key={file.id} span={{ base: 12, md: 6, lg: 4 }}>
-                                    <Card shadow='sm' padding='md' withBorder h='100%'>
-                                        <Stack gap='sm'>
-                                            {/* File Header */}
-                                            <Group>
-                                                {getFileIcon(file.fileType)}
-                                                <Badge size='xs' variant='light' color='gray'>
-                                                    {file.fileType.toUpperCase()}
-                                                </Badge>
-                                            </Group>
+                        <>
+                            <Grid>
+                                {sessionData.patientFiles.map((file: any) => (
+                                    <Grid.Col key={file.id} span={{ base: 12, md: 6, lg: 4 }}>
+                                        <Card shadow='sm' padding='md' withBorder h='100%'>
+                                            <Stack gap='sm'>
+                                                {/* File Header */}
+                                                <Group>
+                                                    {getFileIcon(file.fileType)}
+                                                    <Badge size='xs' variant='light' color='gray'>
+                                                        {file.fileType.toUpperCase()}
+                                                    </Badge>
+                                                </Group>
 
-                                            {/* File Info */}
-                                            <div>
-                                                <Text fw={600} size='sm' mb='xs' lineClamp={2}>
-                                                    {file.fileName}
-                                                </Text>
-                                                <Text size='xs' c='dimmed' mb='sm'>
-                                                    {formatFileSize(file.fileSize)} •{' '}
-                                                    {new Date(file.uploadedAt).toLocaleDateString('vi-VN')}
-                                                </Text>
+                                                {/* File Info */}
+                                                <div>
+                                                    <Text fw={600} size='sm' mb='xs' lineClamp={2}>
+                                                        {file.fileName}
+                                                    </Text>
+                                                    <Text size='xs' c='dimmed' mb='sm'>
+                                                        {formatFileSize(file.fileSize)} •{' '}
+                                                        {new Date(file.uploadedAt).toLocaleDateString('vi-VN')}
+                                                    </Text>
 
-                                                {/* Uploader Info */}
-                                                {file.uploader && (
-                                                    <Group gap='xs' mb='sm'>
-                                                        <IconUser size={12} />
-                                                        <Text size='xs' c='dimmed'>
-                                                            {file.uploader.name}
-                                                        </Text>
-                                                    </Group>
-                                                )}
-                                            </div>
+                                                    {/* Uploader Info */}
+                                                    {file.uploader && (
+                                                        <Group gap='xs' mb='sm'>
+                                                            <IconUser size={12} />
+                                                            <Text size='xs' c='dimmed'>
+                                                                {file.uploader.name}
+                                                            </Text>
+                                                        </Group>
+                                                    )}
+                                                </div>
 
-                                            {/* Actions */}
-                                            <Group gap='xs' mt='auto'>
-                                                <ActionIcon
-                                                    variant='light'
-                                                    color='blue'
-                                                    size='sm'
-                                                    onClick={() => handleViewFile(file.filePath)}
-                                                    flex={1}
-                                                    title='Xem file'
-                                                >
-                                                    <IconEye size={14} />
-                                                </ActionIcon>
-                                                <ActionIcon
-                                                    variant='light'
-                                                    color='green'
-                                                    size='sm'
-                                                    onClick={() => handleDownloadFile(file.filePath, file.fileName)}
-                                                    flex={1}
-                                                    title='Tải xuống'
-                                                >
-                                                    <IconDownload size={14} />
-                                                </ActionIcon>
-                                            </Group>
-                                        </Stack>
-                                    </Card>
-                                </Grid.Col>
-                            ))}
-                        </Grid>
+                                                {/* Actions */}
+                                                <Group gap='xs' mt='auto'>
+                                                    <ActionIcon
+                                                        variant='light'
+                                                        color='blue'
+                                                        size='sm'
+                                                        onClick={() => handleViewFile(file.filePath)}
+                                                        flex={1}
+                                                        title='Xem file'
+                                                    >
+                                                        <IconEye size={14} />
+                                                    </ActionIcon>
+                                                    <ActionIcon
+                                                        variant='light'
+                                                        color='green'
+                                                        size='sm'
+                                                        onClick={() => handleDownloadFile(file.filePath, file.fileName)}
+                                                        flex={1}
+                                                        title='Tải xuống'
+                                                    >
+                                                        <IconDownload size={14} />
+                                                    </ActionIcon>
+                                                </Group>
+                                            </Stack>
+                                        </Card>
+                                    </Grid.Col>
+                                ))}
+                            </Grid>
+
+                        </>
                     ) : (
                         <Paper p='xl' ta='center' withBorder>
                             <IconFile size={48} color='gray' />
@@ -287,11 +323,21 @@ const SessionDetailPage = () => {
                                 Chưa có file nào
                             </Title>
                             <Text c='dimmed' mt='xs'>
-                                Lần khám này chưa có file đính kèm
+                                Phiên khám này chưa có file đính kèm
                             </Text>
                         </Paper>
                     )}
                 </div>
+
+                {/* Send Files Modal */}
+                <SendFilesModal
+                    opened={isSendModalOpen}
+                    onClose={handleCloseSendModal}
+                    sessionType={sessionData?.typeLabSession || 'test'}
+                    sessionId={sessionId!}
+                    patientId={patientId!}
+                    sessionData={sessionData}
+                />
             </Stack>
         </Container>
     )

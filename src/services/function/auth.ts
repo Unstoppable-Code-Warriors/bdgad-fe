@@ -23,9 +23,9 @@ export const authService = {
         return authUtils.get<ApiResponse<{ user: User }>>(`${PREFIX}/auth/me`)
     },
 
-    // Get user by role
-    getUserByCode: async (code: string): Promise<ApiResponse<{ user: User }>> => {
-        return authUtils.get<ApiResponse<{ user: User }>>(`${PREFIX}/auth/users?code=${code}`)
+    // Get users by role/code
+    getUserByCode: async (code: number): Promise<ApiResponse<{ users: User[] }>> => {
+        return authUtils.get<{ data: { users: User[] }}>(`${PREFIX}/auth/users?code=${code}`)
     },
 
     updateProfile: async (data: UpdateProfileRequest): Promise<ApiResponse<{ user: User }>> => {

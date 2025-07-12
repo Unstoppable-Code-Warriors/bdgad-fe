@@ -53,7 +53,7 @@ export const authApi = parentApi.extend({
                 // For auth API, we might not always need the access token
                 // Only add it for specific endpoints that require it (like refresh, logout)
                 const url = request.url
-                const requiresAuth = url.includes('/refresh') || url.includes('/logout') || url.includes('/me') || url.includes('/change-password') || url.includes('/update-profile')
+                const requiresAuth = url.includes('/refresh') || url.includes('/logout') || url.includes('/me') || url.includes('/change-password') || url.includes('/update-profile') || url.includes('/users')
 
                 if (requiresAuth) {
                     const token = getAccessToken()

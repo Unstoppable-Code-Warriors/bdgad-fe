@@ -123,8 +123,6 @@ export const staffService = {
     uploadMedicalTestRequisition: async (formData: {
         files: File[]
         patientId: number
-        doctorId: number
-        labTestingId?: number
         typeLabSession: string
         ocrResult?: string
     }): Promise<MedicalTestRequisitionUploadResponse> => {
@@ -137,10 +135,6 @@ export const staffService = {
         
         // Append other fields
         data.append('patientId', formData.patientId.toString())
-        data.append('doctorId', formData.doctorId.toString())
-        if (formData.labTestingId) {
-            data.append('labTestingId', formData.labTestingId.toString())
-        }
         data.append('typeLabSession', formData.typeLabSession)
         if (formData.ocrResult) {
             data.append('ocrResult', formData.ocrResult)
@@ -164,6 +158,18 @@ export const staffService = {
     getPatientLabSessionDetail: async ( sessionId: string): Promise<any> => {
         return backendApi
             .get(`${PREFIX}/sessions/${sessionId}`)
+            .json()
+    },
+
+    //Assign lab test or doctor to session
+    assignSession: async (sessionId: string, data: {
+        doctorId?: number
+        labTestingId?: number
+    }): Promise<any> => {
+        return backendApi
+            .put(`${PREFIX}/sessions/${sessionId}`, {
+                json: data
+            })
             .json()
     },
 
