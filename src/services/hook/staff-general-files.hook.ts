@@ -55,6 +55,6 @@ export const useDeleteGeneralFile = () => {
 
 export const useUploadMedicalTestRequisition = () => {
     return useMutation({
-        mutationFn: (file: File) => staffService.uploadMedicalTestRequisition(file)
+        mutationFn: (file: any) => staffService.uploadMedicalTestRequisition(file)
     })
 }
