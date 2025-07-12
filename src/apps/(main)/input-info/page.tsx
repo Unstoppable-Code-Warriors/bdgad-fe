@@ -85,7 +85,7 @@ const InputInfoPage = () => {
             icon: <IconMicroscope size={16} />
         },
         {
-            value: 'assessment',
+            value: 'validation',
             label: 'Thẩm định',
             icon: <IconClipboardCheck size={16} />
         }

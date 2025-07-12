@@ -65,7 +65,7 @@ const getStatusBadge = (typeLabSession: string) => {
                 Xét nghiệm
             </Badge>
         )
-    } else if (typeLabSession === 'assessment') {
+    } else if (typeLabSession === 'validation') {
         return (
             <Badge color='green' variant='light' size='sm'>
                 Thẩm định

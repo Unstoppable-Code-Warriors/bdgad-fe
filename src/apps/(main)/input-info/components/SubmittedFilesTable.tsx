@@ -1,6 +1,6 @@
 import type { FileWithPath } from '@mantine/dropzone'
 import { Card, Stack, Group, Text, Badge, Table, Image, ActionIcon, Box } from '@mantine/core'
-import { IconScan, IconEye, IconTrash } from '@tabler/icons-react'
+import { IconScan, IconTrash, IconDownload } from '@tabler/icons-react'
 import { getFileIcon, getFileTypeLabel, formatFileSize } from '../utils/fileUtils'
 
 interface SubmittedFile {
@@ -98,7 +98,7 @@ const SubmittedFilesTable = ({ files, onStartOCR, onDelete }: SubmittedFilesTabl
                                             color="green"
                                             onClick={() => handleDownload(submittedFile.file)}
                                         >
-                                            <IconEye size="1rem" />
+                                            <IconDownload size="1rem" />
                                         </ActionIcon>
                                         <ActionIcon
                                             variant="light"

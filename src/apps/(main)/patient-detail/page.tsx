@@ -17,7 +17,7 @@ const getStatusBadge = (status: string) => {
         processing: 'yellow',
         pending: 'blue',
         test: 'blue',
-        assessment: 'green'
+        validation: 'green'
     }
 
     const statusLabels = {
@@ -25,7 +25,7 @@ const getStatusBadge = (status: string) => {
         processing: 'Đang xử lý',
         pending: 'Chờ thẩm định',
         test: 'Xét nghiệm',
-        assessment: 'Thẩm định'
+        validation: 'Thẩm định'
     }
 
     return (
@@ -162,7 +162,7 @@ const PatientDetailPage = () => {
                                         <Text fw={700} size='lg' c='green'>
                                             {
                                                 sessions.filter(
-                                                    (session: any) => session.typeLabSession === 'assessment'
+                                                    (session: any) => session.typeLabSession === 'validation'
                                                 ).length
                                             }
                                         </Text>
