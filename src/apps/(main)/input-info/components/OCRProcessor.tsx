@@ -112,7 +112,11 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
             await new Promise(resolve => setTimeout(resolve, 500))
             
             // Call real API
-            const result = await staffService.uploadMedicalTestRequisition(selectedFile)
+            const result = await staffService.uploadMedicalTestRequisition({
+                files: [selectedFile],
+                patientId: 0, // TODO: Replace with actual patientId if available
+                typeLabSession: '', // TODO: Replace with actual typeLabSession if available
+            })
             console.log('OCR Result:', result)
             
             setProgress(80)
