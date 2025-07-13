@@ -4,7 +4,7 @@ import { Title, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert, Too
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
 import { IconEye, IconRefresh, IconAlertCircle, IconDownload } from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
-import { useLabTestSessions, useSendToAnalysis } from '@/services/hook/lab-test.hook'
+import { useLabTestSessions } from '@/services/hook/lab-test.hook'
 import { labTestService } from '@/services/function/lab-test'
 import { notifications } from '@mantine/notifications'
 import type { LabTestSessionListItem } from '@/types/lab-test'
