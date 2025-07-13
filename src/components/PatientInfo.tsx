@@ -3,7 +3,7 @@ import { IconUser, IconId, IconPhone, IconMapPin, IconStethoscope, IconMail } fr
 
 interface PatientData {
     fullName: string
-    personalId: string
+    citizenId: string
     dateOfBirth: string
     phone: string
     address: string
@@ -62,7 +62,7 @@ export const PatientInfo = ({ patient, doctor, doctorTitle = 'Bác sĩ phụ tr�
                                 {patient.fullName}
                             </Text>
                             <Text size='sm' c='dimmed'>
-                                {calculateAge(patient.dateOfBirth)} tuổi • ID: {patient.personalId}
+                                {calculateAge(patient.dateOfBirth)} tuổi • ID: {patient.citizenId}
                             </Text>
                         </Box>
                     </Group>
@@ -81,7 +81,7 @@ export const PatientInfo = ({ patient, doctor, doctorTitle = 'Bác sĩ phụ tr�
                                         CCCD/CMND:
                                     </Text>
                                     <Text fw={600} size='sm' ff='monospace'>
-                                        {patient.personalId}
+                                        {patient.citizenId}
                                     </Text>
                                 </Group>
                                 <Group justify='space-between'>

@@ -4,7 +4,7 @@ export interface ValidationPatientResponse {
     dateOfBirth: string
     phone: string
     address: string
-    personalId: string
+    citizenId: string
     healthInsuranceCode: string
     createdAt: string
 }
@@ -14,6 +14,11 @@ export interface ValidationDoctorResponse {
     name: string
     email: string
     metadata: Record<string, any>
+}
+export interface ValidationAssign {
+    id: number
+    name: string
+    email: string
 }
 
 export interface ValidationEtlResultResponse {

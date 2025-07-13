@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { analysisService } from '../function/analysis'
 import type { AnalysisFilter, RejectFastqRequest } from '@/types/analysis'
 import type { DateValue } from '@mantine/dates'
+import { authService } from '../function/auth'
+import { Role } from '@/utils/constant'
 
 export const useAnalysisSessions = ({
     page = 1,
@@ -81,7 +83,8 @@ export const useSendEtlResultToValidation = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (etlResultId: number) => analysisService.sendEtlResultToValidation(etlResultId),
+        mutationFn: ({ etlResultId, validataionId }: { etlResultId: number; validataionId: number }) =>
+            analysisService.sendEtlResultToValidation(etlResultId, validataionId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['analysis-sessions'] })
             queryClient.invalidateQueries({ queryKey: ['analysis-session-detail'] })
@@ -98,5 +101,14 @@ export const useRetryEtlProcess = () => {
             queryClient.invalidateQueries({ queryKey: ['analysis-sessions'] })
             queryClient.invalidateQueries({ queryKey: ['analysis-session-detail'] })
         }
+    })
+}
+
+export const getAllValidations = () => {
+    return useQuery({
+        queryKey: ['lab-test-sessions'],
+        queryFn: () => authService.getUserByCode(Role.VALIDATION_TECHNICIAN),
+        staleTime: 30000, // 30 seconds
+        gcTime: 5 * 60 * 1000 // 5 minutes
     })
 }

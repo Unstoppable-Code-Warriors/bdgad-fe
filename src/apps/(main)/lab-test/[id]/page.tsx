@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useLabTestSessionDetail, useSendToAnalysis } from '@/services/hook/lab-test.hook'
+import { getAllAnalysis, useLabTestSessionDetail, useSendToAnalysis } from '@/services/hook/lab-test.hook'
 import { useParams, useNavigate } from 'react-router'
 import {
     Container,
@@ -14,9 +14,11 @@ import {
     Box,
     Card,
     Divider,
-    ThemeIcon
+    ThemeIcon,
+    Select,
+    Avatar
 } from '@mantine/core'
-import { IconAlertCircle, IconSend } from '@tabler/icons-react'
+import { IconAlertCircle, IconSend, IconUser } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { LabTestInfo, FileUpload, FileHistory } from './_components'
 import { PatientInfo } from '@/components/PatientInfo'
@@ -28,6 +30,10 @@ const LabTestDetailPage = () => {
     const { data, isLoading, error } = useLabTestSessionDetail(id)
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
     const sendToAnalysisMutation = useSendToAnalysis()
+    const analysises = getAllAnalysis()
+    const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(
+        data?.analysis?.id ? String(data.analysis.id) : null
+    )
 
     // Get the latest FastQ file
     const latestFastQFile = data?.fastqFiles && data.fastqFiles.length > 0 ? data.fastqFiles[0] : null
@@ -60,22 +66,37 @@ const LabTestDetailPage = () => {
             return
         }
 
-        sendToAnalysisMutation.mutate(latestFastQFile.id, {
-            onSuccess: () => {
-                notifications.show({
-                    title: 'Thành công',
-                    message: 'File FastQ đã được gửi phân tích thành công',
-                    color: 'green'
-                })
+        if (!selectedAnalysisId && !data?.analysis) {
+            notifications.show({
+                title: 'Thiếu thông tin',
+                message: 'Vui lòng chọn người phân tích trước khi gửi.',
+                color: 'orange'
+            })
+            return
+        }
+
+        sendToAnalysisMutation.mutate(
+            {
+                fastqFileId: latestFastQFile.id,
+                analysisId: parseInt(selectedAnalysisId!)
             },
-            onError: (error: any) => {
-                notifications.show({
-                    title: 'Lỗi gửi phân tích',
-                    message: error.message || 'Không thể gửi file FastQ để phân tích',
-                    color: 'red'
-                })
+            {
+                onSuccess: () => {
+                    notifications.show({
+                        title: 'Thành công',
+                        message: 'File FastQ đã được gửi phân tích thành công',
+                        color: 'green'
+                    })
+                },
+                onError: (error: any) => {
+                    notifications.show({
+                        title: 'Lỗi gửi phân tích',
+                        message: error.message || 'Không thể gửi file FastQ để phân tích',
+                        color: 'red'
+                    })
+                }
             }
-        })
+        )
     }
 
     if (isLoading) {
@@ -199,12 +220,48 @@ const LabTestDetailPage = () => {
 
                                             <Divider />
 
+                                            {data.analysis ? (
+                                                <>
+                                                    <Text fw={600}>Kỹ thuật viên phân tích</Text>
+                                                    <Group gap='sm'>
+                                                        <Avatar size='lg' radius='md' color='green' variant='light'>
+                                                            <IconUser size={24} />
+                                                        </Avatar>
+                                                        <Box>
+                                                            <Text fw={700} size='lg'>
+                                                                {data.analysis.name}
+                                                            </Text>
+                                                            <Text size='sm' c='dimmed'>
+                                                                {data.analysis.email}
+                                                            </Text>
+                                                        </Box>
+                                                    </Group>
+                                                </>
+                                            ) : (
+                                                <Select
+                                                    label='Chọn kỹ thuật viên Phân Tích'
+                                                    placeholder='Chọn người dùng...'
+                                                    data={analysises.data?.data?.users.map((user) => ({
+                                                        label: `${user.name} - ${user.email}`,
+                                                        value: String(user.id)
+                                                    }))}
+                                                    value={selectedAnalysisId}
+                                                    onChange={setSelectedAnalysisId}
+                                                    required
+                                                />
+                                            )}
+
+                                            <Divider />
+
                                             <Button
                                                 color='green'
                                                 onClick={handleSendToAnalysis}
                                                 leftSection={<IconSend size={16} />}
                                                 loading={sendToAnalysisMutation.isPending}
-                                                disabled={sendToAnalysisMutation.isPending}
+                                                disabled={
+                                                    sendToAnalysisMutation.isPending ||
+                                                    (!data.analysis && !selectedAnalysisId)
+                                                }
                                                 fullWidth
                                                 size='md'
                                                 radius='lg'

@@ -1,5 +1,6 @@
 import type { Patient } from './patient'
 import type { User } from './user'
+import type { ValidationAssign } from './validation'
 
 export interface FastqFileResponse {
     id: number
@@ -47,6 +48,13 @@ export interface AnalysisSession {
     metadata: Record<string, any>
     patient: Patient
     doctor: User
+    validation: ValidationAssign
+}
+
+export interface AnalysisAssign {
+    id: number
+    name: string
+    email: string
 }
 
 export interface AnalysisSessionListItem extends AnalysisSession {
