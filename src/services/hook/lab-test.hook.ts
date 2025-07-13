@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { labTestService } from '../function/lab-test'
 import type { DateValue } from '@mantine/dates'
+import { authService } from '../function/auth'
+import { Role } from '@/utils/constant'
 
 export const useLabTestSessions = ({
     page = 1,
@@ -79,11 +81,20 @@ export const useSendToAnalysis = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (fastqFileId: number) => labTestService.sendToAnalysis(fastqFileId),
+        mutationFn: ({ fastqFileId, analysisId }: { fastqFileId: number; analysisId: number }) =>
+            labTestService.sendToAnalysis(fastqFileId, analysisId),
         onSuccess: (_, __) => {
             // Invalidate and refetch related queries to update the status
             queryClient.invalidateQueries({ queryKey: ['lab-test-sessions'] })
             queryClient.invalidateQueries({ queryKey: ['lab-test-session-detail'] })
         }
+    })
+}
+export const getAllAnalysis = () => {
+    return useQuery({
+        queryKey: ['lab-test-sessions'],
+        queryFn: () => authService.getUserByCode(Role.ANALYSIS_TECHNICIAN),
+        staleTime: 30000, // 30 seconds
+        gcTime: 5 * 60 * 1000 // 5 minutes
     })
 }

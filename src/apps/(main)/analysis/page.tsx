@@ -1,6 +1,19 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, TextInput, Select, Group, Stack, Paper, Button, Badge, ActionIcon, Alert, Tooltip } from '@mantine/core'
+import {
+    Title,
+    TextInput,
+    Select,
+    Group,
+    Stack,
+    Paper,
+    Button,
+    Badge,
+    ActionIcon,
+    Alert,
+    Tooltip,
+    Text
+} from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { DataTable, type DataTableColumn, type DataTableSortStatus } from 'mantine-datatable'
 import {
@@ -202,11 +215,11 @@ const AnalysisPage = () => {
     const columns: DataTableColumn<AnalysisSessionListItem>[] = useMemo(
         () => [
             {
-                accessor: 'patient.personalId',
-                title: 'CCCD/CMND',
+                accessor: 'barcode',
+                title: 'Barcode',
                 sortable: true,
                 width: 150,
-                render: (record) => record.patient?.personalId || '-',
+                render: (record) => record.barcode || '-',
                 titleClassName: 'bg-white',
                 cellsClassName: 'bg-white'
             },
@@ -223,6 +236,15 @@ const AnalysisPage = () => {
                 sortable: true,
                 width: 150,
                 render: (record) => record.doctor?.name || '-'
+            },
+            {
+                accessor: 'validation.name',
+                title: 'KTV Thẩm Định',
+                sortable: true,
+                width: 150,
+                render: (record) => (
+                    <Text size='sm'>{record.validation ? record.validation.name : 'Chưa chỉ định'}</Text>
+                )
             },
             {
                 accessor: 'requestDate',

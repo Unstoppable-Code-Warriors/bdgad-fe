@@ -80,9 +80,9 @@ export const analysisService = {
         return await backendApi.get(`${PREFIX}/etl-result/${etlResultId}/download`).json<EtlResultDownloadResponse>()
     },
 
-    sendEtlResultToValidation: async (etlResultId: number): Promise<{ message: string }> => {
+    sendEtlResultToValidation: async (etlResultId: number, validataionId: number): Promise<{ message: string }> => {
         return await backendApi
-            .post(`${PREFIX}/etl-result/${etlResultId}/send-to-validation`)
+            .post(`${PREFIX}/etl-result/${etlResultId}/validation/${validataionId}`)
             .json<{ message: string }>()
     },
 

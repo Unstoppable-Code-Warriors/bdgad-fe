@@ -86,7 +86,12 @@ export const labTestService = {
     deleteFastQ: async (fastqFileId: number): Promise<{ message: string }> => {
         return await backendApi.delete(`${PREFIX}/fastq/${fastqFileId}`).json<{ message: string }>()
     },
-    sendToAnalysis: async (fastqFileId: number): Promise<{ message: string }> => {
-        return await backendApi.post(`${PREFIX}/fastq/${fastqFileId}/send-to-analysis`).json<{ message: string }>()
+    sendToAnalysis: async (fastqFileId: number, analysisId: number): Promise<{ message: string }> => {
+        return await backendApi
+            .post(`${PREFIX}/fastq/${fastqFileId}/analysis/${analysisId}`)
+            .json<{ message: string }>()
+    },
+    assignAnalysis: async (sessionId: number, analysisId: number) => {
+        return await backendApi.put(`${PREFIX}/lab-test/session/${sessionId}/analysis/${analysisId}`)
     }
 }

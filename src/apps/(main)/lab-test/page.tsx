@@ -2,9 +2,9 @@ import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { Title, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert, Tooltip } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
-import { IconEye, IconRefresh, IconAlertCircle, IconDownload, IconSend } from '@tabler/icons-react'
+import { IconEye, IconRefresh, IconAlertCircle, IconDownload } from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
-import { useLabTestSessions, useSendToAnalysis } from '@/services/hook/lab-test.hook'
+import { useLabTestSessions } from '@/services/hook/lab-test.hook'
 import { labTestService } from '@/services/function/lab-test'
 import { notifications } from '@mantine/notifications'
 import type { LabTestSessionListItem } from '@/types/lab-test'
@@ -61,7 +61,7 @@ const LabTestPage = () => {
         dateTo: dateRange[1]
     })
 
-    const sendToAnalysisMutation = useSendToAnalysis()
+    // const sendToAnalysisMutation = useSendToAnalysis()
 
     // Status options for the filter
     const statusOptions: SelectOption[] = Object.values(LAB_TEST_STATUS).map((status) => ({
@@ -97,33 +97,33 @@ const LabTestPage = () => {
         }
     }, [])
 
-    const handleSendToAnalysis = useCallback(async (fastqFileId: number) => {
-        if (!fastqFileId) {
-            notifications.show({
-                title: 'Lỗi',
-                message: 'Không tìm thấy file FastQ để gửi phân tích',
-                color: 'red'
-            })
-            return
-        }
+    // const handleSendToAnalysis = useCallback(async (fastqFileId: number) => {
+    //     if (!fastqFileId) {
+    //         notifications.show({
+    //             title: 'Lỗi',
+    //             message: 'Không tìm thấy file FastQ để gửi phân tích',
+    //             color: 'red'
+    //         })
+    //         return
+    //     }
 
-        sendToAnalysisMutation.mutate(fastqFileId, {
-            onSuccess: () => {
-                notifications.show({
-                    title: 'Thành công',
-                    message: 'File FastQ đã được gửi phân tích thành công',
-                    color: 'green'
-                })
-            },
-            onError: (error: any) => {
-                notifications.show({
-                    title: 'Lỗi gửi phân tích',
-                    message: error.message || 'Không thể gửi file FastQ để phân tích',
-                    color: 'red'
-                })
-            }
-        })
-    }, [])
+    //     sendToAnalysisMutation.mutate(fastqFileId, {
+    //         onSuccess: () => {
+    //             notifications.show({
+    //                 title: 'Thành công',
+    //                 message: 'File FastQ đã được gửi phân tích thành công',
+    //                 color: 'green'
+    //             })
+    //         },
+    //         onError: (error: any) => {
+    //             notifications.show({
+    //                 title: 'Lỗi gửi phân tích',
+    //                 message: error.message || 'Không thể gửi file FastQ để phân tích',
+    //                 color: 'red'
+    //             })
+    //         }
+    //     })
+    // }, [])
 
     const recordsPerPageOptions = [5, 10, 20, 50]
 
@@ -156,35 +156,23 @@ const LabTestPage = () => {
                 )
             },
             {
-                accessor: 'patient.personalId',
-                title: 'Số CCCD',
-                width: 140,
-                render: (record) => (
-                    <Text size='sm' ff='monospace'>
-                        {record.patient.personalId}
-                    </Text>
-                )
-            },
-            {
                 accessor: 'patient.fullName',
                 title: 'Tên bệnh nhân',
                 width: 180,
                 render: (record) => <Text fw={500}>{record.patient.fullName}</Text>
             },
             {
-                accessor: 'patient.healthInsuranceCode',
-                title: 'Mã BHYT',
-                width: 140,
-                render: (record) => (
-                    <Text size='sm' ff='monospace'>
-                        {record.patient.healthInsuranceCode}
-                    </Text>
-                )
-            },
-            {
                 accessor: 'doctor.name',
                 title: 'Bác sĩ chỉ định',
                 width: 150
+            },
+            {
+                accessor: 'analysis.name',
+                title: 'KTV Phân tích',
+                width: 150,
+                render: (record) => (
+                    <Text size='sm'>{record.analysis ? record.analysis.name : 'Chưa được chỉ định'}</Text>
+                )
             },
             {
                 accessor: 'requestDate',
@@ -210,9 +198,7 @@ const LabTestPage = () => {
                             FastQ
                         </Button>
                     ) : (
-                        <Text size='xs' c='dimmed'>
-                            -
-                        </Text>
+                        <Text size='sm'>-</Text>
                     )
             },
             {
@@ -221,7 +207,7 @@ const LabTestPage = () => {
                 width: 120,
                 render: (record) => (
                     <Badge color={getStatusColor(record?.latestFastqFile?.status || '')} variant='light' size='sm'>
-                        {getStatusLabel(record?.latestFastqFile?.status || '')}
+                        {getStatusLabel(record?.latestFastqFile?.status || 'Chưa tải lên')}
                     </Badge>
                 )
             },
@@ -237,7 +223,7 @@ const LabTestPage = () => {
                                 <IconEye size={16} />
                             </ActionIcon>
                         </Tooltip>
-                        {record.latestFastqFile?.status === 'uploaded' && (
+                        {/* {record.latestFastqFile?.status === 'uploaded' && (
                             <Tooltip label='Gửi phân tích'>
                                 <ActionIcon
                                     variant='light'
@@ -247,7 +233,7 @@ const LabTestPage = () => {
                                     <IconSend size={16} />
                                 </ActionIcon>
                             </Tooltip>
-                        )}
+                        )} */}
                     </Group>
                 ),
                 titleClassName: 'bg-white',
