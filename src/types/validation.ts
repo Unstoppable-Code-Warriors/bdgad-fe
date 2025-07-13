@@ -15,6 +15,11 @@ export interface ValidationDoctorResponse {
     email: string
     metadata: Record<string, any>
 }
+export interface ValidationAssign {
+    id: number
+    name: string
+    email: string
+}
 
 export interface ValidationEtlResultResponse {
     id: number

@@ -31,7 +31,8 @@ const LabTestDetailPage = () => {
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
     const sendToAnalysisMutation = useSendToAnalysis()
     const analysises = getAllAnalysis()
-    const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null)
+    const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(String(data?.analysis?.id) || null)
+    console.log('selectedAnalysisId', selectedAnalysisId)
 
     // Get the latest FastQ file
     const latestFastQFile = data?.fastqFiles && data.fastqFiles.length > 0 ? data.fastqFiles[0] : null
@@ -64,7 +65,7 @@ const LabTestDetailPage = () => {
             return
         }
 
-        if (!selectedAnalysisId) {
+        if (!selectedAnalysisId && !data?.analysis) {
             notifications.show({
                 title: 'Thiếu thông tin',
                 message: 'Vui lòng chọn người phân tích trước khi gửi.',
@@ -76,7 +77,7 @@ const LabTestDetailPage = () => {
         sendToAnalysisMutation.mutate(
             {
                 fastqFileId: latestFastQFile.id,
-                analysisId: parseInt(selectedAnalysisId)
+                analysisId: parseInt(selectedAnalysisId!)
             },
             {
                 onSuccess: () => {

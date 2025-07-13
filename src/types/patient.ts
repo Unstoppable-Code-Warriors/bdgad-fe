@@ -4,7 +4,6 @@ export interface Patient {
     dateOfBirth: string
     phone: string
     address: string
-    personalId: string
     citizenId: string
     createdAt: string
 }
