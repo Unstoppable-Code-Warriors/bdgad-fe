@@ -53,8 +53,9 @@ const AnalysisDetailPage = () => {
     const navigate = useNavigate()
     const { data, isLoading, error, refetch } = useAnalysisSessionDetail(id)
     const [selectedValidationId, setSelectedValidationId] = useState<string | null>(
-        data?.validataion?.id ? String(data.validataion.id) : null
+        data?.validation ? String(data.validation.id) : null
     )
+    console.log('selectedValidationId', selectedValidationId)
 
     // Mutations
     const processAnalysisMutation = useProcessAnalysis()
@@ -388,7 +389,7 @@ const AnalysisDetailPage = () => {
                                             Tải xuống kết quả
                                         </Button>
                                         <Divider />
-                                        {data.validataion ? (
+                                        {data.validation ? (
                                             <>
                                                 <Text fw={600}>Kỹ thuật viên phân tích</Text>
                                                 <Group gap='sm'>
@@ -397,10 +398,10 @@ const AnalysisDetailPage = () => {
                                                     </Avatar>
                                                     <Box>
                                                         <Text fw={700} size='lg'>
-                                                            {data.validataion.name}
+                                                            {data.validation.name}
                                                         </Text>
                                                         <Text size='sm' c='dimmed'>
-                                                            {data.validataion.email}
+                                                            {data.validation.email}
                                                         </Text>
                                                     </Box>
                                                 </Group>
@@ -426,7 +427,7 @@ const AnalysisDetailPage = () => {
                                             loading={sendEtlResultToValidationMutation.isPending}
                                             disabled={
                                                 sendEtlResultToValidationMutation.isPending ||
-                                                (!data.validataion && selectedValidationId == undefined)
+                                                (!data.validation && selectedValidationId == undefined)
                                             }
                                             fullWidth
                                             size='md'

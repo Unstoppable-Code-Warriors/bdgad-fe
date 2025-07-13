@@ -1,6 +1,19 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, TextInput, Select, Group, Stack, Paper, Button, Badge, ActionIcon, Alert, Tooltip } from '@mantine/core'
+import {
+    Title,
+    TextInput,
+    Select,
+    Group,
+    Stack,
+    Paper,
+    Button,
+    Badge,
+    ActionIcon,
+    Alert,
+    Tooltip,
+    Text
+} from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { DataTable, type DataTableColumn, type DataTableSortStatus } from 'mantine-datatable'
 import {
@@ -229,7 +242,9 @@ const AnalysisPage = () => {
                 title: 'KTV Thẩm Định',
                 sortable: true,
                 width: 150,
-                render: (record) => record.validataion?.name || 'Chưa chỉ định'
+                render: (record) => (
+                    <Text size='sm'>{record.validation ? record.validation.name : 'Chưa chỉ định'}</Text>
+                )
             },
             {
                 accessor: 'requestDate',

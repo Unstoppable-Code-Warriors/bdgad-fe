@@ -48,7 +48,7 @@ export interface AnalysisSession {
     metadata: Record<string, any>
     patient: Patient
     doctor: User
-    validataion: ValidationAssign
+    validation: ValidationAssign
 }
 
 export interface AnalysisAssign {

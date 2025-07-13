@@ -158,11 +158,11 @@ const ValidationPage = () => {
     const columns: DataTableColumn<ValidationSessionWithLatestEtlResponse>[] = useMemo(
         () => [
             {
-                accessor: 'patient.personalId',
-                title: 'CCCD/CMND',
+                accessor: 'barcode',
+                title: 'Barcode',
                 sortable: true,
                 width: 150,
-                render: (record) => record.patient?.personalId || '-',
+                render: (record) => record.barcode || '-',
                 titleClassName: 'bg-white',
                 cellsClassName: 'bg-white'
             },
