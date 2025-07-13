@@ -49,6 +49,12 @@ export interface AnalysisSession {
     doctor: User
 }
 
+export interface AnalysisAssign {
+    id: number
+    name: string
+    email: string
+}
+
 export interface AnalysisSessionListItem extends AnalysisSession {
     latestFastqFile: FastqFileResponse | null
     latestEtlResult: EtlResultResponse | null

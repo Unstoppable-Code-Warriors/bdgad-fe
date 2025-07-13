@@ -5,6 +5,6 @@ export interface Patient {
     phone: string
     address: string
     personalId: string
-    healthInsuranceCode: string
+    citizenId: string
     createdAt: string
 }
