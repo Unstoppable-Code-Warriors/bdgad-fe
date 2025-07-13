@@ -4,7 +4,7 @@ export interface ValidationPatientResponse {
     dateOfBirth: string
     phone: string
     address: string
-    personalId: string
+    citizenId: string
     healthInsuranceCode: string
     createdAt: string
 }

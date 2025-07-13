@@ -2,7 +2,7 @@ import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { Title, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert, Tooltip } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
-import { IconEye, IconRefresh, IconAlertCircle, IconDownload, IconSend } from '@tabler/icons-react'
+import { IconEye, IconRefresh, IconAlertCircle, IconDownload } from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
 import { useLabTestSessions, useSendToAnalysis } from '@/services/hook/lab-test.hook'
 import { labTestService } from '@/services/function/lab-test'
@@ -61,7 +61,7 @@ const LabTestPage = () => {
         dateTo: dateRange[1]
     })
 
-    const sendToAnalysisMutation = useSendToAnalysis()
+    // const sendToAnalysisMutation = useSendToAnalysis()
 
     // Status options for the filter
     const statusOptions: SelectOption[] = Object.values(LAB_TEST_STATUS).map((status) => ({
