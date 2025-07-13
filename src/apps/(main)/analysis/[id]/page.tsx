@@ -1,10 +1,11 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import {
     useAnalysisSessionDetail,
     useProcessAnalysis,
     useDownloadEtlResult,
     useSendEtlResultToValidation,
-    useRetryEtlProcess
+    useRetryEtlProcess,
+    getAllValidations
 } from '@/services/hook/analysis.hook'
 import { useParams, useNavigate } from 'react-router'
 import {
@@ -21,7 +22,9 @@ import {
     Box,
     Card,
     Divider,
-    ThemeIcon
+    ThemeIcon,
+    Avatar,
+    Select
 } from '@mantine/core'
 import {
     IconAlertCircle,
@@ -32,7 +35,8 @@ import {
     IconRefresh,
     IconSend,
     IconFileText,
-    IconChartLine
+    IconChartLine,
+    IconUser
 } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { AnalysisInfo } from './_components'
@@ -48,12 +52,16 @@ const AnalysisDetailPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const { data, isLoading, error, refetch } = useAnalysisSessionDetail(id)
+    const [selectedValidationId, setSelectedValidationId] = useState<string | null>(
+        data?.validataion?.id ? String(data.validataion.id) : null
+    )
 
     // Mutations
     const processAnalysisMutation = useProcessAnalysis()
     const downloadEtlResultMutation = useDownloadEtlResult()
     const sendEtlResultToValidationMutation = useSendEtlResultToValidation()
     const retryEtlProcessMutation = useRetryEtlProcess()
+    const validations = getAllValidations()
 
     // Get the latest FastQ file waiting for approval
     const latestFastQFile =
@@ -143,22 +151,36 @@ const AnalysisDetailPage = () => {
     }
 
     const handleSendEtlResultToValidation = async (etlResultId: number) => {
-        sendEtlResultToValidationMutation.mutate(etlResultId, {
-            onSuccess: () => {
-                notifications.show({
-                    title: 'Thành công',
-                    message: 'Kết quả phân tích đã được gửi để xác thực',
-                    color: 'green'
-                })
+        if (!selectedValidationId) {
+            notifications.show({
+                title: 'Thieu thong tin',
+                message: 'Vui long chon nguoi xac thuc truoc khi gui ket qua.',
+                color: 'orange'
+            })
+            return
+        }
+        sendEtlResultToValidationMutation.mutate(
+            {
+                etlResultId: etlResultId,
+                validataionId: parseInt(selectedValidationId!)
             },
-            onError: (error: any) => {
-                notifications.show({
-                    title: 'Lỗi gửi xác thực',
-                    message: error.message || 'Không thể gửi kết quả để xác thực',
-                    color: 'red'
-                })
+            {
+                onSuccess: () => {
+                    notifications.show({
+                        title: 'Thành công',
+                        message: 'Kết quả phân tích đã được gửi để xác thực',
+                        color: 'green'
+                    })
+                },
+                onError: (error: any) => {
+                    notifications.show({
+                        title: 'Lỗi gửi xác thực',
+                        message: error.message || 'Không thể gửi kết quả để xác thực',
+                        color: 'red'
+                    })
+                }
             }
-        })
+        )
     }
 
     const handleDownloadFastQ = useCallback(async (fastqFileId: number) => {
@@ -365,13 +387,47 @@ const AnalysisDetailPage = () => {
                                         >
                                             Tải xuống kết quả
                                         </Button>
+                                        <Divider />
+                                        {data.validataion ? (
+                                            <>
+                                                <Text fw={600}>Kỹ thuật viên phân tích</Text>
+                                                <Group gap='sm'>
+                                                    <Avatar size='lg' radius='md' color='green' variant='light'>
+                                                        <IconUser size={24} />
+                                                    </Avatar>
+                                                    <Box>
+                                                        <Text fw={700} size='lg'>
+                                                            {data.validataion.name}
+                                                        </Text>
+                                                        <Text size='sm' c='dimmed'>
+                                                            {data.validataion.email}
+                                                        </Text>
+                                                    </Box>
+                                                </Group>
+                                            </>
+                                        ) : (
+                                            <Select
+                                                label='Chọn kỹ thuật viên Thẩm Định'
+                                                placeholder='Chọn kỹ thuật viên...'
+                                                data={validations.data?.data?.users.map((user) => ({
+                                                    label: `${user.name} - ${user.email}`,
+                                                    value: String(user.id)
+                                                }))}
+                                                value={selectedValidationId}
+                                                onChange={setSelectedValidationId}
+                                                required
+                                            />
+                                        )}
                                         <Button
                                             color='blue'
                                             variant='light'
                                             onClick={() => handleSendEtlResultToValidation(latestEtlResult.id)}
                                             leftSection={<IconSend size={16} />}
                                             loading={sendEtlResultToValidationMutation.isPending}
-                                            disabled={sendEtlResultToValidationMutation.isPending}
+                                            disabled={
+                                                sendEtlResultToValidationMutation.isPending ||
+                                                (!data.validataion && selectedValidationId == undefined)
+                                            }
                                             fullWidth
                                             size='md'
                                             radius='lg'
@@ -518,34 +574,34 @@ const AnalysisDetailPage = () => {
                                     variant: 'light',
                                     condition: (result) => result.status === AnalysisStatus.COMPLETED,
                                     handler: handleDownloadEtlResult
-                                },
-                                {
-                                    type: 'send',
-                                    label: 'Gửi để xác thực',
-                                    icon: <IconSend size={16} />,
-                                    color: 'blue',
-                                    variant: 'light',
-                                    condition: (result) => result.status === AnalysisStatus.COMPLETED,
-                                    handler: handleSendEtlResultToValidation
-                                },
-                                {
-                                    type: 'retry',
-                                    label: 'Phân tích lại',
-                                    icon: <IconRefresh size={16} />,
-                                    color: 'orange',
-                                    variant: 'light',
-                                    condition: (result) => result.status === AnalysisStatus.FAILED,
-                                    handler: handleRetryEtlResult
-                                },
-                                {
-                                    type: 'retry',
-                                    label: 'Phân tích lại',
-                                    icon: <IconRefresh size={16} />,
-                                    color: 'orange',
-                                    variant: 'light',
-                                    condition: (result) => result.status === AnalysisStatus.REJECTED,
-                                    handler: handleRetryEtlResult
                                 }
+                                // {
+                                //     type: 'send',
+                                //     label: 'Gửi để xác thực',
+                                //     icon: <IconSend size={16} />,
+                                //     color: 'blue',
+                                //     variant: 'light',
+                                //     condition: (result) => result.status === AnalysisStatus.COMPLETED,
+                                //     handler: handleSendEtlResultToValidation
+                                // },
+                                // {
+                                //     type: 'retry',
+                                //     label: 'Phân tích lại',
+                                //     icon: <IconRefresh size={16} />,
+                                //     color: 'orange',
+                                //     variant: 'light',
+                                //     condition: (result) => result.status === AnalysisStatus.FAILED,
+                                //     handler: handleRetryEtlResult
+                                // },
+                                // {
+                                //     type: 'retry',
+                                //     label: 'Phân tích lại',
+                                //     icon: <IconRefresh size={16} />,
+                                //     color: 'orange',
+                                //     variant: 'light',
+                                //     condition: (result) => result.status === AnalysisStatus.REJECTED,
+                                //     handler: handleRetryEtlResult
+                                // }
                             ]}
                         />
                     </Grid.Col>

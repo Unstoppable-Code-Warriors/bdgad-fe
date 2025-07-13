@@ -31,8 +31,9 @@ const LabTestDetailPage = () => {
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
     const sendToAnalysisMutation = useSendToAnalysis()
     const analysises = getAllAnalysis()
-    const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(String(data?.analysis?.id) || null)
-    console.log('selectedAnalysisId', selectedAnalysisId)
+    const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(
+        data?.analysis?.id ? String(data.analysis.id) : null
+    )
 
     // Get the latest FastQ file
     const latestFastQFile = data?.fastqFiles && data.fastqFiles.length > 0 ? data.fastqFiles[0] : null
@@ -200,40 +201,6 @@ const LabTestDetailPage = () => {
                                 />
 
                                 {/* Action Panel */}
-                                {/* {latestFastQFile?.status === 'uploaded' && (
-                                    <Card shadow='sm' radius='lg' p='lg' withBorder>
-                                        <Stack gap='lg'>
-                                            <Group gap='sm'>
-                                                <ThemeIcon size='lg' radius='md' variant='light' color='green'>
-                                                    <IconSend size={20} />
-                                                </ThemeIcon>
-                                                <Box>
-                                                    <Text fw={600} size='md'>
-                                                        Sẵn sàng phân tích
-                                                    </Text>
-                                                    <Text size='sm' c='dimmed'>
-                                                        File FastQ đã sẵn sàng để gửi phân tích
-                                                    </Text>
-                                                </Box>
-                                            </Group>
-
-                                            <Divider />
-
-                                            <Button
-                                                color='green'
-                                                onClick={handleSendToAnalysis}
-                                                leftSection={<IconSend size={16} />}
-                                                loading={sendToAnalysisMutation.isPending}
-                                                disabled={sendToAnalysisMutation.isPending}
-                                                fullWidth
-                                                size='md'
-                                                radius='lg'
-                                            >
-                                                Gửi phân tích FastQ
-                                            </Button>
-                                        </Stack>
-                                    </Card>
-                                )} */}
                                 {latestFastQFile?.status === 'uploaded' && (
                                     <Card shadow='sm' radius='lg' p='lg' withBorder>
                                         <Stack gap='lg'>
@@ -272,7 +239,7 @@ const LabTestDetailPage = () => {
                                                 </>
                                             ) : (
                                                 <Select
-                                                    label='Chọn người phân tích'
+                                                    label='Chọn kỹ thuật viên Phân Tích'
                                                     placeholder='Chọn người dùng...'
                                                     data={analysises.data?.data?.users.map((user) => ({
                                                         label: `${user.name} - ${user.email}`,
