@@ -55,7 +55,6 @@ const AnalysisDetailPage = () => {
     const [selectedValidationId, setSelectedValidationId] = useState<string | null>(
         data?.validation ? String(data.validation.id) : null
     )
-    console.log('selectedValidationId', selectedValidationId)
 
     // Mutations
     const processAnalysisMutation = useProcessAnalysis()

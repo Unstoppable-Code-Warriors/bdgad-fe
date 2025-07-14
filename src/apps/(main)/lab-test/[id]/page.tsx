@@ -66,7 +66,10 @@ const LabTestDetailPage = () => {
             return
         }
 
-        if (!selectedAnalysisId && !data?.analysis) {
+        // Prevent NaN by checking selectedAnalysisId
+        const analysisId = data?.analysis?.id ?? (selectedAnalysisId ? parseInt(selectedAnalysisId, 10) : undefined)
+
+        if (!analysisId) {
             notifications.show({
                 title: 'Thiếu thông tin',
                 message: 'Vui lòng chọn người phân tích trước khi gửi.',
@@ -78,7 +81,7 @@ const LabTestDetailPage = () => {
         sendToAnalysisMutation.mutate(
             {
                 fastqFileId: latestFastQFile.id,
-                analysisId: parseInt(selectedAnalysisId!)
+                analysisId: analysisId
             },
             {
                 onSuccess: () => {
