@@ -45,6 +45,9 @@ export * from './fastq'
 // Lab test types
 export * from './lab-test'
 
+// Notification types
+export * from './notification'
+
 // Patient types
 export * from './patient'
 

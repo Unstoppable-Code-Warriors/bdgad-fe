@@ -1,6 +1,7 @@
 import Logo from '@/components/logo'
 import { AppShell, Group, Text, Stack, Badge } from '@mantine/core'
 import UserButton from './user-button'
+import NotificationBell from './notification-bell'
 import { useUser } from '@/services/hook/auth.hook'
 const Header = () => {
     const { data , isLoading } = useUser()
@@ -25,6 +26,10 @@ const Header = () => {
                             </Group>
                         </Stack>
                     )}
+                    
+                    {/* Notification Bell */}
+                    <NotificationBell />
+                    
                     <UserButton />
                 </Group>
             </Group>
