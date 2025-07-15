@@ -24,12 +24,24 @@ export const authLoader = () => {
 /**
  * Non-auth loader - For public routes like login, forgot password, reset password
  * If user already has a valid access token, redirects to home page
+ * Special handling for password-related routes: clears tokens when token is present in URL
  */
 export const nonAuthLoader = () => {
     const accessToken = getAccessToken()
     const isAuthenticated = isUserAuthenticated()
+    
+    // Check if this is a password-related request with a token
+    const currentUrl = new URL(window.location.href)
+    const isPasswordRoute = currentUrl.pathname === '/auth/reset-password'
+    const hasToken = currentUrl.searchParams.has('token')
+    
+    // If user is on password page with a token, clear their current session
+    if (isPasswordRoute && hasToken && (accessToken || isAuthenticated)) {
+        clearTokensOutside()
+        return null
+    }
 
-    // Check if user is already authenticated
+    // Check if user is already authenticated for other auth routes
     if (accessToken && isAuthenticated) {
         // User is already logged in, redirect to home
         throw redirect('/')
