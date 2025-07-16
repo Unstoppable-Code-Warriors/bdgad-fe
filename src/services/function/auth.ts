@@ -14,8 +14,22 @@ const PREFIX = 'api/v1'
 // Auth service functions
 export const authService = {
     // Login user with email and password
-    login: async (credentials: LoginRequest): Promise<LoginApiResponse | {code: string, message: string, status: number}> => {
-        return authUtils.post<LoginApiResponse | {code: string, message: string, status: number}>(`${PREFIX}/auth/login`, credentials)
+    login: async (
+        credentials: LoginRequest
+    ): Promise<LoginApiResponse | { code: string; message: string; status: number }> => {
+        return authUtils.post<LoginApiResponse | { code: string; message: string; status: number }>(
+            `${PREFIX}/auth/login`,
+            credentials
+        )
+    },
+
+    // Initiate Google OAuth flow
+    initiateGoogleOAuth: async (
+        redirectAfterLogin: string
+    ): Promise<{ data: { oauthUrl: string; state: string }; message: string }> => {
+        return authUtils.post<{ data: { oauthUrl: string; state: string }; message: string }>(`${PREFIX}/auth/google`, {
+            redirectAfterLogin
+        })
     },
 
     // Get current user profile
@@ -25,11 +39,11 @@ export const authService = {
 
     // Get users by role/code
     getUserByCode: async (code: number): Promise<ApiResponse<{ users: User[] }>> => {
-        return authUtils.get<{ data: { users: User[] }}>(`${PREFIX}/auth/users?code=${code}`)
+        return authUtils.get<{ data: { users: User[] } }>(`${PREFIX}/auth/users?code=${code}`)
     },
 
     updateProfile: async (data: UpdateProfileRequest): Promise<ApiResponse<{ user: User }>> => {
-        return authUtils.put<{ data: {user: User},message: string }>(`${PREFIX}/auth/update-profile`, data)
+        return authUtils.put<{ data: { user: User }; message: string }>(`${PREFIX}/auth/update-profile`, data)
     },
 
     // Change password

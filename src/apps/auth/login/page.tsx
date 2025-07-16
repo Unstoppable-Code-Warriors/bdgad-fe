@@ -18,8 +18,9 @@ import { authService } from '@/services/function/auth'
 import { setTokensOutside } from '@/stores/auth.store'
 import { Link, useNavigate } from 'react-router'
 import { emailValidator, normalizeEmail, suggestEmailCorrection } from '@/utils/validateEmail'
-import { authNotifications, showErrorNotification } from '@/utils/notifications'
+import { authNotifications } from '@/utils/notifications'
 import { getLoginErrorMessage } from '@/utils/error'
+import { useGoogleAuth } from '@/hooks/use-google-auth'
 
 interface LoginFormValues {
     email: string
@@ -31,6 +32,9 @@ const LoginPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [emailSuggestion, setEmailSuggestion] = useState<string | null>(null)
     const navigate = useNavigate()
+
+    // Google OAuth hook
+    const { initiateGoogleLogin, loading: googleLoading } = useGoogleAuth()
 
     const form = useForm<LoginFormValues>({
         initialValues: {
@@ -90,24 +94,12 @@ const LoginPage = () => {
     }
 
     const handleGoogleLogin = async () => {
-        setLoading(true)
         setError(null)
-
-        try {
-            // TODO: Implement Google OAuth logic here
-            console.log('Google login attempt')
-
-            await new Promise((resolve) => setTimeout(resolve, 1000))
-        } catch (err) {
-            setError('Đăng nhập với Google thất bại. Vui lòng thử lại.')
-            showErrorNotification({
-                title: 'Đăng nhập Google thất bại',
-                message: 'Đăng nhập với Google thất bại. Vui lòng thử lại.'
-            })
-        } finally {
-            setLoading(false)
-        }
+        await initiateGoogleLogin()
     }
+
+    // Determine if any loading state is active
+    const isLoading = loading || googleLoading
 
     return (
         <Container size={420} my={40}>
@@ -134,6 +126,7 @@ const LoginPage = () => {
                                 leftSection={<IconMail size='1rem' />}
                                 {...form.getInputProps('email')}
                                 onChange={handleEmailChange}
+                                disabled={isLoading}
                             />
 
                             {/* Email suggestion */}
@@ -155,9 +148,10 @@ const LoginPage = () => {
                             placeholder='Mật khẩu của bạn'
                             leftSection={<IconLock size='1rem' />}
                             {...form.getInputProps('password')}
+                            disabled={isLoading}
                         />
 
-                        <Button type='submit' fullWidth mt='md' loading={loading} disabled={loading}>
+                        <Button type='submit' fullWidth mt='md' loading={loading} disabled={isLoading}>
                             Đăng nhập
                         </Button>
 
@@ -174,8 +168,8 @@ const LoginPage = () => {
                             fullWidth
                             leftSection={<IconBrandGoogle size='1rem' />}
                             onClick={handleGoogleLogin}
-                            loading={loading}
-                            disabled={loading}
+                            loading={googleLoading}
+                            disabled={isLoading}
                         >
                             Đăng nhập với Google
                         </Button>

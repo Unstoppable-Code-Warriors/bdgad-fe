@@ -15,6 +15,7 @@ import PatientInfoPage from '@/apps/(main)/patient-folder/page'
 import PatientDetailPage from '@/apps/(main)/patient-detail/page'
 import InputGeneralDataPage from '@/apps/(main)/input-general-data/page'
 import NewPasswordPage from '@/apps/auth/new-password/page'
+import CallbackPage from '@/apps/auth/callback/page'
 import LabTestPage from '@/apps/(main)/lab-test/page'
 import LabTestDetailPage from '@/apps/(main)/lab-test/[id]/page'
 import AnalysisPage from '@/apps/(main)/analysis/page'
@@ -73,6 +74,10 @@ export const router = createBrowserRouter([
                     {
                         path: 'new-password',
                         element: <NewPasswordPage />
+                    },
+                    {
+                        path: 'callback',
+                        element: <CallbackPage />
                     }
                 ]
             },
