@@ -3,6 +3,7 @@ import { AppShell, Group, Text, Stack, Badge } from '@mantine/core'
 import UserButton from './user-button'
 import NotificationBell from './notification-bell'
 import { useUser } from '@/services/hook/auth.hook'
+import { translateRole } from '@/types/role'
 const Header = () => {
     const { data , isLoading } = useUser()
     const userProfile = data?.data?.user
@@ -18,11 +19,13 @@ const Header = () => {
                                 {userProfile.email}
                             </Text>
                             <Group gap='xs'>
-                                {userProfile.roles?.map((role: any, index: number) => (
-                                    <Badge key={index} variant='light' size='sm'>
-                                        {role.name}
-                                    </Badge>
-                                ))}
+                                {userProfile.roles?.map((role: any, index: number) => {
+                                    return (
+                                        <Badge key={index} variant='light' size='sm'>
+                                            {translateRole(role.name)}
+                                        </Badge>
+                                    )
+                                })}
                             </Group>
                         </Stack>
                     )}

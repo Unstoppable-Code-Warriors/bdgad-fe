@@ -18,6 +18,8 @@ import { authService } from '@/services/function/auth'
 import { showSuccessNotification } from '@/utils/notifications'
 import { getUpdateProfileErrorMessage } from '@/utils/error'
 import { validatePhone, normalizePhone } from '@/utils/validatePhone'
+import { validateName, formatName } from '@/utils/validateName'
+import { translateRole } from '@/types/role'
 
 interface UpdateProfileUserProps {
     userProfile: any
@@ -37,19 +39,7 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
             address: userProfile?.metadata?.address || ''
         },
         validate: {
-            name: (value) => {
-                if (value.length < 3) {
-                    return 'Tên phải có ít nhất 3 ký tự'
-                }
-                if (value.length > 50) {
-                    return 'Tên không được vượt quá 50 ký tự'
-                }
-                // Check if contains only letters and single spaces between words
-                if (!/^[a-zA-ZÀ-ỹ]+(\s[a-zA-ZÀ-ỹ]+)*$/.test(value)) {
-                    return 'Tên chỉ được chứa chữ cái và 1 khoảng trắng giữa các từ'
-                }
-                return null
-            },
+            name: validateName,
             phone: validatePhone,
             address: (value) => {
                 if (!value) return null // Address is optional
@@ -81,11 +71,13 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
         try {
             setIsLoadingUpdateProfile(true)
             setError(null)
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            
+            console.log('Calling updateProfile with data:', values) // Debug log
+            
             const response = await authService.updateProfile({
-                name: values.name,
+                name: formatName(values.name), // Use formatName to trim and normalize
                 phone: values.phone ? normalizePhone(values.phone) : '',
-                address: values.address
+                address: values.address?.trim() || ''
             })
 
             if ('code' in response) {
@@ -235,7 +227,7 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
                                         py='sm'
                                         style={{ fontSize: '14px' }}
                                     >
-                                        {role.name}
+                                        {translateRole(role.name)}
                                     </Badge>
                                 ))}
                             </Group>

@@ -1,4 +1,4 @@
-export const validateName = (name: string): string => {
+export const validateName = (name: string): string | null => {
     if (!name || !name.trim()) {
         return 'Họ và tên là bắt buộc'
     }
@@ -17,22 +17,17 @@ export const validateName = (name: string): string => {
         return 'Giữa hai từ chỉ được có một khoảng trắng'
     }
 
-    // Check if starts or ends with space (after trim should not happen)
-    if (trimmedName !== name) {
-        return 'Họ và tên không được có khoảng trắng ở đầu hoặc cuối'
-    }
-
-    // Check minimum length
+    // Check minimum length (after trimming)
     if (trimmedName.length < 2) {
         return 'Họ và tên phải có ít nhất 2 ký tự'
     }
 
-    // Check maximum length
+    // Check maximum length (after trimming)
     if (trimmedName.length > 50) {
         return 'Họ và tên không được quá 50 ký tự'
     }
 
-    return ''
+    return null
 }
 
 export const formatName = (name: string): string => {

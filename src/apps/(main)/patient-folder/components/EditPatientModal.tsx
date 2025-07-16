@@ -9,6 +9,8 @@ import {
 import { IconEdit } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { useUpdatePatientFolder } from '@/services/hook/staff-patient-folder.hook'
+import { validateName, formatName } from '@/utils/validateName'
+import { validateCitizenId, formatCitizenId } from '@/utils/validateIdentification'
 
 interface EditPatientModalProps {
     opened: boolean
@@ -21,6 +23,8 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
         fullName: '',
         citizenId: ''
     })
+    const [fullNameError, setFullNameError] = useState<string>('')
+    const [citizenIdError, setCitizenIdError] = useState<string>('')
 
     const updatePatientMutation = useUpdatePatientFolder()
 
@@ -38,29 +42,54 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
             fullName: '',
             citizenId: ''
         })
+        setFullNameError('')
+        setCitizenIdError('')
         onClose()
     }, [onClose])
 
     const handleFullNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        
         setEditPatientData(prev => ({
             ...prev,
-            fullName: e.target.value
+            fullName: value
         }))
+
+        // Real-time validation
+        const error = validateName(value)
+        setFullNameError(error || '')
     }, [])
 
     const handleCitizenIdChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        const formattedValue = formatCitizenId(value)
+        
         setEditPatientData(prev => ({
             ...prev,
-            citizenId: e.target.value
+            citizenId: formattedValue
         }))
+
+        // Real-time validation
+        const error = validateCitizenId(formattedValue)
+        setCitizenIdError(error || '')
     }, [])
 
     const handleUpdatePatient = useCallback(async () => {
-        if (patient && editPatientData.fullName.trim() && editPatientData.citizenId.trim()) {
+        const formattedName = formatName(editPatientData.fullName)
+        const nameValidation = validateName(formattedName)
+        const citizenIdValidation = validateCitizenId(editPatientData.citizenId)
+        
+        setFullNameError(nameValidation || '')
+        setCitizenIdError(citizenIdValidation || '')
+
+        if (!nameValidation && !citizenIdValidation && patient) {
             try {
                 await updatePatientMutation.mutateAsync({
                     id: patient.id,
-                    data: editPatientData
+                    data: {
+                        ...editPatientData,
+                        fullName: formattedName
+                    }
                 })
 
                 notifications.show({
@@ -81,7 +110,10 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
         }
     }, [patient, editPatientData, updatePatientMutation, handleClose])
 
-    const isFormValid = editPatientData.fullName.trim() && editPatientData.citizenId.trim()
+    const isFormValid = editPatientData.fullName.trim() && 
+                       editPatientData.citizenId.length === 12 && 
+                       !fullNameError &&
+                       !citizenIdError
 
     return (
         <Modal
@@ -99,15 +131,18 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
                     onChange={handleFullNameChange}
                     required
                     size="md"
+                    error={fullNameError}
                 />
 
                 <TextInput
-                    label="Mã định danh"
-                    placeholder="Nhập mã định danh..."
+                    label="Số CCCD"
+                    placeholder="Nhập số căn cước công dân (12 số)..."
                     value={editPatientData.citizenId}
                     onChange={handleCitizenIdChange}
                     required
                     size="md"
+                    error={citizenIdError}
+                    maxLength={12}
                 />
 
                 <Group justify="flex-end" mt="md">

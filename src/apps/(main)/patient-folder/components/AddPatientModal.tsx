@@ -10,6 +10,7 @@ import { IconPlus } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { useCreatePatientFolder } from '@/services/hook/staff-patient-folder.hook'
 import { validateName, formatName } from '@/utils/validateName'
+import { validateCitizenId, formatCitizenId } from '@/utils/validateIdentification'
 
 interface AddPatientModalProps {
     opened: boolean
@@ -39,56 +40,38 @@ const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
     const handleFullNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
         
-        const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]*$/
-        
-        if (nameRegex.test(value)) {
-            const formattedValue = value.replace(/\s{2,}/g, ' ')
-            
-            setPatientData(prev => ({
-                ...prev,
-                fullName: formattedValue
-            }))
+        // Allow typing but validate in real-time
+        setPatientData(prev => ({
+            ...prev,
+            fullName: value
+        }))
 
-            // Real-time validation
-            const error = validateName(formattedValue)
-            setFullNameError(error)
-        }
+        // Real-time validation
+        const error = validateName(value)
+        setFullNameError(error || '')
     }, [])
 
     const handleCitizenIdChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
-        
-        const numericValue = value.replace(/\D/g, '')
-        
-        const limitedValue = numericValue.slice(0, 12)
+        const formattedValue = formatCitizenId(value)
         
         setPatientData(prev => ({
             ...prev,
-            citizenId: limitedValue
+            citizenId: formattedValue
         }))
 
-        // Validate
-        if (limitedValue.length > 0 && limitedValue.length < 12) {
-            setCitizenIdError('Số CCCD phải có đúng 12 số')
-        } else {
-            setCitizenIdError('')
-        }
+        // Real-time validation
+        const error = validateCitizenId(formattedValue)
+        setCitizenIdError(error || '')
     }, [])
-
-    const validateCitizenId = (citizenId: string) => {
-        if (!citizenId) return 'Số CCCD là bắt buộc'
-        if (citizenId.length !== 12) return 'Số CCCD phải có đúng 12 số'
-        if (!/^\d{12}$/.test(citizenId)) return 'Số CCCD chỉ được chứa số'
-        return ''
-    }
 
     const handleSavePatient = useCallback(async () => {
         const formattedName = formatName(patientData.fullName)
         const nameValidation = validateName(formattedName)
         const citizenIdValidation = validateCitizenId(patientData.citizenId)
         
-        setFullNameError(nameValidation)
-        setCitizenIdError(citizenIdValidation)
+        setFullNameError(nameValidation || '')
+        setCitizenIdError(citizenIdValidation || '')
 
         if (!nameValidation && !citizenIdValidation) {
             try {
