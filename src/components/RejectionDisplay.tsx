@@ -1,6 +1,5 @@
-import { Card, Text, Badge, Group, Avatar, Stack, Box, Button } from '@mantine/core'
-import { IconAlertTriangle, IconUser, IconEye } from '@tabler/icons-react'
-import { modals } from '@mantine/modals'
+import { Card, Text, Badge, Group, Avatar, Stack, Box } from '@mantine/core'
+import { IconAlertTriangle, IconUser } from '@tabler/icons-react'
 
 interface RejectionDisplayProps {
     rejector: {
@@ -20,97 +19,9 @@ export const RejectionDisplay = ({
     rejector,
     redoReason,
     rejectionDate,
-    itemType = 'item',
-    itemId,
-    onViewDetails,
     compact = false
 }: RejectionDisplayProps) => {
-    const handleViewDetails = () => {
-        if (onViewDetails) {
-            onViewDetails()
-            return
-        }
-
-        // Default modal implementation
-        modals.open({
-            title: (
-                <Group gap='sm'>
-                    <IconAlertTriangle size={20} color='var(--mantine-color-red-6)' />
-                    <Text fw={600} c='red.7'>
-                        Chi tiết từ chối
-                    </Text>
-                </Group>
-            ),
-            children: (
-                <Stack gap='lg'>
-                    <Card p='md' bg='red.0' radius='md' withBorder>
-                        <Group gap='sm' mb='md'>
-                            <Avatar size='md' radius='xl' color='red' variant='light'>
-                                <IconUser size={14} />
-                            </Avatar>
-                            <Box>
-                                <Text size='sm' fw={500} c='red.8'>
-                                    {itemType} #{itemId}
-                                </Text>
-                                {rejectionDate && (
-                                    <Text size='xs' c='red.6'>
-                                        Từ chối lúc: {new Date(rejectionDate).toLocaleString('vi-VN')}
-                                    </Text>
-                                )}
-                            </Box>
-                        </Group>
-
-                        <Box>
-                            <Text size='sm' fw={500} c='red.7' mb='xs'>
-                                Người từ chối:
-                            </Text>
-                            <Group gap='sm'>
-                                <Avatar size='sm' radius='xl' color='red' variant='light'>
-                                    <IconUser size={12} />
-                                </Avatar>
-                                <Box>
-                                    <Text size='sm' fw={500}>
-                                        {rejector.name}
-                                    </Text>
-                                    <Text size='xs' c='dimmed'>
-                                        {rejector.email}
-                                    </Text>
-                                </Box>
-                            </Group>
-                        </Box>
-                    </Card>
-
-                    <Box>
-                        <Text size='sm' fw={500} mb='xs'>
-                            Lý do từ chối:
-                        </Text>
-                        {redoReason ? (
-                            <Card p='md' bg='gray.0' radius='md' withBorder>
-                                <Text size='sm' style={{ lineHeight: 1.6 }}>
-                                    {redoReason}
-                                </Text>
-                            </Card>
-                        ) : (
-                            <Card p='md' bg='gray.1' radius='md' withBorder style={{ borderStyle: 'dashed' }}>
-                                <Group gap='sm'>
-                                    <IconAlertTriangle size={16} color='var(--mantine-color-orange-6)' />
-                                    <Text size='sm' c='orange.7' fs='italic'>
-                                        Không có lý do từ chối được ghi nhận
-                                    </Text>
-                                </Group>
-                            </Card>
-                        )}
-                    </Box>
-
-                    <Group justify='flex-end' mt='md'>
-                        <Button variant='light' onClick={() => modals.closeAll()}>
-                            Đóng
-                        </Button>
-                    </Group>
-                </Stack>
-            )
-        })
-    }
+ 
 
     if (compact) {
         return (
@@ -133,17 +44,7 @@ export const RejectionDisplay = ({
                             {rejector.email}
                         </Text>
                     </Stack>
-                    {(redoReason || onViewDetails) && (
-                        <Button
-                            variant='subtle'
-                            color='red'
-                            size='xs'
-                            leftSection={<IconEye size={12} />}
-                            onClick={handleViewDetails}
-                        >
-                            Chi tiết
-                        </Button>
-                    )}
+
                 </Group>
             </Card>
         )
@@ -220,20 +121,7 @@ export const RejectionDisplay = ({
                     </Box>
                 )}
 
-                {(redoReason || onViewDetails) && (
-                    <Group justify='flex-end'>
-                        <Button
-                            variant='filled'
-                            color='red'
-                            leftSection={<IconEye size={16} />}
-                            onClick={handleViewDetails}
-                            size='sm'
-                            radius='md'
-                        >
-                            Xem chi tiết từ chối
-                        </Button>
-                    </Group>
-                )}
+                
             </Stack>
         </Card>
     )

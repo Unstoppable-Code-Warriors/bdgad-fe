@@ -150,7 +150,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                 <Group>
                     {isAlreadyAssigned ? <IconCheck size={20} /> : <IconSend size={20} />}
                     <Text fw={600}>
-                        {isAlreadyAssigned ? 'Đã gửi file' : 'Gửi file cho người dùng'}
+                        {isAlreadyAssigned ? 'Đã gửi yêu cầu' : 'Gửi yêu cầu xét nghiệm'}
                     </Text>
                 </Group>
             }
@@ -169,7 +169,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                 {isAlreadyAssigned && (
                     <Alert icon={<IconCheck size={16} />} color='green' variant='light'>
                         <Stack gap='xs'>
-                            <Text size='sm' fw={500}>File đã được gửi cho:</Text>
+                            <Text size='sm' fw={500}>Yêu cầu đã được gửi cho:</Text>
                             {currentDoctorName && (
                                 <Group gap='xs'>
                                     <Badge color='blue' variant='light' size='sm'>Bác sĩ</Badge>
@@ -280,8 +280,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                     >
                         {isSending 
                             ? (isAlreadyAssigned ? 'Đang cập nhật...' : 'Đang gửi...') 
-                            : (isAlreadyAssigned ? 'Cập nhật' : 'Gửi file')
-                        }
+                            : (isAlreadyAssigned ? 'Cập nhật' : 'Gửi yêu cầu')}
                     </Button>
                 </Group>
             </Stack>

@@ -326,7 +326,7 @@ const AnalysisDetailPage = () => {
                                         <Divider />
                                         <Text size='sm' fw={500} c='teal'>
                                             {latestEtlResult?.status === AnalysisStatus.REJECTED
-                                                ? 'Phân tích lại'
+                                                ? 'phân tích'
                                                 : 'Phân tích mẫu'}
                                         </Text>
                                         {latestEtlResult?.status === AnalysisStatus.REJECTED ? (
@@ -340,7 +340,7 @@ const AnalysisDetailPage = () => {
                                                 size='md'
                                                 radius='lg'
                                             >
-                                                Phân tích lại
+                                                phân tích
                                             </Button>
                                         ) : (
                                             <Button
@@ -476,7 +476,7 @@ const AnalysisDetailPage = () => {
                                             size='md'
                                             radius='lg'
                                         >
-                                            Phân tích lại
+                                            phân tích
                                         </Button>
                                     </Stack>
                                 )}
@@ -586,7 +586,7 @@ const AnalysisDetailPage = () => {
                                 // },
                                 // {
                                 //     type: 'retry',
-                                //     label: 'Phân tích lại',
+                                //     label: 'phân tích',
                                 //     icon: <IconRefresh size={16} />,
                                 //     color: 'orange',
                                 //     variant: 'light',
@@ -595,7 +595,7 @@ const AnalysisDetailPage = () => {
                                 // },
                                 // {
                                 //     type: 'retry',
-                                //     label: 'Phân tích lại',
+                                //     label: 'phân tích',
                                 //     icon: <IconRefresh size={16} />,
                                 //     color: 'orange',
                                 //     variant: 'light',

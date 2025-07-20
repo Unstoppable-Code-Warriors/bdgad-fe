@@ -380,7 +380,7 @@ const AnalysisPage = () => {
                 <Stack gap='md'>
                     <Group grow>
                         <TextInput
-                            placeholder='Tìm kiếm theo CCCD hoặc tên bệnh nhân...'
+                            placeholder='Tìm kiếm theo barcode'
                             leftSection={<IconSearch size={16} />}
                             value={search}
                             onChange={(event) => setSearch(event.currentTarget.value)}
@@ -445,11 +445,15 @@ const AnalysisPage = () => {
                     page={page}
                     onPageChange={setPage}
                     recordsPerPageOptions={recordsPerPageOptions}
+                    recordsPerPageLabel='Số bản ghi mỗi trang'
                     onRecordsPerPageChange={setLimit}
                     sortStatus={{
                         columnAccessor: sortBy as string,
                         direction: (sortOrder as string).toLowerCase() as 'asc' | 'desc'
                     }}
+                    paginationText={({ from, to, totalRecords }) =>
+                        `Hiển thị ${from} - ${to} của ${totalRecords} bản ghi`
+                    }
                     onSortStatusChange={handleSort}
                     fetching={isLoading}
                     noRecordsText='Không có dữ liệu phân tích'

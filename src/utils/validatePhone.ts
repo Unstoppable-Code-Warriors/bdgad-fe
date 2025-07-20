@@ -6,14 +6,7 @@ export const validatePhone = (phone: string): string | null => {
     if (cleanPhone.length !== 10) {
         return 'Số điện thoại phải có đúng 10 chữ số'
     }
-    
-    const validPrefixes = ['03', '05', '07', '08', '09']
-    const prefix = cleanPhone.substring(0, 2)
-    
-    if (!validPrefixes.includes(prefix)) {
-        return 'Số điện thoại không hợp lệ (phải bắt đầu bằng 03, 05, 07, 08, 09)'
-    }
-    
+        
     return null
 }
 

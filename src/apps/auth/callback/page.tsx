@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router'
 import { Container, Paper, Text, Loader, Alert, Stack, ThemeIcon } from '@mantine/core'
 import { IconCheck, IconX, IconAlertCircle } from '@tabler/icons-react'
 import { setTokensOutside } from '@/stores/auth.store'
-import { authNotifications, showErrorNotification } from '@/utils/notifications'
+import { authNotifications } from '@/utils/notifications'
 
 const CallbackPage = () => {
     const [searchParams] = useSearchParams()
@@ -34,14 +34,14 @@ const CallbackPage = () => {
                     }, 1500)
                 } else if (errorParam) {
                     // Authentication failed
-                    const errorMessage = message ? decodeURIComponent(message) : 'Đăng nhập Google thất bại'
-                    setError(errorMessage)
-                    setProcessing(false)
+                    let error = ''
 
-                    showErrorNotification({
-                        title: 'Đăng nhập Google thất bại',
-                        message: errorMessage
-                    })
+                    if (errorParam == 'ACCOUNT_INACTIVE') {
+                        error = 'Tài khoản của bạn bị vô hiệu hóa.'
+                    }
+                    const errorMessage = message ? decodeURIComponent(message) : 'Đăng nhập Google thất bại'
+                    setError(error || errorMessage)
+                    setProcessing(false)
 
                     // Redirect to login after a delay
                     setTimeout(() => {

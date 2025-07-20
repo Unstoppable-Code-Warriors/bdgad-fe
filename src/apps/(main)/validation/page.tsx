@@ -184,17 +184,6 @@ const ValidationPage = () => {
                 )
             },
             {
-                accessor: 'barcode',
-                title: 'Barcode',
-                sortable: true,
-                width: 120,
-                render: (record) => (
-                    <Text size='sm' ff='monospace'>
-                        {record.barcode}
-                    </Text>
-                )
-            },
-            {
                 accessor: 'doctor.name',
                 title: 'Bác sĩ',
                 width: 150,
@@ -315,7 +304,7 @@ const ValidationPage = () => {
             <ListSearchFilter
                 searchValue={search}
                 onSearchChange={setSearch}
-                searchPlaceholder='Tìm kiếm theo tên, CCCD, mã xét nghiệm...'
+                searchPlaceholder='Tìm kiếm mã xét nghiệm...'
                 statusFilter={statusFilter}
                 onStatusFilterChange={(value) => updateFilter({ status: value || undefined })}
                 statusOptions={statusOptions}
@@ -344,6 +333,10 @@ const ValidationPage = () => {
                     recordsPerPage={limit}
                     page={page}
                     onPageChange={setPage}
+                    recordsPerPageLabel='Số bản ghi mỗi trang'
+                    paginationText={({ from, to, totalRecords }) =>
+                        `Hiển thị ${from} - ${to} của ${totalRecords} bản ghi`
+                    }
                     recordsPerPageOptions={recordsPerPageOptions}
                     onRecordsPerPageChange={setLimit}
                     sortStatus={sortStatus}

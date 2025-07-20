@@ -3,7 +3,6 @@ import { Dropzone } from '@mantine/dropzone'
 import {
     IconFileDescription,
     IconUpload,
-    IconX,
     IconFile,
     IconTrash,
     IconLock,
@@ -219,24 +218,24 @@ export const FileUpload = ({
                                     color: 'red'
                                 })
                             }}
-                            maxSize={100 * 1024 * 1024} // 100MB
+                            maxSize={100 * 1024 * 1024 * 1024} // 100MB
                             maxFiles={1}
                             accept={['.fastq', '.fq', '.fastq.gz', '.fq.gz']}
                             disabled={isUploading}
                         >
-                            <Group justify='center' gap='xl' mih={220} style={{ pointerEvents: 'none' }}>
+                            <Group justify='center' gap='xl' mih={180} style={{ pointerEvents: 'none' }}>
                                 <Dropzone.Accept>
                                     <IconUpload
                                         style={{ width: 52, height: 52, color: 'var(--mantine-color-blue-6)' }}
                                         stroke={1.5}
                                     />
                                 </Dropzone.Accept>
-                                <Dropzone.Reject>
+                                {/* <Dropzone.Reject>
                                     <IconX
                                         style={{ width: 52, height: 52, color: 'var(--mantine-color-red-6)' }}
                                         stroke={1.5}
                                     />
-                                </Dropzone.Reject>
+                                </Dropzone.Reject> */}
                                 <Dropzone.Idle>
                                     <IconFile
                                         style={{ width: 52, height: 52, color: 'var(--mantine-color-dimmed)' }}
@@ -245,10 +244,10 @@ export const FileUpload = ({
                                 </Dropzone.Idle>
 
                                 <div>
-                                    <Text size='xl' inline>
+                                    <Text size='sm' c='dimmed' inline>
                                         Kéo thả file FastQ vào đây hoặc click để chọn
                                     </Text>
-                                    <Text size='sm' c='dimmed' inline mt={7}>
+                                    <Text size='sm' c='dimmed' inline mt={15}>
                                         Hỗ trợ: .fastq, .fq, .fastq.gz, .fq.gz (Tối đa 100MB, chỉ 1 file)
                                     </Text>
                                 </div>
