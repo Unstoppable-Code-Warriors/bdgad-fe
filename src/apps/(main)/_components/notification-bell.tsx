@@ -2,11 +2,15 @@ import { ActionIcon, Menu, Indicator, ScrollArea, UnstyledButton, Divider, Group
 import { IconBell, IconCheck } from '@tabler/icons-react'
 import { useNotifications, useMarkNotificationAsRead } from '@/services/hook/notification.hook'
 import { useUser } from '@/services/hook/auth.hook'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { showErrorNotification } from '@/utils/notifications'
 import type { Notification } from '@/types/notification'
+import { Role } from '@/utils/constant'
 
 const NotificationBell = () => {
+    const navigate = useNavigate()
+    const [opened, setOpened] = useState(false)
     const { data: user } = useUser()
     const userProfile = user?.data?.user
     
@@ -56,6 +60,59 @@ const NotificationBell = () => {
         }
     }
 
+    const handleNotificationClick = (notification: Notification) => {
+        if (!notification.isRead) {
+            handleMarkAsRead(notification.id)
+        }
+
+        setOpened(false)
+        
+        const userRole = Number(userProfile?.roles[0].code)
+        
+        switch (userRole) {
+            case Role.LAB_TESTING_TECHNICIAN:
+                if (notification.labcode) {
+                    navigate(`/lab-test?search=${notification.labcode}`)
+                } else {
+                    navigate('/lab-test')
+                }
+                break
+                
+            case Role.ANALYSIS_TECHNICIAN:
+                if (notification.labcode) {
+                    navigate(`/analysis?search=${notification.labcode}`)
+                } else {
+                    navigate('/analysis')
+                }
+                break
+                
+            case Role.VALIDATION_TECHNICIAN:
+                if (notification.labcode) {
+                    navigate(`/validation?search=${notification.labcode}`)
+                } else {
+                    navigate('/validation')
+                }
+                break
+                
+            case Role.DOCTOR:
+                if (notification.labcode) {
+                    navigate(`/doctor-dashboard?search=${notification.labcode}`)
+                } else {
+                    navigate('/doctor-dashboard')
+                }
+                break
+                
+            case Role.STAFF:
+            default:
+                if (notification.labcode) {
+                    navigate(`/lab-test?search=${notification.labcode}`)
+                } else {
+                    navigate('/lab-test')
+                }
+                break
+        }
+    }
+
     // Helper function để format thời gian
     const formatTime = (dateString: string) => {
         const date = new Date(dateString)
@@ -75,7 +132,12 @@ const NotificationBell = () => {
         }
     }
 
-    const getNotificationColor = (type: string) => {
+    const getNotificationColor = (type: string, subType?: string) => {
+        // If subType exists, prioritize it for color
+        if (subType === 'accept') return 'green'
+        if (subType === 'reject') return 'red'
+        
+        // Default type colors
         switch (type) {
             case 'system': return 'blue'
             case 'lab_task': return 'green'
@@ -88,7 +150,7 @@ const NotificationBell = () => {
     const getNotificationTypeLabel = (type: string) => {
         switch (type) {
             case 'system': return 'Hệ thống'
-            case 'lab_task': return 'Lab'
+            case 'lab_task': return 'Xét nghiệm'
             case 'analysis_task': return 'Phân tích'
             case 'validation_task': return 'Xác thực'
             default: return 'Khác'
@@ -104,7 +166,7 @@ const NotificationBell = () => {
     }
 
     return (
-        <Menu shadow="md" width={350} position="bottom-end">
+        <Menu shadow="md" width={400} position="bottom-end" opened={opened} onChange={setOpened}>
             <Menu.Target>
                 <ActionIcon variant="light" size="lg" radius="md">
                     <Indicator 
@@ -145,37 +207,38 @@ const NotificationBell = () => {
                                 key={notification.id}
                                 w="100%"
                                 p="sm"
-                                onClick={() => {
-                                    if (!notification.isRead) {
-                                        handleMarkAsRead(notification.id)
-                                    }
-                                }}
+                                onClick={() => handleNotificationClick(notification)}
                                 style={{
                                     backgroundColor: notification.isRead ? 'transparent' : 'var(--mantine-color-blue-0)',
                                     borderBottom: '1px solid var(--mantine-color-gray-2)',
-                                    cursor: notification.isRead ? 'default' : 'pointer'
+                                    cursor: 'pointer'
                                 }}
                             >
                                 <Group gap="sm" align="flex-start">
                                     <Badge 
                                         size="xs" 
-                                        color={getNotificationColor(notification.type)}
+                                        color={getNotificationColor(notification.taskType, notification.subType)}
                                         variant="dot"
                                     />
                                     <Stack gap={2} style={{ flex: 1 }}>
                                         <Group justify="space-between" align="flex-start">
                                             <Text size="sm" fw={notification.isRead ? 400 : 600} lineClamp={1}>
                                                 {notification.title}
+                                                {notification.subType === 'reject' && (
+                                                    <Text span size="xs" c="red" fw={700} ml={5}>
+                                                        (Từ chối)
+                                                    </Text>
+                                                )}
                                             </Text>
                                             <Badge 
                                                 size="xs" 
-                                                color={getNotificationColor(notification.type)}
+                                                color={getNotificationColor(notification.taskType, notification.subType)}
                                                 variant="light"
                                             >
-                                                {getNotificationTypeLabel(notification.type)}
+                                                {getNotificationTypeLabel(notification.taskType)}
                                             </Badge>
                                         </Group>
-                                        <Text size="xs" c="dimmed" lineClamp={2}>
+                                        <Text size="xs" c="dimmed" lineClamp={2} mr="lg">
                                             {notification.message}
                                         </Text>
                                         <Group justify="space-between" align="center">

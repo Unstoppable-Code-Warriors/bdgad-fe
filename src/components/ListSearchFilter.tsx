@@ -66,9 +66,12 @@ export const ListSearchFilter = ({
     showRefreshButton = true,
     showClearFilters = true
 }: ListSearchFilterProps) => {
-    const hasActiveFilters = statusFilter || (dateRange && (dateRange[0] || dateRange[1]))
+    // Check for active filters including additional filters (passed via onClearFilters callback)
+    const hasActiveFilters = searchValue || statusFilter || (dateRange && (dateRange[0] || dateRange[1])) || 
+        (additionalFilters && onClearFilters) // If there are additional filters, assume they might be active
 
     const handleClearAll = () => {
+        onSearchChange('')
         onStatusFilterChange?.(null)
         onDateRangeChange?.([null, null])
         onClearFilters?.()

@@ -1,9 +1,8 @@
 import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, Group, Stack, Paper, Button, Badge, ActionIcon, Alert, Text, Tooltip } from '@mantine/core'
+import { Title, Group, Stack, Paper, Badge, ActionIcon, Alert, Text, Tooltip } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
 import {
-    IconRefresh,
     IconAlertCircle,
     IconDownload,
     IconCheck,
@@ -310,14 +309,6 @@ const ValidationPage = () => {
         <Stack>
             <Group justify='space-between'>
                 <Title order={2}>Xác thực kết quả ETL</Title>
-                <Button
-                    leftSection={<IconRefresh size={16} />}
-                    variant='light'
-                    onClick={handleRefresh}
-                    loading={isLoading}
-                >
-                    Làm mới
-                </Button>
             </Group>
 
             {/* Reusable Search and Filter Component */}

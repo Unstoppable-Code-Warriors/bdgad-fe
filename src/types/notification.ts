@@ -8,11 +8,14 @@ export interface Notification {
     id: number
     title: string
     message: string
-    type: 'system' | 'lab_task' | 'analysis_task' | 'validation_task'
+    taskType: 'system' | 'lab_task' | 'analysis_task' | 'validation_task'
+    subType?: 'reject' | 'accept'
     sender: NotificationUser
     receiver: NotificationUser
     isRead: boolean
     createdAt: string
+    labcode?: string
+    barcode?: string
 }
 
 export type NotificationApiResponse = Notification[]

@@ -118,10 +118,6 @@ const AnalysisPage = () => {
         [navigate]
     )
 
-    const handleRefresh = useCallback(() => {
-        refetch()
-    }, [refetch])
-
     const handleSort = useCallback(
         (sortStatus: DataTableSortStatus<AnalysisSessionListItem>) => {
             setSortBy(sortStatus.columnAccessor)
@@ -370,14 +366,6 @@ const AnalysisPage = () => {
             {/* Header */}
             <Group justify='space-between'>
                 <Title order={2}>Quản lý phân tích</Title>
-                <Button
-                    leftSection={<IconRefresh size={16} />}
-                    variant='light'
-                    onClick={handleRefresh}
-                    loading={isLoading}
-                >
-                    Làm mới
-                </Button>
             </Group>
 
             {/* Error Alert */}

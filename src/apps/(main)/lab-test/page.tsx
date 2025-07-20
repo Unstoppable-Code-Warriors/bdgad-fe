@@ -2,7 +2,7 @@ import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { Title, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert, Tooltip } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
-import { IconEye, IconRefresh, IconAlertCircle, IconDownload } from '@tabler/icons-react'
+import { IconEye, IconAlertCircle, IconDownload } from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
 import { useLabTestSessions } from '@/services/hook/lab-test.hook'
 import { labTestService } from '@/services/function/lab-test'
@@ -248,14 +248,6 @@ const LabTestPage = () => {
             {/* Header */}
             <Group justify='space-between'>
                 <Title order={2}>Quản lý xét nghiệm</Title>
-                <Button
-                    leftSection={<IconRefresh size={16} />}
-                    variant='light'
-                    onClick={handleRefresh}
-                    loading={isLoading}
-                >
-                    Làm mới
-                </Button>
             </Group>
 
             {/* Error Alert */}
@@ -269,7 +261,7 @@ const LabTestPage = () => {
             <ListSearchFilter
                 searchValue={search}
                 onSearchChange={setSearch}
-                searchPlaceholder='Tìm kiếm theo tên, CCCD...'
+                searchPlaceholder='Tìm kiếm theo mã xét nghiệm, barcode'
                 statusFilter={filter.status}
                 onStatusFilterChange={(value) => updateFilter({ status: (value as LabTestStatus) || undefined })}
                 statusOptions={statusOptions}
