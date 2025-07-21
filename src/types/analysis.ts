@@ -106,14 +106,15 @@ export const analysisStatusConfig = {
     },
     [AnalysisStatus.COMPLETED]: {
         label: 'Hoàn thành',
-        color: 'green'
+        color: 'teal'
     },
     [AnalysisStatus.FAILED]: {
         label: 'Thất bại',
-        color: 'red'
+        color: 'grape'
     }
 }
 
 export interface AnalysisFilter {
     etlStatus?: string
+    etlApprovalStatus?: string
 }

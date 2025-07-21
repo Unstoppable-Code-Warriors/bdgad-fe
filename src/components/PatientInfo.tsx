@@ -18,19 +18,28 @@ interface AnalysisData {
     name: string
     email: string
 }
+
+interface ValidationData {
+    name: string
+    email: string
+}
 interface PatientInfoProps {
     patient: PatientData
     analysis?: AnalysisData
     analysisTitle?: string
+    validation?: ValidationData
+    validationTitle?: string
     doctor?: DoctorData
     doctorTitle?: string
 }
 
 export const PatientInfo = ({
     patient,
+    validation,
     analysis,
     doctor,
     doctorTitle = 'Bác sĩ phụ trách',
+    validationTitle = 'Người thẩm định',
     analysisTitle = 'Người phân tích'
 }: PatientInfoProps) => {
     const calculateAge = (dateOfBirth: string) => {
@@ -197,6 +206,38 @@ export const PatientInfo = ({
                                         <IconMail size={14} color='var(--mantine-color-gray-6)' />
                                         <Text size='sm' c='dimmed'>
                                             {analysis.email}
+                                        </Text>
+                                    </Group>
+                                </Group>
+                            </Stack>
+                        </Group>
+                    </Stack>
+                </Paper>
+            )}
+            {/* Validation Information */}
+            {validation && (
+                <Paper p='lg' radius='md' bg='orange.0' withBorder mt={doctor ? 'md' : 0}>
+                    <Stack gap='lg'>
+                        <Group gap='xs'>
+                            <IconMicroscope size={18} color='var(--mantine-color-orange-6)' />
+                            <Text fw={700} size='lg' c='orange'>
+                                {validationTitle}
+                            </Text>
+                        </Group>
+
+                        <Group gap='md'>
+                            <Avatar size='lg' radius='md' color='orange' variant='light'>
+                                <IconMicroscope size={24} />
+                            </Avatar>
+                            <Stack gap='xs' style={{ flex: 1 }}>
+                                <Text fw={600} size='md'>
+                                    {validation.name}
+                                </Text>
+                                <Group gap='lg'>
+                                    <Group gap='xs'>
+                                        <IconMail size={14} color='var(--mantine-color-gray-6)' />
+                                        <Text size='sm' c='dimmed'>
+                                            {validation.email}
                                         </Text>
                                     </Group>
                                 </Group>

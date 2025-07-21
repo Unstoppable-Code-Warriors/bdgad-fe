@@ -72,6 +72,7 @@ const AnalysisPage = () => {
 
     // Filters
     const [etlStatusFilter, setEtlStatusFilter] = useState<string>('')
+    const [etlApprovalStatusFilter, setEtlApprovalStatusFilter] = useState<string>('')
     const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
 
     // Debounced search
@@ -81,8 +82,9 @@ const AnalysisPage = () => {
     const filter: AnalysisFilter = useMemo(() => {
         const filterObj: AnalysisFilter = {}
         if (etlStatusFilter) filterObj.etlStatus = etlStatusFilter
+        if (etlApprovalStatusFilter) filterObj.etlApprovalStatus = etlApprovalStatusFilter
         return filterObj
-    }, [etlStatusFilter])
+    }, [etlStatusFilter, etlApprovalStatusFilter])
 
     // Fetch data
     const {
@@ -221,7 +223,7 @@ const AnalysisPage = () => {
             },
             {
                 accessor: 'patient.fullName',
-                title: 'Họ tên bệnh nhân',
+                title: 'Tên bệnh nhân',
                 sortable: true,
                 width: 200,
                 render: (record) => record.patient?.fullName || '-'
@@ -265,7 +267,7 @@ const AnalysisPage = () => {
             },
             {
                 accessor: 'latestEtlResult.status',
-                title: 'Trạng thái phân tích',
+                title: 'Trạng thái ETL',
                 width: 140,
                 render: (record) => {
                     const status = record.latestEtlResult?.status
@@ -385,7 +387,7 @@ const AnalysisPage = () => {
                             value={search}
                             onChange={(event) => setSearch(event.currentTarget.value)}
                         />
-                        <Select
+                        {/* <Select
                             placeholder='Lọc theo trạng thái phân tích'
                             leftSection={<IconFilter size={16} />}
                             data={[
@@ -400,6 +402,33 @@ const AnalysisPage = () => {
                             rightSection={
                                 etlStatusFilter && (
                                     <ActionIcon size='sm' variant='transparent' onClick={() => setEtlStatusFilter('')}>
+                                        <IconX size={12} />
+                                    </ActionIcon>
+                                )
+                            }
+                        /> */}
+                        <Select
+                            placeholder='Lọc theo trạng thái ETL'
+                            leftSection={<IconFilter size={16} />}
+                            data={[
+                                { value: '', label: 'Tất cả trạng thái ETL' },
+                                { value: AnalysisStatus.REJECTED, label: 'Từ chối' },
+                                { value: AnalysisStatus.APPROVED, label: 'Đã phê duyệt' },
+                                { value: AnalysisStatus.WAIT_FOR_APPROVAL, label: 'Chờ phê duyệt' },
+                                { value: AnalysisStatus.PROCESSING, label: 'Đang xử lý' },
+                                { value: AnalysisStatus.COMPLETED, label: 'Hoàn thành' },
+                                { value: AnalysisStatus.FAILED, label: 'Thất bại' }
+                            ]}
+                            value={etlApprovalStatusFilter}
+                            onChange={(value) => setEtlApprovalStatusFilter(value || '')}
+                            clearable
+                            rightSection={
+                                etlApprovalStatusFilter && (
+                                    <ActionIcon
+                                        size='sm'
+                                        variant='transparent'
+                                        onClick={() => setEtlApprovalStatusFilter('')}
+                                    >
                                         <IconX size={12} />
                                     </ActionIcon>
                                 )

@@ -151,6 +151,17 @@ const ValidationPage = () => {
     const columns: DataTableColumn<ValidationSessionWithLatestEtlResponse>[] = useMemo(
         () => [
             {
+                accessor: 'labcode',
+                title: 'Labcode',
+                sortable: true,
+                width: 120,
+                render: (record) => (
+                    <Text fw={500} c='blue'>
+                        {record.labcode}
+                    </Text>
+                )
+            },
+            {
                 accessor: 'barcode',
                 title: 'Barcode',
                 sortable: true,
@@ -166,17 +177,7 @@ const ValidationPage = () => {
                 width: 180,
                 render: (record) => <Text fw={500}>{record.patient?.fullName || '-'}</Text>
             },
-            {
-                accessor: 'labcode',
-                title: 'Mã xét nghiệm',
-                sortable: true,
-                width: 120,
-                render: (record) => (
-                    <Text fw={500} c='blue'>
-                        {record.labcode}
-                    </Text>
-                )
-            },
+
             {
                 accessor: 'doctor.name',
                 title: 'Bác sĩ',
@@ -298,7 +299,7 @@ const ValidationPage = () => {
             <ListSearchFilter
                 searchValue={search}
                 onSearchChange={setSearch}
-                searchPlaceholder='Tìm kiếm mã xét nghiệm...'
+                searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
                 statusFilter={statusFilter}
                 onStatusFilterChange={(value) => updateFilter({ status: value || undefined })}
                 statusOptions={statusOptions}
