@@ -1,5 +1,20 @@
 import { useParams, useNavigate } from 'react-router'
-import { Container, Title, Card, Text, Stack, Button, Group, Paper, ActionIcon, Badge, Flex, Box } from '@mantine/core'
+import {
+    Container,
+    Title,
+    Card,
+    Text,
+    Stack,
+    Button,
+    Group,
+    Paper,
+    ActionIcon,
+    Badge,
+    Flex,
+    Box,
+    Grid,
+    ScrollArea
+} from '@mantine/core'
 import {
     IconArrowLeft,
     IconCalendarEvent,
@@ -7,7 +22,10 @@ import {
     IconClipboardCheck,
     IconStethoscope,
     IconUser,
-    IconPlus
+    IconPlus,
+    IconPhone,
+    IconId,
+    IconMapPin
 } from '@tabler/icons-react'
 import { usePatientLabSessions } from '@/services/hook/staff-patient-session.hook'
 
@@ -65,7 +83,8 @@ const PatientDetailPage = () => {
 
     const { data: sessionsResponse, isLoading, error } = usePatientLabSessions(id!)
 
-    const sessions = sessionsResponse || []
+    const sessions = sessionsResponse?.labSessionData || []
+    const patientData = sessionsResponse?.patientData || null
 
     const handleBack = () => {
         navigate('/patient-folder')
@@ -116,11 +135,9 @@ const PatientDetailPage = () => {
                     </Button>
                 </Group>
 
-                {/* Overall Statistics */}
                 {sessions.length > 0 && (
                     <Card shadow='md' padding='xl' withBorder radius='lg'>
                         <Group justify='space-between' align='center'>
-                            {/* Left Side - Overview */}
                             <Group>
                                 <Box
                                     p='lg'
@@ -176,66 +193,199 @@ const PatientDetailPage = () => {
                     </Card>
                 )}
 
-                {/* Sessions List */}
-                {sessions.length > 0 ? (
-                    <Stack gap='md'>
-                        {sessions.map((session: any, index: number) => (
-                            <Card
-                                key={session.id}
-                                shadow='sm'
-                                padding='lg'
-                                withBorder
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => handleSessionClick(session.id)}
-                            >
-                                <Group justify='space-between' align='flex-start'>
-                                    <Group align='flex-start'>
-                                        <Box
-                                            p='sm'
-                                            bg={session.typeLabSession === 'test' ? 'blue.0' : 'green.0'}
-                                            style={{ borderRadius: '8px' }}
-                                        >
-                                            {getSessionTypeIcon(session.typeLabSession)}
-                                        </Box>
-
-                                        <div>
-                                            <Group gap='sm' mb='xs'>
-                                                <Text fw={600} size='lg'>
-                                                    Lần {index + 1}
-                                                </Text>
-                                                {getSessionTypeBadge(session.typeLabSession)}
-                                            </Group>
-
-                                            <Text fw={500} mb='xs'>
-                                                Barcode: {session.barcode}
-                                            </Text>
-
-                                            <Group gap='md'>
-                                                <Flex align='center' gap='xs'>
-                                                    <IconCalendarEvent size={14} />
-                                                    <Text size='sm' c='dimmed'>
-                                                        {new Date(session.requestDate).toLocaleDateString('vi-VN')}
-                                                    </Text>
-                                                </Flex>
-                                                <Flex align='center' gap='xs'>
-                                                    <IconUser size={14} />
-                                                    <Text size='sm' c='dimmed'>
-                                                        {session.doctor?.name || 'Chưa có bác sĩ'}
-                                                    </Text>
-                                                </Flex>
-                                                <Text size='sm' c='dimmed'>
-                                                    {session.patientFiles?.length || 0} file
-                                                </Text>
-                                            </Group>
-                                        </div>
-                                    </Group>
-
-                                    {getStatusBadge(session.typeLabSession)}
+                <Grid>
+                    {/* Patient Information */}
+                    <Grid.Col span={sessions.length > 0 ? 4 : 12}>
+                        <Card shadow='sm' padding='lg' withBorder>
+                            <Stack gap='md'>
+                                <Group align='center' mb='sm'>
+                                    <Box p='sm' bg='blue.0' style={{ borderRadius: '8px' }}>
+                                        <IconUser size={20} color='#1971c2' />
+                                    </Box>
+                                    <div>
+                                        <Text fw={600} size='lg'>
+                                            Thông tin bệnh nhân
+                                        </Text>
+                                        <Text size='sm' c='dimmed'>
+                                            Chi tiết hồ sơ bệnh nhân
+                                        </Text>
+                                    </div>
                                 </Group>
-                            </Card>
-                        ))}
-                    </Stack>
-                ) : (
+
+                                <Grid>
+                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
+                                        <Stack gap='xs'>
+                                            <Group gap='xs'>
+                                                <IconUser size={16} color='#495057' />
+                                                <Text size='sm' fw={500} c='dimmed'>
+                                                    Họ và tên
+                                                </Text>
+                                            </Group>
+                                            <Text size='md' fw={600} pl='xl'>
+                                                {patientData?.fullName || 'Không có thông tin'}
+                                            </Text>
+                                        </Stack>
+                                    </Grid.Col>
+
+                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
+                                        <Stack gap='xs'>
+                                            <Group gap='xs'>
+                                                <IconCalendarEvent size={16} color='#495057' />
+                                                <Text size='sm' fw={500} c='dimmed'>
+                                                    Ngày sinh
+                                                </Text>
+                                            </Group>
+                                            <Text size='md' fw={600} pl='xl'>
+                                                {patientData?.dateOfBirth
+                                                    ? new Date(patientData.dateOfBirth).toLocaleDateString('vi-VN')
+                                                    : 'Không có thông tin'}
+                                            </Text>
+                                        </Stack>
+                                    </Grid.Col>
+
+                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
+                                        <Stack gap='xs'>
+                                            <Group gap='xs'>
+                                                <IconPhone size={16} color='#495057' />
+                                                <Text size='sm' fw={500} c='dimmed'>
+                                                    Số điện thoại
+                                                </Text>
+                                            </Group>
+                                            <Text size='md' fw={600} pl='xl'>
+                                                {patientData?.phone || 'Không có thông tin'}
+                                            </Text>
+                                        </Stack>
+                                    </Grid.Col>
+
+                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
+                                        <Stack gap='xs'>
+                                            <Group gap='xs'>
+                                                <IconId size={16} color='#495057' />
+                                                <Text size='sm' fw={500} c='dimmed'>
+                                                    CCCD
+                                                </Text>
+                                            </Group>
+                                            <Text size='md' fw={600} pl='xl'>
+                                                {patientData?.citizenId || 'Không có thông tin'}
+                                            </Text>
+                                        </Stack>
+                                    </Grid.Col>
+
+                                    {sessions.length > 0 && (
+                                        <Grid.Col span={12}>
+                                            <Stack gap='xs'>
+                                                <Group gap='xs'>
+                                                    <IconMapPin size={16} color='#495057' />
+                                                    <Text size='sm' fw={500} c='dimmed'>
+                                                        Địa chỉ
+                                                    </Text>
+                                                </Group>
+                                                <Text size='md' fw={600} pl='xl'>
+                                                    {patientData?.address || 'Không có thông tin'}
+                                                </Text>
+                                            </Stack>
+                                        </Grid.Col>
+                                    )}
+
+                                    {sessions.length === 0 && (
+                                        <>
+                                            <Grid.Col span={12}>
+                                                <Stack gap='xs'>
+                                                    <Group gap='xs'>
+                                                        <IconMapPin size={16} color='#495057' />
+                                                        <Text size='sm' fw={500} c='dimmed'>
+                                                            Địa chỉ
+                                                        </Text>
+                                                    </Group>
+                                                    <Text size='md' fw={600} pl='xl'>
+                                                        {'Không có thông tin'}
+                                                    </Text>
+                                                </Stack>
+                                            </Grid.Col>
+                                        </>
+                                    )}
+                                </Grid>
+                            </Stack>
+                        </Card>
+                    </Grid.Col>
+
+                    {/* Sessions List */}
+                    {sessions.length > 0 && (
+                        <Grid.Col span={8}>
+                            <Stack gap='md' h='100%'>
+                                <Text fw={600} size='lg'>
+                                    Danh sách lần khám
+                                </Text>
+                                <ScrollArea h={500} scrollbarSize={6} scrollHideDelay={500}>
+                                    <Stack gap='md'>
+                                        {sessions.map((session: any, index: number) => (
+                                            <Card
+                                                key={session.id}
+                                                shadow='sm'
+                                                padding='lg'
+                                                withBorder
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => handleSessionClick(session.id)}
+                                            >
+                                                <Group justify='space-between' align='flex-start'>
+                                                    <Group align='flex-start'>
+                                                        <Box
+                                                            p='sm'
+                                                            bg={
+                                                                session.typeLabSession === 'test' ? 'blue.0' : 'green.0'
+                                                            }
+                                                            style={{ borderRadius: '8px' }}
+                                                        >
+                                                            {getSessionTypeIcon(session.typeLabSession)}
+                                                        </Box>
+
+                                                        <div>
+                                                            <Group gap='sm' mb='xs'>
+                                                                <Text fw={600} size='lg'>
+                                                                    Lần {index + 1}
+                                                                </Text>
+                                                                {getSessionTypeBadge(session.typeLabSession)}
+                                                            </Group>
+
+                                                            <Text fw={500} mb='xs'>
+                                                                Barcode: {session.barcode}
+                                                            </Text>
+
+                                                            <Group gap='md'>
+                                                                <Flex align='center' gap='xs'>
+                                                                    <IconCalendarEvent size={14} />
+                                                                    <Text size='sm' c='dimmed'>
+                                                                        {new Date(
+                                                                            session.requestDate
+                                                                        ).toLocaleDateString('vi-VN')}
+                                                                    </Text>
+                                                                </Flex>
+                                                                <Flex align='center' gap='xs'>
+                                                                    <IconUser size={14} />
+                                                                    <Text size='sm' c='dimmed'>
+                                                                        {session.doctor?.name || 'Chưa có bác sĩ'}
+                                                                    </Text>
+                                                                </Flex>
+                                                                <Text size='sm' c='dimmed'>
+                                                                    {session.patientFiles?.length || 0} file
+                                                                </Text>
+                                                            </Group>
+                                                        </div>
+                                                    </Group>
+
+                                                    {getStatusBadge(session.typeLabSession)}
+                                                </Group>
+                                            </Card>
+                                        ))}
+                                    </Stack>
+                                </ScrollArea>
+                            </Stack>
+                        </Grid.Col>
+                    )}
+                </Grid>
+
+                {/* Empty State for No Sessions */}
+                {sessions.length === 0 && (
                     <Paper p='xl' ta='center' withBorder>
                         <IconStethoscope size={48} color='gray' />
                         <Text size='lg' fw={600} mt='md'>
