@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react'
+import { Paper, Title, Text, Badge, Group, Button, Grid, Box, TextInput, Alert } from '@mantine/core'
 import {
-    Paper,
-    Title,
-    Text,
-    Badge,
-    Group,
-    Button,
-    Grid,
-    Box,
-    TextInput,
-    Alert
-} from '@mantine/core'
-import { IconUser, IconMail, IconPhone, IconMapPin, IconLock, IconShield, IconDeviceFloppy, IconAlertCircle } from '@tabler/icons-react'
+    IconUser,
+    IconMail,
+    IconPhone,
+    IconMapPin,
+    IconLock,
+    IconShield,
+    IconDeviceFloppy,
+    IconAlertCircle
+} from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
 import { useQueryClient } from '@tanstack/react-query'
 import { authService } from '@/services/function/auth'
@@ -43,7 +41,7 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
             phone: validatePhone,
             address: (value) => {
                 if (!value) return null // Address is optional
-                
+
                 if (value.length > 200) {
                     return 'Địa chỉ không được vượt quá 200 ký tự'
                 }
@@ -71,9 +69,9 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
         try {
             setIsLoadingUpdateProfile(true)
             setError(null)
-            
+
             console.log('Calling updateProfile with data:', values) // Debug log
-            
+
             const response = await authService.updateProfile({
                 name: formatName(values.name), // Use formatName to trim and normalize
                 phone: values.phone ? normalizePhone(values.phone) : '',
@@ -89,6 +87,10 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
                 })
                 // Refresh user data
                 queryClient.invalidateQueries({ queryKey: ['user'] })
+            }
+
+            if (response && response.code === 'DUPLICATE_PHONE') {
+                setError('Số điện thoại đã được sử dụng. Vui lòng nhập số điện thoại khác.')
             }
         } catch (err: unknown) {
             console.error('Error updating profile:', err)
@@ -204,7 +206,7 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
                                     }
                                 }
                             }}
-                            className="max-w-[32rem]"
+                            className='max-w-[32rem]'
                         />
                     </Grid.Col>
                     <Grid.Col span={6}>

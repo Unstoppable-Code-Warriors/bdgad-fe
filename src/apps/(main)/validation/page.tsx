@@ -2,13 +2,7 @@ import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { Title, Group, Stack, Paper, Badge, ActionIcon, Alert, Text, Tooltip } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
-import {
-    IconAlertCircle,
-    IconDownload,
-    IconCheck,
-    IconX as IconReject,
-    IconEye
-} from '@tabler/icons-react'
+import { IconAlertCircle, IconDownload, IconCheck, IconX as IconReject, IconEye } from '@tabler/icons-react'
 import {
     validationEtlStatusConfig,
     ValidationEtlStatus,
@@ -191,7 +185,7 @@ const ValidationPage = () => {
             },
             {
                 accessor: 'requestDate',
-                title: 'Ngày yêu cầu',
+                title: 'Ngày chỉ định',
                 sortable: true,
                 width: 120,
                 render: (record) => new Date(record.requestDate).toLocaleDateString('vi-VN')

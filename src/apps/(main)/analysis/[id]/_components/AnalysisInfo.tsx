@@ -83,7 +83,7 @@ export const AnalysisInfo = ({ data, latestFastQFile, latestEtlResult }: Analysi
                             <Stack gap='sm'>
                                 <Group justify='space-between'>
                                     <Text size='sm' c='dimmed'>
-                                        Ngày yêu cầu:
+                                        Ngày chỉ định:
                                     </Text>
                                     <Text fw={600} size='sm'>
                                         {new Date(data.requestDate).toLocaleDateString('vi-VN')}
