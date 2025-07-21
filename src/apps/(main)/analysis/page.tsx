@@ -1,19 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import {
-    Title,
-    TextInput,
-    Select,
-    Group,
-    Stack,
-    Paper,
-    Button,
-    Badge,
-    ActionIcon,
-    Alert,
-    Tooltip,
-    Text
-} from '@mantine/core'
+import { Title, TextInput, Select, Group, Stack, Paper, Badge, ActionIcon, Alert, Tooltip, Text } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { DataTable, type DataTableColumn, type DataTableSortStatus } from 'mantine-datatable'
 import {
@@ -71,7 +58,6 @@ const AnalysisPage = () => {
     })
 
     // Filters
-    const [etlStatusFilter, setEtlStatusFilter] = useState<string>('')
     const [etlApprovalStatusFilter, setEtlApprovalStatusFilter] = useState<string>('')
     const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
 
@@ -81,10 +67,9 @@ const AnalysisPage = () => {
     // Build filter object
     const filter: AnalysisFilter = useMemo(() => {
         const filterObj: AnalysisFilter = {}
-        if (etlStatusFilter) filterObj.etlStatus = etlStatusFilter
         if (etlApprovalStatusFilter) filterObj.etlApprovalStatus = etlApprovalStatusFilter
         return filterObj
-    }, [etlStatusFilter, etlApprovalStatusFilter])
+    }, [etlApprovalStatusFilter])
 
     // Fetch data
     const {
@@ -387,26 +372,6 @@ const AnalysisPage = () => {
                             value={search}
                             onChange={(event) => setSearch(event.currentTarget.value)}
                         />
-                        {/* <Select
-                            placeholder='Lọc theo trạng thái phân tích'
-                            leftSection={<IconFilter size={16} />}
-                            data={[
-                                { value: '', label: 'Tất cả trạng thái' },
-                                { value: AnalysisStatus.PROCESSING, label: 'Đang xử lý' },
-                                { value: AnalysisStatus.COMPLETED, label: 'Hoàn thành' },
-                                { value: AnalysisStatus.FAILED, label: 'Thất bại' }
-                            ]}
-                            value={etlStatusFilter}
-                            onChange={(value) => setEtlStatusFilter(value || '')}
-                            clearable
-                            rightSection={
-                                etlStatusFilter && (
-                                    <ActionIcon size='sm' variant='transparent' onClick={() => setEtlStatusFilter('')}>
-                                        <IconX size={12} />
-                                    </ActionIcon>
-                                )
-                            }
-                        /> */}
                         <Select
                             placeholder='Lọc theo trạng thái ETL'
                             leftSection={<IconFilter size={16} />}
