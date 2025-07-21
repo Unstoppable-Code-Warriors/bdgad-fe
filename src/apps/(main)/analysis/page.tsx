@@ -75,7 +75,7 @@ const AnalysisPage = () => {
     const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
 
     // Debounced search
-    const [debouncedSearch] = useDebouncedValue(search, 500)
+    const [debouncedSearch] = useDebouncedValue(search, 1000)
 
     // Build filter object
     const filter: AnalysisFilter = useMemo(() => {
@@ -415,23 +415,6 @@ const AnalysisPage = () => {
                             maxDate={new Date()}
                         />
                     </Group>
-
-                    {(etlStatusFilter || dateRange[0] || dateRange[1]) && (
-                        <Group>
-                            <Button
-                                variant='light'
-                                color='gray'
-                                leftSection={<IconX size={16} />}
-                                onClick={() => {
-                                    setEtlStatusFilter('')
-                                    setDateRange([null, null])
-                                }}
-                                size='sm'
-                            >
-                                Xóa bộ lọc
-                            </Button>
-                        </Group>
-                    )}
                 </Stack>
             </Paper>
 
