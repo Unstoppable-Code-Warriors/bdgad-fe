@@ -67,7 +67,10 @@ export const ListSearchFilter = ({
     showClearFilters = true
 }: ListSearchFilterProps) => {
     // Check for active filters including additional filters (passed via onClearFilters callback)
-    const hasActiveFilters = searchValue || statusFilter || (dateRange && (dateRange[0] || dateRange[1])) || 
+    const hasActiveFilters =
+        searchValue ||
+        statusFilter ||
+        (dateRange && (dateRange[0] || dateRange[1])) ||
         (additionalFilters && onClearFilters) // If there are additional filters, assume they might be active
 
     const handleClearAll = () => {
@@ -144,29 +147,6 @@ export const ListSearchFilter = ({
                 </Group>
 
                 <Group>{additionalFilters}</Group>
-
-                {(hasActiveFilters || totalRecords !== undefined) && (
-                    <Group>
-                        {showClearFilters && hasActiveFilters && (
-                            <Button
-                                variant='light'
-                                color='gray'
-                                leftSection={<IconX size={16} />}
-                                onClick={handleClearAll}
-                                size='sm'
-                                disabled={isLoading}
-                            >
-                                Xóa bộ lọc
-                            </Button>
-                        )}
-
-                        {totalRecords !== undefined && (
-                            <Text size='sm' c='dimmed'>
-                                Tìm thấy {totalRecords} kết quả
-                            </Text>
-                        )}
-                    </Group>
-                )}
             </Stack>
         </Paper>
     )

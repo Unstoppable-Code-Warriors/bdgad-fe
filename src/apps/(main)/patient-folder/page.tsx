@@ -18,18 +18,18 @@ import {
     Modal
 } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
-import { 
-    IconSearch, 
-    IconCalendar, 
-    IconUser, 
-    IconCalendarEvent, 
+import {
+    IconSearch,
+    IconCalendar,
+    IconUser,
+    IconCalendarEvent,
     IconPlus,
     IconDots,
     IconEdit,
     IconTrash
 } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
-import { usePatientFolders, useDeletePatientFolder } from '@/services/hook/staff-patient-folder.hook' 
+import { usePatientFolders, useDeletePatientFolder } from '@/services/hook/staff-patient-folder.hook'
 import AddPatientModal from './components/AddPatientModal'
 import EditPatientModal from './components/EditPatientModal'
 
@@ -43,10 +43,7 @@ const PatientFolderPage = () => {
     const [selectedPatient, setSelectedPatient] = useState<any>(null)
 
     // Use hooks
-    const {
-        data: patientsResponse,
-        isLoading,
-    } = usePatientFolders({
+    const { data: patientsResponse, isLoading } = usePatientFolders({
         search: searchTerm
     })
 
@@ -139,7 +136,7 @@ const PatientFolderPage = () => {
                 {/* Header */}
                 <Group justify='space-between'>
                     <Title order={2}>Thông tin bệnh nhân</Title>
-                    <Group>                    
+                    <Group>
                         <Button leftSection={<IconPlus size={16} />} onClick={handleAddPatient}>
                             Thêm bệnh nhân
                         </Button>
@@ -192,12 +189,12 @@ const PatientFolderPage = () => {
                                 className='hover:transform hover:-translate-y-1 hover:shadow-lg'
                             >
                                 {/* Menu ba chấm */}
-                                <Menu shadow="md" width={200} position="bottom-start">
+                                <Menu shadow='md' width={200} position='bottom-start'>
                                     <Menu.Target>
                                         <ActionIcon
-                                            variant="subtle"
-                                            color="gray"
-                                            size="sm"
+                                            variant='subtle'
+                                            color='gray'
+                                            size='sm'
                                             style={{
                                                 position: 'absolute',
                                                 top: 8,
@@ -219,7 +216,7 @@ const PatientFolderPage = () => {
                                         </Menu.Item>
                                         <Menu.Item
                                             leftSection={<IconTrash size={14} />}
-                                            color="red"
+                                            color='red'
                                             onClick={(e) => handleDeleteClick(patient, e)}
                                         >
                                             Xóa
@@ -272,27 +269,20 @@ const PatientFolderPage = () => {
                 )}
 
                 {/* Add Patient Modal */}
-                <AddPatientModal
-                    opened={isAddModalOpen}
-                    onClose={handleCloseAddModal}
-                />
+                <AddPatientModal opened={isAddModalOpen} onClose={handleCloseAddModal} />
 
                 {/* Edit Patient Modal */}
-                <EditPatientModal
-                    opened={isEditModalOpen}
-                    onClose={handleCloseEditModal}
-                    patient={selectedPatient}
-                />
+                <EditPatientModal opened={isEditModalOpen} onClose={handleCloseEditModal} patient={selectedPatient} />
 
                 {/* Delete Confirmation Modal */}
                 <Modal
                     opened={isDeleteModalOpen}
                     onClose={handleCloseDeleteModal}
-                    title="Xác nhận xóa"
+                    title='Xác nhận xóa'
                     centered
-                    size="sm"
+                    size='sm'
                 >
-                    <Stack gap="md">
+                    <Stack gap='md'>
                         <Text>
                             Bạn có chắc chắn muốn xóa bệnh nhân{' '}
                             <Text span fw={600}>
@@ -300,16 +290,16 @@ const PatientFolderPage = () => {
                             </Text>
                             ?
                         </Text>
-                        <Text size="sm" c="dimmed">
+                        <Text size='sm' c='dimmed'>
                             Hành động này không thể hoàn tác.
                         </Text>
 
-                        <Group justify="flex-end" mt="md">
-                            <Button variant="light" onClick={handleCloseDeleteModal}>
+                        <Group justify='flex-end' mt='md'>
+                            <Button variant='light' onClick={handleCloseDeleteModal}>
                                 Hủy
                             </Button>
                             <Button
-                                color="red"
+                                color='red'
                                 leftSection={<IconTrash size={16} />}
                                 onClick={handleDeletePatient}
                                 loading={deletePatientMutation.isPending}
