@@ -196,7 +196,7 @@ const PatientDetailPage = () => {
                 <Grid>
                     {/* Patient Information */}
                     <Grid.Col span={sessions.length > 0 ? 4 : 12}>
-                        <Card shadow='sm' padding='lg' withBorder>
+                        <Card h={sessions.length > 0 ? 485 : '100%'} shadow='sm' padding='lg' withBorder>
                             <Stack gap='md'>
                                 <Group align='center' mb='sm'>
                                     <Box p='sm' bg='blue.0' style={{ borderRadius: '8px' }}>
@@ -205,9 +205,6 @@ const PatientDetailPage = () => {
                                     <div>
                                         <Text fw={600} size='lg'>
                                             Thông tin bệnh nhân
-                                        </Text>
-                                        <Text size='sm' c='dimmed'>
-                                            Chi tiết hồ sơ bệnh nhân
                                         </Text>
                                     </div>
                                 </Group>

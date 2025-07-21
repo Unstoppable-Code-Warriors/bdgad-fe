@@ -29,11 +29,7 @@ import {
     IconFileZip,
     IconFile,
     IconSend,
-    IconCheck,
-    IconPhone,
-    IconMapPin,
-    IconId,
-    IconMedicalCross
+    IconCheck
 } from '@tabler/icons-react'
 import { usePatientLabSessionDetail } from '@/services/hook/staff-patient-session.hook'
 import SendFilesModal from '../components/SendFilesModal'
@@ -326,7 +322,7 @@ const SessionDetailPage = () => {
                                 Chưa có file nào
                             </Title>
                             <Text c='dimmed' mt='xs'>
-                                Phiên khám này chưa có file đính kèm
+                                lần khám này chưa có file đính kèm
                             </Text>
                         </Paper>
                     )}
