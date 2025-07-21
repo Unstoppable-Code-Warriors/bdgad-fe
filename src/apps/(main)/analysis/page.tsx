@@ -1,19 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import {
-    Title,
-    TextInput,
-    Select,
-    Group,
-    Stack,
-    Paper,
-    Button,
-    Badge,
-    ActionIcon,
-    Alert,
-    Tooltip,
-    Text
-} from '@mantine/core'
+import { Title, TextInput, Select, Group, Stack, Paper, Badge, ActionIcon, Alert, Tooltip, Text } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { DataTable, type DataTableColumn, type DataTableSortStatus } from 'mantine-datatable'
 import {
@@ -71,18 +58,18 @@ const AnalysisPage = () => {
     })
 
     // Filters
-    const [etlStatusFilter, setEtlStatusFilter] = useState<string>('')
+    const [etlApprovalStatusFilter, setEtlApprovalStatusFilter] = useState<string>('')
     const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
 
     // Debounced search
-    const [debouncedSearch] = useDebouncedValue(search, 500)
+    const [debouncedSearch] = useDebouncedValue(search, 1000)
 
     // Build filter object
     const filter: AnalysisFilter = useMemo(() => {
         const filterObj: AnalysisFilter = {}
-        if (etlStatusFilter) filterObj.etlStatus = etlStatusFilter
+        if (etlApprovalStatusFilter) filterObj.etlApprovalStatus = etlApprovalStatusFilter
         return filterObj
-    }, [etlStatusFilter])
+    }, [etlApprovalStatusFilter])
 
     // Fetch data
     const {
@@ -221,7 +208,7 @@ const AnalysisPage = () => {
             },
             {
                 accessor: 'patient.fullName',
-                title: 'Họ tên bệnh nhân',
+                title: 'Tên bệnh nhân',
                 sortable: true,
                 width: 200,
                 render: (record) => record.patient?.fullName || '-'
@@ -265,7 +252,7 @@ const AnalysisPage = () => {
             },
             {
                 accessor: 'latestEtlResult.status',
-                title: 'Trạng thái phân tích',
+                title: 'Trạng thái ETL',
                 width: 140,
                 render: (record) => {
                     const status = record.latestEtlResult?.status
@@ -386,20 +373,27 @@ const AnalysisPage = () => {
                             onChange={(event) => setSearch(event.currentTarget.value)}
                         />
                         <Select
-                            placeholder='Lọc theo trạng thái phân tích'
+                            placeholder='Lọc theo trạng thái ETL'
                             leftSection={<IconFilter size={16} />}
                             data={[
-                                { value: '', label: 'Tất cả trạng thái' },
+                                { value: '', label: 'Tất cả trạng thái ETL' },
+                                { value: AnalysisStatus.REJECTED, label: 'Từ chối' },
+                                { value: AnalysisStatus.APPROVED, label: 'Đã phê duyệt' },
+                                { value: AnalysisStatus.WAIT_FOR_APPROVAL, label: 'Chờ phê duyệt' },
                                 { value: AnalysisStatus.PROCESSING, label: 'Đang xử lý' },
                                 { value: AnalysisStatus.COMPLETED, label: 'Hoàn thành' },
                                 { value: AnalysisStatus.FAILED, label: 'Thất bại' }
                             ]}
-                            value={etlStatusFilter}
-                            onChange={(value) => setEtlStatusFilter(value || '')}
+                            value={etlApprovalStatusFilter}
+                            onChange={(value) => setEtlApprovalStatusFilter(value || '')}
                             clearable
                             rightSection={
-                                etlStatusFilter && (
-                                    <ActionIcon size='sm' variant='transparent' onClick={() => setEtlStatusFilter('')}>
+                                etlApprovalStatusFilter && (
+                                    <ActionIcon
+                                        size='sm'
+                                        variant='transparent'
+                                        onClick={() => setEtlApprovalStatusFilter('')}
+                                    >
                                         <IconX size={12} />
                                     </ActionIcon>
                                 )
@@ -415,23 +409,6 @@ const AnalysisPage = () => {
                             maxDate={new Date()}
                         />
                     </Group>
-
-                    {(etlStatusFilter || dateRange[0] || dateRange[1]) && (
-                        <Group>
-                            <Button
-                                variant='light'
-                                color='gray'
-                                leftSection={<IconX size={16} />}
-                                onClick={() => {
-                                    setEtlStatusFilter('')
-                                    setDateRange([null, null])
-                                }}
-                                size='sm'
-                            >
-                                Xóa bộ lọc
-                            </Button>
-                        </Group>
-                    )}
                 </Stack>
             </Paper>
 

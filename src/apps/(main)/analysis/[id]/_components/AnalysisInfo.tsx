@@ -144,7 +144,7 @@ export const AnalysisInfo = ({ data, latestFastQFile, latestEtlResult }: Analysi
                         <Paper p='md' radius='md' bg='teal.0' withBorder>
                             <Stack gap='sm' align='center'>
                                 <Text size='sm' fw={500} c='teal'>
-                                    Trạng thái phân tích
+                                    Trạng thái ETL
                                 </Text>
                                 {latestEtlResult?.status ? (
                                     <Badge

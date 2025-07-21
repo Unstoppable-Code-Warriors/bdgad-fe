@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react'
-import { Group, Stack, Paper, TextInput, Select, Button, ActionIcon, Text } from '@mantine/core'
+import { Group, Stack, Paper, TextInput, Select, Button, ActionIcon } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { IconSearch, IconCalendar, IconFilter, IconX, IconRefresh } from '@tabler/icons-react'
 
@@ -55,28 +55,14 @@ export const ListSearchFilter = ({
     onDateRangeChange,
 
     onRefresh,
-    onClearFilters,
 
     isLoading = false,
-    totalRecords,
 
     additionalFilters,
 
     variant = 'default',
-    showRefreshButton = true,
-    showClearFilters = true
+    showRefreshButton = true
 }: ListSearchFilterProps) => {
-    // Check for active filters including additional filters (passed via onClearFilters callback)
-    const hasActiveFilters = searchValue || statusFilter || (dateRange && (dateRange[0] || dateRange[1])) || 
-        (additionalFilters && onClearFilters) // If there are additional filters, assume they might be active
-
-    const handleClearAll = () => {
-        onSearchChange('')
-        onStatusFilterChange?.(null)
-        onDateRangeChange?.([null, null])
-        onClearFilters?.()
-    }
-
     return (
         <Paper p={variant === 'compact' ? 'sm' : 'md'} withBorder shadow='sm'>
             <Stack gap='sm'>
@@ -144,29 +130,6 @@ export const ListSearchFilter = ({
                 </Group>
 
                 <Group>{additionalFilters}</Group>
-
-                {(hasActiveFilters || totalRecords !== undefined) && (
-                    <Group>
-                        {showClearFilters && hasActiveFilters && (
-                            <Button
-                                variant='light'
-                                color='gray'
-                                leftSection={<IconX size={16} />}
-                                onClick={handleClearAll}
-                                size='sm'
-                                disabled={isLoading}
-                            >
-                                Xóa bộ lọc
-                            </Button>
-                        )}
-
-                        {totalRecords !== undefined && (
-                            <Text size='sm' c='dimmed'>
-                                Tìm thấy {totalRecords} kết quả
-                            </Text>
-                        )}
-                    </Group>
-                )}
             </Stack>
         </Paper>
     )

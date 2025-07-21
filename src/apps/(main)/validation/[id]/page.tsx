@@ -148,7 +148,12 @@ const ValidationDetailPage = () => {
                             <ValidationInfo validation={data} />
 
                             {/* Patient Information */}
-                            <PatientInfo patient={data.patient} doctor={data.doctor} doctorTitle='Bác sĩ yêu cầu' />
+                            <PatientInfo
+                                patient={data.patient}
+                                doctor={data.doctor}
+                                doctorTitle='Bác sĩ yêu cầu'
+                                validationTitle='Người thẩm định'
+                            />
                         </Stack>
                     </Grid.Col>
 

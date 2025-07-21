@@ -185,7 +185,7 @@ const LabTestDetailPage = () => {
                             <LabTestInfo data={data} latestFastQFile={latestFastQFile} />
 
                             {/* Patient Information */}
-                            <PatientInfo patient={data.patient} doctor={data.doctor} />
+                            <PatientInfo patient={data.patient} analysis={data.analysis} doctor={data.doctor} />
                         </Stack>
                     </Grid.Col>
 
