@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { Container, Center, Title, Select, Paper, Stack, Button, Group } from '@mantine/core'
-import { IconMicroscope, IconClipboardCheck, IconDeviceFloppy } from '@tabler/icons-react'
+import { IconMicroscope, IconClipboardCheck, IconDeviceFloppy, IconArrowNarrowLeft } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { useUploadMedicalTestRequisition } from '@/services/hook/staff-upload.hook'
 import ImportStep from './components/ImportStep'
@@ -48,10 +48,10 @@ const InputInfoPage = () => {
 
         try {
             const formData = {
-                files: submittedFiles.map(sf => sf.file),
+                files: submittedFiles.map((sf) => sf.file),
                 patientId: parseInt(patientId),
                 typeLabSession: typeLabSession,
-                ocrResult: undefined 
+                ocrResult: undefined
             }
 
             // Call API
@@ -64,7 +64,6 @@ const InputInfoPage = () => {
             })
 
             navigate(`/patient-detail/${patientId}`)
-
         } catch (error) {
             console.error('Upload error:', error)
 
@@ -96,17 +95,24 @@ const InputInfoPage = () => {
             <Center mb='xl'>
                 <div>
                     <Title order={1} ta='center' mb='sm'>
-                        Tạo phiên khám mới
+                        Tạo lần khám mới
                     </Title>
                 </div>
             </Center>
+            <Button
+                mb='xl'
+                leftSection={<IconArrowNarrowLeft size={16} />}
+                onClick={() => navigate(`/patient-detail/${patientId}`)}
+            >
+                Quay lại hồ sơ bệnh nhân
+            </Button>
 
             {/* Session Type Selection */}
             <Paper p='lg' withBorder mb='xl' style={{ margin: '0 auto' }}>
                 <Stack gap='md'>
                     <Select
-                        label='Loại phiên khám'
-                        placeholder='Chọn loại phiên khám'
+                        label='Loại lần khám'
+                        placeholder='Chọn loại lần khám'
                         value={typeLabSession}
                         onChange={(value) => setTypeLabSession(value || 'test')}
                         data={sessionTypeOptions.map((option) => ({
@@ -122,10 +128,7 @@ const InputInfoPage = () => {
                 </Stack>
             </Paper>
 
-            <ImportStep 
-                onFilesSubmitted={handleFilesSubmitted}
-                onOCRComplete={handleOCRComplete}
-            />
+            <ImportStep onFilesSubmitted={handleFilesSubmitted} onOCRComplete={handleOCRComplete} />
 
             {/* Save Files Button */}
             {submittedFiles.length > 0 && (

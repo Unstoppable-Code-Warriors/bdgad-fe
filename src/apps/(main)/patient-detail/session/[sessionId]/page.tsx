@@ -34,7 +34,6 @@ import {
 import { usePatientLabSessionDetail } from '@/services/hook/staff-patient-session.hook'
 import SendFilesModal from '../components/SendFilesModal'
 
-
 const getFileIcon = (fileType: string) => {
     switch (fileType.toLowerCase()) {
         case 'pdf':
@@ -176,24 +175,25 @@ const SessionDetailPage = () => {
                     </Group>
 
                     {/* Send Files Button */}
-                    {sessionData?.patientFiles && sessionData.patientFiles.length > 0 && (() => {
-                        const hasDoctor = sessionData?.doctor?.id
-                        const hasLabTech = sessionData?.labTestingTechnician?.id || sessionData?.labTesting?.id
-                        const isAlreadyAssigned = sessionData.typeLabSession === 'test' 
-                            ? hasDoctor && hasLabTech 
-                            : hasDoctor
+                    {sessionData?.patientFiles &&
+                        sessionData.patientFiles.length > 0 &&
+                        (() => {
+                            const hasDoctor = sessionData?.doctor?.id
+                            const hasLabTech = sessionData?.labTestingTechnician?.id || sessionData?.labTesting?.id
+                            const isAlreadyAssigned =
+                                sessionData.typeLabSession === 'test' ? hasDoctor && hasLabTech : hasDoctor
 
-                        return (
-                            <Button 
-                                leftSection={isAlreadyAssigned ? <IconCheck size={16} /> : <IconSend size={16} />} 
-                                onClick={handleSendFiles}
-                                color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
-                                variant={isAlreadyAssigned ? 'light' : 'filled'}
-                            >
-                                {isAlreadyAssigned ? 'Thông tin người nhận' : 'Gửi yêu cầu xét nghiệm'}
-                            </Button>
-                        )
-                    })()}
+                            return (
+                                <Button
+                                    leftSection={isAlreadyAssigned ? <IconCheck size={16} /> : <IconSend size={16} />}
+                                    onClick={handleSendFiles}
+                                    color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
+                                    variant={isAlreadyAssigned ? 'light' : 'filled'}
+                                >
+                                    {isAlreadyAssigned ? 'Thông tin người nhận' : 'Gửi yêu cầu xét nghiệm'}
+                                </Button>
+                            )
+                        })()}
                 </Group>
 
                 {/* Session Info */}
@@ -214,7 +214,7 @@ const SessionDetailPage = () => {
                                 </Group>
 
                                 <Text fw={500} size='lg' mb='sm'>
-                                     Barcode: {sessionData.barcode}
+                                    Barcode: {sessionData.barcode}
                                 </Text>
 
                                 <Group gap='lg'>
@@ -314,7 +314,6 @@ const SessionDetailPage = () => {
                                     </Grid.Col>
                                 ))}
                             </Grid>
-
                         </>
                     ) : (
                         <Paper p='xl' ta='center' withBorder>
@@ -323,7 +322,7 @@ const SessionDetailPage = () => {
                                 Chưa có file nào
                             </Title>
                             <Text c='dimmed' mt='xs'>
-                                Phiên khám này chưa có file đính kèm
+                                lần khám này chưa có file đính kèm
                             </Text>
                         </Paper>
                     )}

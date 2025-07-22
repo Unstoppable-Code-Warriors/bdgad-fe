@@ -135,7 +135,7 @@ const LabTestPage = () => {
         () => [
             {
                 accessor: 'labcode',
-                title: 'Mã xét nghiệm',
+                title: 'Labcode',
                 width: 120,
                 render: (record) => (
                     <Text fw={500} c='blue'>
@@ -163,7 +163,7 @@ const LabTestPage = () => {
             },
             {
                 accessor: 'doctor.name',
-                title: 'Bác sĩ chỉ định',
+                title: 'Bác sĩ',
                 width: 150
             },
             {
@@ -261,7 +261,7 @@ const LabTestPage = () => {
             <ListSearchFilter
                 searchValue={search}
                 onSearchChange={setSearch}
-                searchPlaceholder='Tìm kiếm theo mã xét nghiệm, barcode'
+                searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
                 statusFilter={filter.status}
                 onStatusFilterChange={(value) => updateFilter({ status: (value as LabTestStatus) || undefined })}
                 statusOptions={statusOptions}

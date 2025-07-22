@@ -5,7 +5,6 @@ export interface ValidationPatientResponse {
     phone: string
     address: string
     citizenId: string
-    healthInsuranceCode: string
     createdAt: string
 }
 

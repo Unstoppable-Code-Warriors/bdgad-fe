@@ -21,13 +21,11 @@ export const useAssignSession = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ sessionId, data }: { 
-            sessionId: string; 
-            data: { doctorId?: number; labTestingId?: number } 
-        }) => staffService.assignSession(sessionId, data),
+        mutationFn: ({ sessionId, data }: { sessionId: string; data: { doctorId?: number; labTestingId?: number } }) =>
+            staffService.assignSession(sessionId, data),
         onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ 
-                queryKey: ['patient-lab-session-detail', variables.sessionId] 
+            queryClient.invalidateQueries({
+                queryKey: ['patient-lab-session-detail', variables.sessionId]
             })
         }
     })

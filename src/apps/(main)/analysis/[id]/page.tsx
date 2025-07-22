@@ -284,7 +284,7 @@ const AnalysisDetailPage = () => {
                             />
 
                             {/* Patient Information */}
-                            <PatientInfo patient={data.patient} doctor={data.doctor} />
+                            <PatientInfo validation={data.validation} patient={data.patient} doctor={data.doctor} />
                         </Stack>
                     </Grid.Col>
 
@@ -324,11 +324,11 @@ const AnalysisDetailPage = () => {
                                             Tải file FastQ
                                         </Button>
                                         <Divider />
-                                        <Text size='sm' fw={500} c='teal'>
+                                        {/* <Text size='sm' fw={500} c='teal'>
                                             {latestEtlResult?.status === AnalysisStatus.REJECTED
                                                 ? 'phân tích'
                                                 : 'Phân tích mẫu'}
-                                        </Text>
+                                        </Text> */}
                                         {latestEtlResult?.status === AnalysisStatus.REJECTED ? (
                                             <Button
                                                 color='orange'
@@ -340,7 +340,7 @@ const AnalysisDetailPage = () => {
                                                 size='md'
                                                 radius='lg'
                                             >
-                                                phân tích
+                                                Phân tích
                                             </Button>
                                         ) : (
                                             <Button
@@ -432,7 +432,7 @@ const AnalysisDetailPage = () => {
                                             size='md'
                                             radius='lg'
                                         >
-                                            Gửi để xác thực
+                                            Gửi để thẩm định
                                         </Button>
                                     </Stack>
                                 )}
