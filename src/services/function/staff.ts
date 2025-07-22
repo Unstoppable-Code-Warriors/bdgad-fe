@@ -173,5 +173,18 @@ export const staffService = {
             .json()
     },
 
+    // OCR file processing
+    ocrFile: async (file: File): Promise<any> => {      
+        const formData = new FormData()
+        formData.append('file', file)
+
+        return backendApi
+            .post(`${PREFIX}/ocr`, {
+                body: formData,
+                headers: {}
+            })
+            .json()
+    },
+
 }
 

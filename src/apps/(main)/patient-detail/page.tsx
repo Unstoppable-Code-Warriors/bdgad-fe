@@ -196,7 +196,7 @@ const PatientDetailPage = () => {
                 <Grid>
                     {/* Patient Information */}
                     <Grid.Col span={sessions.length > 0 ? 4 : 12}>
-                        <Card h={sessions.length > 0 ? 485 : '100%'} shadow='sm' padding='lg' withBorder>
+                        <Card h={sessions.length > 0 ? 350 : '100%'} shadow='sm' padding='lg' withBorder>
                             <Stack gap='md'>
                                 <Group align='center' mb='sm'>
                                     <Box p='sm' bg='blue.0' style={{ borderRadius: '8px' }}>
@@ -215,12 +215,12 @@ const PatientDetailPage = () => {
                                             <Group gap='xs'>
                                                 <IconUser size={16} color='#495057' />
                                                 <Text size='sm' fw={500} c='dimmed'>
-                                                    Họ và tên
+                                                    Họ và tên:
+                                                </Text>
+                                                <Text size='md' fw={600}>
+                                                    {patientData?.fullName || 'Không có thông tin'}
                                                 </Text>
                                             </Group>
-                                            <Text size='md' fw={600} pl='xl'>
-                                                {patientData?.fullName || 'Không có thông tin'}
-                                            </Text>
                                         </Stack>
                                     </Grid.Col>
 
@@ -229,14 +229,14 @@ const PatientDetailPage = () => {
                                             <Group gap='xs'>
                                                 <IconCalendarEvent size={16} color='#495057' />
                                                 <Text size='sm' fw={500} c='dimmed'>
-                                                    Ngày sinh
+                                                    Ngày sinh:
+                                                </Text>
+                                                <Text size='md' fw={600}>
+                                                    {patientData?.dateOfBirth
+                                                        ? new Date(patientData.dateOfBirth).toLocaleDateString('vi-VN')
+                                                        : 'Không có thông tin'}
                                                 </Text>
                                             </Group>
-                                            <Text size='md' fw={600} pl='xl'>
-                                                {patientData?.dateOfBirth
-                                                    ? new Date(patientData.dateOfBirth).toLocaleDateString('vi-VN')
-                                                    : 'Không có thông tin'}
-                                            </Text>
                                         </Stack>
                                     </Grid.Col>
 
@@ -245,12 +245,12 @@ const PatientDetailPage = () => {
                                             <Group gap='xs'>
                                                 <IconPhone size={16} color='#495057' />
                                                 <Text size='sm' fw={500} c='dimmed'>
-                                                    Số điện thoại
+                                                    Số điện thoại:
+                                                </Text>
+                                                <Text size='md' fw={600}>
+                                                    {patientData?.phone || 'Không có thông tin'}
                                                 </Text>
                                             </Group>
-                                            <Text size='md' fw={600} pl='xl'>
-                                                {patientData?.phone || 'Không có thông tin'}
-                                            </Text>
                                         </Stack>
                                     </Grid.Col>
 
@@ -259,12 +259,12 @@ const PatientDetailPage = () => {
                                             <Group gap='xs'>
                                                 <IconId size={16} color='#495057' />
                                                 <Text size='sm' fw={500} c='dimmed'>
-                                                    CCCD
+                                                    CCCD:
+                                                </Text>
+                                                <Text size='md' fw={600}>
+                                                    {patientData?.citizenId || 'Không có thông tin'}
                                                 </Text>
                                             </Group>
-                                            <Text size='md' fw={600} pl='xl'>
-                                                {patientData?.citizenId || 'Không có thông tin'}
-                                            </Text>
                                         </Stack>
                                     </Grid.Col>
 
@@ -274,12 +274,12 @@ const PatientDetailPage = () => {
                                                 <Group gap='xs'>
                                                     <IconMapPin size={16} color='#495057' />
                                                     <Text size='sm' fw={500} c='dimmed'>
-                                                        Địa chỉ
+                                                        Địa chỉ:
+                                                    </Text>
+                                                    <Text size='md' fw={600}>
+                                                        {patientData?.address || 'Không có thông tin'}
                                                     </Text>
                                                 </Group>
-                                                <Text size='md' fw={600} pl='xl'>
-                                                    {patientData?.address || 'Không có thông tin'}
-                                                </Text>
                                             </Stack>
                                         </Grid.Col>
                                     )}

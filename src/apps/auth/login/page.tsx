@@ -123,7 +123,6 @@ const LoginPage = () => {
                                 left: 0,
                                 right: 0,
                                 bottom: 0,
-                                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(147, 51, 234, 0.6))',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',

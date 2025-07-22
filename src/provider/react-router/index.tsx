@@ -24,6 +24,8 @@ import ValidationPage from '@/apps/(main)/validation/page'
 import ValidationDetailPage from '@/apps/(main)/validation/[id]/page'
 import ProfilePage from '@/apps/(main)/profile/page'
 import SessionDetailPage from '@/apps/(main)/patient-detail/session/[sessionId]/page'
+import OCRPage from '@/apps/(main)/input-info/ocr/page'
+
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -97,6 +99,10 @@ export const router = createBrowserRouter([
                     {
                         path: 'import-file/input',
                         element: <InputInfoPage />
+                    },
+                    {
+                        path: 'input-info/ocr',
+                        element: <OCRPage />
                     },
                     {
                         path: '/patient-folder',

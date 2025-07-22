@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { Container, Center, Title, Select, Paper, Stack, Button, Group } from '@mantine/core'
 import { IconMicroscope, IconClipboardCheck, IconDeviceFloppy, IconArrowNarrowLeft } from '@tabler/icons-react'
@@ -12,6 +12,7 @@ interface SubmittedFile {
     uploadedAt: string
     status: 'uploaded' | 'processing' | 'completed'
     type: 'image' | 'pdf' | 'document' | 'other'
+    ocrResult?: any 
 }
 
 const InputInfoPage = () => {
@@ -25,13 +26,33 @@ const InputInfoPage = () => {
 
     const uploadMutation = useUploadMedicalTestRequisition()
 
+    useEffect(() => {
+        if (location.state?.ocrResult) {
+            handleOCRComplete(location.state.ocrResult)
+        }
+    }, [location.state])
+
     const handleFilesSubmitted = (files: SubmittedFile[]) => {
         setSubmittedFiles(files)
     }
 
     const handleOCRComplete = (data: any) => {
-        // Handle OCR complete if needed
         console.log('OCR completed:', data)
+
+        notifications.show({
+            title: 'Thành công',
+            message: 'OCR hoàn thành. Dữ liệu đã được xử lý.',
+            color: 'green'
+        })
+
+        // Update the corresponding file with OCR result
+        setSubmittedFiles((prev) =>
+            prev.map((file) => ({
+                ...file,
+                ocrResult: data,
+                status: 'completed' as const
+            }))
+        )
     }
 
     const handleSaveFiles = async () => {
@@ -47,14 +68,18 @@ const InputInfoPage = () => {
         setIsSaving(true)
 
         try {
+            // Include OCR results in the upload
+            const ocrResults = submittedFiles
+                .filter((file) => file.ocrResult)
+                .map((file) => file.ocrResult)
+
             const formData = {
                 files: submittedFiles.map((sf) => sf.file),
                 patientId: parseInt(patientId),
                 typeLabSession: typeLabSession,
-                ocrResult: undefined
+                ocrResult: ocrResults.length > 0 ? JSON.stringify(ocrResults[0]) : undefined
             }
 
-            // Call API
             await uploadMutation.mutateAsync(formData)
 
             notifications.show({
@@ -66,7 +91,6 @@ const InputInfoPage = () => {
             navigate(`/patient-detail/${patientId}`)
         } catch (error) {
             console.error('Upload error:', error)
-
             notifications.show({
                 title: 'Lỗi',
                 message: 'Không thể upload file',
