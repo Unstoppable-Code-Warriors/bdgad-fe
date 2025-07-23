@@ -58,7 +58,7 @@ export const AnalysisInfo = ({ data, latestFastQFile, latestEtlResult }: Analysi
 
                                 <Group justify='space-between'>
                                     <Text size='sm' c='dimmed'>
-                                        Mã vạch:
+                                        Barcode:
                                     </Text>
                                     <Text fw={600} size='sm'>
                                         {data.barcode}

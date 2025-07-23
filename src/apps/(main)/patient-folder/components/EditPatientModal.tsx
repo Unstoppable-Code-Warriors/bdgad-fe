@@ -1,11 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import {
-    Modal,
-    TextInput,
-    Group,
-    Stack,
-    Button
-} from '@mantine/core'
+import { Modal, TextInput, Group, Stack, Button } from '@mantine/core'
 import { IconEdit } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { useUpdatePatientFolder } from '@/services/hook/staff-patient-folder.hook'
@@ -49,8 +43,8 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
 
     const handleFullNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
-        
-        setEditPatientData(prev => ({
+
+        setEditPatientData((prev) => ({
             ...prev,
             fullName: value
         }))
@@ -63,8 +57,8 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
     const handleCitizenIdChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
         const formattedValue = formatCitizenId(value)
-        
-        setEditPatientData(prev => ({
+
+        setEditPatientData((prev) => ({
             ...prev,
             citizenId: formattedValue
         }))
@@ -78,19 +72,24 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
         const formattedName = formatName(editPatientData.fullName)
         const nameValidation = validateName(formattedName)
         const citizenIdValidation = validateCitizenId(editPatientData.citizenId)
-        
+
         setFullNameError(nameValidation || '')
         setCitizenIdError(citizenIdValidation || '')
 
         if (!nameValidation && !citizenIdValidation && patient) {
             try {
-                await updatePatientMutation.mutateAsync({
+                const res = await updatePatientMutation.mutateAsync({
                     id: patient.id,
                     data: {
                         ...editPatientData,
                         fullName: formattedName
                     }
                 })
+
+                if (res.code && res.code === 'CITIZEN_ID_EXISTS') {
+                    setCitizenIdError('Số căn cước công dân đã tồn tại')
+                    return
+                }
 
                 notifications.show({
                     title: 'Thành công',
@@ -110,43 +109,35 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
         }
     }, [patient, editPatientData, updatePatientMutation, handleClose])
 
-    const isFormValid = editPatientData.fullName.trim() && 
-                       editPatientData.citizenId.length === 12 && 
-                       !fullNameError &&
-                       !citizenIdError
+    const isFormValid =
+        editPatientData.fullName.trim() && editPatientData.citizenId.length === 12 && !fullNameError && !citizenIdError
 
     return (
-        <Modal
-            opened={opened}
-            onClose={handleClose}
-            title="Chỉnh sửa thông tin bệnh nhân"
-            centered
-            size="md"
-        >
-            <Stack gap="md">
+        <Modal opened={opened} onClose={handleClose} title='Chỉnh sửa thông tin bệnh nhân' centered size='md'>
+            <Stack gap='md'>
                 <TextInput
-                    label="Họ và tên"
-                    placeholder="Nhập họ và tên đầy đủ..."
+                    label='Họ và tên'
+                    placeholder='Nhập họ và tên đầy đủ...'
                     value={editPatientData.fullName}
                     onChange={handleFullNameChange}
                     required
-                    size="md"
+                    size='md'
                     error={fullNameError}
                 />
 
                 <TextInput
-                    label="Số CCCD"
-                    placeholder="Nhập số căn cước công dân (12 số)..."
+                    label='Số CCCD'
+                    placeholder='Nhập số căn cước công dân (12 số)...'
                     value={editPatientData.citizenId}
                     onChange={handleCitizenIdChange}
                     required
-                    size="md"
+                    size='md'
                     error={citizenIdError}
                     maxLength={12}
                 />
 
-                <Group justify="flex-end" mt="md">
-                    <Button variant="light" onClick={handleClose}>
+                <Group justify='flex-end' mt='md'>
+                    <Button variant='light' onClick={handleClose}>
                         Hủy
                     </Button>
                     <Button

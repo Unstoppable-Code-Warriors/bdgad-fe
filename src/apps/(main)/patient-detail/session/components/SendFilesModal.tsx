@@ -30,9 +30,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
     // Check if session is already assigned
     const hasDoctor = sessionData?.doctor?.id
     const hasLabTech = sessionData?.labTestingTechnician?.id || sessionData?.labTesting?.id
-    const isAlreadyAssigned = sessionType === 'test' 
-        ? hasDoctor && hasLabTech 
-        : hasDoctor
+    const isAlreadyAssigned = sessionType === 'test' ? hasDoctor && hasLabTech : hasDoctor
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -40,10 +38,9 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
             try {
                 const doctorsResponse = await authService.getUserByCode(Role.DOCTOR)
                 setDoctors(doctorsResponse.data?.users || [])
-                 
-                const labTechsResponse = await authService.getUserByCode(Role.LAB_TESTING_TECHNICIAN)                
-                setLabTechs(labTechsResponse.data?.users || [])
 
+                const labTechsResponse = await authService.getUserByCode(Role.LAB_TESTING_TECHNICIAN)
+                setLabTechs(labTechsResponse.data?.users || [])
             } catch (error) {
                 console.error('Error fetching users:', error)
                 setDoctors([])
@@ -114,7 +111,6 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
             })
 
             onClose()
-
         } catch (error) {
             console.error('Assign session error:', error)
             setError('Không thể gán file cho người dùng')
@@ -123,14 +119,14 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
 
     // Filter users by role and map to options
     const doctorOptions = doctors
-        .filter(user => user.roleId === Role.DOCTOR)
+        .filter((user) => user.roleId === Role.DOCTOR)
         .map((doctor: any) => ({
             value: doctor.id.toString(),
             label: `${doctor.name} (${doctor.email})`
         }))
 
     const labTechOptions = labTechs
-        .filter(user => user.roleId === Role.LAB_TESTING_TECHNICIAN)
+        .filter((user) => user.roleId === Role.LAB_TESTING_TECHNICIAN)
         .map((labTech: any) => ({
             value: labTech.id.toString(),
             label: `${labTech.name} (${labTech.email})`
@@ -150,7 +146,11 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                 <Group>
                     {isAlreadyAssigned ? <IconCheck size={20} /> : <IconSend size={20} />}
                     <Text fw={600}>
-                        {isAlreadyAssigned ? 'Đã gửi yêu cầu' : 'Gửi yêu cầu xét nghiệm'}
+                        {isAlreadyAssigned
+                            ? 'Đã gửi yêu cầu'
+                            : sessionType === 'test'
+                              ? 'Gửi yêu cầu xét nghiệm'
+                              : 'Gửi yêu cầu thẩm định'}
                     </Text>
                 </Group>
             }
@@ -169,16 +169,22 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                 {isAlreadyAssigned && (
                     <Alert icon={<IconCheck size={16} />} color='green' variant='light'>
                         <Stack gap='xs'>
-                            <Text size='sm' fw={500}>Yêu cầu đã được gửi cho:</Text>
+                            <Text size='sm' fw={500}>
+                                Yêu cầu đã được gửi cho:
+                            </Text>
                             {currentDoctorName && (
                                 <Group gap='xs'>
-                                    <Badge color='blue' variant='light' size='sm'>Bác sĩ</Badge>
+                                    <Badge color='blue' variant='light' size='sm'>
+                                        Bác sĩ
+                                    </Badge>
                                     <Text size='sm'>{currentDoctorName}</Text>
                                 </Group>
                             )}
                             {sessionType === 'test' && currentLabTechName && (
                                 <Group gap='xs'>
-                                    <Badge color='orange' variant='light' size='sm'>Kỹ thuật viên</Badge>
+                                    <Badge color='orange' variant='light' size='sm'>
+                                        Kỹ thuật viên
+                                    </Badge>
                                     <Text size='sm'>{currentLabTechName}</Text>
                                 </Group>
                             )}
@@ -193,14 +199,14 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                     variant='light'
                 >
                     <Text size='sm'>
-                        Loại phiên: <strong>{sessionType === 'test' ? 'Xét nghiệm' : 'Thẩm định'}</strong>
+                        Loại lần khám: <strong>{sessionType === 'test' ? 'Xét nghiệm' : 'Thẩm định'}</strong>
                     </Text>
                 </Alert>
 
                 {/* Loading State */}
                 {isLoading && (
-                    <Alert icon={<IconAlertCircle size={16} />} color="blue" variant="light">
-                        <Text size="sm">Đang tải danh sách người dùng...</Text>
+                    <Alert icon={<IconAlertCircle size={16} />} color='blue' variant='light'>
+                        <Text size='sm'>Đang tải danh sách người dùng...</Text>
                     </Alert>
                 )}
 
@@ -226,7 +232,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                         error={error && !selectedDoctor ? true : false}
                     />
                     {!isLoading && doctorOptions.length === 0 && (
-                        <Text size="xs" c="dimmed" mt="xs">
+                        <Text size='xs' c='dimmed' mt='xs'>
                             Không có bác sĩ nào trong hệ thống
                         </Text>
                     )}
@@ -257,7 +263,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                                 error={error && sessionType === 'test' && !selectedLabTech ? true : false}
                             />
                             {!isLoading && labTechOptions.length === 0 && (
-                                <Text size="xs" c="dimmed" mt="xs">
+                                <Text size='xs' c='dimmed' mt='xs'>
                                     Không có kỹ thuật viên xét nghiệm nào trong hệ thống
                                 </Text>
                             )}
@@ -278,9 +284,13 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                         color={sessionType === 'test' ? 'blue' : 'green'}
                         variant={isAlreadyAssigned ? 'light' : 'filled'}
                     >
-                        {isSending 
-                            ? (isAlreadyAssigned ? 'Đang cập nhật...' : 'Đang gửi...') 
-                            : (isAlreadyAssigned ? 'Cập nhật' : 'Gửi yêu cầu')}
+                        {isSending
+                            ? isAlreadyAssigned
+                                ? 'Đang cập nhật...'
+                                : 'Đang gửi...'
+                            : isAlreadyAssigned
+                              ? 'Cập nhật'
+                              : 'Gửi yêu cầu'}
                     </Button>
                 </Group>
             </Stack>

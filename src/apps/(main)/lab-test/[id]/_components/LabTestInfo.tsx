@@ -53,7 +53,7 @@ export const LabTestInfo = ({ data, latestFastQFile }: LabTestInfoProps) => {
 
                                 <Group justify='space-between'>
                                     <Text size='sm' c='dimmed'>
-                                        Mã vạch:
+                                        Barcode:
                                     </Text>
                                     <Text fw={600} size='sm' ff='monospace'>
                                         {data.barcode}

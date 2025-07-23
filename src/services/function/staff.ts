@@ -2,7 +2,6 @@ import { backendApi } from '@/utils/api'
 import type { MedicalTestRequisitionUploadResponse } from '@/types'
 import type { GeneralFileDownloadResponse } from '@/types/general-file'
 
-
 const PREFIX = 'api/v1/staff'
 
 // Staff service functions
@@ -22,22 +21,33 @@ export const staffService = {
 
     // Download general file by ID
     downloadGeneralFile: async (id: string): Promise<any> => {
-        return backendApi
-            .get(`${PREFIX}/general-files/${id}/download`).json<GeneralFileDownloadResponse>()
+        return backendApi.get(`${PREFIX}/general-files/${id}/download`).json<GeneralFileDownloadResponse>()
+    },
+
+    downloadPatientFile: async (patientFileId: string, sessionId: string): Promise<any> => {
+        const response = await backendApi.get(`${PREFIX}/patient-files/${patientFileId}/sessions/${sessionId}/download`)
+
+        // Clone the response to avoid "body stream already read" error
+        const responseClone = response.clone()
+
+        // Check content type to determine how to parse
+        const contentType = response.headers.get('content-type') || ''
+
+        if (contentType.includes('application/json')) {
+            return await response.json()
+        } else {
+            return await responseClone.text()
+        }
     },
 
     // Delete general file by ID
     deleteGeneralFile: async (id: string): Promise<any> => {
-        return backendApi
-            .delete(`${PREFIX}/general-files/${id}`)
-            .json()
+        return backendApi.delete(`${PREFIX}/general-files/${id}`).json()
     },
 
     // Get general file by ID
     getGeneralFile: async (id: string): Promise<any> => {
-        return backendApi
-            .get(`${PREFIX}/general-file/${id}`)
-            .json()
+        return backendApi.get(`${PREFIX}/general-file/${id}`).json()
     },
 
     // Get all general files with pagination and filtering
@@ -57,9 +67,7 @@ export const staffService = {
         const queryString = searchParams.toString()
         const url = queryString ? `${PREFIX}/general-files?${queryString}` : `${PREFIX}/general-files`
 
-        return backendApi
-            .get(url)
-            .json()
+        return backendApi.get(url).json()
     },
 
     //Create folder patient
@@ -73,9 +81,7 @@ export const staffService = {
 
     //Get patient folder by ID
     getPatientFolder: async (id: string): Promise<any> => {
-        return backendApi
-            .get(`${PREFIX}/patients/${id}`)
-            .json()
+        return backendApi.get(`${PREFIX}/patients/${id}`).json()
     },
 
     //Get all patient folders
@@ -95,16 +101,17 @@ export const staffService = {
         const queryString = searchParams.toString()
         const url = queryString ? `${PREFIX}/patients?${queryString}` : `${PREFIX}/patients`
 
-        return backendApi
-            .get(url)
-            .json()
+        return backendApi.get(url).json()
     },
 
     //Update patient folder by ID
-    updatePatientFolder: async (id: string, patientData: {
-        fullName?: string
-        citizenId?: string
-    }): Promise<any> => {
+    updatePatientFolder: async (
+        id: string,
+        patientData: {
+            fullName?: string
+            citizenId?: string
+        }
+    ): Promise<any> => {
         return backendApi
             .put(`${PREFIX}/patients/${id}`, {
                 json: patientData
@@ -114,9 +121,7 @@ export const staffService = {
 
     //Delete patient folder by ID
     deletePatientFolder: async (id: string): Promise<any> => {
-        return backendApi
-            .delete(`${PREFIX}/patients/${id}`)
-            .json()
+        return backendApi.delete(`${PREFIX}/patients/${id}`).json()
     },
 
     // Upload medical test requisition file
@@ -127,12 +132,12 @@ export const staffService = {
         ocrResult?: string
     }): Promise<MedicalTestRequisitionUploadResponse> => {
         const data = new FormData()
-        
+
         // Append files
         formData.files.forEach((file) => {
             data.append('files', file)
         })
-        
+
         // Append other fields
         data.append('patientId', formData.patientId.toString())
         data.append('typeLabSession', formData.typeLabSession)
@@ -149,23 +154,22 @@ export const staffService = {
     },
     // Get all lab sessions of a patient
     getPatientLabSessions: async (patientId: string): Promise<any> => {
-        return backendApi
-            .get(`${PREFIX}/patients/${patientId}/sessions`)
-            .json()
+        return backendApi.get(`${PREFIX}/patients/${patientId}/sessions`).json()
     },
 
     // Get session detail by ID
-    getPatientLabSessionDetail: async ( sessionId: string): Promise<any> => {
-        return backendApi
-            .get(`${PREFIX}/sessions/${sessionId}`)
-            .json()
+    getPatientLabSessionDetail: async (sessionId: string): Promise<any> => {
+        return backendApi.get(`${PREFIX}/sessions/${sessionId}`).json()
     },
 
     //Assign lab test or doctor to session
-    assignSession: async (sessionId: string, data: {
-        doctorId?: number
-        labTestingId?: number
-    }): Promise<any> => {
+    assignSession: async (
+        sessionId: string,
+        data: {
+            doctorId?: number
+            labTestingId?: number
+        }
+    ): Promise<any> => {
         return backendApi
             .put(`${PREFIX}/sessions/${sessionId}`, {
                 json: data
@@ -174,7 +178,7 @@ export const staffService = {
     },
 
     // OCR file processing
-    ocrFile: async (file: File): Promise<any> => {      
+    ocrFile: async (file: File): Promise<any> => {
         const formData = new FormData()
         formData.append('file', file)
 
@@ -184,7 +188,5 @@ export const staffService = {
                 headers: {}
             })
             .json()
-    },
-
+    }
 }
-

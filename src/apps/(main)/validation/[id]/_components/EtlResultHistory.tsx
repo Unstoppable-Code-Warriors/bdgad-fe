@@ -32,7 +32,25 @@ const getStatusIcon = (status: string) => {
 export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
     const etlResult = validation.latestEtlResult
     const results = etlResult ? [etlResult] : []
+    // const downloadEtlResultMutation = useDownloadEtlResult()
 
+    // const handleDownloadEtlResult = async (etlResultId: number) => {
+    //     try {
+    //         const response = await downloadEtlResultMutation.mutateAsync(etlResultId)
+    //         window.open(response.downloadUrl, '_blank')
+    //         notifications.show({
+    //             title: 'Thành công',
+    //             message: 'Đang tải xuống kết quả phân tích',
+    //             color: 'green'
+    //         })
+    //     } catch (error: any) {
+    //         notifications.show({
+    //             title: 'Lỗi tải file',
+    //             message: error.message || 'Không thể tải xuống kết quả phân tích',
+    //             color: 'red'
+    //         })
+    //     }
+    // }
     if (!etlResult) {
         return (
             <Card shadow='sm' padding='xl' radius='lg' withBorder>
@@ -42,10 +60,10 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                     </ThemeIcon>
                     <Box>
                         <Text fw={700} size='xl'>
-                            Lịch sử kết quả ETL
+                            Lịch sử kết quả phân tích
                         </Text>
                         <Text size='sm' c='dimmed'>
-                            Chưa có kết quả ETL
+                            Chưa có kết quả phân tích
                         </Text>
                     </Box>
                 </Group>
@@ -55,10 +73,10 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                             <IconHistory size={20} />
                         </ThemeIcon>
                         <Text c='dimmed' fw={500}>
-                            Chưa có kết quả ETL nào
+                            Chưa có kết quả phân tích nào
                         </Text>
                         <Text size='sm' c='dimmed'>
-                            Chưa có kết quả ETL nào được tạo cho phiên này
+                            Chưa có kết quả phân tích nào được tạo cho lần khám này
                         </Text>
                     </Stack>
                 </Card>
@@ -74,10 +92,10 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                 </ThemeIcon>
                 <Box>
                     <Text fw={700} size='xl'>
-                        Lịch sử kết quả ETL
+                        Lịch sử kết quả phân tích
                     </Text>
                     <Text size='sm' c='dimmed'>
-                        Chi tiết về kết quả xử lý ETL
+                        Chi tiết về kết quả xử lý phân tích
                     </Text>
                 </Box>
             </Group>
@@ -95,7 +113,7 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                             <Box w='100%'>
                                 <Group gap='sm' mb='sm'>
                                     <Text fw={600} size='md'>
-                                        Kết quả ETL #{result.id}
+                                        Kết quả phân tích #{result.id}
                                     </Text>
                                     <Badge
                                         color={getStatusColor(result.status || '')}
@@ -113,13 +131,12 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                                         <Group gap='xs'>
                                             <IconClock size={14} color='var(--mantine-color-gray-6)' />
                                             <Text size='sm' c='dimmed'>
-                                                Hoàn thành lúc:{' '}
                                                 {new Date(result.etlCompletedAt).toLocaleString('vi-VN')}
                                             </Text>
                                         </Group>
 
                                         {/* File Path */}
-                                        <Group gap='xs' align='flex-start'>
+                                        {/* <Group gap='xs' align='flex-start'>
                                             <IconMessage size={14} color='var(--mantine-color-blue-6)' />
                                             <Box style={{ flex: 1 }}>
                                                 <Text size='sm' c='dimmed' fw={500}>
@@ -129,7 +146,7 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                                                     {result.resultPath}
                                                 </Text>
                                             </Box>
-                                        </Group>
+                                        </Group> */}
 
                                         {/* Comment */}
                                         {result.comment && (
@@ -162,11 +179,27 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                                                 rejector={result.rejector}
                                                 redoReason={result.redoReason}
                                                 rejectionDate={result.etlCompletedAt}
-                                                itemType='Kết quả ETL'
+                                                itemType='Kết quả phân tích'
                                                 itemId={result.id}
                                                 compact
                                             />
                                         )}
+                                        {/* Download Button */}
+                                        {/* {result.status !== ValidationEtlStatus.FAILED &&
+                                            result.status !== ValidationEtlStatus.PROCESSING && (
+                                                <Group gap='sm' justify='flex-end'>
+                                                    <Button
+                                                        variant={'light'}
+                                                        color='teal'
+                                                        leftSection={<IconDownload size={16} />}
+                                                        onClick={() => handleDownloadEtlResult(result.id)}
+                                                        size='sm'
+                                                        radius='md'
+                                                    >
+                                                        Tải xuống
+                                                    </Button>
+                                                </Group>
+                                            )} */}
                                     </Stack>
                                 </Card>
                             </Box>

@@ -184,7 +184,7 @@ const ValidationDetailPage = () => {
                                     ].includes(latestEtlResult.status as ValidationEtlStatus) && (
                                         <Stack gap='md'>
                                             <Text size='sm' fw={500} c='blue'>
-                                                Kết quả ETL đã sẵn sàng
+                                                Kết quả phân tích đã sẵn sàng
                                             </Text>
                                             <Button
                                                 color='blue'

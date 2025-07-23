@@ -41,6 +41,7 @@ const PatientFolderPage = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [selectedPatient, setSelectedPatient] = useState<any>(null)
+    const [errorMess, setErrorMess] = useState('')
 
     // Use hooks
     const { data: patientsResponse, isLoading } = usePatientFolders({
@@ -105,13 +106,19 @@ const PatientFolderPage = () => {
     const handleCloseDeleteModal = useCallback(() => {
         setIsDeleteModalOpen(false)
         setSelectedPatient(null)
+        setErrorMess('')
     }, [])
 
     const handleDeletePatient = useCallback(async () => {
         if (selectedPatient) {
             try {
-                await deletePatientMutation.mutateAsync(selectedPatient.id)
+                setErrorMess('') // Clear previous errors
+                const res = await deletePatientMutation.mutateAsync(selectedPatient.id)
 
+                if (res.code && res.code === 'PATIENT_HAS_LAB_SESSION') {
+                    setErrorMess('Không thể xóa bệnh nhân này vì đã có lần khám.')
+                    return
+                }
                 notifications.show({
                     title: 'Thành công',
                     message: 'Xóa bệnh nhân thành công',
@@ -290,9 +297,12 @@ const PatientFolderPage = () => {
                             </Text>
                             ?
                         </Text>
-                        <Text size='sm' c='dimmed'>
-                            Hành động này không thể hoàn tác.
-                        </Text>
+
+                        {errorMess && (
+                            <Text c='red' size='sm'>
+                                {errorMess}
+                            </Text>
+                        )}
 
                         <Group justify='flex-end' mt='md'>
                             <Button variant='light' onClick={handleCloseDeleteModal}>

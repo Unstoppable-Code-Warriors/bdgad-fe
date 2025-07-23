@@ -101,7 +101,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
             await new Promise((resolve) => setTimeout(resolve, 500))
 
             setProgress(50)
-            await new Promise((resolve) => setTimeout(resolve, 500))            
+            await new Promise((resolve) => setTimeout(resolve, 500))
             const result = await staffService.ocrFile(selectedFile)
             console.log('OCR Result:', result)
 
@@ -135,7 +135,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
 
             setProgress(100)
         } catch (err: any) {
-            setError('OCR processing failed. Please try again.')
+            setError('Xử lý OCR không thành công. Vui lòng thử lại.')
         } finally {
             setIsProcessing(false)
         }
@@ -212,16 +212,17 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
 
                         <div style={{ width: '100%', textAlign: 'center' }}>
                             <Text size='xl' fw={600} c='blue.6' mb='sm'>
-                                Processing Medical Requisition...
+                                Dang xử lý tài liệu
                             </Text>
                             <Text c='dimmed' mb='lg'>
-                                Extracting information from your document
+                                Vui lòng đợi trong khi chúng tôi xử lý tài liệu của bạn. Quá trình này có thể mất vài
+                                phút tùy thuộc vào kích thước và độ phức tạp của tài liệu.
                             </Text>
 
                             <Progress value={progress} size='lg' radius='md' animated color='blue' mb='md' />
 
                             <Text size='sm' c='blue.6' fw={500}>
-                                {progress}% Complete
+                                {progress}% đã hoàn thành
                             </Text>
                         </div>
                     </Stack>
@@ -241,12 +242,12 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                 <Paper p='md' withBorder>
                     <Stack gap='md' align='center'>
                         <Text size='lg' fw={600} c='red.6'>
-                            OCR Processing Failed
+                            Xử lý OCR không thành công
                         </Text>
 
                         <Group gap='md'>
                             <Button variant='outline' leftSection={<IconArrowLeft size='1rem' />} onClick={onBack}>
-                                Back to Upload
+                                Quay lại
                             </Button>
 
                             <Button
@@ -255,7 +256,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                                 leftSection={<IconScan size='1rem' />}
                                 onClick={handleRetry}
                             >
-                                Retry OCR
+                                Thử lại OCR
                             </Button>
                         </Group>
                     </Stack>

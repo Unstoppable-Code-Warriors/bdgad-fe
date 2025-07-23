@@ -1,5 +1,5 @@
 import { Card, Text, Badge, Group, Stack, ThemeIcon, Box, Timeline, Avatar, Button, Divider } from '@mantine/core'
-import { IconChartLine, IconUser, IconClock, IconAlertTriangle, IconMessage, IconCheck } from '@tabler/icons-react'
+import { IconChartLine, IconUser, IconClock, IconAlertTriangle, IconCheck } from '@tabler/icons-react'
 import { RejectionDisplay } from './RejectionDisplay'
 
 interface EtlResultData {
@@ -131,7 +131,7 @@ export const EtlResultHistory = ({
             <Timeline active={results.length} bulletSize={32} lineWidth={3}>
                 {results.map((result, index) => (
                     <Timeline.Item
-                        key={result.id}
+                        key={index}
                         bullet={
                             <ThemeIcon size='lg' radius='xl' color={getStatusColor(result.status || '')}>
                                 {result.status && statusConfig[result.status]?.color === 'red' ? (
@@ -149,14 +149,9 @@ export const EtlResultHistory = ({
                             <Box w='100%'>
                                 <Group gap='sm' mb='sm'>
                                     <Text fw={600} size='md'>
-                                        {resultNamePrefix} #{results.length - index}
+                                        {resultNamePrefix} #{result.id}
                                     </Text>
-                                    <Badge
-                                        color={getStatusColor(result.status || '')}
-                                        variant='light'
-                                        size='md'
-                                        radius='md'
-                                    >
+                                    <Badge color={getStatusColor(result.status || '')} size='md' radius='md'>
                                         {getStatusLabel(result.status || '')}
                                     </Badge>
                                 </Group>
@@ -188,7 +183,7 @@ export const EtlResultHistory = ({
                                         )}
 
                                         {/* Comment */}
-                                        {result.comment && (
+                                        {/* {result.comment && (
                                             <Group gap='xs' align='flex-start'>
                                                 <IconMessage size={14} color='var(--mantine-color-blue-6)' />
                                                 <Box style={{ flex: 1 }}>
@@ -200,7 +195,7 @@ export const EtlResultHistory = ({
                                                     </Text>
                                                 </Box>
                                             </Group>
-                                        )}
+                                        )} */}
 
                                         {/* Error */}
                                         {result.error && (

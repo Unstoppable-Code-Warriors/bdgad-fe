@@ -10,16 +10,21 @@ interface FileUploadZoneProps {
 
 const FileUploadZone = ({ onDrop, onReject }: FileUploadZoneProps) => {
     return (
-        <Card withBorder padding="md" radius="md">
-            <Stack gap="sm">
-                <Text size="lg" fw={600} c="blue.7">Tải tập tin</Text>
+        <Card withBorder padding='md' radius='md'>
+            <Stack gap='sm'>
+                <Text size='lg' fw={600} c='blue.7'>
+                    Tải tập tin
+                </Text>
 
                 <Dropzone
                     onDrop={onDrop}
                     onReject={onReject || ((files) => console.log('rejected files', files))}
                     maxSize={10 * 1024 ** 2}
                     accept={[
-                        'image/jpeg', 'image/png', 'image/jpg', 'image/gif',
+                        'image/jpeg',
+                        'image/png',
+                        'image/jpg',
+                        'image/gif',
                         'application/pdf',
                         'application/msword',
                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -50,10 +55,14 @@ const FileUploadZone = ({ onDrop, onReject }: FileUploadZoneProps) => {
 
                         <div>
                             <Text size='lg' inline>
-                                Drag files here or click to select
+                                Kéo và thả tập tin vào đây hoặc
+                                <Text component='span' c='blue' fw={500} inline>
+                                    {' '}
+                                    nhấp để chọn tập tin
+                                </Text>
                             </Text>
                             <Text size='sm' c='dimmed' inline mt={7}>
-                                Supports: Images, PDF, Word, Excel documents (Max 10MB each)
+                                Chỉ hỗ trợ tập tin hình ảnh, PDF, Word và Excel. Kích thước tối đa là 10MB.
                             </Text>
                         </div>
                     </Group>

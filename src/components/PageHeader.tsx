@@ -115,7 +115,7 @@ export const PageHeader = ({ onBack, title, pageType, labcode, barcode }: PageHe
                                 {labcode && barcode && ' • '}
                                 {barcode && (
                                     <>
-                                        Mã vạch:{' '}
+                                        Barcode:{' '}
                                         <Text span fw={600} c={`${pageType === 'validation' ? 'teal' : 'blue'}.7`}>
                                             {barcode}
                                         </Text>
