@@ -190,7 +190,7 @@ const SessionDetailPage = () => {
                                     color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
                                     variant={isAlreadyAssigned ? 'light' : 'filled'}
                                 >
-                                    {isAlreadyAssigned ? 'Thông tin người nhận' : 'Gửi yêu cầu xét nghiệm'}
+                                    {isAlreadyAssigned ? 'Thông tin người nhận' : 'Thẩm định'}
                                 </Button>
                             )
                         })()}

@@ -88,11 +88,6 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
 
                 if (res.code && res.code === 'CITIZEN_ID_EXISTS') {
                     setCitizenIdError('Số căn cước công dân đã tồn tại')
-                    notifications.show({
-                        title: 'Lỗi',
-                        message: 'Số căn cước công dân đã tồn tại',
-                        color: 'red'
-                    })
                     return
                 }
 
@@ -140,7 +135,6 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
                     error={citizenIdError}
                     maxLength={12}
                 />
-                {citizenIdError && <div style={{ color: 'red', fontSize: '0.875rem' }}>{citizenIdError}</div>}
 
                 <Group justify='flex-end' mt='md'>
                     <Button variant='light' onClick={handleClose}>
