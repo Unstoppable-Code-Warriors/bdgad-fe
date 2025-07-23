@@ -1,5 +1,5 @@
 import { Card, Text, Badge, Group, Stack, ThemeIcon, Box, Timeline, Avatar, Button, Divider } from '@mantine/core'
-import { IconChartLine, IconUser, IconClock, IconAlertTriangle, IconMessage, IconCheck } from '@tabler/icons-react'
+import { IconChartLine, IconUser, IconClock, IconAlertTriangle, IconCheck } from '@tabler/icons-react'
 import { RejectionDisplay } from './RejectionDisplay'
 
 interface EtlResultData {
@@ -131,7 +131,7 @@ export const EtlResultHistory = ({
             <Timeline active={results.length} bulletSize={32} lineWidth={3}>
                 {results.map((result, index) => (
                     <Timeline.Item
-                        key={result.id}
+                        key={index}
                         bullet={
                             <ThemeIcon size='lg' radius='xl' color={getStatusColor(result.status || '')}>
                                 {result.status && statusConfig[result.status]?.color === 'red' ? (

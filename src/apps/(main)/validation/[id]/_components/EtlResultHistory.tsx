@@ -1,18 +1,8 @@
-import { Card, Text, Badge, Group, Stack, ThemeIcon, Box, Timeline, Avatar, Button } from '@mantine/core'
-import {
-    IconHistory,
-    IconUser,
-    IconClock,
-    IconMessage,
-    IconCircleCheck,
-    IconCircleX,
-    IconDownload
-} from '@tabler/icons-react'
+import { Card, Text, Badge, Group, Stack, ThemeIcon, Box, Timeline, Avatar } from '@mantine/core'
+import { IconHistory, IconUser, IconClock, IconMessage, IconCircleCheck, IconCircleX } from '@tabler/icons-react'
 import type { ValidationSessionWithLatestEtlResponse } from '@/types/validation'
 import { validationEtlStatusConfig, ValidationEtlStatus } from '@/types/validation'
 import { RejectionDisplay } from '@/components/RejectionDisplay'
-import { useDownloadEtlResult } from '@/services/hook/analysis.hook'
-import { notifications } from '@mantine/notifications'
 
 interface EtlResultHistoryProps {
     validation: ValidationSessionWithLatestEtlResponse
@@ -42,25 +32,25 @@ const getStatusIcon = (status: string) => {
 export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
     const etlResult = validation.latestEtlResult
     const results = etlResult ? [etlResult] : []
-    const downloadEtlResultMutation = useDownloadEtlResult()
+    // const downloadEtlResultMutation = useDownloadEtlResult()
 
-    const handleDownloadEtlResult = async (etlResultId: number) => {
-        try {
-            const response = await downloadEtlResultMutation.mutateAsync(etlResultId)
-            window.open(response.downloadUrl, '_blank')
-            notifications.show({
-                title: 'Thành công',
-                message: 'Đang tải xuống kết quả phân tích',
-                color: 'green'
-            })
-        } catch (error: any) {
-            notifications.show({
-                title: 'Lỗi tải file',
-                message: error.message || 'Không thể tải xuống kết quả phân tích',
-                color: 'red'
-            })
-        }
-    }
+    // const handleDownloadEtlResult = async (etlResultId: number) => {
+    //     try {
+    //         const response = await downloadEtlResultMutation.mutateAsync(etlResultId)
+    //         window.open(response.downloadUrl, '_blank')
+    //         notifications.show({
+    //             title: 'Thành công',
+    //             message: 'Đang tải xuống kết quả phân tích',
+    //             color: 'green'
+    //         })
+    //     } catch (error: any) {
+    //         notifications.show({
+    //             title: 'Lỗi tải file',
+    //             message: error.message || 'Không thể tải xuống kết quả phân tích',
+    //             color: 'red'
+    //         })
+    //     }
+    // }
     if (!etlResult) {
         return (
             <Card shadow='sm' padding='xl' radius='lg' withBorder>
