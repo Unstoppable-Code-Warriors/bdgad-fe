@@ -72,7 +72,10 @@ export interface ValidationEtlResultDownloadResponse {
 export enum ValidationEtlStatus {
     WAIT_FOR_APPROVAL = 'wait_for_approval',
     REJECTED = 'rejected',
-    APPROVED = 'approved'
+    APPROVED = 'approved',
+    PROCESSING = 'processing',
+    COMPLETED = 'completed',
+    FAILED = 'failed'
 }
 
 export const validationEtlStatusConfig = {
@@ -81,7 +84,7 @@ export const validationEtlStatusConfig = {
         color: 'orange'
     },
     [ValidationEtlStatus.REJECTED]: {
-        label: 'Đã từ chối',
+        label: 'Từ chối',
         color: 'red'
     },
     [ValidationEtlStatus.APPROVED]: {

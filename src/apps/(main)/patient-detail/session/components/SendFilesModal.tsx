@@ -145,7 +145,13 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
             title={
                 <Group>
                     {isAlreadyAssigned ? <IconCheck size={20} /> : <IconSend size={20} />}
-                    <Text fw={600}>{isAlreadyAssigned ? 'Đã gửi yêu cầu' : 'Gửi yêu cầu thẩm định'}</Text>
+                    <Text fw={600}>
+                        {isAlreadyAssigned
+                            ? 'Đã gửi yêu cầu'
+                            : sessionType === 'test'
+                              ? 'Gửi yêu cầu xét nghiệm'
+                              : 'Gửi yêu cầu thẩm định'}
+                    </Text>
                 </Group>
             }
             centered

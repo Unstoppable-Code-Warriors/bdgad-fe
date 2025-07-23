@@ -149,14 +149,9 @@ export const EtlResultHistory = ({
                             <Box w='100%'>
                                 <Group gap='sm' mb='sm'>
                                     <Text fw={600} size='md'>
-                                        {resultNamePrefix} #{results.length - index}
+                                        {resultNamePrefix} #{result.id}
                                     </Text>
-                                    <Badge
-                                        color={getStatusColor(result.status || '')}
-                                        variant='light'
-                                        size='md'
-                                        radius='md'
-                                    >
+                                    <Badge color={getStatusColor(result.status || '')} size='md' radius='md'>
                                         {getStatusLabel(result.status || '')}
                                     </Badge>
                                 </Group>
@@ -188,7 +183,7 @@ export const EtlResultHistory = ({
                                         )}
 
                                         {/* Comment */}
-                                        {result.comment && (
+                                        {/* {result.comment && (
                                             <Group gap='xs' align='flex-start'>
                                                 <IconMessage size={14} color='var(--mantine-color-blue-6)' />
                                                 <Box style={{ flex: 1 }}>
@@ -200,7 +195,7 @@ export const EtlResultHistory = ({
                                                     </Text>
                                                 </Box>
                                             </Group>
-                                        )}
+                                        )} */}
 
                                         {/* Error */}
                                         {result.error && (

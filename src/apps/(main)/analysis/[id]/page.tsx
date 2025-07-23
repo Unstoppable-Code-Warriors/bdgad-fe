@@ -530,7 +530,15 @@ const AnalysisDetailPage = () => {
                                     icon: <IconDownload size={16} />,
                                     color: 'blue',
                                     variant: 'light',
-                                    condition: (file) => file.status === AnalysisStatus.WAIT_FOR_APPROVAL,
+                                    condition: (result) =>
+                                        [
+                                            AnalysisStatus.WAIT_FOR_APPROVAL,
+                                            AnalysisStatus.APPROVED,
+                                            AnalysisStatus.REJECTED,
+                                            AnalysisStatus.PROCESSING,
+                                            AnalysisStatus.COMPLETED,
+                                            AnalysisStatus.FAILED
+                                        ].includes(result.status as AnalysisStatus),
                                     handler: handleDownloadFastQ
                                 },
                                 {
@@ -565,44 +573,54 @@ const AnalysisDetailPage = () => {
                             iconColor='teal'
                             statusConfig={analysisStatusConfig}
                             resultNamePrefix='Kết quả phân tích'
-                            actions={[
-                                {
-                                    type: 'download',
-                                    label: 'Tải xuống',
-                                    icon: <IconDownload size={16} />,
-                                    color: 'teal',
-                                    variant: 'light',
-                                    condition: (result) => result.status === AnalysisStatus.COMPLETED,
-                                    handler: handleDownloadEtlResult
-                                }
-                                // {
-                                //     type: 'send',
-                                //     label: 'Gửi để xác thực',
-                                //     icon: <IconSend size={16} />,
-                                //     color: 'blue',
-                                //     variant: 'light',
-                                //     condition: (result) => result.status === AnalysisStatus.COMPLETED,
-                                //     handler: handleSendEtlResultToValidation
-                                // },
-                                // {
-                                //     type: 'retry',
-                                //     label: 'phân tích',
-                                //     icon: <IconRefresh size={16} />,
-                                //     color: 'orange',
-                                //     variant: 'light',
-                                //     condition: (result) => result.status === AnalysisStatus.FAILED,
-                                //     handler: handleRetryEtlResult
-                                // },
-                                // {
-                                //     type: 'retry',
-                                //     label: 'phân tích',
-                                //     icon: <IconRefresh size={16} />,
-                                //     color: 'orange',
-                                //     variant: 'light',
-                                //     condition: (result) => result.status === AnalysisStatus.REJECTED,
-                                //     handler: handleRetryEtlResult
-                                // }
-                            ]}
+                            actions={
+                                [
+                                    // {
+                                    //     type: 'download',
+                                    //     label: 'Tải xuống',
+                                    //     icon: <IconDownload size={16} />,
+                                    //     color: 'teal',
+                                    //     variant: 'light',
+                                    //     condition: (result) =>
+                                    //         [
+                                    //             AnalysisStatus.WAIT_FOR_APPROVAL,
+                                    //             AnalysisStatus.APPROVED,
+                                    //             AnalysisStatus.REJECTED,
+                                    //             AnalysisStatus.PROCESSING,
+                                    //             AnalysisStatus.COMPLETED,
+                                    //             AnalysisStatus.FAILED
+                                    //         ].includes(result.status as AnalysisStatus),
+                                    //     handler: handleDownloadEtlResult
+                                    // }
+                                    // {
+                                    //     type: 'send',
+                                    //     label: 'Gửi để xác thực',
+                                    //     icon: <IconSend size={16} />,
+                                    //     color: 'blue',
+                                    //     variant: 'light',
+                                    //     condition: (result) => result.status === AnalysisStatus.COMPLETED,
+                                    //     handler: handleSendEtlResultToValidation
+                                    // },
+                                    // {
+                                    //     type: 'retry',
+                                    //     label: 'phân tích',
+                                    //     icon: <IconRefresh size={16} />,
+                                    //     color: 'orange',
+                                    //     variant: 'light',
+                                    //     condition: (result) => result.status === AnalysisStatus.FAILED,
+                                    //     handler: handleRetryEtlResult
+                                    // },
+                                    // {
+                                    //     type: 'retry',
+                                    //     label: 'phân tích',
+                                    //     icon: <IconRefresh size={16} />,
+                                    //     color: 'orange',
+                                    //     variant: 'light',
+                                    //     condition: (result) => result.status === AnalysisStatus.REJECTED,
+                                    //     handler: handleRetryEtlResult
+                                    // }
+                                ]
+                            }
                         />
                     </Grid.Col>
                 </Grid>

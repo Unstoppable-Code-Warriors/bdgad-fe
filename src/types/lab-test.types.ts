@@ -95,11 +95,11 @@ export const statusConfig = {
         color: 'orange'
     },
     [LAB_TEST_STATUS.WAIT_FOR_APPROVAL]: {
-        label: 'Chờ duyệt',
+        label: 'Chờ phê duyệt',
         color: 'blue'
     },
     [LAB_TEST_STATUS.APPROVED]: {
-        label: 'Đã duyệt',
+        label: 'Đã phê duyệt',
         color: 'green'
     },
     [LAB_TEST_STATUS.REJECTED]: {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import {
     Container,
@@ -33,6 +33,8 @@ import {
 } from '@tabler/icons-react'
 import { usePatientLabSessionDetail } from '@/services/hook/staff-patient-session.hook'
 import SendFilesModal from '../components/SendFilesModal'
+import { notifications } from '@mantine/notifications'
+import { useDownloadPatientFile } from '@/services/hook/staff-general-files.hook'
 
 const getFileIcon = (fileType: string) => {
     switch (fileType.toLowerCase()) {
@@ -101,6 +103,8 @@ const SessionDetailPage = () => {
 
     const { data: sessionData, isLoading, error } = usePatientLabSessionDetail(sessionId!)
 
+    const downloadMutation = useDownloadPatientFile()
+
     const handleBack = () => {
         navigate(`/patient-detail/${patientId}`)
     }
@@ -109,14 +113,59 @@ const SessionDetailPage = () => {
         window.open(filePath, '_blank')
     }
 
-    const handleDownloadFile = (filePath: string, fileName: string) => {
-        const link = document.createElement('a')
-        link.href = filePath
-        link.download = fileName
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-    }
+    const handleDownloadFile = useCallback(
+        async (fileId: string, fileName?: string) => {
+            try {
+                // Fetch the file using the download mutation
+                const response = await downloadMutation.mutateAsync({ patientFileId: fileId!, sessionId: sessionId! })
+
+                console.log('Download response:', response)
+
+                let downloadUrl: string
+                let finalFileName = fileName || 'downloaded-file'
+
+                // Handle different response types
+                if (typeof response === 'string') {
+                    // If response is a direct URL string
+                    downloadUrl = response.trim()
+                } else if (response && typeof response === 'object') {
+                    // If response is an object, try to get the URL
+                    downloadUrl = response.downloadUrl || response.url || response.data || String(response)
+                    finalFileName = response.fileName || response.filename || finalFileName
+                } else {
+                    throw new Error('Invalid response format')
+                }
+
+                // Validate URL
+                if (!downloadUrl || (!downloadUrl.startsWith('http') && !downloadUrl.startsWith('blob:'))) {
+                    throw new Error('Invalid download URL: ' + downloadUrl)
+                }
+
+                // Create download link and trigger download
+                const link = document.createElement('a')
+                link.href = downloadUrl
+                link.download = finalFileName
+                link.target = '_blank'
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+
+                notifications.show({
+                    title: 'Thành công',
+                    message: 'Tệp tin đã được tải xuống thành công',
+                    color: 'green'
+                })
+            } catch (error) {
+                console.error('Download failed:', error)
+                notifications.show({
+                    title: 'Lỗi',
+                    message: `Không thể tải xuống tệp tin: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    color: 'red'
+                })
+            }
+        },
+        [downloadMutation, sessionId]
+    )
 
     const handleSendFiles = () => {
         setIsSendModalOpen(true)
@@ -190,7 +239,11 @@ const SessionDetailPage = () => {
                                     color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
                                     variant={isAlreadyAssigned ? 'light' : 'filled'}
                                 >
-                                    {isAlreadyAssigned ? 'Thông tin người nhận' : 'Thẩm định'}
+                                    {isAlreadyAssigned
+                                        ? 'Thông tin người nhận'
+                                        : sessionData.typeLabSession === 'test'
+                                          ? 'Gửi Xét nghiệm'
+                                          : 'Gửi Thẩm định'}
                                 </Button>
                             )
                         })()}
@@ -302,7 +355,7 @@ const SessionDetailPage = () => {
                                                         variant='light'
                                                         color='green'
                                                         size='sm'
-                                                        onClick={() => handleDownloadFile(file.filePath, file.fileName)}
+                                                        onClick={() => handleDownloadFile(file.id, file.fileName)}
                                                         flex={1}
                                                         title='Tải xuống'
                                                     >

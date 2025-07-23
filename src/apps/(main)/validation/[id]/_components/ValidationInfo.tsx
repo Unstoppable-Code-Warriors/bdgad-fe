@@ -30,14 +30,14 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                             <Group gap='xs'>
                                 <IconShield size={16} color='var(--mantine-color-teal-6)' />
                                 <Text size='sm' fw={600} c='teal'>
-                                    Thông tin phiên
+                                    Thông tin lần khám
                                 </Text>
                             </Group>
 
                             <Stack gap='sm'>
                                 <Group justify='space-between'>
                                     <Text size='sm' c='dimmed'>
-                                        Mã phiên:
+                                        Mã lần khám:
                                     </Text>
                                     <Text fw={600} size='sm'>
                                         {validation.id}
@@ -46,7 +46,7 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
 
                                 <Group justify='space-between'>
                                     <Text size='sm' c='dimmed'>
-                                        Mã phòng thí nghiệm:
+                                        Labcode:
                                     </Text>
                                     <Text fw={600} size='sm'>
                                         {validation.labcode}
@@ -55,7 +55,7 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
 
                                 <Group justify='space-between'>
                                     <Text size='sm' c='dimmed'>
-                                        Mã vạch:
+                                        Barcode:
                                     </Text>
                                     <Text fw={600} size='sm'>
                                         {validation.barcode}

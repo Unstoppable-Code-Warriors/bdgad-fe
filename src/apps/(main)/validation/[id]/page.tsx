@@ -184,7 +184,7 @@ const ValidationDetailPage = () => {
                                     ].includes(latestEtlResult.status as ValidationEtlStatus) && (
                                         <Stack gap='md'>
                                             <Text size='sm' fw={500} c='blue'>
-                                                Kết quả ETL đã sẵn sàng
+                                                Kết quả phân tích đã sẵn sàng
                                             </Text>
                                             <Button
                                                 color='blue'
@@ -284,7 +284,55 @@ const ValidationDetailPage = () => {
                 </Grid>
 
                 {/* ETL Result History */}
-                <EtlResultHistory validation={data} />
+                <EtlResultHistory
+                    actions={[
+                        {
+                            type: 'download',
+                            label: 'Tải xuống',
+                            icon: <IconDownload size={16} />,
+                            color: 'teal',
+                            variant: 'light',
+                            condition: (result) =>
+                                [
+                                    AnalysisStatus.WAIT_FOR_APPROVAL,
+                                    AnalysisStatus.APPROVED,
+                                    AnalysisStatus.REJECTED,
+                                    AnalysisStatus.PROCESSING,
+                                    AnalysisStatus.COMPLETED,
+                                    AnalysisStatus.FAILED
+                                ].includes(result.status as AnalysisStatus),
+                            handler: handleDownloadEtlResult
+                        }
+                        // {
+                        //     type: 'send',
+                        //     label: 'Gửi để xác thực',
+                        //     icon: <IconSend size={16} />,
+                        //     color: 'blue',
+                        //     variant: 'light',
+                        //     condition: (result) => result.status === AnalysisStatus.COMPLETED,
+                        //     handler: handleSendEtlResultToValidation
+                        // },
+                        // {
+                        //     type: 'retry',
+                        //     label: 'phân tích',
+                        //     icon: <IconRefresh size={16} />,
+                        //     color: 'orange',
+                        //     variant: 'light',
+                        //     condition: (result) => result.status === AnalysisStatus.FAILED,
+                        //     handler: handleRetryEtlResult
+                        // },
+                        // {
+                        //     type: 'retry',
+                        //     label: 'phân tích',
+                        //     icon: <IconRefresh size={16} />,
+                        //     color: 'orange',
+                        //     variant: 'light',
+                        //     condition: (result) => result.status === AnalysisStatus.REJECTED,
+                        //     handler: handleRetryEtlResult
+                        // }
+                    ]}
+                    validation={data}
+                />
             </Stack>
         </Container>
     )

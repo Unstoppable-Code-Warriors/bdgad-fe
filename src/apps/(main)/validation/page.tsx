@@ -200,7 +200,7 @@ const ValidationPage = () => {
                     if (!status) return '-'
 
                     return (
-                        <Badge color={getStatusColor(status)} size='sm'>
+                        <Badge color={getStatusColor(status)} size='sm' variant='light'>
                             {getStatusLabel(status)}
                         </Badge>
                     )

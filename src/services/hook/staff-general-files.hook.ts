@@ -1,12 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { staffService } from '../function/staff'
 
-export const useGeneralFiles = (params: {
-    page?: number
-    limit?: number
-    search?: string
-    filter?: string
-} = {}) => {
+export const useGeneralFiles = (
+    params: {
+        page?: number
+        limit?: number
+        search?: string
+        filter?: string
+    } = {}
+) => {
     return useQuery({
         queryKey: ['general-files', params],
         queryFn: () => staffService.getAllGeneralFiles(params)
@@ -17,8 +19,8 @@ export const useGeneralFileDetail = (id: string | undefined) => {
     return useQuery({
         queryKey: ['general-file-detail', id],
         queryFn: () => {
-            if (!id) return Promise.resolve(undefined);
-            return staffService.getGeneralFile(id);
+            if (!id) return Promise.resolve(undefined)
+            return staffService.getGeneralFile(id)
         },
         enabled: !!id
     })
@@ -38,6 +40,13 @@ export const useUploadGeneralFile = () => {
 export const useDownloadGeneralFile = () => {
     return useMutation({
         mutationFn: (id: string) => staffService.downloadGeneralFile(id)
+    })
+}
+
+export const useDownloadPatientFile = () => {
+    return useMutation({
+        mutationFn: ({ patientFileId, sessionId }: { patientFileId: string; sessionId: string }) =>
+            staffService.downloadPatientFile(patientFileId, sessionId)
     })
 }
 
