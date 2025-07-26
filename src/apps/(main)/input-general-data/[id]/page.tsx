@@ -17,7 +17,8 @@ import {
     Tooltip,
     Box,
     ThemeIcon,
-    Paper
+    Paper,
+    Modal
 } from '@mantine/core'
 import {
     IconDownload,
@@ -46,6 +47,8 @@ const CategoryDetailPage = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const [importModalOpened, setImportModalOpened] = useState(false)
+    const [deleteModalOpened, setDeleteModalOpened] = useState(false)
+    const [fileToDelete, setFileToDelete] = useState<{ id: string; name: string } | null>(null)
 
     const { data: category, isLoading } = useCategoryGeneralFileDetail(id)
     const downloadMutation = useDownloadGeneralFile()
@@ -83,6 +86,8 @@ const CategoryDetailPage = () => {
                 message: 'Tệp tin đã được xóa thành công',
                 color: 'green'
             })
+            setDeleteModalOpened(false)
+            setFileToDelete(null)
         } catch (error) {
             notifications.show({
                 title: 'Lỗi',
@@ -90,6 +95,16 @@ const CategoryDetailPage = () => {
                 color: 'red'
             })
         }
+    }
+
+    const openDeleteConfirmation = (file: any) => {
+        setFileToDelete({ id: file.id.toString(), name: file.fileName })
+        setDeleteModalOpened(true)
+    }
+
+    const closeDeleteModal = () => {
+        setDeleteModalOpened(false)
+        setFileToDelete(null)
     }
 
     const handleImportFiles = async (uploadedFiles: File[]) => {
@@ -332,8 +347,7 @@ const CategoryDetailPage = () => {
                                                     gradient={{ from: 'red', to: 'pink' }}
                                                     size='lg'
                                                     radius='md'
-                                                    onClick={() => handleDeleteFile(file.id.toString())}
-                                                    loading={deleteMutation.isPending}
+                                                    onClick={() => openDeleteConfirmation(file)}
                                                 >
                                                     <IconTrash size={18} />
                                                 </ActionIcon>
@@ -395,6 +409,27 @@ const CategoryDetailPage = () => {
                     onClose={() => setImportModalOpened(false)}
                     onImport={handleImportFiles}
                 />
+
+                {/* Delete Confirmation Modal */}
+                <Modal opened={deleteModalOpened} onClose={closeDeleteModal} title='Xác nhận xóa tệp tin' size='sm'>
+                    <Stack gap='md'>
+                        <Text>
+                            Bạn có chắc chắn muốn xóa tệp tin "{fileToDelete?.name}"? Thao tác này không thể hoàn tác.
+                        </Text>
+                        <Group justify='flex-end'>
+                            <Button variant='outline' onClick={closeDeleteModal}>
+                                Hủy
+                            </Button>
+                            <Button
+                                color='red'
+                                onClick={() => fileToDelete && handleDeleteFile(fileToDelete.id)}
+                                loading={deleteMutation.isPending}
+                            >
+                                Xóa
+                            </Button>
+                        </Group>
+                    </Stack>
+                </Modal>
             </Stack>
         </Container>
     )

@@ -110,6 +110,7 @@ const CreateCategoryModal = ({ opened, onClose }: CreateCategoryModalProps) => {
                         label='Mô tả'
                         placeholder='Nhập mô tả danh mục (1-500 ký tự)'
                         rows={3}
+                        required
                         {...form.getInputProps('description')}
                     />
                     <Group justify='flex-end' mt='md'>

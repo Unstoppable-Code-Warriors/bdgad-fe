@@ -19,7 +19,7 @@ const ImportFileModal = ({ opened, onClose, onImport }: ImportFileModalProps) =>
 
     const handleFileDrop = (files: FileWithPath[]) => {
         setSelectedFiles(files)
-        setError(null) 
+        setError(null)
     }
 
     const handleFileReject = (rejectedFiles: FileRejection[]) => {
@@ -72,7 +72,7 @@ const ImportFileModal = ({ opened, onClose, onImport }: ImportFileModalProps) =>
     const removeFile = (index: number) => {
         setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
         if (selectedFiles.length === 1) {
-            setError(null) 
+            setError(null)
         }
     }
 
@@ -171,7 +171,7 @@ const ImportFileModal = ({ opened, onClose, onImport }: ImportFileModalProps) =>
                         loading={isUploading}
                         leftSection={<IconUpload size={16} />}
                     >
-                        Tải lên và Import
+                        Tải lên
                     </Button>
                 </Group>
             </Stack>

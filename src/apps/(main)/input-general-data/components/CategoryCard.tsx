@@ -12,7 +12,8 @@ import {
     Modal,
     TextInput,
     Textarea,
-    Alert
+    Alert,
+    Tooltip
 } from '@mantine/core'
 import { IconDots, IconEdit, IconTrash, IconFolder, IconAlertCircle } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
@@ -138,13 +139,22 @@ const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
 
     return (
         <>
-            <Card shadow='sm' padding='lg' radius='md' withBorder style={{ cursor: 'pointer', height: '100%' }}>
-                <Group justify='space-between' mb='xs' onClick={() => onOpenCategory(category)}>
+            <Card
+                shadow='sm'
+                padding='lg'
+                radius='md'
+                withBorder
+                style={{ cursor: 'pointer', height: '100%' }}
+                onClick={() => onOpenCategory(category)}
+            >
+                <Group justify='space-between' mb='xs'>
                     <Group>
                         <IconFolder size={24} color='var(--mantine-color-blue-6)' />
-                        <Text fw={500} size='lg'>
-                            {category.name}
-                        </Text>
+                        <Tooltip label={category.name} position='top' disabled={category.name.length <= 30}>
+                            <Text fw={500} size='lg' lineClamp={1} style={{ maxWidth: '200px' }}>
+                                {category.name}
+                            </Text>
+                        </Tooltip>
                     </Group>
                     <Menu shadow='md' width={200}>
                         <Menu.Target>
@@ -222,6 +232,7 @@ const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
                             label='Mô tả'
                             placeholder='Nhập mô tả danh mục (1-500 ký tự)'
                             rows={3}
+                            required
                             {...form.getInputProps('description')}
                         />
                         <Group justify='flex-end' mt='md'>
@@ -265,7 +276,7 @@ const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
                         </Alert>
                     )}
 
-                    <Text>Bạn có chắc chắn muốn xóa danh mục "{category.name}"? Thao tác này không thể hoàn tác.</Text>
+                    <Text>Bạn có chắc chắn muốn xóa danh mục "{category.name}"?</Text>
                     <Group justify='flex-end'>
                         <Button
                             variant='outline'
