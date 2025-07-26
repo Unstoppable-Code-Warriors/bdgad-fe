@@ -20,7 +20,8 @@ import {
 } from '@mantine/core'
 import { IconAlertCircle, IconSend, IconUser } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
-import { LabTestInfo, FileUpload, FileHistory } from './_components'
+import { LabTestInfo, FileHistory } from './_components'
+import { FileUpload } from './_components/FileUploadPair'
 import { PatientInfo } from '@/components/PatientInfo'
 import { PageHeader } from '@/components/PageHeader'
 
@@ -28,36 +29,37 @@ const LabTestDetailPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const { data, isLoading, error } = useLabTestSessionDetail(id)
-    const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+    const [r1File, setR1File] = useState<File | null>(null)
+    const [r2File, setR2File] = useState<File | null>(null)
     const sendToAnalysisMutation = useSendToAnalysis()
     const analysises = getAllAnalysis()
     const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(
         data?.analysis?.id ? String(data.analysis.id) : null
     )
 
-    // Get the latest FastQ file
-    const latestFastQFile = data?.fastqFiles && data.fastqFiles.length > 0 ? data.fastqFiles[0] : null
+    // Get the latest FastQ file pair
+    const latestFastqFilePair = data?.fastqFilePairs && data.fastqFilePairs.length > 0 ? data.fastqFilePairs[0] : null
 
     const handleBack = () => {
         navigate('/lab-test')
     }
 
-    const handleFileDrop = (files: File[]) => {
-        // Replace existing files with new files (only one file allowed)
-        setUploadedFiles(files)
-    }
-
-    const handleRemoveFile = (index: number) => {
-        setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
-    }
-
     const handleUploadSuccess = () => {
         // Clear uploaded files after successful upload
-        setUploadedFiles([])
+        setR1File(null)
+        setR2File(null)
+    }
+
+    const handleR1FileDrop = (file: File | null) => {
+        setR1File(file)
+    }
+
+    const handleR2FileDrop = (file: File | null) => {
+        setR2File(file)
     }
 
     const handleSendToAnalysis = async () => {
-        if (!latestFastQFile?.id) {
+        if (!latestFastqFilePair?.id) {
             notifications.show({
                 title: 'Lỗi',
                 message: 'Không tìm thấy file FastQ để gửi phân tích',
@@ -80,7 +82,7 @@ const LabTestDetailPage = () => {
 
         sendToAnalysisMutation.mutate(
             {
-                fastqFileId: latestFastQFile.id,
+                fastqPairId: latestFastqFilePair.id,
                 analysisId: analysisId
             },
             {
@@ -182,7 +184,7 @@ const LabTestDetailPage = () => {
                     <Grid.Col span={{ base: 12, lg: 8 }}>
                         <Stack gap='xl'>
                             {/* Lab Test Information */}
-                            <LabTestInfo data={data} latestFastQFile={latestFastQFile} />
+                            <LabTestInfo data={data} latestFastqFilePair={latestFastqFilePair} />
 
                             {/* Patient Information */}
                             <PatientInfo patient={data.patient} analysis={data.analysis} doctor={data.doctor} />
@@ -195,16 +197,17 @@ const LabTestDetailPage = () => {
                             <Stack gap='lg'>
                                 <FileUpload
                                     sessionId={parseInt(id || '0', 10)}
-                                    latestFastQFile={latestFastQFile}
-                                    fastqFiles={data.fastqFiles}
-                                    uploadedFiles={uploadedFiles}
-                                    onFileDrop={handleFileDrop}
-                                    onRemoveFile={handleRemoveFile}
+                                    latestFastqFilePair={latestFastqFilePair}
+                                    fastqFilePairs={data.fastqFilePairs}
                                     onUploadSuccess={handleUploadSuccess}
+                                    r1File={r1File}
+                                    r2File={r2File}
+                                    onR1FileDrop={handleR1FileDrop}
+                                    onR2FileDrop={handleR2FileDrop}
                                 />
 
                                 {/* Action Panel */}
-                                {latestFastQFile?.status === 'uploaded' && (
+                                {latestFastqFilePair?.status === 'uploaded' && (
                                     <Card shadow='sm' radius='lg' p='lg' withBorder>
                                         <Stack gap='lg'>
                                             <Group gap='sm'>
@@ -280,7 +283,7 @@ const LabTestDetailPage = () => {
                 </Grid>
 
                 {/* FastQ File History */}
-                <FileHistory fastqFiles={data.fastqFiles} />
+                <FileHistory fastqFilePairs={data.fastqFilePairs} />
             </Stack>
         </Container>
     )

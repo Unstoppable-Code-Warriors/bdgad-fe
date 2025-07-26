@@ -59,12 +59,18 @@ export const labTestService = {
         }
         return await backendApi.get<LabTestSessionDetail>(`${PREFIX}/sessions/${personalId}`).json()
     },
-    uploadFastQ: async (sessionId: number, file: File): Promise<{ message: string }> => {
+    uploadFastQPair: async (sessionId: number, files: File[]): Promise<{ message: string }> => {
+        if (files.length !== 2) {
+            throw new Error('Exactly 2 FASTQ files are required')
+        }
+
         const formData = new FormData()
-        formData.append('fastq', file)
+        files.forEach((file) => {
+            formData.append('fastqFiles', file)
+        })
 
         return await backendApi
-            .post(`${PREFIX}/session/${sessionId}/fastq`, {
+            .post(`${PREFIX}/session/${sessionId}/fastq-pair`, {
                 body: formData,
                 headers: {}
             })
@@ -83,12 +89,12 @@ export const labTestService = {
             expiresAt: string
         }>()
     },
-    deleteFastQ: async (fastqFileId: number): Promise<{ message: string }> => {
-        return await backendApi.delete(`${PREFIX}/fastq/${fastqFileId}`).json<{ message: string }>()
+    deleteFastQPair: async (fastqPairId: number): Promise<{ message: string }> => {
+        return await backendApi.delete(`${PREFIX}/fastq/${fastqPairId}`).json<{ message: string }>()
     },
-    sendToAnalysis: async (fastqFileId: number, analysisId: number): Promise<{ message: string }> => {
+    sendToAnalysis: async (fastqPairId: number, analysisId: number): Promise<{ message: string }> => {
         return await backendApi
-            .post(`${PREFIX}/fastq/${fastqFileId}/analysis/${analysisId}`)
+            .post(`${PREFIX}/fastq/${fastqPairId}/analysis/${analysisId}`)
             .json<{ message: string }>()
     },
     assignAnalysis: async (sessionId: number, analysisId: number) => {

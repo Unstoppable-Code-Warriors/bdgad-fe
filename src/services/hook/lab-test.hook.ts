@@ -39,12 +39,12 @@ export const useLabTestSessionDetail = (personalId: string | undefined) => {
     })
 }
 
-export const useUploadFastQ = () => {
+export const useUploadFastQPair = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ sessionId, file }: { sessionId: number; file: File }) =>
-            labTestService.uploadFastQ(sessionId, file),
+        mutationFn: ({ sessionId, files }: { sessionId: number; files: File[] }) =>
+            labTestService.uploadFastQPair(sessionId, files),
         onSuccess: (_, { sessionId }) => {
             // Invalidate and refetch the session detail to get updated data
             queryClient.invalidateQueries({ queryKey: ['lab-test-session-detail', sessionId.toString()] })
@@ -53,6 +53,9 @@ export const useUploadFastQ = () => {
         }
     })
 }
+
+// Keep backward compatibility - map to old hook name
+export const useUploadFastQ = useUploadFastQPair
 
 export const useDownloadFastQ = () => {
     return useMutation({
@@ -64,11 +67,11 @@ export const useDownloadFastQ = () => {
     })
 }
 
-export const useDeleteFastQ = () => {
+export const useDeleteFastQPair = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (fastqFileId: number) => labTestService.deleteFastQ(fastqFileId),
+        mutationFn: (fastqPairId: number) => labTestService.deleteFastQPair(fastqPairId),
         onSuccess: (_, __) => {
             // Invalidate and refetch related queries
             queryClient.invalidateQueries({ queryKey: ['lab-test-sessions'] })
@@ -77,12 +80,15 @@ export const useDeleteFastQ = () => {
     })
 }
 
+// Keep backward compatibility
+export const useDeleteFastQ = useDeleteFastQPair
+
 export const useSendToAnalysis = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ fastqFileId, analysisId }: { fastqFileId: number; analysisId: number }) =>
-            labTestService.sendToAnalysis(fastqFileId, analysisId),
+        mutationFn: ({ fastqPairId, analysisId }: { fastqPairId: number; analysisId: number }) =>
+            labTestService.sendToAnalysis(fastqPairId, analysisId),
         onSuccess: (_, __) => {
             // Invalidate and refetch related queries to update the status
             queryClient.invalidateQueries({ queryKey: ['lab-test-sessions'] })

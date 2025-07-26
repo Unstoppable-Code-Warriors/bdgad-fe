@@ -178,9 +178,9 @@ const AnalysisPage = () => {
     )
 
     const handleRejectFastq = useCallback(
-        (fastqFileId: number) => {
+        (fastqPairId: number) => {
             openRejectFastqModal({
-                fastqFileId,
+                fastqPairId,
                 onSuccess: () => {
                     refetch()
                 }
@@ -237,11 +237,11 @@ const AnalysisPage = () => {
                 render: (record) => new Date(record.requestDate).toLocaleDateString('vi-VN')
             },
             {
-                accessor: 'latestFastqFile.status',
+                accessor: 'latestFastqPairFile.status',
                 title: 'Trạng thái FastQ',
                 width: 140,
                 render: (record) => {
-                    const status = record.latestFastqFile?.status
+                    const status = record.latestFastqPairFile?.status
                     if (!status) return <Badge color='gray'>Chưa có file</Badge>
                     return (
                         <Badge color={getStatusColor(status)} variant='light'>
@@ -278,12 +278,12 @@ const AnalysisPage = () => {
                         </Tooltip>
 
                         {/* Process Analysis Button - only show for approved FastQ files */}
-                        {record.latestFastqFile?.status === FastQFileStatus.WAIT_FOR_APPROVAL && (
+                        {record.latestFastqPairFile?.status === FastQFileStatus.WAIT_FOR_APPROVAL && (
                             <Tooltip label='Bắt đầu phân tích'>
                                 <ActionIcon
                                     variant='light'
                                     color='green'
-                                    onClick={() => handleProcessAnalysis(record.latestFastqFile!.id)}
+                                    onClick={() => handleProcessAnalysis(record.latestFastqPairFile!.fastqFileR1.id)}
                                     loading={processAnalysisMutation.isPending}
                                 >
                                     <IconPlayerPlay size={16} />
@@ -292,12 +292,12 @@ const AnalysisPage = () => {
                         )}
 
                         {/* Reject FastQ Button - only show for files waiting for approval */}
-                        {record.latestFastqFile?.status === FastQFileStatus.WAIT_FOR_APPROVAL && (
+                        {record.latestFastqPairFile?.status === FastQFileStatus.WAIT_FOR_APPROVAL && (
                             <Tooltip label='Từ chối FastQ'>
                                 <ActionIcon
                                     variant='light'
                                     color='red'
-                                    onClick={() => handleRejectFastq(record.latestFastqFile!.id)}
+                                    onClick={() => handleRejectFastq(record.latestFastqPairFile!.id)}
                                 >
                                     <IconX size={16} />
                                 </ActionIcon>
@@ -319,18 +319,19 @@ const AnalysisPage = () => {
                         )}
 
                         {/* Retry ETL Result - only show for failed results with available FastQ */}
-                        {record.latestEtlResult?.status === AnalysisStatus.FAILED && record.latestFastqFile?.id && (
-                            <Tooltip label='Thử lại phân tích'>
-                                <ActionIcon
-                                    variant='light'
-                                    color='orange'
-                                    onClick={() => handleRetryEtlResult(record.latestFastqFile!.id)}
-                                    loading={processAnalysisMutation.isPending}
-                                >
-                                    <IconRefresh size={16} />
-                                </ActionIcon>
-                            </Tooltip>
-                        )}
+                        {record.latestEtlResult?.status === AnalysisStatus.FAILED &&
+                            record.latestFastqPairFile?.fastqFileR1.id && (
+                                <Tooltip label='Thử lại phân tích'>
+                                    <ActionIcon
+                                        variant='light'
+                                        color='orange'
+                                        onClick={() => handleRetryEtlResult(record.latestFastqPairFile!.fastqFileR1.id)}
+                                        loading={processAnalysisMutation.isPending}
+                                    >
+                                        <IconRefresh size={16} />
+                                    </ActionIcon>
+                                </Tooltip>
+                            )}
                     </Group>
                 ),
                 titleClassName: 'bg-white',

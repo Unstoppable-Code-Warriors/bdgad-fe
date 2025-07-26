@@ -25,10 +25,10 @@ const commonConfig: Options = {
                         // Clone the response to avoid consuming the original stream
                         const clonedResponse = response.clone()
                         const errorData = (await clonedResponse.json()) as unknown
-                        
+
                         // Attach the parsed error data to the error object
                         ;(error as any).errorData = errorData
-                        
+
                         error.name = 'APIError'
                         error.message = (errorData as any)?.message || (errorData as any)?.error || 'An error occurred'
                     } catch {
@@ -53,7 +53,13 @@ export const authApi = parentApi.extend({
                 // For auth API, we might not always need the access token
                 // Only add it for specific endpoints that require it (like refresh, logout)
                 const url = request.url
-                const requiresAuth = url.includes('/refresh') || url.includes('/logout') || url.includes('/me') || url.includes('/change-password') || url.includes('/update-profile') || url.includes('/users')
+                const requiresAuth =
+                    url.includes('/refresh') ||
+                    url.includes('/logout') ||
+                    url.includes('/me') ||
+                    url.includes('/change-password') ||
+                    url.includes('/update-profile') ||
+                    url.includes('/users')
 
                 if (requiresAuth) {
                     const token = getAccessToken()

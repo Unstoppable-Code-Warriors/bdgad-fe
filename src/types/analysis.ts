@@ -1,6 +1,7 @@
 import type { Patient } from './patient'
 import type { User } from './user'
 import type { ValidationAssign } from './validation'
+import type { FastqFile } from './fastq'
 
 export interface FastqFileResponse {
     id: number
@@ -8,6 +9,25 @@ export interface FastqFileResponse {
     createdAt: string
     status: string | null
     redoReason: string | null
+    creator: {
+        id: number
+        name: string
+        email: string
+    }
+    rejector?: {
+        id: number
+        name: string
+        email: string
+    }
+}
+
+export interface FastqFilePairResponse {
+    id: number
+    createdAt: string
+    status: string | null
+    redoReason: string | null
+    fastqFileR1: FastqFile
+    fastqFileR2: FastqFile
     creator: {
         id: number
         name: string
@@ -58,12 +78,12 @@ export interface AnalysisAssign {
 }
 
 export interface AnalysisSessionListItem extends AnalysisSession {
-    latestFastqFile: FastqFileResponse | null
+    latestFastqPairFile: FastqFilePairResponse | null
     latestEtlResult: EtlResultResponse | null
 }
 
 export interface AnalysisSessionDetail extends AnalysisSession {
-    fastqFiles: FastqFileResponse[]
+    fastqFilePairs: FastqFilePairResponse[]
     etlResults: EtlResultResponse[]
 }
 

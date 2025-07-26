@@ -11,13 +11,13 @@ import { statusConfig } from '@/types/lab-test.types'
 import { labTestService } from '@/services/function/lab-test'
 import { notifications } from '@mantine/notifications'
 import { modals } from '@mantine/modals'
-import type { FastQ } from '@/types/fastq'
+import type { FastqFilePair } from '@/types/fastq'
 import { useState } from 'react'
-import { useDeleteFastQ } from '@/services/hook/lab-test.hook'
+import { useDeleteFastQPair } from '@/services/hook/lab-test.hook'
 import { RejectionDisplay } from '@/components/RejectionDisplay'
 
 interface FileHistoryProps {
-    fastqFiles?: FastQ[]
+    fastqFilePairs?: FastqFilePair[]
 }
 
 const getStatusColor = (status: string) => {
@@ -28,14 +28,16 @@ const getStatusLabel = (status: string) => {
     return statusConfig[status as keyof typeof statusConfig]?.label || status
 }
 
-export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
+export const FileHistory = ({ fastqFilePairs }: FileHistoryProps) => {
     const [isDownloading, setIsDownloading] = useState(false)
-    const deleteFastQMutation = useDeleteFastQ()
+    const [isDownloadingR2, setIsDownloadingR2] = useState(false)
 
-    const handleDownload = async (file: FastQ) => {
+    const deleteFastQPairMutation = useDeleteFastQPair()
+
+    const handleDownload = async (file: FastqFilePair) => {
         try {
             setIsDownloading(true)
-            const response = await labTestService.downloadFastQ(file.id)
+            const response = await labTestService.downloadFastQ(file.fastqFileR1.id)
             // Open the download URL in a new window/tab
             window.open(response.downloadUrl, '_blank')
         } catch (error: any) {
@@ -49,7 +51,24 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
         }
     }
 
-    const handleDelete = (file: FastQ) => {
+    const handleDownloadR2 = async (file: FastqFilePair) => {
+        try {
+            setIsDownloadingR2(true)
+            const response = await labTestService.downloadFastQ(file.fastqFileR2.id)
+            // Open the download URL in a new window/tab
+            window.open(response.downloadUrl, '_blank')
+        } catch (error: any) {
+            notifications.show({
+                title: 'Lỗi tải file',
+                message: error.message || 'Không thể tạo link tải xuống',
+                color: 'red'
+            })
+        } finally {
+            setIsDownloadingR2(false)
+        }
+    }
+
+    const handleDelete = (file: FastqFilePair) => {
         // Check if file can be deleted (only uploaded status)
         if (file.status !== 'uploaded') {
             notifications.show({
@@ -61,27 +80,27 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
         }
 
         modals.openConfirmModal({
-            title: 'Xóa file FastQ',
+            title: 'Xóa cặp file FastQ',
             children: (
                 <Text size='sm'>
-                    Bạn có chắc chắn muốn xóa file FastQ #{file.id}? Hành động này không thể hoàn tác.
+                    Bạn có chắc chắn muốn xóa cặp file FastQ #{file.id}? Hành động này không thể hoàn tác.
                 </Text>
             ),
             labels: { confirm: 'Xóa', cancel: 'Hủy' },
             confirmProps: { color: 'red' },
             onConfirm: () => {
-                deleteFastQMutation.mutate(file.id, {
+                deleteFastQPairMutation.mutate(file.id, {
                     onSuccess: () => {
                         notifications.show({
                             title: 'Xóa file thành công',
-                            message: `File FastQ #${file.id} đã được xóa`,
+                            message: `Cặp file FastQ #${file.id} đã được xóa`,
                             color: 'green'
                         })
                     },
                     onError: (error: any) => {
                         notifications.show({
                             title: 'Lỗi xóa file',
-                            message: error.message || 'Không thể xóa file FastQ',
+                            message: error.message || 'Không thể xóa cặp file FastQ',
                             color: 'red'
                         })
                     }
@@ -90,7 +109,7 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
         })
     }
 
-    const handleViewReason = (file: FastQ) => {
+    const handleViewReason = (file: FastqFilePair) => {
         modals.open({
             title: (
                 <Group gap='sm'>
@@ -171,11 +190,11 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
         })
     }
 
-    const canDeleteFile = (file: FastQ) => {
+    const canDeleteFile = (file: FastqFilePair) => {
         return file.status === 'uploaded'
     }
 
-    if (!fastqFiles || fastqFiles.length === 0) {
+    if (!fastqFilePairs || fastqFilePairs.length === 0) {
         return (
             <Card shadow='sm' padding='xl' radius='lg' withBorder>
                 <Group gap='sm' mb='lg'>
@@ -216,16 +235,16 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
                 </ThemeIcon>
                 <Box>
                     <Text fw={700} size='xl'>
-                        Lịch sử File FastQ
+                        Lịch sử cặp file FastQ
                     </Text>
                     <Text size='sm' c='dimmed'>
-                        {fastqFiles.length} file đã được tải lên
+                        {fastqFilePairs.length} cặp file đã được tải lên
                     </Text>
                 </Box>
             </Group>
 
-            <Timeline active={fastqFiles.length} bulletSize={32} lineWidth={3}>
-                {fastqFiles.map((file) => (
+            <Timeline active={fastqFilePairs.length} bulletSize={32} lineWidth={3}>
+                {fastqFilePairs.map((file) => (
                     <Timeline.Item
                         key={file.id}
                         bullet={
@@ -241,7 +260,7 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
                             <Box w='100%'>
                                 <Group gap='sm' mb='sm'>
                                     <Text fw={600} size='md'>
-                                        File FastQ #{file.id}
+                                        Cặp file FastQ #{file.id}
                                     </Text>
                                     <Badge
                                         color={getStatusColor(file.status || '')}
@@ -299,7 +318,19 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
                                                 size='sm'
                                                 radius='md'
                                             >
-                                                Tải xuống
+                                                R1 file
+                                            </Button>
+
+                                            <Button
+                                                variant='light'
+                                                color='blue'
+                                                leftSection={<IconDownload size={16} />}
+                                                onClick={() => handleDownloadR2(file)}
+                                                loading={isDownloadingR2}
+                                                size='sm'
+                                                radius='md'
+                                            >
+                                                R2 file
                                             </Button>
 
                                             {canDeleteFile(file) && (
@@ -308,7 +339,7 @@ export const FileHistory = ({ fastqFiles }: FileHistoryProps) => {
                                                     color='red'
                                                     leftSection={<IconTrash size={16} />}
                                                     onClick={() => handleDelete(file)}
-                                                    loading={deleteFastQMutation.isPending}
+                                                    loading={deleteFastQPairMutation.isPending}
                                                     size='sm'
                                                     radius='md'
                                                 >

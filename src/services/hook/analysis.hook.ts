@@ -52,7 +52,7 @@ export const useProcessAnalysis = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (fastqFileId: number) => analysisService.processAnalysis(fastqFileId),
+        mutationFn: (fastqPairId: number) => analysisService.processAnalysis(fastqPairId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['analysis-sessions'] })
             queryClient.invalidateQueries({ queryKey: ['analysis-session-detail'] })
@@ -60,12 +60,12 @@ export const useProcessAnalysis = () => {
     })
 }
 
-export const useRejectFastq = () => {
+export const useRejectFastqPair = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ fastqFileId, data }: { fastqFileId: number; data: RejectFastqRequest }) =>
-            analysisService.rejectFastq(fastqFileId, data),
+        mutationFn: ({ fastqPairId, data }: { fastqPairId: number; data: RejectFastqRequest }) =>
+            analysisService.rejectFastqPair(fastqPairId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['analysis-sessions'] })
             queryClient.invalidateQueries({ queryKey: ['analysis-session-detail'] })

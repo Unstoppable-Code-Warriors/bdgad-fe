@@ -64,13 +64,13 @@ export const analysisService = {
         return await backendApi.get<AnalysisSessionDetail>(`${PREFIX}/sessions/${id}`).json()
     },
 
-    processAnalysis: async (fastqFileId: number): Promise<{ message: string }> => {
-        return await backendApi.post(`${PREFIX}/process/${fastqFileId}`).json<{ message: string }>()
+    processAnalysis: async (fastqPairId: number): Promise<{ message: string }> => {
+        return await backendApi.post(`${PREFIX}/process/${fastqPairId}`).json<{ message: string }>()
     },
 
-    rejectFastq: async (fastqFileId: number, data: RejectFastqRequest): Promise<{ message: string }> => {
+    rejectFastqPair: async (fastqPairId: number, data: RejectFastqRequest): Promise<{ message: string }> => {
         return await backendApi
-            .put(`${PREFIX}/fastq/${fastqFileId}/reject`, {
+            .put(`${PREFIX}/fastq/${fastqPairId}/reject`, {
                 json: data
             })
             .json<{ message: string }>()

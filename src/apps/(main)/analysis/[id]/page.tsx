@@ -12,7 +12,6 @@ import {
     Container,
     Stack,
     Grid,
-    Alert,
     Loader,
     Center,
     Text,
@@ -24,7 +23,8 @@ import {
     Divider,
     ThemeIcon,
     Avatar,
-    Select
+    Select,
+    Alert
 } from '@mantine/core'
 import {
     IconAlertCircle,
@@ -63,10 +63,10 @@ const AnalysisDetailPage = () => {
     const retryEtlProcessMutation = useRetryEtlProcess()
     const validations = getAllValidations()
 
-    // Get the latest FastQ file waiting for approval
-    const latestFastQFile =
-        data?.fastqFiles && data.fastqFiles.length > 0
-            ? data.fastqFiles.find((f) => f.status === AnalysisStatus.WAIT_FOR_APPROVAL) || data.fastqFiles[0]
+    // Get the latest FastQ file pair waiting for approval
+    const latestFastqFilePair =
+        data?.fastqFilePairs && data.fastqFilePairs.length > 0
+            ? data.fastqFilePairs.find((f) => f.status === AnalysisStatus.WAIT_FOR_APPROVAL) || data.fastqFilePairs[0]
             : null
 
     // Get the latest ETL result
@@ -77,16 +77,16 @@ const AnalysisDetailPage = () => {
     }
 
     const handleProcessAnalysis = async () => {
-        if (!latestFastQFile?.id) {
+        if (!latestFastqFilePair?.id) {
             notifications.show({
                 title: 'Lỗi',
-                message: 'Không tìm thấy file FastQ để xử lý phân tích',
+                message: 'Không tìm thấy cặp file FastQ để xử lý phân tích',
                 color: 'red'
             })
             return
         }
 
-        processAnalysisMutation.mutate(latestFastQFile.id, {
+        processAnalysisMutation.mutate(latestFastqFilePair.id, {
             onSuccess: () => {
                 notifications.show({
                     title: 'Thành công',
@@ -104,9 +104,9 @@ const AnalysisDetailPage = () => {
         })
     }
 
-    const handleOpenRejectModal = (fastqId: number) => {
+    const handleOpenRejectModal = (fastqPairId: number) => {
         openRejectFastqModal({
-            fastqFileId: fastqId,
+            fastqPairId: fastqPairId,
             onSuccess: () => {
                 refetch()
             }
@@ -197,6 +197,28 @@ const AnalysisDetailPage = () => {
         }
     }, [])
 
+    const handleDownloadR1 = useCallback(
+        async (fastqFilePairId: number) => {
+            // Find the FastQ file pair by ID
+            const fastqFilePair = data?.fastqFilePairs?.find((pair) => pair.id === fastqFilePairId)
+            if (fastqFilePair?.fastqFileR1?.id) {
+                await handleDownloadFastQ(fastqFilePair.fastqFileR1.id)
+            }
+        },
+        [handleDownloadFastQ, data?.fastqFilePairs]
+    )
+
+    const handleDownloadR2 = useCallback(
+        async (fastqFilePairId: number) => {
+            // Find the FastQ file pair by ID
+            const fastqFilePair = data?.fastqFilePairs?.find((pair) => pair.id === fastqFilePairId)
+            if (fastqFilePair?.fastqFileR2?.id) {
+                await handleDownloadFastQ(fastqFilePair.fastqFileR2.id)
+            }
+        },
+        [handleDownloadFastQ, data?.fastqFilePairs]
+    )
+
     if (isLoading) {
         return (
             <Container size='xl' py='xl'>
@@ -279,7 +301,7 @@ const AnalysisDetailPage = () => {
                             {/* Analysis Information */}
                             <AnalysisInfo
                                 data={data}
-                                latestFastQFile={latestFastQFile}
+                                latestFastqFilePair={latestFastqFilePair}
                                 latestEtlResult={latestEtlResult}
                             />
 
@@ -307,22 +329,34 @@ const AnalysisDetailPage = () => {
                                 <Divider />
 
                                 {/* Analysis Actions */}
-                                {latestFastQFile?.status === AnalysisStatus.WAIT_FOR_APPROVAL && (
+                                {latestFastqFilePair?.status === AnalysisStatus.WAIT_FOR_APPROVAL && (
                                     <Stack gap='md'>
                                         <Text size='sm' fw={500} c='blue'>
-                                            FastQ đang chờ phê duyệt
+                                            Cặp file FastQ đang chờ phê duyệt
                                         </Text>
-                                        <Button
-                                            variant='light'
-                                            color='blue'
-                                            leftSection={<IconDownload size={16} />}
-                                            onClick={() => handleDownloadFastQ(latestFastQFile.id)}
-                                            fullWidth
-                                            size='md'
-                                            radius='lg'
-                                        >
-                                            Tải file FastQ
-                                        </Button>
+                                        <Group justify='space-between' grow>
+                                            <Button
+                                                variant='light'
+                                                color='blue'
+                                                leftSection={<IconDownload size={16} />}
+                                                onClick={() => handleDownloadFastQ(latestFastqFilePair.fastqFileR1.id)}
+                                                size='md'
+                                                radius='lg'
+                                            >
+                                                R1 file
+                                            </Button>
+                                            <Button
+                                                variant='light'
+                                                color='blue'
+                                                leftSection={<IconDownload size={16} />}
+                                                onClick={() => handleDownloadFastQ(latestFastqFilePair.fastqFileR2.id)}
+                                                size='md'
+                                                radius='lg'
+                                            >
+                                                R2 file
+                                            </Button>
+                                        </Group>
+
                                         <Divider />
                                         {/* <Text size='sm' fw={500} c='teal'>
                                             {latestEtlResult?.status === AnalysisStatus.REJECTED
@@ -359,13 +393,13 @@ const AnalysisDetailPage = () => {
                                         <Button
                                             color='red'
                                             variant='light'
-                                            onClick={() => handleOpenRejectModal(latestFastQFile.id)}
+                                            onClick={() => handleOpenRejectModal(latestFastqFilePair.id)}
                                             leftSection={<IconX size={16} />}
                                             fullWidth
                                             size='md'
                                             radius='lg'
                                         >
-                                            Từ chối FastQ
+                                            Từ chối cặp file FastQ
                                         </Button>
                                     </Stack>
                                 )}
@@ -437,7 +471,7 @@ const AnalysisDetailPage = () => {
                                     </Stack>
                                 )}
 
-                                {latestFastQFile?.status === AnalysisStatus.PROCESSING && (
+                                {latestFastqFilePair?.status === AnalysisStatus.PROCESSING && (
                                     <Stack gap='md' align='center'>
                                         <Loader size='md' color='blue' />
                                         <Text size='sm' ta='center' c='blue' fw={500}>
@@ -492,13 +526,13 @@ const AnalysisDetailPage = () => {
                                     </Stack>
                                 )}
 
-                                {!latestFastQFile && (
+                                {!latestFastqFilePair && (
                                     <Stack gap='md' align='center'>
                                         <ThemeIcon size='xl' radius='xl' variant='light' color='gray'>
                                             <IconXboxX size={24} />
                                         </ThemeIcon>
                                         <Text size='sm' ta='center' c='dimmed' fw={500}>
-                                            Chưa có file FastQ
+                                            Chưa có cặp file FastQ
                                         </Text>
                                         <Text size='xs' ta='center' c='dimmed'>
                                             Chờ tải lên file để bắt đầu
@@ -514,19 +548,19 @@ const AnalysisDetailPage = () => {
                 <Grid>
                     <Grid.Col span={{ base: 12, lg: 6 }}>
                         <FileHistory
-                            files={data.fastqFiles}
-                            title='Lịch sử FastQ'
-                            subtitle='Theo dõi các file FastQ đã tải lên'
-                            emptyStateTitle='Chưa có file FastQ nào'
-                            emptyStateDescription='File FastQ sẽ xuất hiện ở đây sau khi được tải lên'
+                            files={data.fastqFilePairs}
+                            title='Lịch sử cặp file FastQ'
+                            subtitle='Theo dõi các cặp file FastQ đã tải lên'
+                            emptyStateTitle='Chưa có cặp file FastQ nào'
+                            emptyStateDescription='Cặp file FastQ sẽ xuất hiện ở đây sau khi được tải lên'
                             icon={<IconFileText size={20} />}
                             iconColor='orange'
                             statusConfig={analysisStatusConfig}
-                            fileNamePrefix='File FastQ'
+                            fileNamePrefix='Cặp file FastQ'
                             actions={[
                                 {
                                     type: 'download',
-                                    label: 'Tải file FastQ',
+                                    label: 'R1 file',
                                     icon: <IconDownload size={16} />,
                                     color: 'blue',
                                     variant: 'light',
@@ -539,26 +573,43 @@ const AnalysisDetailPage = () => {
                                             AnalysisStatus.COMPLETED,
                                             AnalysisStatus.FAILED
                                         ].includes(result.status as AnalysisStatus),
-                                    handler: handleDownloadFastQ
+                                    handler: handleDownloadR1
                                 },
                                 {
-                                    type: 'process',
-                                    label: 'Bắt đầu phân tích',
-                                    icon: <IconPlayerPlay size={16} />,
-                                    color: 'green',
+                                    type: 'download',
+                                    label: 'R2 file',
+                                    icon: <IconDownload size={16} />,
+                                    color: 'blue',
                                     variant: 'light',
-                                    condition: (file) => file.status === AnalysisStatus.WAIT_FOR_APPROVAL,
-                                    handler: () => handleProcessAnalysis()
-                                },
-                                {
-                                    type: 'reject',
-                                    label: 'Từ chối',
-                                    icon: <IconX size={16} />,
-                                    color: 'red',
-                                    variant: 'light',
-                                    condition: (file) => file.status === AnalysisStatus.WAIT_FOR_APPROVAL,
-                                    handler: handleOpenRejectModal
+                                    condition: (result) =>
+                                        [
+                                            AnalysisStatus.WAIT_FOR_APPROVAL,
+                                            AnalysisStatus.APPROVED,
+                                            AnalysisStatus.REJECTED,
+                                            AnalysisStatus.PROCESSING,
+                                            AnalysisStatus.COMPLETED,
+                                            AnalysisStatus.FAILED
+                                        ].includes(result.status as AnalysisStatus),
+                                    handler: handleDownloadR2
                                 }
+                                // {
+                                //     type: 'process',
+                                //     label: 'Bắt đầu phân tích',
+                                //     icon: <IconPlayerPlay size={16} />,
+                                //     color: 'green',
+                                //     variant: 'light',
+                                //     condition: (file) => file.status === AnalysisStatus.WAIT_FOR_APPROVAL,
+                                //     handler: () => handleProcessAnalysis()
+                                // },
+                                // {
+                                //     type: 'reject',
+                                //     label: 'Từ chối',
+                                //     icon: <IconX size={16} />,
+                                //     color: 'red',
+                                //     variant: 'light',
+                                //     condition: (file) => file.status === AnalysisStatus.WAIT_FOR_APPROVAL,
+                                //     handler: handleOpenRejectModal
+                                // }
                             ]}
                         />
                     </Grid.Col>
