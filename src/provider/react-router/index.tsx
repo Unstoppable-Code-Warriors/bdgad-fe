@@ -14,6 +14,7 @@ import InputInfoPage from '@/apps/(main)/input-info/page'
 import PatientInfoPage from '@/apps/(main)/patient-folder/page'
 import PatientDetailPage from '@/apps/(main)/patient-detail/page'
 import InputGeneralDataPage from '@/apps/(main)/input-general-data/page'
+import CategoryDetailPage from '@/apps/(main)/input-general-data/[id]/page'
 import NewPasswordPage from '@/apps/auth/new-password/page'
 import CallbackPage from '@/apps/auth/callback/page'
 import LabTestPage from '@/apps/(main)/lab-test/page'
@@ -25,7 +26,6 @@ import ValidationDetailPage from '@/apps/(main)/validation/[id]/page'
 import ProfilePage from '@/apps/(main)/profile/page'
 import SessionDetailPage from '@/apps/(main)/patient-detail/session/[sessionId]/page'
 import OCRPage from '@/apps/(main)/input-info/ocr/page'
-
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -101,8 +101,32 @@ export const router = createBrowserRouter([
                         element: <InputInfoPage />
                     },
                     {
-                        path: 'input-info/ocr',
-                        element: <OCRPage />
+                        path: 'input-general-data',
+                        element: <Outlet />,
+                        children: [
+                            {
+                                index: true,
+                                element: <InputGeneralDataPage />
+                            },
+                            {
+                                path: ':id',
+                                element: <CategoryDetailPage />
+                            }
+                        ]
+                    },
+                    {
+                        path: 'input-info',
+                        element: <Outlet />,
+                        children: [
+                            {
+                                index: true,
+                                element: <InputInfoPage />
+                            },
+                            {
+                                path: 'ocr',
+                                element: <OCRPage />
+                            }
+                        ]
                     },
                     {
                         path: '/patient-folder',
@@ -115,10 +139,6 @@ export const router = createBrowserRouter([
                     {
                         path: '/patient-detail/:id/session/:sessionId',
                         element: <SessionDetailPage />
-                    },
-                    {
-                        path: '/input-general-data',
-                        element: <InputGeneralDataPage />
                     },
                     {
                         path: '/lab-test',

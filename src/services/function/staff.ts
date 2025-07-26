@@ -7,9 +7,12 @@ const PREFIX = 'api/v1/staff'
 // Staff service functions
 export const staffService = {
     // Upload general file
-    uploadGeneralFile: async (file: File): Promise<any> => {
+    uploadGeneralFile: async (file: File, categoryGeneralFileId?: number): Promise<any> => {
         const formData = new FormData()
         formData.append('files', file)
+        if (categoryGeneralFileId) {
+            formData.append('categoryGeneralFileId', categoryGeneralFileId.toString())
+        }
 
         return backendApi
             .post(`${PREFIX}/general-files`, {
@@ -188,5 +191,34 @@ export const staffService = {
                 headers: {}
             })
             .json()
+    },
+
+    // Category General Files APIs
+    createCategoryGeneralFile: async (data: { name: string; description: string }): Promise<any> => {
+        return backendApi
+            .post(`${PREFIX}/category-general-files`, {
+                json: data
+            })
+            .json()
+    },
+
+    getAllCategoryGeneralFiles: async (): Promise<any> => {
+        return backendApi.get(`${PREFIX}/category-general-files`).json()
+    },
+
+    getCategoryGeneralFileById: async (id: string): Promise<any> => {
+        return backendApi.get(`${PREFIX}/category-general-files/${id}`).json()
+    },
+
+    updateCategoryGeneralFile: async (id: string, data: { name: string; description: string }): Promise<any> => {
+        return backendApi
+            .put(`${PREFIX}/category-general-files/${id}`, {
+                json: data
+            })
+            .json()
+    },
+
+    deleteCategoryGeneralFile: async (id: string): Promise<any> => {
+        return backendApi.delete(`${PREFIX}/category-general-files/${id}`).json()
     }
 }

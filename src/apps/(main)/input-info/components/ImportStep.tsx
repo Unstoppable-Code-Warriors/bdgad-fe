@@ -36,7 +36,7 @@ const ImportStep = ({ onFilesSubmitted }: ImportStepProps) => {
         if (location.state?.submittedFiles) {
             console.log('Restoring submitted files from OCR:', location.state.submittedFiles)
             setSubmittedFiles(location.state.submittedFiles)
-            
+
             if (onFilesSubmitted) {
                 onFilesSubmitted(location.state.submittedFiles)
             }
@@ -102,7 +102,6 @@ const ImportStep = ({ onFilesSubmitted }: ImportStepProps) => {
     }
 
     const handleViewOCR = (ocrData: any) => {
-      
         modals.open({
             title: 'OCR Results',
             size: 'xl',
@@ -111,8 +110,7 @@ const ImportStep = ({ onFilesSubmitted }: ImportStepProps) => {
                     <Text size='sm' c='dimmed'>
                         OCR processing results for the medical requisition
                     </Text>
-                    
-              
+
                     <Paper p='md' withBorder>
                         <Stack gap='sm'>
                             <Group>
@@ -129,7 +127,7 @@ const ImportStep = ({ onFilesSubmitted }: ImportStepProps) => {
                             </Group>
                             <Group>
                                 <Text fw={600}>Test Code:</Text>
-                                <Text>{ocrData.ocrResult?.["Test code"] || 'N/A'}</Text>
+                                <Text>{ocrData.ocrResult?.['Test code'] || 'N/A'}</Text>
                             </Group>
                             <Group>
                                 <Text fw={600}>Sample Date:</Text>
@@ -141,7 +139,9 @@ const ImportStep = ({ onFilesSubmitted }: ImportStepProps) => {
                     {/* Show selected tests */}
                     {ocrData.ocrResult?.non_invasive_prenatal_testing?.test_options && (
                         <Paper p='md' withBorder>
-                            <Text fw={600} mb='sm'>Selected Tests:</Text>
+                            <Text fw={600} mb='sm'>
+                                Selected Tests:
+                            </Text>
                             <Stack gap='xs'>
                                 {ocrData.ocrResult.non_invasive_prenatal_testing.test_options
                                     .filter((test: any) => test.is_selected)
@@ -174,7 +174,7 @@ const ImportStep = ({ onFilesSubmitted }: ImportStepProps) => {
 
             <SubmittedFilesTable
                 files={submittedFiles}
-                onStartOCR={handleOCRClick} 
+                onStartOCR={handleOCRClick}
                 onViewOCR={handleViewOCR} // Add the new handler
                 onDelete={handleDeleteSubmittedFile}
             />

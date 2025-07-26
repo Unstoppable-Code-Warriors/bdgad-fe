@@ -34,12 +34,12 @@ const OCRPage = () => {
             return file
         })
 
-        navigate('/import-file/input', { 
-            state: { 
+        navigate('/import-file/input', {
+            state: {
                 ...location.state,
                 ocrResult: ocrData,
-                submittedFiles: updatedSubmittedFiles 
-            } 
+                submittedFiles: updatedSubmittedFiles
+            }
         })
     }
 
@@ -60,11 +60,7 @@ const OCRPage = () => {
     return (
         <Container size='xl' py='xl'>
             <Stack gap='lg'>
-                <OCRProcessor 
-                    selectedFile={selectedFile}
-                    onComplete={handleComplete}
-                    onBack={handleBack}
-                />
+                <OCRProcessor selectedFile={selectedFile} onComplete={handleComplete} onBack={handleBack} />
             </Stack>
         </Container>
     )

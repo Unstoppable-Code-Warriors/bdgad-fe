@@ -30,9 +30,12 @@ export const useUploadGeneralFile = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (file: File) => staffService.uploadGeneralFile(file),
+        mutationFn: ({ file, categoryGeneralFileId }: { file: File; categoryGeneralFileId?: number }) =>
+            staffService.uploadGeneralFile(file, categoryGeneralFileId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['general-files'] })
+            queryClient.invalidateQueries({ queryKey: ['category-general-files'] })
+            queryClient.invalidateQueries({ queryKey: ['category-general-file-detail'] })
         }
     })
 }
@@ -58,6 +61,7 @@ export const useDeleteGeneralFile = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['general-files'] })
             queryClient.invalidateQueries({ queryKey: ['general-file-detail'] })
+            queryClient.invalidateQueries({ queryKey: ['category-general-file-detail'] })
         }
     })
 }
