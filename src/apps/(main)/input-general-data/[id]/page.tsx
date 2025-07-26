@@ -414,7 +414,7 @@ const CategoryDetailPage = () => {
                 <Modal opened={deleteModalOpened} onClose={closeDeleteModal} title='Xác nhận xóa tệp tin' size='sm'>
                     <Stack gap='md'>
                         <Text>
-                            Bạn có chắc chắn muốn xóa tệp tin "{fileToDelete?.name}"? Thao tác này không thể hoàn tác.
+                            Bạn có chắc chắn muốn xóa tệp tin "{fileToDelete?.name}"?
                         </Text>
                         <Group justify='flex-end'>
                             <Button variant='outline' onClick={closeDeleteModal}>
