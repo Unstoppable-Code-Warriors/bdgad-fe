@@ -2,16 +2,16 @@ import { Alert, Box, Button, Group, Stack, Text, Textarea, ThemeIcon } from '@ma
 import { IconAlertCircle, IconX } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { modals } from '@mantine/modals'
-import { useRejectFastq } from '@/services/hook/analysis.hook'
+import { useRejectFastqPair } from '@/services/hook/analysis.hook'
 import { useState } from 'react'
 
 interface RejectFastqModalProps {
-    fastqFileId: number
+    fastqPairId: number
     onSuccess?: () => void
 }
 
-export const openRejectFastqModal = ({ fastqFileId, onSuccess }: RejectFastqModalProps) => {
-    const modalId = `reject-fastq-${fastqFileId}`
+export const openRejectFastqModal = ({ fastqPairId, onSuccess }: RejectFastqModalProps) => {
+    const modalId = `reject-fastq-${fastqPairId}`
 
     modals.open({
         modalId,
@@ -22,15 +22,15 @@ export const openRejectFastqModal = ({ fastqFileId, onSuccess }: RejectFastqModa
                 </ThemeIcon>
                 <Box>
                     <Text fw={600} size='lg'>
-                        Từ chối file FastQ
+                        Từ chối cặp file FastQ
                     </Text>
                     <Text size='sm' c='dimmed'>
-                        Nhập lý do để từ chối file này
+                        Nhập lý do để từ chối cặp file này
                     </Text>
                 </Box>
             </Group>
         ),
-        children: <RejectFastqModalContent fastqFileId={fastqFileId} onSuccess={onSuccess} />,
+        children: <RejectFastqModalContent fastqPairId={fastqPairId} onSuccess={onSuccess} />,
         size: 'md',
         radius: 'lg',
         centered: true,
@@ -39,9 +39,9 @@ export const openRejectFastqModal = ({ fastqFileId, onSuccess }: RejectFastqModa
     })
 }
 
-const RejectFastqModalContent = ({ fastqFileId, onSuccess }: RejectFastqModalProps) => {
+const RejectFastqModalContent = ({ fastqPairId, onSuccess }: RejectFastqModalProps) => {
     const [rejectReason, setRejectReason] = useState('')
-    const rejectFastqMutation = useRejectFastq()
+    const rejectFastqMutation = useRejectFastqPair()
 
     const handleCloseModal = () => {
         modals.closeAll()
@@ -58,12 +58,12 @@ const RejectFastqModalContent = ({ fastqFileId, onSuccess }: RejectFastqModalPro
         }
 
         rejectFastqMutation.mutate(
-            { fastqFileId, data: { redoReason: rejectReason.trim() } },
+            { fastqPairId, data: { redoReason: rejectReason.trim() } },
             {
                 onSuccess: () => {
                     notifications.show({
                         title: 'Thành công',
-                        message: 'File FastQ đã được từ chối',
+                        message: 'Cặp file FastQ đã được từ chối',
                         color: 'green'
                     })
                     handleCloseModal()
@@ -72,7 +72,7 @@ const RejectFastqModalContent = ({ fastqFileId, onSuccess }: RejectFastqModalPro
                 onError: (error: any) => {
                     notifications.show({
                         title: 'Lỗi từ chối file',
-                        message: error.message || 'Không thể từ chối file FastQ',
+                        message: error.message || 'Không thể từ chối cặp file FastQ',
                         color: 'red'
                     })
                 }
@@ -83,7 +83,7 @@ const RejectFastqModalContent = ({ fastqFileId, onSuccess }: RejectFastqModalPro
     return (
         <Stack gap='lg'>
             <Alert color='orange' variant='light' icon={<IconAlertCircle size={16} />}>
-                File FastQ sẽ được đánh dấu là bị từ chối và cần phải tải lên lại.
+                Cặp file FastQ sẽ được đánh dấu là bị từ chối và cần phải tải lên lại.
             </Alert>
 
             <Textarea

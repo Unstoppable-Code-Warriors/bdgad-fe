@@ -182,32 +182,50 @@ const LabTestPage = () => {
             },
             {
                 accessor: 'fastq',
-                title: 'FastQ File',
+                title: 'FastQ Files',
                 width: 120,
                 textAlign: 'center',
-                render: (record) =>
-                    record?.latestFastqFile?.id ? (
-                        <Button
-                            variant='light'
-                            color='teal'
-                            size='xs'
-                            leftSection={<IconDownload size={14} />}
-                            onClick={() => handleDownloadFastQ(record.latestFastqFile.id)}
-                            loading={isDownloading}
-                        >
-                            FastQ
-                        </Button>
-                    ) : (
-                        <Text size='sm'>-</Text>
+                render: (record) => {
+                    const fastqPair = record?.latestFastqFilePair
+                    if (!fastqPair?.fastqFileR1?.id) {
+                        return <Text size='sm'>-</Text>
+                    }
+
+                    return (
+                        <Group gap={4} justify='center'>
+                            <Button
+                                variant='light'
+                                color='teal'
+                                size='xs'
+                                leftSection={<IconDownload size={12} />}
+                                onClick={() => handleDownloadFastQ(fastqPair.fastqFileR1.id)}
+                                loading={isDownloading}
+                            >
+                                R1
+                            </Button>
+                            {fastqPair.fastqFileR2?.id && (
+                                <Button
+                                    variant='light'
+                                    color='blue'
+                                    size='xs'
+                                    leftSection={<IconDownload size={12} />}
+                                    onClick={() => handleDownloadFastQ(fastqPair.fastqFileR2.id)}
+                                    loading={isDownloading}
+                                >
+                                    R2
+                                </Button>
+                            )}
+                        </Group>
                     )
+                }
             },
             {
-                accessor: 'latestFastqFile.status',
+                accessor: 'latestFastqFilePair.status',
                 title: 'Trạng thái',
                 width: 120,
                 render: (record) => (
-                    <Badge color={getStatusColor(record?.latestFastqFile?.status || '')} variant='light' size='sm'>
-                        {getStatusLabel(record?.latestFastqFile?.status || 'Chưa tải lên')}
+                    <Badge color={getStatusColor(record?.latestFastqFilePair?.status || '')} variant='light' size='sm'>
+                        {getStatusLabel(record?.latestFastqFilePair?.status || 'Chưa tải lên')}
                     </Badge>
                 )
             },

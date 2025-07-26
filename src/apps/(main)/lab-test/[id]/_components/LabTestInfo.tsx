@@ -1,6 +1,6 @@
 import { Card, Text, Group, Divider, Stack, ThemeIcon, Box, Grid } from '@mantine/core'
 import { IconFlask, IconBarcode, IconCalendar } from '@tabler/icons-react'
-import type { FastQ } from '@/types/fastq'
+import type { FastqFilePair } from '@/types/fastq'
 
 interface LabTestInfoProps {
     data: {
@@ -9,10 +9,10 @@ interface LabTestInfoProps {
         requestDate: string
         createdAt: string
     }
-    latestFastQFile?: FastQ | null
+    latestFastqFilePair?: FastqFilePair | null
 }
 
-export const LabTestInfo = ({ data, latestFastQFile }: LabTestInfoProps) => {
+export const LabTestInfo = ({ data, latestFastqFilePair }: LabTestInfoProps) => {
     return (
         <Card shadow='sm' padding='xl' radius='lg' withBorder>
             <Group gap='sm' mb='xl'>
@@ -100,7 +100,7 @@ export const LabTestInfo = ({ data, latestFastQFile }: LabTestInfoProps) => {
             </Grid>
 
             {/* Additional Information */}
-            {latestFastQFile?.redoReason && (
+            {latestFastqFilePair?.redoReason && (
                 <>
                     <Divider my='xl' />
                     <Card p='lg' radius='md' bg='red.0' withBorder>
@@ -109,11 +109,11 @@ export const LabTestInfo = ({ data, latestFastQFile }: LabTestInfoProps) => {
                                 Lý do từ chối:
                             </Text>
                             <Text size='sm' c='red.7'>
-                                {latestFastQFile.redoReason}
+                                {latestFastqFilePair.redoReason}
                             </Text>
-                            {latestFastQFile.rejector && (
+                            {latestFastqFilePair.rejector && (
                                 <Text size='xs' c='red.6' mt='xs'>
-                                    Từ chối bởi: {latestFastQFile.rejector.name}
+                                    Từ chối bởi: {latestFastqFilePair.rejector.name}
                                 </Text>
                             )}
                         </Stack>

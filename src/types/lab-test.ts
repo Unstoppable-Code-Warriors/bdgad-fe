@@ -1,5 +1,5 @@
 import type { AnalysisAssign } from './analysis'
-import type { FastQ } from './fastq'
+import type { FastqFilePair } from './fastq'
 import type { Patient } from './patient'
 import type { User } from './user'
 
@@ -16,9 +16,9 @@ export interface LabTestSession {
 }
 
 export interface LabTestSessionListItem extends LabTestSession {
-    latestFastqFile: FastQ
+    latestFastqFilePair: FastqFilePair | null
 }
 
 export interface LabTestSessionDetail extends LabTestSession {
-    fastqFiles: FastQ[]
+    fastqFilePairs: FastqFilePair[]
 }

@@ -1,11 +1,11 @@
 import { Card, Text, Group, Badge, Divider, Stack, ThemeIcon, Box, Grid, Paper } from '@mantine/core'
 import { IconFlask, IconCalendar, IconBarcode, IconClock } from '@tabler/icons-react'
-import type { AnalysisSessionDetail, FastqFileResponse, EtlResultResponse } from '@/types/analysis'
+import type { AnalysisSessionDetail, FastqFilePairResponse, EtlResultResponse } from '@/types/analysis'
 import { analysisStatusConfig } from '@/types/analysis'
 
 interface AnalysisInfoProps {
     data: AnalysisSessionDetail
-    latestFastQFile: FastqFileResponse | null
+    latestFastqFilePair: FastqFilePairResponse | null
     latestEtlResult: EtlResultResponse | null
 }
 
@@ -17,7 +17,7 @@ const getStatusLabel = (status: string) => {
     return analysisStatusConfig[status as keyof typeof analysisStatusConfig]?.label || status
 }
 
-export const AnalysisInfo = ({ data, latestFastQFile, latestEtlResult }: AnalysisInfoProps) => {
+export const AnalysisInfo = ({ data, latestFastqFilePair, latestEtlResult }: AnalysisInfoProps) => {
     return (
         <Card shadow='sm' padding='xl' radius='lg' withBorder>
             <Group gap='sm' mb='xl'>
@@ -122,14 +122,14 @@ export const AnalysisInfo = ({ data, latestFastQFile, latestEtlResult }: Analysi
                                 <Text size='sm' fw={500} c='blue'>
                                     Trạng thái FastQ
                                 </Text>
-                                {latestFastQFile?.status ? (
+                                {latestFastqFilePair?.status ? (
                                     <Badge
-                                        color={getStatusColor(latestFastQFile.status)}
+                                        color={getStatusColor(latestFastqFilePair.status)}
                                         variant='filled'
                                         size='lg'
                                         radius='md'
                                     >
-                                        {getStatusLabel(latestFastQFile.status)}
+                                        {getStatusLabel(latestFastqFilePair.status)}
                                     </Badge>
                                 ) : (
                                     <Badge color='gray' variant='filled' size='lg' radius='md'>
@@ -167,18 +167,18 @@ export const AnalysisInfo = ({ data, latestFastQFile, latestEtlResult }: Analysi
             </Stack>
 
             {/* Additional Information */}
-            {(latestFastQFile?.redoReason || latestEtlResult?.comment) && (
+            {(latestFastqFilePair?.redoReason || latestEtlResult?.comment) && (
                 <>
                     <Divider my='xl' />
                     <Stack gap='md'>
-                        {latestFastQFile?.redoReason && (
+                        {latestFastqFilePair?.redoReason && (
                             <Paper p='lg' radius='md' bg='red.0' withBorder>
                                 <Stack gap='xs'>
                                     <Text size='sm' fw={600} c='red'>
                                         Lý do từ chối FastQ:
                                     </Text>
                                     <Text size='sm' c='red.7'>
-                                        {latestFastQFile.redoReason}
+                                        {latestFastqFilePair.redoReason}
                                     </Text>
                                 </Stack>
                             </Paper>
