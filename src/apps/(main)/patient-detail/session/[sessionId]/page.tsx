@@ -267,7 +267,10 @@ const SessionDetailPage = () => {
                                 </Group>
 
                                 <Text fw={500} size='lg' mb='sm'>
-                                    Barcode: {sessionData.barcode}
+                                    Barcode:{' '}
+                                    <Text span fw={600}>
+                                        {sessionData.patient.barcode}
+                                    </Text>
                                 </Text>
 
                                 <Group gap='lg'>
