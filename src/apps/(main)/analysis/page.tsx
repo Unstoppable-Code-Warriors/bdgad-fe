@@ -198,6 +198,15 @@ const AnalysisPage = () => {
     const columns: DataTableColumn<AnalysisSessionListItem>[] = useMemo(
         () => [
             {
+                accessor: 'labcode',
+                title: 'Labcode',
+                sortable: true,
+                width: 150,
+                render: (record) => record.labcode || '-',
+                titleClassName: 'bg-white',
+                cellsClassName: 'bg-white'
+            },
+            {
                 accessor: 'barcode',
                 title: 'Barcode',
                 sortable: true,
