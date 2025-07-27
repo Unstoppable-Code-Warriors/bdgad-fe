@@ -278,8 +278,8 @@ const CategoryDetailPage = () => {
                                                 >
                                                     {getFileIcon(file.fileType)}
                                                 </ThemeIcon>
-                                                <Box style={{ flex: 1, minWidth: 0 }}>
-                                                    <Tooltip label={file.fileName} position='top'>
+                                                <Box style={{ flex: 1, minWidth: 0, height: 60 }}>
+                                                    <Tooltip label={file.fileName} position='top'>   
                                                         <Text fw={600} size='sm' lineClamp={2} c='dark'>
                                                             {file.fileName}
                                                         </Text>

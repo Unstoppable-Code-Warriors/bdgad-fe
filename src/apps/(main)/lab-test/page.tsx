@@ -1,4 +1,5 @@
 import { useCallback, useState, useMemo } from 'react'
+import { useDebouncedValue } from '@mantine/hooks'
 import { useNavigate } from 'react-router'
 import { Title, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert, Tooltip } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
@@ -9,7 +10,6 @@ import { labTestService } from '@/services/function/lab-test'
 import { notifications } from '@mantine/notifications'
 import type { LabTestSessionListItem } from '@/types/lab-test'
 import { ListSearchFilter, type SelectOption } from '@/components/ListSearchFilter'
-import { useListState } from '@/hooks/use-list-state'
 
 const getStatusColor = (status: string) => {
     return statusConfig[status as keyof typeof statusConfig]?.color || 'gray'
@@ -23,27 +23,29 @@ const LabTestPage = () => {
     const navigate = useNavigate()
     const [isDownloading, setIsDownloading] = useState(false)
 
-    // Use the new list state hook
-    const {
-        search,
-        debouncedSearch,
-        setSearch,
-        page,
-        setPage,
-        limit,
-        setLimit,
-        sortStatus,
-        handleSort,
-        filter,
-        updateFilter,
-        dateRange,
-        setDateRange
-    } = useListState<LabTestFilter>({
-        defaultSortBy: 'createdAt',
-        defaultSortOrder: 'desc'
+    // Replace useListState with direct state management
+    const [search, setSearch] = useState('')
+    const [debouncedSearch] = useDebouncedValue(search, 500)
+    const [page, setPage] = useState(1)
+    const [limit, setLimit] = useState(10)
+    const [sortStatus, setSortStatus] = useState({
+        columnAccessor: 'createdAt',
+        direction: 'desc' as 'asc' | 'desc'
     })
+    const [filter, setFilter] = useState<LabTestFilter>({})
+    const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null])
 
-    // Fetch data using the hook with proper search params
+    // Helper functions
+    const handleSort = useCallback((newSortStatus: any) => {
+        setSortStatus(newSortStatus)
+        setPage(1) 
+    }, [])
+
+    const updateFilter = useCallback((newFilter: Partial<LabTestFilter>) => {
+        setFilter(prev => ({ ...prev, ...newFilter }))
+        setPage(1) 
+    }, [])
+
     const {
         data: labTestResponse,
         isLoading,
@@ -63,7 +65,6 @@ const LabTestPage = () => {
 
     // const sendToAnalysisMutation = useSendToAnalysis()
 
-    // Status options for the filter
     const statusOptions: SelectOption[] = Object.values(LAB_TEST_STATUS).map((status) => ({
         value: status,
         label: statusConfig[status as keyof typeof statusConfig]?.label || status
@@ -153,13 +154,7 @@ const LabTestPage = () => {
                     <Text size='sm' ff='monospace'>
                         {record.barcode}
                     </Text>
-                )
-            },
-            {
-                accessor: 'patient.fullName',
-                title: 'Tên bệnh nhân',
-                width: 180,
-                render: (record) => <Text fw={500}>{record.patient.fullName}</Text>
+                ),
             },
             {
                 accessor: 'doctor.name',
@@ -261,6 +256,16 @@ const LabTestPage = () => {
         [handleDownloadFastQ, isDownloading, handleViewDetail]
     )
 
+    const handlePageChange = useCallback((newPage: number) => {
+        setPage(newPage)
+    }, [page])
+
+    const handleLimitChange = useCallback((newLimit: number) => {
+        setLimit(newLimit)
+        setPage(1)
+    }, [])
+
+
     return (
         <Stack gap='lg'>
             {/* Header */}
@@ -285,11 +290,23 @@ const LabTestPage = () => {
                 statusOptions={statusOptions}
                 statusPlaceholder='Lọc theo trạng thái'
                 dateRange={dateRange}
-                onDateRangeChange={setDateRange}
+                onDateRangeChange={(value) => {
+                    if (
+                        Array.isArray(value) &&
+                        (typeof value[0] === 'string' || typeof value[1] === 'string')
+                    ) {
+                        setDateRange([
+                            value[0] ? new Date(value[0] as string) : null,
+                            value[1] ? new Date(value[1] as string) : null
+                        ])
+                    } else {
+                        setDateRange(value as [Date | null, Date | null])
+                    }
+                }}
                 onRefresh={handleRefresh}
                 isLoading={isLoading}
                 totalRecords={totalRecords}
-                showRefreshButton={false} // We have it in the header
+                showRefreshButton={false} 
             />
 
             {/* Data Table */}
@@ -300,9 +317,9 @@ const LabTestPage = () => {
                     totalRecords={totalRecords}
                     recordsPerPage={limit}
                     recordsPerPageOptions={recordsPerPageOptions}
-                    onRecordsPerPageChange={setLimit}
+                    onRecordsPerPageChange={handleLimitChange}
                     page={page}
-                    onPageChange={setPage}
+                    onPageChange={handlePageChange}
                     paginationActiveBackgroundColor='blue'
                     loadingText='Đang tải...'
                     noRecordsText='Không có dữ liệu'
@@ -320,8 +337,8 @@ const LabTestPage = () => {
                     fetching={isLoading}
                     sortStatus={sortStatus}
                     onSortStatusChange={handleSort}
-                    pinLastColumn
                     pinFirstColumn
+                    pinLastColumn
                 />
             </Paper>
         </Stack>
