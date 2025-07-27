@@ -25,7 +25,8 @@ import {
     IconPlus,
     IconPhone,
     IconId,
-    IconMapPin
+    IconMapPin,
+    IconBarcode
 } from '@tabler/icons-react'
 import { usePatientLabSessions } from '@/services/hook/staff-patient-session.hook'
 
@@ -213,6 +214,19 @@ const PatientDetailPage = () => {
                                     <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
                                         <Stack gap='xs'>
                                             <Group gap='xs'>
+                                                <IconBarcode size={16} color='#495057' />
+                                                <Text size='sm' fw={500} c='dimmed'>
+                                                    Barcode:
+                                                </Text>
+                                                <Text size='md' fw={600}>
+                                                    {patientData?.barcode || 'Không có thông tin'}
+                                                </Text>
+                                            </Group>
+                                        </Stack>
+                                    </Grid.Col>
+                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
+                                        <Stack gap='xs'>
+                                            <Group gap='xs'>
                                                 <IconUser size={16} color='#495057' />
                                                 <Text size='sm' fw={500} c='dimmed'>
                                                     Họ và tên:
@@ -268,39 +282,19 @@ const PatientDetailPage = () => {
                                         </Stack>
                                     </Grid.Col>
 
-                                    {sessions.length > 0 && (
-                                        <Grid.Col span={12}>
-                                            <Stack gap='xs'>
-                                                <Group gap='xs'>
-                                                    <IconMapPin size={16} color='#495057' />
-                                                    <Text size='sm' fw={500} c='dimmed'>
-                                                        Địa chỉ:
-                                                    </Text>
-                                                    <Text size='md' fw={600}>
-                                                        {patientData?.address || 'Không có thông tin'}
-                                                    </Text>
-                                                </Group>
-                                            </Stack>
-                                        </Grid.Col>
-                                    )}
-
-                                    {sessions.length === 0 && (
-                                        <>
-                                            <Grid.Col span={12}>
-                                                <Stack gap='xs'>
-                                                    <Group gap='xs'>
-                                                        <IconMapPin size={16} color='#495057' />
-                                                        <Text size='sm' fw={500} c='dimmed'>
-                                                            Địa chỉ
-                                                        </Text>
-                                                    </Group>
-                                                    <Text size='md' fw={600} pl='xl'>
-                                                        {'Không có thông tin'}
-                                                    </Text>
-                                                </Stack>
-                                            </Grid.Col>
-                                        </>
-                                    )}
+                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
+                                        <Stack gap='xs'>
+                                            <Group gap='xs'>
+                                                <IconMapPin size={16} color='#495057' />
+                                                <Text size='sm' fw={500} c='dimmed'>
+                                                    Địa chỉ:
+                                                </Text>
+                                                <Text size='md' fw={600}>
+                                                    {patientData?.address || 'Không có thông tin'}
+                                                </Text>
+                                            </Group>
+                                        </Stack>
+                                    </Grid.Col>
                                 </Grid>
                             </Stack>
                         </Card>
@@ -343,10 +337,6 @@ const PatientDetailPage = () => {
                                                                 </Text>
                                                                 {getSessionTypeBadge(session.typeLabSession)}
                                                             </Group>
-
-                                                            <Text fw={500} mb='xs'>
-                                                                Barcode: {session.barcode}
-                                                            </Text>
 
                                                             <Group gap='md'>
                                                                 <Flex align='center' gap='xs'>
