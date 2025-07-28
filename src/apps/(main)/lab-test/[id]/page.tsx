@@ -174,7 +174,7 @@ const LabTestDetailPage = () => {
                     onBack={handleBack}
                     title='Chi tiết xét nghiệm'
                     pageType='lab-test'
-                    labcode={data.labcode}
+                    labcode={Array.isArray(data.labcode) ? data.labcode : [data.labcode]}
                     barcode={data.barcode}
                 />
 

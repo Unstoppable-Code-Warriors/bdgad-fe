@@ -14,7 +14,7 @@ export interface Notification {
     receiver: NotificationUser
     isRead: boolean
     createdAt: string
-    labcode?: string
+    labcode?: string[]
     barcode?: string
 }
 

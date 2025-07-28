@@ -135,7 +135,7 @@ const ValidationDetailPage = () => {
                     onBack={handleBack}
                     title='Chi tiết thẩm định'
                     pageType='validation'
-                    labcode={data.labcode}
+                    labcode={Array.isArray(data.labcode) ? data.labcode : [data.labcode]}
                     barcode={data.barcode}
                 />
 

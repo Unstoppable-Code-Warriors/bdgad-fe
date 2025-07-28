@@ -148,6 +148,12 @@ export const staffService = {
             data.append('ocrResult', formData.ocrResult)
         }
 
+        // Append labcode array (FormData only accepts strings, so append each value separately)
+        const labcodeArray = ['O5123A', 'N5456B']
+        labcodeArray.forEach((labcode) => {
+            data.append('labcode', labcode)
+        })
+
         return backendApi
             .post(`${PREFIX}/patient-files/upload`, {
                 body: data,

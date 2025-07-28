@@ -155,7 +155,7 @@ const ValidationPage = () => {
                 title: 'Labcode',
                 sortable: true,
                 width: 120,
-                render: (record) => record.labcode
+                render: (record) => (Array.isArray(record.labcode) ? record.labcode.join(', ') : record.labcode)
             },
             {
                 accessor: 'barcode',

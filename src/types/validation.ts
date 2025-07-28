@@ -41,7 +41,7 @@ export interface ValidationEtlResultResponse {
 
 export interface ValidationSessionResponse {
     id: number
-    labcode: string
+    labcode: string[]
     barcode: string
     requestDate: string
     createdAt: string
