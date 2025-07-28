@@ -6,6 +6,9 @@ export const usePatientFolders = (params: {
     limit?: number
     search?: string
     filter?: string
+    sortOrder?: string
+    dateFrom?: string
+    dateTo?: string
 } = {}) => {
     return useQuery({
         queryKey: ['patient-folders', params],
