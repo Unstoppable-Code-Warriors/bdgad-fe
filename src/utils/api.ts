@@ -2,8 +2,8 @@ import ky, { type KyInstance, type Options } from 'ky'
 import { getAccessToken, getRefreshToken, setTokensOutside, logoutOutside } from '@/stores/auth.store'
 
 // Environment variables or configuration
-const AUTH_BASE_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3001'
-const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:3000'
+const AUTH_BASE_URL = import.meta.env.VITE_AUTH_API_URL || 'https://auth.bdgad.bio'
+const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || 'https://be.bdgad.bio'
 
 // Common configuration for all API instances
 const commonConfig: Options = {

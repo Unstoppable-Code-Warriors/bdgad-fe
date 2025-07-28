@@ -373,7 +373,7 @@ const AnalysisPage = () => {
                 <Stack gap='md'>
                     <Group grow>
                         <TextInput
-                            placeholder='Tìm kiếm theo barcode'
+                            placeholder='Tìm kiếm theo mã labcode, barcode'
                             leftSection={<IconSearch size={16} />}
                             value={search}
                             onChange={(event) => setSearch(event.currentTarget.value)}

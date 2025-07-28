@@ -18,7 +18,7 @@ import {
 import {
     IconArrowLeft,
     IconDownload,
-    IconEye,
+    IconTrash, // Add this import
     IconFileText,
     IconPhoto,
     IconFileWord,
@@ -35,6 +35,7 @@ import { usePatientLabSessionDetail } from '@/services/hook/staff-patient-sessio
 import SendFilesModal from '../components/SendFilesModal'
 import { notifications } from '@mantine/notifications'
 import { useDownloadPatientFile } from '@/services/hook/staff-general-files.hook'
+import { modals } from '@mantine/modals'
 
 const getFileIcon = (fileType: string) => {
     switch (fileType.toLowerCase()) {
@@ -101,7 +102,7 @@ const SessionDetailPage = () => {
     const navigate = useNavigate()
     const [isSendModalOpen, setIsSendModalOpen] = useState(false)
 
-    const { data: sessionData, isLoading, error } = usePatientLabSessionDetail(sessionId!)
+    const { data: sessionData, isLoading, error, refetch } = usePatientLabSessionDetail(sessionId!) // Add refetch
 
     const downloadMutation = useDownloadPatientFile()
 
@@ -109,27 +110,19 @@ const SessionDetailPage = () => {
         navigate(`/patient-detail/${patientId}`)
     }
 
-    const handleViewFile = (filePath: string) => {
-        window.open(filePath, '_blank')
-    }
+
 
     const handleDownloadFile = useCallback(
         async (fileId: string, fileName?: string) => {
             try {
-                // Fetch the file using the download mutation
                 const response = await downloadMutation.mutateAsync({ patientFileId: fileId!, sessionId: sessionId! })
-
-                console.log('Download response:', response)
 
                 let downloadUrl: string
                 let finalFileName = fileName || 'downloaded-file'
 
-                // Handle different response types
                 if (typeof response === 'string') {
-                    // If response is a direct URL string
                     downloadUrl = response.trim()
                 } else if (response && typeof response === 'object') {
-                    // If response is an object, try to get the URL
                     downloadUrl = response.downloadUrl || response.url || response.data || String(response)
                     finalFileName = response.fileName || response.filename || finalFileName
                 } else {
@@ -145,7 +138,6 @@ const SessionDetailPage = () => {
                 const link = document.createElement('a')
                 link.href = downloadUrl
                 link.download = finalFileName
-                link.target = '_blank'
                 document.body.appendChild(link)
                 link.click()
                 document.body.removeChild(link)
@@ -174,6 +166,43 @@ const SessionDetailPage = () => {
     const handleCloseSendModal = () => {
         setIsSendModalOpen(false)
     }
+
+    const handleDeleteFile = useCallback(
+        (fileId: string, fileName: string) => {
+            modals.openConfirmModal({
+                title: 'Xác nhận xóa file',
+                children: (
+                    <Text size='sm'>
+                        Bạn có chắc chắn muốn xóa file <strong>{fileName}</strong>? Hành động này không thể hoàn tác.
+                    </Text>
+                ),
+                labels: { confirm: 'Xóa', cancel: 'Hủy' },
+                confirmProps: { color: 'red' },
+                onConfirm: async () => {
+                    try {
+                        console.log('Deleting file with ID:', fileId)
+                        // await deletePatientFile(fileId)
+
+                        notifications.show({
+                            title: 'Thành công',
+                            message: `Đã xóa file ${fileName}`,
+                            color: 'green'
+                        })
+
+                        // Refresh data after delete
+                        refetch()
+                    } catch (error) {
+                        notifications.show({
+                            title: 'Lỗi',
+                            message: `Không thể xóa file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                            color: 'red'
+                        })
+                    }
+                }
+            })
+        },
+        [refetch]
+    )
 
     if (isLoading) {
         return (
@@ -346,16 +375,6 @@ const SessionDetailPage = () => {
                                                 <Group gap='xs' mt='auto'>
                                                     <ActionIcon
                                                         variant='light'
-                                                        color='blue'
-                                                        size='sm'
-                                                        onClick={() => handleViewFile(file.filePath)}
-                                                        flex={1}
-                                                        title='Xem file'
-                                                    >
-                                                        <IconEye size={14} />
-                                                    </ActionIcon>
-                                                    <ActionIcon
-                                                        variant='light'
                                                         color='green'
                                                         size='sm'
                                                         onClick={() => handleDownloadFile(file.id, file.fileName)}
@@ -363,6 +382,16 @@ const SessionDetailPage = () => {
                                                         title='Tải xuống'
                                                     >
                                                         <IconDownload size={14} />
+                                                    </ActionIcon>
+                                                    <ActionIcon
+                                                        variant='light'
+                                                        color='red'
+                                                        size='sm'
+                                                        onClick={() => handleDeleteFile(file.id, file.fileName)}
+                                                        flex={1}
+                                                        title='Xóa file'
+                                                    >
+                                                        <IconTrash size={14} />
                                                     </ActionIcon>
                                                 </Group>
                                             </Stack>
