@@ -87,6 +87,8 @@ export const analysisService = {
     },
 
     retryEtlProcess: async (etlResultId: number): Promise<{ message: string }> => {
+        console.log('Retrying ETL process for result ID:', etlResultId)
+        console.log('API Call:', `${PREFIX}/etl-result/${etlResultId}/retry`)
         return await backendApi.post(`${PREFIX}/etl-result/${etlResultId}/retry`).json<{ message: string }>()
     }
 }
