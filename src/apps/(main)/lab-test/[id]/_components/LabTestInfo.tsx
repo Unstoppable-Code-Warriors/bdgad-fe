@@ -47,7 +47,9 @@ export const LabTestInfo = ({ data, latestFastqFilePair }: LabTestInfoProps) => 
                                         Labcode:
                                     </Text>
                                     <Text fw={600} size='sm' ff='monospace'>
-                                        {data.labcode}
+                                        {data.labcode.length > 1
+                                            ? Array.from(data.labcode).join(', ')
+                                            : data.labcode[0]}
                                     </Text>
                                 </Group>
 
