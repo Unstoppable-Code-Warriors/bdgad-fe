@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import {
     Container,
@@ -15,7 +15,9 @@ import {
     Box,
     Menu,
     ActionIcon,
-    Modal
+    Modal,
+    Pagination,
+    Select
 } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import {
@@ -42,32 +44,58 @@ const PatientFolderPage = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [selectedPatient, setSelectedPatient] = useState<any>(null)
     const [errorMess, setErrorMess] = useState('')
+    const [page, setPage] = useState(1)
+    const [limit, setLimit] = useState(16)
+    const [sortOrder, setSortOrder] = useState('desc')
 
     // Use hooks
     const { data: patientsResponse, isLoading } = usePatientFolders({
-        search: searchTerm
+        search: searchTerm,
+        page: page,
+        limit: limit,
+        sortOrder: sortOrder,
+        dateFrom: dateRange[0] ? dateRange[0].toISOString().split('T')[0] : undefined,
+        dateTo: dateRange[1] ? dateRange[1].toISOString().split('T')[0] : undefined
     })
 
     const deletePatientMutation = useDeletePatientFolder()
 
     const patients = patientsResponse?.data || patientsResponse || []
+    const totalPages = patientsResponse?.meta?.totalPages || 1
+    const totalCount = patientsResponse?.meta?.total || 0
 
-    const filteredPatients = patients.filter((patient: any) => {
-        const matchesSearch =
-            patient.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            patient.citizenId?.toLowerCase().includes(searchTerm.toLowerCase())
-
-        const patientDate = new Date(patient.createdAt)
-        const [dateFrom, dateTo] = dateRange
-        const matchesDateRange = (!dateFrom || patientDate >= dateFrom) && (!dateTo || patientDate <= dateTo)
-
-        return matchesSearch && matchesDateRange
-    })
+    // Use server-side filtered results from the API
+    const displayedPatients = patients
 
     const clearFilters = useCallback(() => {
         setSearchTerm('')
         setDateRange([null, null])
+        setSortOrder('desc')
+        setPage(1)
     }, [])
+
+    const handlePageChange = useCallback((newPage: number) => {
+        setPage(newPage)
+    }, [])
+
+    const handleLimitChange = useCallback((newLimit: string | null) => {
+        if (newLimit) {
+            setLimit(parseInt(newLimit))
+            setPage(1) // Reset to first page when changing limit
+        }
+    }, [])
+
+    const handleSortOrderChange = useCallback((newSortOrder: string | null) => {
+        if (newSortOrder) {
+            setSortOrder(newSortOrder)
+            setPage(1) // Reset to first page when changing sort order
+        }
+    }, [])
+
+    // Reset page when search term, date range, or sort order changes
+    useEffect(() => {
+        setPage(1)
+    }, [searchTerm, dateRange, sortOrder])
 
     const handleAddPatient = useCallback(() => {
         setIsAddModalOpen(true)
@@ -138,7 +166,7 @@ const PatientFolderPage = () => {
     }, [selectedPatient, deletePatientMutation, handleCloseDeleteModal])
 
     return (
-        <Container size='xl' py='xl'>
+        <Container size='xl'>
             <Stack gap='lg'>
                 {/* Header */}
                 <Group justify='space-between'>
@@ -152,36 +180,56 @@ const PatientFolderPage = () => {
 
                 {/* Search and Filters */}
                 <Paper p='md' withBorder>
-                    <Group grow>
-                        <TextInput
-                            placeholder='Tìm kiếm theo tên, mã định danh...'
-                            leftSection={<IconSearch size={16} />}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.currentTarget.value)}
-                        />
+                    <Stack gap='md'>
+                        <Group grow>
+                            <TextInput
+                                placeholder='Tìm kiếm theo tên, mã định danh...'
+                                leftSection={<IconSearch size={16} />}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.currentTarget.value)}
+                            />
 
-                        <DatePickerInput
-                            type='range'
-                            placeholder='Chọn khoảng thời gian'
-                            leftSection={<IconCalendar size={16} />}
-                            value={dateRange}
-                            onChange={(value) => {
-                                setDateRange([
-                                    value[0] ? new Date(value[0]) : null,
-                                    value[1] ? new Date(value[1]) : null
-                                ])
-                            }}
-                            clearable
-                        />
-                        <Button variant='light' onClick={clearFilters}>
-                            Xóa bộ lọc
-                        </Button>
-                    </Group>
+                            <DatePickerInput
+                                type='range'
+                                placeholder='Chọn khoảng thời gian'
+                                leftSection={<IconCalendar size={16} />}
+                                value={dateRange}
+                                onChange={(value) => {
+                                    setDateRange([
+                                        value[0] ? new Date(value[0]) : null,
+                                        value[1] ? new Date(value[1]) : null
+                                    ])
+                                }}
+                                clearable
+                            />
+
+                            <Select
+                                placeholder='Sắp xếp theo'
+                                value={sortOrder}
+                                onChange={handleSortOrderChange}
+                                data={[
+                                    { value: 'asc', label: 'Cũ nhất' },
+                                    { value: 'desc', label: 'Mới nhất' }
+                                ]}
+                                style={{ minWidth: 120 }}
+                            />
+
+                            <Button variant='light' onClick={clearFilters}>
+                                Xóa bộ lọc
+                            </Button>
+                        </Group>
+
+                        <Group justify='space-between' align='center'>
+                            <Text size='sm' c='dimmed'>
+                                Tổng số: {totalCount} bệnh nhân
+                            </Text>
+                        </Group>
+                    </Stack>
                 </Paper>
 
                 {/* Patient Cards Grid */}
                 <Grid>
-                    {filteredPatients.map((patient: any) => (
+                    {displayedPatients.map((patient: any) => (
                         <Grid.Col key={patient.id} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
                             <Card
                                 shadow='sm'
@@ -243,9 +291,13 @@ const PatientFolderPage = () => {
                                         </Box>
 
                                         <Flex align='center' gap='xs' mt='xs'>
-                                            <IconCalendarEvent size={14} />
+                                            {patient.latestLabSession && <IconCalendarEvent size={14} />}
                                             <Text size='xs' c='dimmed'>
-                                                {new Date(patient.createdAt).toLocaleDateString('vi-VN')}
+                                                {patient.latestLabSession?.createdAt
+                                                    ? new Date(patient.latestLabSession.createdAt).toLocaleDateString(
+                                                          'vi-VN'
+                                                      )
+                                                    : 'Chưa có lần khám'}
                                             </Text>
                                         </Flex>
                                     </Stack>
@@ -263,7 +315,7 @@ const PatientFolderPage = () => {
                 )}
 
                 {/* Empty State */}
-                {!isLoading && filteredPatients.length === 0 && (
+                {!isLoading && displayedPatients.length === 0 && (
                     <Paper p='xl' ta='center'>
                         <IconUser size={48} color='gray' />
                         <Title order={4} mt='md' c='dimmed'>
@@ -274,7 +326,38 @@ const PatientFolderPage = () => {
                         </Text>
                     </Paper>
                 )}
+                <Paper p='md' withBorder>
+                    <Group justify='space-between' align='center'>
+                        <Group gap='xs'>
+                            <Text size='sm' c='dimmed'>
+                                Hiển thị:
+                            </Text>
+                            <Select
+                                value={limit.toString()}
+                                onChange={handleLimitChange}
+                                data={[
+                                    { value: '16', label: '16' },
+                                    { value: '32', label: '32' },
+                                    { value: '64', label: '64' }
+                                ]}
+                                style={{ width: 80 }}
+                            />
+                            <Text size='sm' c='dimmed'>
+                                mục/trang
+                            </Text>
+                        </Group>
 
+                        {!isLoading && displayedPatients.length > 0 && totalPages > 1 && (
+                            <Pagination
+                                value={page}
+                                onChange={handlePageChange}
+                                total={totalPages}
+                                size='sm'
+                                withEdges
+                            />
+                        )}
+                    </Group>
+                </Paper>
                 {/* Add Patient Modal */}
                 <AddPatientModal opened={isAddModalOpen} onClose={handleCloseAddModal} />
 

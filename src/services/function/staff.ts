@@ -93,6 +93,9 @@ export const staffService = {
         limit?: number
         search?: string
         filter?: string
+        sortOrder?: string
+        dateFrom?: string
+        dateTo?: string
     }): Promise<any> => {
         const searchParams = new URLSearchParams()
 
@@ -100,6 +103,9 @@ export const staffService = {
         if (params?.limit) searchParams.append('limit', params.limit.toString())
         if (params?.search) searchParams.append('search', params.search)
         if (params?.filter) searchParams.append('filter', params.filter)
+        if (params?.sortOrder) searchParams.append('sortOrder', params.sortOrder)
+        if (params?.dateFrom) searchParams.append('dateFrom', params.dateFrom)
+        if (params?.dateTo) searchParams.append('dateTo', params.dateTo)
 
         const queryString = searchParams.toString()
         const url = queryString ? `${PREFIX}/patients?${queryString}` : `${PREFIX}/patients`
