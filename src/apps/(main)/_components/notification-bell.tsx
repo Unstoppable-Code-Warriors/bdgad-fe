@@ -75,32 +75,32 @@ const NotificationBell = () => {
 
         switch (userRole) {
             case Role.LAB_TESTING_TECHNICIAN:
-                if (notification.labcode) {
-                    navigate(`/lab-test?search=${notification.labcode}`)
+                if (notification.barcode) {
+                    navigate(`/lab-test?search=${notification.barcode}`)
                 } else {
                     navigate('/lab-test')
                 }
                 break
 
             case Role.ANALYSIS_TECHNICIAN:
-                if (notification.labcode) {
-                    navigate(`/analysis?search=${notification.labcode}`)
+                if (notification.barcode) {
+                    navigate(`/analysis?search=${notification.barcode}`)
                 } else {
                     navigate('/analysis')
                 }
                 break
 
             case Role.VALIDATION_TECHNICIAN:
-                if (notification.labcode) {
-                    navigate(`/validation?search=${notification.labcode}`)
+                if (notification.barcode) {
+                    navigate(`/validation?search=${notification.barcode}`)
                 } else {
                     navigate('/validation')
                 }
                 break
 
             case Role.DOCTOR:
-                if (notification.labcode) {
-                    navigate(`/doctor-dashboard?search=${notification.labcode}`)
+                if (notification.barcode) {
+                    navigate(`/doctor-dashboard?search=${notification.barcode}`)
                 } else {
                     navigate('/doctor-dashboard')
                 }
@@ -108,8 +108,8 @@ const NotificationBell = () => {
 
             case Role.STAFF:
             default:
-                if (notification.labcode) {
-                    navigate(`/lab-test?search=${notification.labcode}`)
+                if (notification.barcode) {
+                    navigate(`/lab-test?search=${notification.barcode}`)
                 } else {
                     navigate('/lab-test')
                 }
@@ -134,6 +134,12 @@ const NotificationBell = () => {
         } else {
             return `${days} ngày trước`
         }
+    }
+
+    // Helper function để format labcode array thành string
+    const formatLabcode = (labcode?: string[]) => {
+        if (!labcode || labcode.length === 0) return null
+        return labcode.join(', ')
     }
 
     const getNotificationColor = (type: string, subType?: string) => {
@@ -259,6 +265,20 @@ const NotificationBell = () => {
                                         <Text size='xs' c='dimmed' lineClamp={2} mr='lg'>
                                             {notification.message}
                                         </Text>
+                                        {(notification.labcode || notification.barcode) && (
+                                            <Group gap='xs'>
+                                                {notification.labcode && (
+                                                    <Text size='xs' c='blue.6' fw={500}>
+                                                        Labcode: {formatLabcode(notification.labcode)}
+                                                    </Text>
+                                                )}
+                                                {notification.barcode && (
+                                                    <Text size='xs' c='green.6' fw={500}>
+                                                        Barcode: {notification.barcode}
+                                                    </Text>
+                                                )}
+                                            </Group>
+                                        )}
                                         <Group justify='space-between' align='center'>
                                             <Text size='xs' c='dimmed'>
                                                 Từ: {notification.sender.name}

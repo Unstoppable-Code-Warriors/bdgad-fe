@@ -5,11 +5,16 @@ interface PageHeaderProps {
     onBack: () => void
     title: string
     pageType: 'lab-test' | 'analysis' | 'validation'
-    labcode?: string
+    labcode?: string[]
     barcode?: string
 }
 
 export const PageHeader = ({ onBack, title, pageType, labcode, barcode }: PageHeaderProps) => {
+    const formatLabcode = (labcode?: string[]) => {
+        if (!labcode || labcode.length === 0) return null
+        return labcode.join(', ')
+    }
+
     const getBreadcrumbs = () => {
         if (pageType === 'lab-test') {
             return [
@@ -44,13 +49,6 @@ export const PageHeader = ({ onBack, title, pageType, labcode, barcode }: PageHe
             return { from: 'teal', to: 'green', deg: 45 }
         }
         return { from: 'blue', to: 'cyan', deg: 45 }
-    }
-
-    const getLabTitle = () => {
-        if (pageType === 'validation') {
-            return 'Labcode'
-        }
-        return pageType === 'lab-test' ? 'Mã xét nghiệm' : 'Labcode'
     }
 
     const breadcrumbs = getBreadcrumbs()
@@ -104,15 +102,15 @@ export const PageHeader = ({ onBack, title, pageType, labcode, barcode }: PageHe
                         </Title>
                         {(labcode || barcode) && (
                             <Text size='md' c={`${pageType === 'validation' ? 'teal' : 'blue'}.6`} fw={500} mt={4}>
-                                {labcode && (
+                                {labcode && labcode.length > 0 && (
                                     <>
-                                        {getLabTitle()}:{' '}
+                                        Labcode:{' '}
                                         <Text span fw={600} c={`${pageType === 'validation' ? 'teal' : 'blue'}.7`}>
-                                            {labcode}
+                                            {formatLabcode(labcode)}
                                         </Text>
                                     </>
                                 )}
-                                {labcode && barcode && ' • '}
+                                {labcode && labcode.length > 0 && barcode && ' • '}
                                 {barcode && (
                                     <>
                                         Barcode:{' '}

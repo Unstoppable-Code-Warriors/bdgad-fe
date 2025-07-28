@@ -38,12 +38,12 @@ const LabTestPage = () => {
     // Helper functions
     const handleSort = useCallback((newSortStatus: any) => {
         setSortStatus(newSortStatus)
-        setPage(1) 
+        setPage(1)
     }, [])
 
     const updateFilter = useCallback((newFilter: Partial<LabTestFilter>) => {
-        setFilter(prev => ({ ...prev, ...newFilter }))
-        setPage(1) 
+        setFilter((prev) => ({ ...prev, ...newFilter }))
+        setPage(1)
     }, [])
 
     const {
@@ -139,9 +139,7 @@ const LabTestPage = () => {
                 title: 'Labcode',
                 width: 120,
                 render: (record) => (
-                    <Text fw={500} c='blue'>
-                        {record.labcode}
-                    </Text>
+                    <Text>{Array.isArray(record.labcode) ? record.labcode.join(', ') : record.labcode}</Text>
                 ),
                 titleClassName: 'bg-white',
                 cellsClassName: 'bg-white'
@@ -150,11 +148,7 @@ const LabTestPage = () => {
                 accessor: 'barcode',
                 title: 'Barcode',
                 width: 120,
-                render: (record) => (
-                    <Text size='sm' ff='monospace'>
-                        {record.barcode}
-                    </Text>
-                ),
+                render: (record) => <Text>{record.barcode}</Text>
             },
             {
                 accessor: 'doctor.name',
@@ -256,15 +250,17 @@ const LabTestPage = () => {
         [handleDownloadFastQ, isDownloading, handleViewDetail]
     )
 
-    const handlePageChange = useCallback((newPage: number) => {
-        setPage(newPage)
-    }, [page])
+    const handlePageChange = useCallback(
+        (newPage: number) => {
+            setPage(newPage)
+        },
+        [page]
+    )
 
     const handleLimitChange = useCallback((newLimit: number) => {
         setLimit(newLimit)
         setPage(1)
     }, [])
-
 
     return (
         <Stack gap='lg'>
@@ -291,10 +287,7 @@ const LabTestPage = () => {
                 statusPlaceholder='Lọc theo trạng thái'
                 dateRange={dateRange}
                 onDateRangeChange={(value) => {
-                    if (
-                        Array.isArray(value) &&
-                        (typeof value[0] === 'string' || typeof value[1] === 'string')
-                    ) {
+                    if (Array.isArray(value) && (typeof value[0] === 'string' || typeof value[1] === 'string')) {
                         setDateRange([
                             value[0] ? new Date(value[0] as string) : null,
                             value[1] ? new Date(value[1] as string) : null
@@ -306,7 +299,7 @@ const LabTestPage = () => {
                 onRefresh={handleRefresh}
                 isLoading={isLoading}
                 totalRecords={totalRecords}
-                showRefreshButton={false} 
+                showRefreshButton={false}
             />
 
             {/* Data Table */}

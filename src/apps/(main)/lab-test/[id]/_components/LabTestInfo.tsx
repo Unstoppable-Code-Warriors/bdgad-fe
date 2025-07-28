@@ -37,14 +37,14 @@ export const LabTestInfo = ({ data, latestFastqFilePair }: LabTestInfoProps) => 
                             <Group gap='xs'>
                                 <IconBarcode size={16} color='var(--mantine-color-blue-6)' />
                                 <Text size='sm' fw={600} c='blue'>
-                                    Mã định danh
+                                    Mã xét nghiệm
                                 </Text>
                             </Group>
 
                             <Stack gap='sm'>
                                 <Group justify='space-between'>
                                     <Text size='sm' c='dimmed'>
-                                        Mã xét nghiệm:
+                                        Labcode:
                                     </Text>
                                     <Text fw={600} size='sm' ff='monospace'>
                                         {data.labcode}
