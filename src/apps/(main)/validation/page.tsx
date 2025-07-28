@@ -155,11 +155,7 @@ const ValidationPage = () => {
                 title: 'Labcode',
                 sortable: true,
                 width: 120,
-                render: (record) => (
-                    <Text fw={500} c='blue'>
-                        {record.labcode}
-                    </Text>
-                )
+                render: (record) => record.labcode
             },
             {
                 accessor: 'barcode',

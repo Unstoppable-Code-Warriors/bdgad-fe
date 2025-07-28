@@ -61,7 +61,7 @@ export interface EtlResultResponse {
 
 export interface AnalysisSession {
     id: number
-    labcode: string
+    labcode: string[]
     barcode: string
     requestDate: string
     createdAt: string

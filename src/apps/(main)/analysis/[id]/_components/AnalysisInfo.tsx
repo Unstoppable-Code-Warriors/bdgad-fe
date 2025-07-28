@@ -52,7 +52,9 @@ export const AnalysisInfo = ({ data, latestFastqFilePair, latestEtlResult }: Ana
                                         Labcode:
                                     </Text>
                                     <Text fw={600} size='sm'>
-                                        {data.labcode}
+                                        {data.labcode.length > 1
+                                            ? Array.from(data.labcode).join(', ')
+                                            : data.labcode[0]}
                                     </Text>
                                 </Group>
 

@@ -49,7 +49,9 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                                         Labcode:
                                     </Text>
                                     <Text fw={600} size='sm'>
-                                        {validation.labcode}
+                                        {validation.labcode.length > 1
+                                            ? Array.from(validation.labcode).join(', ')
+                                            : validation.labcode[0]}
                                     </Text>
                                 </Group>
 

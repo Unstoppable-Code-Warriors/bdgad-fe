@@ -289,7 +289,7 @@ const AnalysisDetailPage = () => {
                     onBack={handleBack}
                     title='Chi tiết phân tích'
                     pageType='analysis'
-                    labcode={data.labcode}
+                    labcode={Array.isArray(data.labcode) ? data.labcode : [data.labcode]}
                     barcode={data.barcode}
                 />
 

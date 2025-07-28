@@ -202,9 +202,7 @@ const AnalysisPage = () => {
                 title: 'Labcode',
                 width: 120,
                 render: (record) => (
-                    <Text fw={500} c='blue'>
-                        {record.labcode}
-                    </Text>
+                    <Text>{Array.isArray(record.labcode) ? record.labcode.join(', ') : record.labcode}</Text>
                 ),
                 titleClassName: 'bg-white',
                 cellsClassName: 'bg-white'
