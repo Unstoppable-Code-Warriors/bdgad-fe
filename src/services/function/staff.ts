@@ -110,7 +110,6 @@ export const staffService = {
         const queryString = searchParams.toString()
         const url = queryString ? `${PREFIX}/patients?${queryString}` : `${PREFIX}/patients`
 
-        console.log('Fetching patient folders with URL:', url)
         return backendApi.get(url).json()
     },
 
