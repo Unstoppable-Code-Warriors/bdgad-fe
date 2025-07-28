@@ -72,6 +72,7 @@ const AnalysisDetailPage = () => {
     // Get the latest ETL result
     const latestEtlResult = data?.etlResults && data.etlResults.length > 0 ? data.etlResults[0] : null
 
+    console.log('Latest Etl File:', latestEtlResult)
     const handleBack = () => {
         navigate('/analysis')
     }

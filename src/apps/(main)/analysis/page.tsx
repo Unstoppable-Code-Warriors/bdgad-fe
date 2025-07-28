@@ -286,7 +286,7 @@ const AnalysisPage = () => {
                                 <ActionIcon
                                     variant='light'
                                     color='green'
-                                    onClick={() => handleProcessAnalysis(record.latestFastqPairFile!.fastqFileR1.id)}
+                                    onClick={() => handleProcessAnalysis(record.latestFastqPairFile!.id)}
                                     loading={processAnalysisMutation.isPending}
                                 >
                                     <IconPlayerPlay size={16} />
@@ -328,7 +328,7 @@ const AnalysisPage = () => {
                                     <ActionIcon
                                         variant='light'
                                         color='orange'
-                                        onClick={() => handleRetryEtlResult(record.latestFastqPairFile!.fastqFileR1.id)}
+                                        onClick={() => handleRetryEtlResult(record.latestFastqPairFile!.id)}
                                         loading={processAnalysisMutation.isPending}
                                     >
                                         <IconRefresh size={16} />
