@@ -234,7 +234,7 @@ const AnalysisPage = () => {
             },
             {
                 accessor: 'requestDate',
-                title: 'Ngày chỉ định',
+                title: 'Ngày Yêu Cầu',
                 sortable: true,
                 width: 130,
                 render: (record) => new Date(record.requestDate).toLocaleDateString('vi-VN')

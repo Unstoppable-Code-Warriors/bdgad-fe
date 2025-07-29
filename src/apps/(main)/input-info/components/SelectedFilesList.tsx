@@ -13,7 +13,7 @@ const SelectedFilesList = ({ files, onRemove }: SelectedFilesListProps) => {
 
     return (
         <Stack gap="xs" mt="md">
-            <Text size="sm" fw={500}>Selected Files ({files.length})</Text>
+            <Text size="sm" fw={500}>Danh sách file ({files.length})</Text>
             {files.map((file, index) => (
                 <Alert key={index} color='blue' variant='light'>
                     <Group justify='space-between'>

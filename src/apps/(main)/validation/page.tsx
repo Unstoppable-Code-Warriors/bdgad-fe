@@ -182,7 +182,7 @@ const ValidationPage = () => {
             },
             {
                 accessor: 'requestDate',
-                title: 'Ngày chỉ định',
+                title: 'Ngày yêu cầu',
                 sortable: true,
                 width: 120,
                 render: (record) => new Date(record.requestDate).toLocaleDateString('vi-VN')

@@ -165,7 +165,7 @@ const LabTestPage = () => {
             },
             {
                 accessor: 'requestDate',
-                title: 'Ngày chỉ định',
+                title: 'Ngày yêu cầu',
                 width: 120,
                 render: (record) => <Text size='sm'>{new Date(record.requestDate).toLocaleDateString('vi-VN')}</Text>
             },

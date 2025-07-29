@@ -45,7 +45,7 @@ const PatientFolderPage = () => {
     const [selectedPatient, setSelectedPatient] = useState<any>(null)
     const [errorMess, setErrorMess] = useState('')
     const [page, setPage] = useState(1)
-    const [limit, setLimit] = useState(16)
+    const [limit, setLimit] = useState(12)
     const [sortOrder, setSortOrder] = useState('desc')
 
     // Use hooks
@@ -62,9 +62,7 @@ const PatientFolderPage = () => {
 
     const patients = patientsResponse?.data || patientsResponse || []
     const totalPages = patientsResponse?.meta?.totalPages || 1
-    const totalCount = patientsResponse?.meta?.total || 0
 
-    // Use server-side filtered results from the API
     const displayedPatients = patients
 
     const clearFilters = useCallback(() => {
@@ -81,18 +79,18 @@ const PatientFolderPage = () => {
     const handleLimitChange = useCallback((newLimit: string | null) => {
         if (newLimit) {
             setLimit(parseInt(newLimit))
-            setPage(1) // Reset to first page when changing limit
+            setPage(1) 
         }
     }, [])
 
     const handleSortOrderChange = useCallback((newSortOrder: string | null) => {
         if (newSortOrder) {
             setSortOrder(newSortOrder)
-            setPage(1) // Reset to first page when changing sort order
+            setPage(1) 
         }
     }, [])
 
-    // Reset page when search term, date range, or sort order changes
+
     useEffect(() => {
         setPage(1)
     }, [searchTerm, dateRange, sortOrder])
@@ -140,16 +138,16 @@ const PatientFolderPage = () => {
     const handleDeletePatient = useCallback(async () => {
         if (selectedPatient) {
             try {
-                setErrorMess('') // Clear previous errors
+                setErrorMess('') 
                 const res = await deletePatientMutation.mutateAsync(selectedPatient.id)
 
                 if (res.code && res.code === 'PATIENT_HAS_LAB_SESSION') {
-                    setErrorMess('Không thể xóa bệnh nhân này vì đã có lần khám.')
+                    setErrorMess('Không thể thư mục xóa bệnh nhân này vì đã có lần khám.')
                     return
                 }
                 notifications.show({
                     title: 'Thành công',
-                    message: 'Xóa bệnh nhân thành công',
+                    message: 'Xóa thư mục bệnh nhân thành công',
                     color: 'green'
                 })
 
@@ -158,7 +156,7 @@ const PatientFolderPage = () => {
                 console.error('Error deleting patient:', error)
                 notifications.show({
                     title: 'Lỗi',
-                    message: 'Không thể xóa bệnh nhân',
+                    message: 'Không thể thư mục xóa bệnh nhân',
                     color: 'red'
                 })
             }
@@ -219,11 +217,6 @@ const PatientFolderPage = () => {
                             </Button>
                         </Group>
 
-                        <Group justify='space-between' align='center'>
-                            <Text size='sm' c='dimmed'>
-                                Tổng số: {totalCount} bệnh nhân
-                            </Text>
-                        </Group>
                     </Stack>
                 </Paper>
 
@@ -336,14 +329,13 @@ const PatientFolderPage = () => {
                                 value={limit.toString()}
                                 onChange={handleLimitChange}
                                 data={[
-                                    { value: '16', label: '16' },
-                                    { value: '32', label: '32' },
-                                    { value: '64', label: '64' }
+                                    { value: '8', label: '8' },
+                                    { value: '12', label: '12' },
                                 ]}
                                 style={{ width: 80 }}
                             />
                             <Text size='sm' c='dimmed'>
-                                mục/trang
+                                thư mục/trang
                             </Text>
                         </Group>
 

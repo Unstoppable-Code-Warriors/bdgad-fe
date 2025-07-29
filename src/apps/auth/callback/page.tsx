@@ -37,7 +37,7 @@ const CallbackPage = () => {
                     let error = ''
 
                     if (errorParam == 'ACCOUNT_INACTIVE') {
-                        error = 'Tài khoản của bạn bị vô hiệu hóa.'
+                        error = 'Tài khoản của bạn bị tạm dừng hoạt động.'
                     }
                     const errorMessage = message ? decodeURIComponent(message) : 'Đăng nhập Google thất bại'
                     setError(error || errorMessage)

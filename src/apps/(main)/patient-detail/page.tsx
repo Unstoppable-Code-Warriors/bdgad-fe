@@ -303,70 +303,91 @@ const PatientDetailPage = () => {
                     {/* Sessions List */}
                     {sessions.length > 0 && (
                         <Grid.Col span={8}>
-                            <Stack gap='md' h='100%'>
-                                <Text fw={600} size='lg'>
-                                    Danh sách lần khám
-                                </Text>
-                                <ScrollArea h={500} scrollbarSize={6} scrollHideDelay={500}>
-                                    <Stack gap='md'>
-                                        {sessions.map((session: any, index: number) => (
-                                            <Card
-                                                key={session.id}
-                                                shadow='sm'
-                                                padding='lg'
-                                                withBorder
-                                                style={{ cursor: 'pointer' }}
-                                                onClick={() => handleSessionClick(session.id)}
-                                            >
-                                                <Group justify='space-between' align='flex-start'>
-                                                    <Group align='flex-start'>
-                                                        <Box
-                                                            p='sm'
-                                                            bg={
-                                                                session.typeLabSession === 'test' ? 'blue.0' : 'green.0'
-                                                            }
-                                                            style={{ borderRadius: '8px' }}
-                                                        >
-                                                            {getSessionTypeIcon(session.typeLabSession)}
-                                                        </Box>
+                            <Card shadow='sm' padding='lg' withBorder h={550}>
+                                <Stack gap='md' h='100%'>
+                                    <Group justify='space-between' align='center'>
+                                        <Text fw={600} size='lg'>
+                                            Danh sách lần khám
+                                        </Text>
+                                        <Badge variant='light' color='blue'>
+                                            {sessions.length} lần khám
+                                        </Badge>
+                                    </Group>
+                                    
+                                    <ScrollArea 
+                                        h='100%' 
+                                        scrollbarSize={8} 
+                                        scrollHideDelay={1000}
+                                        type="scroll"
+                                        offsetScrollbars
+                                    >
+                                        <Stack gap='md' pr='md'>
+                                            {sessions.map((session: any, index: number) => (
+                                                <Card
+                                                    key={session.id}
+                                                    shadow='sm'
+                                                    padding='lg'
+                                                    withBorder
+                                                    style={{ 
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s ease',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-2px)',
+                                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                                                        }
+                                                    }}
+                                                    onClick={() => handleSessionClick(session.id)}
+                                                >
+                                                    <Group justify='space-between' align='flex-start'>
+                                                        <Group align='flex-start'>
+                                                            <Box
+                                                                p='sm'
+                                                                bg={
+                                                                    session.typeLabSession === 'test' ? 'blue.0' : 'green.0'
+                                                                }
+                                                                style={{ borderRadius: '8px' }}
+                                                            >
+                                                                {getSessionTypeIcon(session.typeLabSession)}
+                                                            </Box>
 
-                                                        <div>
-                                                            <Group gap='sm' mb='xs'>
-                                                                <Text fw={600} size='lg'>
-                                                                    Lần {index + 1}
-                                                                </Text>
-                                                                {getSessionTypeBadge(session.typeLabSession)}
-                                                            </Group>
+                                                            <div>
+                                                                <Group gap='sm' mb='xs'>
+                                                                    <Text fw={600} size='lg'>
+                                                                        Lần {index + 1}
+                                                                    </Text>
+                                                                    {getSessionTypeBadge(session.typeLabSession)}
+                                                                </Group>
 
-                                                            <Group gap='md'>
-                                                                <Flex align='center' gap='xs'>
-                                                                    <IconCalendarEvent size={14} />
+                                                                <Group gap='md'>
+                                                                    <Flex align='center' gap='xs'>
+                                                                        <IconCalendarEvent size={14} />
+                                                                        <Text size='sm' c='dimmed'>
+                                                                            {new Date(
+                                                                                session.requestDate
+                                                                            ).toLocaleDateString('vi-VN')}
+                                                                        </Text>
+                                                                    </Flex>
+                                                                    <Flex align='center' gap='xs'>
+                                                                        <IconUser size={14} />
+                                                                        <Text size='sm' c='dimmed'>
+                                                                            {session.doctor?.name || 'Chưa có bác sĩ'}
+                                                                        </Text>
+                                                                    </Flex>
                                                                     <Text size='sm' c='dimmed'>
-                                                                        {new Date(
-                                                                            session.requestDate
-                                                                        ).toLocaleDateString('vi-VN')}
+                                                                        {session.patientFiles?.length || 0} file
                                                                     </Text>
-                                                                </Flex>
-                                                                <Flex align='center' gap='xs'>
-                                                                    <IconUser size={14} />
-                                                                    <Text size='sm' c='dimmed'>
-                                                                        {session.doctor?.name || 'Chưa có bác sĩ'}
-                                                                    </Text>
-                                                                </Flex>
-                                                                <Text size='sm' c='dimmed'>
-                                                                    {session.patientFiles?.length || 0} file
-                                                                </Text>
-                                                            </Group>
-                                                        </div>
+                                                                </Group>
+                                                            </div>
+                                                        </Group>
+
+                                                        {getStatusBadge(session.typeLabSession)}
                                                     </Group>
-
-                                                    {getStatusBadge(session.typeLabSession)}
-                                                </Group>
-                                            </Card>
-                                        ))}
-                                    </Stack>
-                                </ScrollArea>
-                            </Stack>
+                                                </Card>
+                                            ))}
+                                        </Stack>
+                                    </ScrollArea>
+                                </Stack>
+                            </Card>
                         </Grid.Col>
                     )}
                 </Grid>
