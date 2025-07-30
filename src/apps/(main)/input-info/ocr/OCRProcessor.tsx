@@ -13,7 +13,6 @@ import {
     Title,
     TextInput,
     NumberInput,
-    Select,
     Textarea,
     Checkbox
 } from '@mantine/core'
