@@ -45,7 +45,7 @@ const PatientFolderPage = () => {
     const [selectedPatient, setSelectedPatient] = useState<any>(null)
     const [errorMess, setErrorMess] = useState('')
     const [page, setPage] = useState(1)
-    const [limit, setLimit] = useState(12)
+    const [limit, setLimit] = useState(16)
     const [sortOrder, setSortOrder] = useState('desc')
 
     // Use hooks
@@ -319,7 +319,7 @@ const PatientFolderPage = () => {
                         </Text>
                     </Paper>
                 )}
-                <Paper p='md' withBorder>
+                <Paper p='md' withBorder style={{marginTop: '2rem'}}>
                     <Group justify='space-between' align='center'>
                         <Group gap='xs'>
                             <Text size='sm' c='dimmed'>
