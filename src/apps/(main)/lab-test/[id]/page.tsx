@@ -187,7 +187,11 @@ const LabTestDetailPage = () => {
                             <LabTestInfo data={data} latestFastqFilePair={latestFastqFilePair} />
 
                             {/* Patient Information */}
-                            <PatientInfo patient={data.patient} analysis={data.analysis} doctor={data.doctor} />
+                            <PatientInfo
+                                patient={data.patient}
+                                analysis={data.assignment?.labTesting}
+                                doctor={data.assignment?.doctor}
+                            />
                         </Stack>
                     </Grid.Col>
 
@@ -226,7 +230,7 @@ const LabTestDetailPage = () => {
 
                                             <Divider />
 
-                                            {data.analysis ? (
+                                            {data.assignment?.labTesting ? (
                                                 <>
                                                     <Text fw={600}>Kỹ thuật viên phân tích</Text>
                                                     <Group gap='sm'>
@@ -235,10 +239,10 @@ const LabTestDetailPage = () => {
                                                         </Avatar>
                                                         <Box>
                                                             <Text fw={700} size='lg'>
-                                                                {data.analysis.name}
+                                                                {data.assignment.labTesting.name}
                                                             </Text>
                                                             <Text size='sm' c='dimmed'>
-                                                                {data.analysis.email}
+                                                                {data.assignment.labTesting.email}
                                                             </Text>
                                                         </Box>
                                                     </Group>
@@ -266,7 +270,7 @@ const LabTestDetailPage = () => {
                                                 loading={sendToAnalysisMutation.isPending}
                                                 disabled={
                                                     sendToAnalysisMutation.isPending ||
-                                                    (!data.analysis && !selectedAnalysisId)
+                                                    (!data.assignment?.labTesting && !selectedAnalysisId)
                                                 }
                                                 fullWidth
                                                 size='md'

@@ -313,12 +313,12 @@ const PatientDetailPage = () => {
                                             {sessions.length} lần khám
                                         </Badge>
                                     </Group>
-                                    
-                                    <ScrollArea 
-                                        h='100%' 
-                                        scrollbarSize={8} 
+
+                                    <ScrollArea
+                                        h='100%'
+                                        scrollbarSize={8}
                                         scrollHideDelay={1000}
-                                        type="scroll"
+                                        type='scroll'
                                         offsetScrollbars
                                     >
                                         <Stack gap='md' pr='md'>
@@ -328,7 +328,7 @@ const PatientDetailPage = () => {
                                                     shadow='sm'
                                                     padding='lg'
                                                     withBorder
-                                                    style={{ 
+                                                    style={{
                                                         cursor: 'pointer',
                                                         transition: 'all 0.2s ease',
                                                         '&:hover': {
@@ -343,7 +343,9 @@ const PatientDetailPage = () => {
                                                             <Box
                                                                 p='sm'
                                                                 bg={
-                                                                    session.typeLabSession === 'test' ? 'blue.0' : 'green.0'
+                                                                    session.typeLabSession === 'test'
+                                                                        ? 'blue.0'
+                                                                        : 'green.0'
                                                                 }
                                                                 style={{ borderRadius: '8px' }}
                                                             >
@@ -363,14 +365,15 @@ const PatientDetailPage = () => {
                                                                         <IconCalendarEvent size={14} />
                                                                         <Text size='sm' c='dimmed'>
                                                                             {new Date(
-                                                                                session.requestDate
+                                                                                session.createdAt
                                                                             ).toLocaleDateString('vi-VN')}
                                                                         </Text>
                                                                     </Flex>
                                                                     <Flex align='center' gap='xs'>
                                                                         <IconUser size={14} />
                                                                         <Text size='sm' c='dimmed'>
-                                                                            {session.doctor?.name || 'Chưa có bác sĩ'}
+                                                                            {session.assignment?.doctor?.name ||
+                                                                                'Chưa có bác sĩ'}
                                                                         </Text>
                                                                     </Flex>
                                                                     <Text size='sm' c='dimmed'>

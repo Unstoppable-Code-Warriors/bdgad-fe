@@ -28,8 +28,8 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
     const assignSessionMutation = useAssignSession()
 
     // Check if session is already assigned
-    const hasDoctor = sessionData?.doctor?.id
-    const hasLabTech = sessionData?.labTestingTechnician?.id || sessionData?.labTesting?.id
+    const hasDoctor = sessionData?.assignment?.doctor?.id
+    const hasLabTech = sessionData?.assignment?.labTesting?.id || sessionData?.labTesting?.id
     const isAlreadyAssigned = sessionType === 'test' ? hasDoctor && hasLabTech : hasDoctor
 
     useEffect(() => {
@@ -135,8 +135,8 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
     const isSending = assignSessionMutation.isPending
 
     // Get current assigned names for display
-    const currentDoctorName = sessionData?.doctor?.name
-    const currentLabTechName = sessionData?.labTestingTechnician?.name || sessionData?.labTesting?.name
+    const currentDoctorName = sessionData?.assignment?.doctor?.name
+    const currentLabTechName = sessionData?.assignment?.labTesting?.name || sessionData?.labTesting?.name
 
     return (
         <Modal
