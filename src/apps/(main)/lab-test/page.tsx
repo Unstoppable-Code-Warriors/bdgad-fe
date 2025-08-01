@@ -153,14 +153,21 @@ const LabTestPage = () => {
             {
                 accessor: 'doctor.name',
                 title: 'Bác sĩ',
-                width: 150
+                width: 150,
+                render: (record) => <Text size='sm'>{record?.doctor?.name || 'Chưa được chỉ định'}</Text>
             },
             {
                 accessor: 'analysis.name',
                 title: 'KTV Phân tích',
                 width: 150,
                 render: (record) => (
-                    <Text size='sm'>{record.analysis ? record.analysis.name : 'Chưa được chỉ định'}</Text>
+                    <Text size='sm'>
+                        {record?.analysis?.name
+                            ? record?.analysis?.name === 'Unknown'
+                                ? 'Chưa được chỉ định'
+                                : record?.analysis?.name
+                            : 'Chưa được chỉ định'}
+                    </Text>
                 )
             },
             {

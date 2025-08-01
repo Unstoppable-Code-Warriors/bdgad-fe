@@ -110,8 +110,6 @@ const SessionDetailPage = () => {
         navigate(`/patient-detail/${patientId}`)
     }
 
-
-
     const handleDownloadFile = useCallback(
         async (fileId: string, fileName?: string) => {
             try {
@@ -256,8 +254,8 @@ const SessionDetailPage = () => {
                     {sessionData?.patientFiles &&
                         sessionData.patientFiles.length > 0 &&
                         (() => {
-                            const hasDoctor = sessionData?.doctor?.id
-                            const hasLabTech = sessionData?.labTestingTechnician?.id || sessionData?.labTesting?.id
+                            const hasDoctor = sessionData?.assignment?.doctor?.id
+                            const hasLabTech = sessionData?.assignment?.labTesting?.id || sessionData?.labTesting?.id
                             const isAlreadyAssigned =
                                 sessionData.typeLabSession === 'test' ? hasDoctor && hasLabTech : hasDoctor
 
@@ -306,13 +304,13 @@ const SessionDetailPage = () => {
                                     <Flex align='center' gap='xs'>
                                         <IconCalendarEvent size={16} />
                                         <Text size='sm' c='dimmed'>
-                                            {new Date(sessionData.requestDate).toLocaleDateString('vi-VN')}
+                                            {new Date(sessionData.createdAt).toLocaleDateString('vi-VN')}
                                         </Text>
                                     </Flex>
                                     <Flex align='center' gap='xs'>
                                         <IconUser size={16} />
                                         <Text size='sm' c='dimmed'>
-                                            {sessionData.doctor?.name || 'Chưa có bác sĩ'}
+                                            {sessionData.assignment?.doctor?.name || 'Chưa có bác sĩ'}
                                         </Text>
                                     </Flex>
                                     <Text size='sm' c='dimmed'>

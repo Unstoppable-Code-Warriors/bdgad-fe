@@ -3,6 +3,12 @@ import type { FastqFilePair } from './fastq'
 import type { Patient } from './patient'
 import type { User } from './user'
 
+export interface LabTestAssignment {
+    id: number
+    doctor: User
+    labTesting: User
+}
+
 export interface LabTestSession {
     id: number
     labcode: string
@@ -11,8 +17,10 @@ export interface LabTestSession {
     createdAt: string
     metadata: Record<string, any>
     patient: Patient
-    doctor: User
-    analysis: AnalysisAssign
+    assignment: LabTestAssignment | null
+    // Keep legacy fields for backward compatibility during transition
+    doctor?: User
+    analysis?: AnalysisAssign
 }
 
 export interface LabTestSessionListItem extends LabTestSession {

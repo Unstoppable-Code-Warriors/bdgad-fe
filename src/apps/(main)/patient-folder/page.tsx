@@ -62,6 +62,7 @@ const PatientFolderPage = () => {
 
     const patients = patientsResponse?.data || patientsResponse || []
     const totalPages = patientsResponse?.meta?.totalPages || 1
+    const totalCount = patientsResponse?.meta?.total || 0
 
     const displayedPatients = patients
 
@@ -79,17 +80,16 @@ const PatientFolderPage = () => {
     const handleLimitChange = useCallback((newLimit: string | null) => {
         if (newLimit) {
             setLimit(parseInt(newLimit))
-            setPage(1) 
+            setPage(1)
         }
     }, [])
 
     const handleSortOrderChange = useCallback((newSortOrder: string | null) => {
         if (newSortOrder) {
             setSortOrder(newSortOrder)
-            setPage(1) 
+            setPage(1)
         }
     }, [])
-
 
     useEffect(() => {
         setPage(1)
@@ -138,7 +138,7 @@ const PatientFolderPage = () => {
     const handleDeletePatient = useCallback(async () => {
         if (selectedPatient) {
             try {
-                setErrorMess('') 
+                setErrorMess('')
                 const res = await deletePatientMutation.mutateAsync(selectedPatient.id)
 
                 if (res.code && res.code === 'PATIENT_HAS_LAB_SESSION') {
@@ -217,6 +217,11 @@ const PatientFolderPage = () => {
                             </Button>
                         </Group>
 
+                        <Group justify='space-between' align='center'>
+                            <Text size='sm' c='dimmed'>
+                                Tổng số: {totalCount} bệnh nhân
+                            </Text>
+                        </Group>
                     </Stack>
                 </Paper>
 
@@ -330,7 +335,7 @@ const PatientFolderPage = () => {
                                 onChange={handleLimitChange}
                                 data={[
                                     { value: '8', label: '8' },
-                                    { value: '16', label: '16' },
+                                    { value: '12', label: '12' }
                                 ]}
                                 style={{ width: 80 }}
                             />
