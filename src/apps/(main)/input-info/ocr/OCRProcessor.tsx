@@ -25,14 +25,15 @@ import type { FileWithPath } from '@mantine/dropzone'
 import { staffService } from '@/services/function/staff'
 import {
     FormType,
-    formTypeOptions,
     getDefaultFormValues,
     formValidationRules,
+    mapOCRToFormValues,
+    formTypeOptions,
     genderOptions,
-    niptPackageOptions,
     cancerScreeningPackageOptions,
-    supportPackageOptions,
-    cancerPanelOptions
+    cancerPanelOptions,
+    niptPackageOptions,
+    supportPackageOptions
 } from './Form'
 import type { FormValues } from './Form'
 
@@ -40,9 +41,11 @@ interface OCRProcessorProps {
     selectedFile: FileWithPath
     onComplete: (data: any) => void
     onBack: () => void
+    existingOCRResult?: any
+    isEditing?: boolean
 }
 
-const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) => {
+const OCRProcessor = ({ selectedFile, onComplete, onBack, existingOCRResult, isEditing }: OCRProcessorProps) => {
     const [isProcessing, setIsProcessing] = useState(true)
     const [progress, setProgress] = useState(0)
     const [error, setError] = useState<string | null>(null)
@@ -65,19 +68,49 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
         setImageUrl(url)
 
         try {
-            setProgress(20)
-            await new Promise((resolve) => setTimeout(resolve, 500))
+            // If in editing mode, use existing OCR result instead of processing
+            if (isEditing && existingOCRResult) {
+                setProgress(50)
+                await new Promise((resolve) => setTimeout(resolve, 500))
+                
+                setOcrResult(existingOCRResult)
+                
+                // Map existing OCR result to form values
+                if (existingOCRResult?.ocrResult) {
+                    const mappedValues = mapOCRToFormValues(existingOCRResult.ocrResult)
+                    form.setValues(mappedValues)
+                    console.log('Loading existing OCR Result:', existingOCRResult.ocrResult)
+                    console.log('Mapped form values:', mappedValues)
+                    console.log('Form type detected:', mappedValues.form_type)
+                }
+                
+                setProgress(100)
+            } else {
+                // Normal OCR processing
+                setProgress(20)
+                await new Promise((resolve) => setTimeout(resolve, 500))
 
-            setProgress(50)
-            await new Promise((resolve) => setTimeout(resolve, 500))
-            const result = await staffService.ocrFile(selectedFile)
-            console.log('OCR Result:', result)
+                setProgress(50)
+                await new Promise((resolve) => setTimeout(resolve, 500))
+                const result = await staffService.ocrFile(selectedFile)
+                console.log('OCR Result:', result)
 
-            setProgress(80)
-            await new Promise((resolve) => setTimeout(resolve, 500))
+                setProgress(80)
+                await new Promise((resolve) => setTimeout(resolve, 500))
 
-            setOcrResult(result)
-            setProgress(100)
+                setOcrResult(result)
+
+                // Map OCR result to form values and populate the form
+                if (result?.ocrResult) {
+                    const mappedValues = mapOCRToFormValues(result.ocrResult)
+                    form.setValues(mappedValues)
+                    console.log('OCR Result:', result.ocrResult)
+                    console.log('Mapped form values:', mappedValues)
+                    console.log('Form type detected:', mappedValues.form_type)
+                }
+
+                setProgress(100)
+            }
         } catch (err: any) {
             setError('Xử lý OCR không thành công. Vui lòng thử lại.')
         } finally {
@@ -128,11 +161,13 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
 
                         <div style={{ width: '100%', textAlign: 'center' }}>
                             <Text size='xl' fw={600} c='blue.6' mb='sm'>
-                                Đang xử lý tài liệu
+                                {isEditing ? 'Đang tải dữ liệu' : 'Đang xử lý tài liệu'}
                             </Text>
                             <Text c='dimmed' mb='lg'>
-                                Vui lòng đợi trong khi chúng tôi xử lý tài liệu của bạn. Quá trình này có thể mất vài
-                                phút tùy thuộc vào kích thước và độ phức tạp của tài liệu.
+                                {isEditing 
+                                    ? 'Đang tải thông tin đã xử lý để chỉnh sửa...'
+                                    : 'Vui lòng đợi trong khi chúng tôi xử lý tài liệu của bạn. Quá trình này có thể mất vài phút tùy thuộc vào kích thước và độ phức tạp của tài liệu.'
+                                }
                             </Text>
 
                             <Progress value={progress} size='lg' radius='md' animated color='blue' mb='md' />
@@ -191,7 +226,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                             <Group gap='sm'>
                                 <IconCheck size='1.5rem' color='var(--mantine-color-green-6)' />
                                 <Text size='xl' fw={600} c='green.6'>
-                                    Xử lý OCR thành công
+                                    {isEditing ? 'Chỉnh sửa thông tin OCR' : 'Xử lý OCR thành công'}
                                 </Text>
                             </Group>
 
@@ -329,7 +364,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
 
                                         {/* Ngày thu mẫu - cho phiếu 1 và 3 */}
                                         {(currentFormType === FormType.HEREDITARY_CANCER ||
-                                            currentFormType === FormType.PRENATAL_SCREENING) && (
+                                            currentFormType === FormType.NON_INVASIVE_PRENATAL_TESTING) && (
                                             <Grid.Col span={6}>
                                                 <DatePickerInput
                                                     label='Ngày thu mẫu'
@@ -340,7 +375,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                                         )}
 
                                         {/* Giờ thu mẫu - chỉ phiếu 3 */}
-                                        {currentFormType === FormType.PRENATAL_SCREENING && (
+                                        {currentFormType === FormType.NON_INVASIVE_PRENATAL_TESTING && (
                                             <Grid.Col span={6}>
                                                 <TextInput
                                                     label='Giờ thu mẫu'
@@ -359,8 +394,8 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                                         </Grid.Col>
 
                                         {/* Email - cho phiếu 2 và 3 */}
-                                        {(currentFormType === FormType.GENE_MUTATION ||
-                                            currentFormType === FormType.PRENATAL_SCREENING) && (
+                                        {(currentFormType === FormType.GENE_MUTATION_TESTING ||
+                                            currentFormType === FormType.NON_INVASIVE_PRENATAL_TESTING) && (
                                             <Grid.Col span={6}>
                                                 <TextInput
                                                     label='Email'
@@ -372,7 +407,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
 
                                         {/* Mã xét nghiệm - cho phiếu 1 và 2 */}
                                         {(currentFormType === FormType.HEREDITARY_CANCER ||
-                                            currentFormType === FormType.GENE_MUTATION) && (
+                                            currentFormType === FormType.GENE_MUTATION_TESTING) && (
                                             <Grid.Col span={6}>
                                                 <TextInput
                                                     label='Mã xét nghiệm'
@@ -383,7 +418,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                                         )}
 
                                         {/* Hút thuốc - chỉ phiếu 2 */}
-                                        {currentFormType === FormType.GENE_MUTATION && (
+                                        {currentFormType === FormType.GENE_MUTATION_TESTING && (
                                             <Grid.Col span={6}>
                                                 <Checkbox
                                                     label='Hút thuốc'
@@ -393,7 +428,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                                         )}
 
                                         {/* Nơi thu mẫu - chỉ phiếu 3 */}
-                                        {currentFormType === FormType.PRENATAL_SCREENING && (
+                                        {currentFormType === FormType.NON_INVASIVE_PRENATAL_TESTING && (
                                             <Grid.Col span={6}>
                                                 <TextInput
                                                     label='Nơi thu mẫu'
@@ -438,7 +473,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                                 )}
 
                                 {/* Thông tin bệnh học - chỉ phiếu 2 */}
-                                {currentFormType === FormType.GENE_MUTATION && (
+                                {currentFormType === FormType.GENE_MUTATION_TESTING && (
                                     <Card withBorder padding='md' radius='md'>
                                         <Title order={4} mb='md' c='blue.7'>
                                             Thông tin bệnh học
@@ -491,7 +526,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                                 )}
 
                                 {/* Loại bệnh phẩm - chỉ phiếu 2 */}
-                                {currentFormType === FormType.GENE_MUTATION && (
+                                {currentFormType === FormType.GENE_MUTATION_TESTING && (
                                     <Card withBorder padding='md' radius='md'>
                                         <Title order={4} mb='md' c='blue.7'>
                                             Loại bệnh phẩm
@@ -529,7 +564,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                                 )}
 
                                 {/* Loại ung thư và panel xét nghiệm - chỉ phiếu 2 */}
-                                {currentFormType === FormType.GENE_MUTATION && (
+                                {currentFormType === FormType.GENE_MUTATION_TESTING && (
                                     <Card withBorder padding='md' radius='md'>
                                         <Title order={4} mb='md' c='blue.7'>
                                             Loại ung thư và panel xét nghiệm
@@ -553,7 +588,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                                 )}
 
                                 {/* Thông tin lâm sàng - chỉ phiếu 3 */}
-                                {currentFormType === FormType.PRENATAL_SCREENING && (
+                                {currentFormType === FormType.NON_INVASIVE_PRENATAL_TESTING && (
                                     <Card withBorder padding='md' radius='md'>
                                         <Title order={4} mb='md' c='blue.7'>
                                             Thông tin lâm sàng
@@ -636,7 +671,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack }: OCRProcessorProps) =
                                 )}
 
                                 {/* Thực hiện xét nghiệm - chỉ phiếu 3 */}
-                                {currentFormType === FormType.PRENATAL_SCREENING && (
+                                {currentFormType === FormType.NON_INVASIVE_PRENATAL_TESTING && (
                                     <>
                                         <Card withBorder padding='md' radius='md'>
                                             <Title order={4} mb='md' c='blue.7'>

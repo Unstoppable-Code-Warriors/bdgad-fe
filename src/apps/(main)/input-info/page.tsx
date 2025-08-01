@@ -39,12 +39,6 @@ const InputInfoPage = () => {
     const handleOCRComplete = (data: any) => {
         console.log('OCR completed:', data)
 
-        notifications.show({
-            title: 'Thành công',
-            message: 'OCR hoàn thành. Dữ liệu đã được xử lý.',
-            color: 'green'
-        })
-
         // Update the corresponding file with OCR result
         setSubmittedFiles((prev) =>
             prev.map((file) => ({

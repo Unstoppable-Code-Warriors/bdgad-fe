@@ -44,7 +44,6 @@ const OCRPage = () => {
     }
 
     const handleBack = () => {
-        // Pass back original submitted files when going back
         navigate('/import-file/input', {
             state: {
                 ...location.state,
@@ -60,7 +59,13 @@ const OCRPage = () => {
     return (
         <Container size='xl' py='xl'>
             <Stack gap='lg'>
-                <OCRProcessor selectedFile={selectedFile} onComplete={handleComplete} onBack={handleBack} />
+                <OCRProcessor 
+                    selectedFile={selectedFile} 
+                    onComplete={handleComplete} 
+                    onBack={handleBack}
+                    existingOCRResult={location.state?.existingOCRResult}
+                    isEditing={location.state?.isEditing}
+                />
             </Stack>
         </Container>
     )

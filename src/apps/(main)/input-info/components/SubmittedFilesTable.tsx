@@ -15,7 +15,7 @@ interface SubmittedFile {
 interface SubmittedFilesTableProps {
     files: SubmittedFile[]
     onStartOCR: (file: File) => void
-    onViewOCR?: (ocrData: any) => void 
+    onViewOCR?: (submittedFile: SubmittedFile) => void 
     onDelete: (id: string) => void
 }
 
@@ -30,7 +30,6 @@ const SubmittedFilesTable = ({ files, onStartOCR, onViewOCR, onDelete }: Submitt
         a.click()
         URL.revokeObjectURL(url)
     }
-
     const getOCRButton = (submittedFile: SubmittedFile) => {
 
         if (submittedFile.type !== 'image') return null
@@ -42,9 +41,9 @@ const SubmittedFilesTable = ({ files, onStartOCR, onViewOCR, onDelete }: Submitt
                     variant='light'
                     color='green'
                     leftSection={<IconEye size={14} />}
-                    onClick={() => onViewOCR?.(submittedFile.ocrResult)}
+                    onClick={() => onViewOCR?.(submittedFile)}
                 >
-                    View OCR
+                    Chỉnh sửa OCR
                 </Button>
             )
         }
@@ -135,7 +134,7 @@ const SubmittedFilesTable = ({ files, onStartOCR, onViewOCR, onDelete }: Submitt
                                 <Table.Td>
                                     <Group gap='xs' align='center' style={{ minHeight: 36 }}>
 
-                                        <Box style={{ width: 120, flexShrink: 0 }}>
+                                        <Box style={{ width: 120, flexShrink: 0, marginRight: 45 }}>
                                             {getOCRButton(submittedFile)}
                                         </Box>
                                         

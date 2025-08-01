@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import type { FileWithPath } from '@mantine/dropzone'
-import { Stack, Alert, Text, Paper, Group, Badge } from '@mantine/core'
+import { Stack, Alert } from '@mantine/core'
 import { IconAlertCircle } from '@tabler/icons-react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { modals } from '@mantine/modals'
 
 import FileUploadZone from './FileUploadZone'
 import SelectedFilesList from './SelectedFilesList'
@@ -101,60 +100,15 @@ const ImportStep = ({ onFilesSubmitted }: ImportStepProps) => {
         })
     }
 
-    const handleViewOCR = (ocrData: any) => {
-        modals.open({
-            title: 'OCR Results',
-            size: 'xl',
-            children: (
-                <Stack gap='md'>
-                    <Text size='sm' c='dimmed'>
-                        OCR processing results for the medical requisition
-                    </Text>
-
-                    <Paper p='md' withBorder>
-                        <Stack gap='sm'>
-                            <Group>
-                                <Text fw={600}>Patient Name:</Text>
-                                <Text>{ocrData.ocrResult?.full_name || 'N/A'}</Text>
-                            </Group>
-                            <Group>
-                                <Text fw={600}>Doctor:</Text>
-                                <Text>{ocrData.ocrResult?.doctor || 'N/A'}</Text>
-                            </Group>
-                            <Group>
-                                <Text fw={600}>Clinic:</Text>
-                                <Text>{ocrData.ocrResult?.clinic || 'N/A'}</Text>
-                            </Group>
-                            <Group>
-                                <Text fw={600}>Test Code:</Text>
-                                <Text>{ocrData.ocrResult?.['Test code'] || 'N/A'}</Text>
-                            </Group>
-                            <Group>
-                                <Text fw={600}>Sample Date:</Text>
-                                <Text>{ocrData.ocrResult?.sample_collection_date || 'N/A'}</Text>
-                            </Group>
-                        </Stack>
-                    </Paper>
-
-                    {/* Show selected tests */}
-                    {ocrData.ocrResult?.non_invasive_prenatal_testing?.test_options && (
-                        <Paper p='md' withBorder>
-                            <Text fw={600} mb='sm'>
-                                Selected Tests:
-                            </Text>
-                            <Stack gap='xs'>
-                                {ocrData.ocrResult.non_invasive_prenatal_testing.test_options
-                                    .filter((test: any) => test.is_selected)
-                                    .map((test: any, index: number) => (
-                                        <Badge key={index} variant='light' color='blue'>
-                                            {test.package_name}
-                                        </Badge>
-                                    ))}
-                            </Stack>
-                        </Paper>
-                    )}
-                </Stack>
-            )
+    const handleViewOCR = (submittedFile: SubmittedFile) => {
+        navigate('/input-info/ocr', {
+            state: {
+                file: submittedFile.file,
+                fileId: submittedFile.id,
+                submittedFiles: submittedFiles,
+                existingOCRResult: submittedFile.ocrResult,
+                isEditing: true 
+            }
         })
     }
 
