@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import {
     Container,
@@ -13,12 +13,15 @@ import {
     Flex,
     Box,
     Grid,
-    Paper
+    Paper,
+    Modal
 } from '@mantine/core'
+import { Dropzone } from '@mantine/dropzone'
+import type { FileWithPath } from '@mantine/dropzone'
 import {
     IconArrowLeft,
     IconDownload,
-    IconTrash, // Add this import
+    IconTrash,
     IconFileText,
     IconPhoto,
     IconFileWord,
@@ -29,9 +32,15 @@ import {
     IconFileZip,
     IconFile,
     IconSend,
-    IconCheck
+    IconCheck,
+    IconUpload,
+    IconPlus
 } from '@tabler/icons-react'
-import { usePatientLabSessionDetail } from '@/services/hook/staff-patient-session.hook'
+import {
+    usePatientLabSessionDetail,
+    useDeletePatientFile,
+    useUploadPatientFiles
+} from '@/services/hook/staff-patient-session.hook'
 import SendFilesModal from '../components/SendFilesModal'
 import { notifications } from '@mantine/notifications'
 import { useDownloadPatientFile } from '@/services/hook/staff-general-files.hook'
@@ -101,10 +110,15 @@ const SessionDetailPage = () => {
     const { id: patientId, sessionId } = useParams<{ id: string; sessionId: string }>()
     const navigate = useNavigate()
     const [isSendModalOpen, setIsSendModalOpen] = useState(false)
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
+    const [selectedFiles, setSelectedFiles] = useState<FileWithPath[]>([])
+    const dropzoneRef = useRef<any>(null)
 
-    const { data: sessionData, isLoading, error, refetch } = usePatientLabSessionDetail(sessionId!) // Add refetch
+    const { data: sessionData, isLoading, error } = usePatientLabSessionDetail(sessionId!)
 
     const downloadMutation = useDownloadPatientFile()
+    const deletePatientFileMutation = useDeletePatientFile()
+    const uploadPatientFilesMutation = useUploadPatientFiles()
 
     const handleBack = () => {
         navigate(`/patient-detail/${patientId}`)
@@ -178,17 +192,16 @@ const SessionDetailPage = () => {
                 confirmProps: { color: 'red' },
                 onConfirm: async () => {
                     try {
-                        console.log('Deleting file with ID:', fileId)
-                        // await deletePatientFile(fileId)
+                        await deletePatientFileMutation.mutateAsync({
+                            patientFileId: fileId,
+                            sessionId: sessionId!
+                        })
 
                         notifications.show({
                             title: 'Thành công',
                             message: `Đã xóa file ${fileName}`,
                             color: 'green'
                         })
-
-                        // Refresh data after delete
-                        refetch()
                     } catch (error) {
                         notifications.show({
                             title: 'Lỗi',
@@ -199,8 +212,75 @@ const SessionDetailPage = () => {
                 }
             })
         },
-        [refetch]
+        [deletePatientFileMutation, sessionId]
     )
+
+    const handleUploadFiles = useCallback(
+        async (files: File[]) => {
+            if (!files.length) return
+
+            try {
+                await uploadPatientFilesMutation.mutateAsync({
+                    labSessionId: sessionId!,
+                    files
+                })
+
+                notifications.show({
+                    title: 'Thành công',
+                    message: `${files.length} file đã được tải lên thành công`,
+                    color: 'green'
+                })
+
+                // Reset the selected files and close modal
+                setSelectedFiles([])
+                setIsUploadModalOpen(false)
+            } catch (error) {
+                console.error('Upload failed:', error)
+                notifications.show({
+                    title: 'Lỗi',
+                    message: 'Có lỗi xảy ra khi tải file lên',
+                    color: 'red'
+                })
+            }
+        },
+        [uploadPatientFilesMutation, sessionId]
+    )
+
+    const handleOpenUploadModal = () => {
+        setSelectedFiles([]) // Clear any previous selections
+        setIsUploadModalOpen(true)
+    }
+
+    const handleCloseUploadModal = () => {
+        setIsUploadModalOpen(false)
+        setSelectedFiles([]) // Clear selections when closing
+    }
+
+    const handleSubmitUpload = () => {
+        if (selectedFiles.length > 0) {
+            handleUploadFiles(selectedFiles as File[])
+        }
+    }
+
+    // Handler for when files are dropped or selected
+    const handleFilesSelected = (files: FileWithPath[]) => {
+        setSelectedFiles((prevFiles) => {
+            // Create a new array combining existing files with new files
+            const combinedFiles = [...prevFiles, ...files]
+
+            // Remove duplicates based on file name and size
+            const uniqueFiles = combinedFiles.filter(
+                (file, index, self) => index === self.findIndex((f) => f.name === file.name && f.size === file.size)
+            )
+
+            return uniqueFiles
+        })
+    }
+
+    // Handler to remove a specific file from selection
+    const handleRemoveFile = (indexToRemove: number) => {
+        setSelectedFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove))
+    }
 
     if (isLoading) {
         return (
@@ -324,13 +404,26 @@ const SessionDetailPage = () => {
 
                 {/* Files Grid */}
                 <div>
-                    <Group mb='lg'>
-                        <Title order={3} c={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}>
-                            File {sessionData.typeLabSession === 'test' ? 'xét nghiệm' : 'thẩm định'}
-                        </Title>
-                        <Badge variant='light' color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}>
-                            {sessionData.patientFiles?.length || 0} file
-                        </Badge>
+                    <Group mb='lg' justify='space-between'>
+                        <Group>
+                            <Title order={3} c={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}>
+                                File {sessionData.typeLabSession === 'test' ? 'xét nghiệm' : 'thẩm định'}
+                            </Title>
+                            <Badge variant='light' color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}>
+                                {sessionData.patientFiles?.length || 0} file
+                            </Badge>
+                        </Group>
+
+                        <Group>
+                            <Button
+                                leftSection={<IconUpload size={16} />}
+                                onClick={handleOpenUploadModal}
+                                variant='light'
+                                color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
+                            >
+                                Tải lên file
+                            </Button>
+                        </Group>
                     </Group>
 
                     {sessionData.patientFiles && sessionData.patientFiles.length > 0 ? (
@@ -404,9 +497,18 @@ const SessionDetailPage = () => {
                             <Title order={4} mt='md' c='dimmed'>
                                 Chưa có file nào
                             </Title>
-                            <Text c='dimmed' mt='xs'>
+                            <Text c='dimmed' mt='xs' mb='lg'>
                                 lần khám này chưa có file đính kèm
                             </Text>
+
+                            <Button
+                                leftSection={<IconPlus size={16} />}
+                                onClick={handleOpenUploadModal}
+                                variant='outline'
+                                color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
+                            >
+                                Tải lên file đầu tiên
+                            </Button>
                         </Paper>
                     )}
                 </div>
@@ -420,6 +522,155 @@ const SessionDetailPage = () => {
                     patientId={patientId!}
                     sessionData={sessionData}
                 />
+
+                {/* Upload Files Modal */}
+                <Modal
+                    opened={isUploadModalOpen}
+                    onClose={handleCloseUploadModal}
+                    title={
+                        <Group>
+                            <IconUpload size={20} />
+                            <Text fw={600}>Tải lên file mới</Text>
+                        </Group>
+                    }
+                    size='lg'
+                    centered
+                >
+                    <Stack gap='md'>
+                        <Dropzone
+                            ref={dropzoneRef}
+                            onDrop={handleFilesSelected}
+                            onReject={(files) => {
+                                console.log('rejected files', files)
+                                notifications.show({
+                                    title: 'Lỗi',
+                                    message:
+                                        'Một số file không được chấp nhận. Vui lòng kiểm tra định dạng và kích thước file.',
+                                    color: 'red'
+                                })
+                            }}
+                            maxSize={50 * 1024 ** 2} // 50MB
+                            accept={{
+                                'application/pdf': ['.pdf'],
+                                'image/*': ['.jpg', '.jpeg', '.png', '.gif'],
+                                'application/msword': ['.doc'],
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+                                'application/zip': ['.zip'],
+                                'application/x-rar-compressed': ['.rar']
+                            }}
+                            multiple
+                            style={{
+                                border: `2px dashed ${sessionData.typeLabSession === 'test' ? '#1971c2' : '#2f9e44'}`,
+                                borderRadius: '12px',
+                                backgroundColor: sessionData.typeLabSession === 'test' ? '#e7f5ff' : '#ebfbee',
+                                padding: '40px 20px',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            <Group justify='center' gap='xl' mih={160} style={{ pointerEvents: 'none' }}>
+                                <Dropzone.Accept>
+                                    <IconUpload
+                                        size={52}
+                                        color={sessionData.typeLabSession === 'test' ? '#1971c2' : '#2f9e44'}
+                                        stroke={1.5}
+                                    />
+                                </Dropzone.Accept>
+                                <Dropzone.Reject>
+                                    <IconFile size={52} color='#fa5252' stroke={1.5} />
+                                </Dropzone.Reject>
+                                <Dropzone.Idle>
+                                    <IconUpload
+                                        size={52}
+                                        color={sessionData.typeLabSession === 'test' ? '#1971c2' : '#2f9e44'}
+                                        stroke={1.5}
+                                    />
+                                </Dropzone.Idle>
+
+                                <div>
+                                    <Text
+                                        size='xl'
+                                        inline
+                                        fw={600}
+                                        ta='center'
+                                        c={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
+                                    >
+                                        {selectedFiles.length > 0
+                                            ? `Đã chọn ${selectedFiles.length} file - Thêm file khác`
+                                            : 'Kéo thả file vào đây hoặc click để chọn'}
+                                    </Text>
+                                    <Text size='sm' c='dimmed' inline mt={7} ta='center'>
+                                        Hỗ trợ: PDF, JPG, PNG, DOC, DOCX, ZIP (tối đa 50MB mỗi file)
+                                    </Text>
+                                </div>
+                            </Group>
+                        </Dropzone>
+
+                        {selectedFiles.length > 0 && (
+                            <Card withBorder p='md'>
+                                <Group justify='space-between' mb='sm'>
+                                    <Text fw={600}>File đã chọn ({selectedFiles.length}):</Text>
+                                    <Button
+                                        size='xs'
+                                        variant='light'
+                                        color='red'
+                                        onClick={() => {
+                                            setSelectedFiles([])
+                                        }}
+                                    >
+                                        Xóa tất cả
+                                    </Button>
+                                </Group>
+                                <Stack gap='xs'>
+                                    {selectedFiles.map((file, index) => (
+                                        <Group
+                                            key={index}
+                                            justify='space-between'
+                                            p='xs'
+                                            style={{ backgroundColor: '#f8f9fa', borderRadius: '6px' }}
+                                        >
+                                            <Group gap='xs'>
+                                                {getFileIcon(file.name.split('.').pop() || '')}
+                                                <div>
+                                                    <Text size='sm' fw={500}>
+                                                        {file.name}
+                                                    </Text>
+                                                    <Text size='xs' c='dimmed'>
+                                                        {formatFileSize(file.size)}
+                                                    </Text>
+                                                </div>
+                                            </Group>
+                                            <ActionIcon
+                                                size='sm'
+                                                variant='light'
+                                                color='red'
+                                                onClick={() => handleRemoveFile(index)}
+                                                title='Xóa file khỏi danh sách'
+                                            >
+                                                <IconTrash size={14} />
+                                            </ActionIcon>
+                                        </Group>
+                                    ))}
+                                </Stack>
+                            </Card>
+                        )}
+
+                        <Group justify='space-between' mt='md'>
+                            <Button variant='outline' onClick={handleCloseUploadModal}>
+                                Hủy
+                            </Button>
+                            <Button
+                                onClick={handleSubmitUpload}
+                                disabled={selectedFiles.length === 0}
+                                loading={uploadPatientFilesMutation.isPending}
+                                color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
+                                leftSection={<IconUpload size={16} />}
+                            >
+                                Tải lên {selectedFiles.length > 0 ? `(${selectedFiles.length} file)` : ''}
+                            </Button>
+                        </Group>
+                    </Stack>
+                </Modal>
             </Stack>
         </Container>
     )
