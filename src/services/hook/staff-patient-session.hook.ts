@@ -30,3 +30,31 @@ export const useAssignSession = () => {
         }
     })
 }
+
+export const useDeletePatientFile = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ patientFileId, sessionId }: { patientFileId: string; sessionId: string }) =>
+            staffService.deletePatientFile(patientFileId, sessionId),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({
+                queryKey: ['patient-lab-session-detail', variables.sessionId]
+            })
+        }
+    })
+}
+
+export const useUploadPatientFiles = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ labSessionId, files }: { labSessionId: string; files: File[] }) =>
+            staffService.uploadPatientFiles(labSessionId, files),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({
+                queryKey: ['patient-lab-session-detail', variables.labSessionId]
+            })
+        }
+    })
+}

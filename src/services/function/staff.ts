@@ -43,6 +43,28 @@ export const staffService = {
         }
     },
 
+    // Delete patient file
+    deletePatientFile: async (patientFileId: string, sessionId: string): Promise<any> => {
+        return backendApi.delete(`${PREFIX}/patient-files/${patientFileId}/sessions/${sessionId}`).json()
+    },
+
+    // Upload patient files to session
+    uploadPatientFiles: async (labSessionId: string, files: File[]): Promise<any> => {
+        const formData = new FormData()
+        
+        // Append each file to the FormData
+        files.forEach((file) => {
+            formData.append('files', file)
+        })
+
+        return backendApi
+            .put(`${PREFIX}/patient-files/sessions/${labSessionId}`, {
+                body: formData,
+                headers: {}
+            })
+            .json()
+    },
+
     // Delete general file by ID
     deleteGeneralFile: async (id: string): Promise<any> => {
         return backendApi.delete(`${PREFIX}/general-files/${id}`).json()
