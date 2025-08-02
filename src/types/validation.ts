@@ -57,11 +57,6 @@ export interface ValidationSessionResponse {
 }
 
 export interface ValidationSessionWithLatestEtlResponse extends ValidationSessionResponse {
-    latestEtlResult: ValidationEtlResultResponse | null
-}
-
-export interface ValidationSessionWithAllEtlResponse extends ValidationSessionResponse {
-    latestEtlResult: ValidationEtlResultResponse | null
     etlResults: ValidationEtlResultResponse[]
 }
 

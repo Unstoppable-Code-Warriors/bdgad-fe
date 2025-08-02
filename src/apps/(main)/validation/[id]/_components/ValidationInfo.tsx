@@ -7,7 +7,8 @@ interface ValidationInfoProps {
 }
 
 export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
-    const etlResult = validation.latestEtlResult
+    // Get the latest (first) ETL result from the array
+    const etlResult = validation.etlResults && validation.etlResults.length > 0 ? validation.etlResults[0] : null
 
     return (
         <Card shadow='sm' padding='xl' radius='lg' withBorder>

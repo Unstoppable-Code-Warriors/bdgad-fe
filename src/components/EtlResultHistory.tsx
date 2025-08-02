@@ -1,6 +1,7 @@
 import { Card, Text, Badge, Group, Stack, ThemeIcon, Box, Timeline, Avatar, Button, Divider } from '@mantine/core'
 import { IconChartLine, IconUser, IconClock, IconAlertTriangle, IconCheck, IconDna } from '@tabler/icons-react'
 import { RejectionDisplay } from './RejectionDisplay'
+import { ApprovedDisplay } from './ApprovedDisplay'
 
 interface EtlResultData {
     id: number
@@ -229,8 +230,20 @@ export const EtlResultHistory = ({
                                             </Group>
                                         )}
 
-                                        {/* Approver Info */}
-                                        {result.approver && (
+                                        {/* Approver Display */}
+                                        {result.approver && result.reasonApprove && (
+                                            <ApprovedDisplay
+                                                approver={result.approver}
+                                                reasonApprove={result.reasonApprove}
+                                                approvalDate={result.createdAt || result.etlCompletedAt || ''}
+                                                itemType={resultNamePrefix}
+                                                itemId={result.id}
+                                                compact
+                                            />
+                                        )}
+
+                                        {/* Simple Approver Info (when no approval reason) */}
+                                        {result.approver && !result.reasonApprove && (
                                             <Group gap='xs'>
                                                 <Avatar size='sm' radius='xl' color='green' variant='light'>
                                                     <IconCheck size={12} />
