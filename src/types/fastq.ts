@@ -8,7 +8,7 @@ export interface FastqFilePair {
     id: number
     createdAt: string
     status: string
-    reasonReject: string | null
+    redoReason: string | null
     fastqFileR1: FastqFile
     fastqFileR2: FastqFile
     creator: {
