@@ -4,6 +4,14 @@ import type { DateValue } from '@mantine/dates'
 import { authService } from '../function/auth'
 import { Role } from '@/utils/constant'
 
+const formatDateToISO = (date: DateValue): string | null => {
+    if (!date) return null
+    if (date instanceof Date) {
+        return date.toISOString()
+    }
+    return null
+}
+
 export const useLabTestSessions = ({
     page = 1,
     limit = 10,
@@ -25,9 +33,7 @@ export const useLabTestSessions = ({
 }) => {
     return useQuery({
         queryKey: ['lab-test-sessions', page, limit, search, sortBy, sortOrder, filter, dateFrom, dateTo],
-        queryFn: () => labTestService.getSessions({ page, limit, search, sortBy, sortOrder, filter, dateFrom, dateTo }),
-        staleTime: 30000, // 30 seconds
-        gcTime: 5 * 60 * 1000 // 5 minutes
+        queryFn: () => labTestService.getSessions({ page, limit, search, sortBy, sortOrder, filter, dateFrom: formatDateToISO(dateFrom), dateTo: formatDateToISO(dateTo) })
     })
 }
 
