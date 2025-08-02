@@ -43,7 +43,7 @@ import { FileHistory } from '@/components/FileHistory'
 import { EtlResultHistory } from '@/components/EtlResultHistory'
 import { PageHeader } from '@/components/PageHeader'
 import { AnalysisStatus, analysisStatusConfig } from '@/types/analysis'
-import { FastQFileStatus, statusConfig } from '@/types/lab-test.types'
+import { statusConfig } from '@/types/lab-test.types'
 import { labTestService } from '@/services/function/lab-test'
 import { openRejectFastqModal } from '@/components/RejectFastqModal'
 

@@ -58,6 +58,24 @@ export interface ValidationSessionResponse {
 
 export interface ValidationSessionWithLatestEtlResponse extends ValidationSessionResponse {
     etlResults: ValidationEtlResultResponse[]
+    latestEtlResult: {
+        id: number
+        resultPath: string
+        etlCompletedAt: string
+        status: string | null
+        reasonReject: string | null
+        reasonApprove: string
+        rejector: {
+            id: number
+            name: string
+            email: string
+        } | null
+        approver: {
+            id: number
+            name: string
+            email: string
+        } | null
+    } | null
 }
 
 export interface RejectEtlResultRequest {
