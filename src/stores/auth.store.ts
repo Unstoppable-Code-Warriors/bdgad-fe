@@ -193,3 +193,8 @@ export const setLoadingOutside = (loading: boolean) => {
     const { setLoading } = useAuthStore.getState()
     setLoading(loading)
 }
+
+export const loginOutside = (accessToken: string, user: User, refreshToken?: string) => {
+    const { login } = useAuthStore.getState()
+    login(accessToken, user, refreshToken)
+}

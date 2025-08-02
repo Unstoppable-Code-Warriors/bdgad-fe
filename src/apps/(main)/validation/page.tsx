@@ -288,7 +288,7 @@ const ValidationPage = () => {
     return (
         <Stack>
             <Group justify='space-between'>
-                <Title order={2}>Xác thực kết quả ETL</Title>
+                <Title order={2}>Thẩm định kết quả ETL</Title>
             </Group>
 
             {/* Reusable Search and Filter Component */}

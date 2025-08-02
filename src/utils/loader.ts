@@ -1,5 +1,6 @@
 import { redirect } from 'react-router'
-import { getAccessToken, isUserAuthenticated, clearTokensOutside } from '@/stores/auth.store'
+import { getAccessToken, isUserAuthenticated, clearTokensOutside, getCurrentUser } from '@/stores/auth.store'
+import { getDefaultRouteByRole } from './constant'
 
 /**
  * Auth loader - Protects routes that require authentication
@@ -43,8 +44,13 @@ export const nonAuthLoader = () => {
 
     // Check if user is already authenticated for other auth routes
     if (accessToken && isAuthenticated) {
-        // User is already logged in, redirect to home
-        throw redirect('/')
+        // Get user and determine appropriate route based on role
+        const user = getCurrentUser()
+        const roleCode = Number(user?.roles?.[0]?.code)
+        const defaultRoute = getDefaultRouteByRole(roleCode)
+        
+        // User is already logged in, redirect to role-appropriate page
+        throw redirect(defaultRoute)
     }
 
     // User is not authenticated, allow access to public route

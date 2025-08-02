@@ -169,14 +169,14 @@ const AnalysisDetailPage = () => {
                 onSuccess: () => {
                     notifications.show({
                         title: 'Thành công',
-                        message: 'Kết quả phân tích đã được gửi để xác thực',
+                        message: 'Kết quả phân tích đã được gửi để thẩm định',
                         color: 'green'
                     })
                 },
                 onError: (error: any) => {
                     notifications.show({
-                        title: 'Lỗi gửi xác thực',
-                        message: error.message || 'Không thể gửi kết quả để xác thực',
+                        title: 'Lỗi gửi thẩm định',
+                        message: error.message || 'Không thể gửi kết quả để thẩm định',
                         color: 'red'
                     })
                 }
@@ -519,10 +519,10 @@ const AnalysisDetailPage = () => {
                                 {latestEtlResult?.status === AnalysisStatus.WAIT_FOR_APPROVAL && (
                                     <Stack gap='md' align='center'>
                                         <Text size='sm' ta='center' c='orange' fw={500}>
-                                            Đang chờ xác thực
+                                            Đang chờ thẩm định
                                         </Text>
                                         <Text size='xs' ta='center' c='dimmed'>
-                                            Kết quả đã được gửi để xác thực
+                                            Kết quả đã được gửi để thẩm định
                                         </Text>
                                     </Stack>
                                 )}
@@ -646,7 +646,7 @@ const AnalysisDetailPage = () => {
                                     // }
                                     // {
                                     //     type: 'send',
-                                    //     label: 'Gửi để xác thực',
+                                    //     label: 'Gửi để thẩm định',
                                     //     icon: <IconSend size={16} />,
                                     //     color: 'blue',
                                     //     variant: 'light',

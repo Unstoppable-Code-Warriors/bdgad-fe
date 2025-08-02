@@ -65,7 +65,7 @@ const FileUploadZone = ({ onDrop, onReject }: FileUploadZoneProps) => {
                 <Dropzone
                     onDrop={handleFileDrop}
                     onReject={handleFileReject}
-                    maxSize={10 * 1024 ** 2}
+                    maxSize={10 * 1024 ** 2} // 10MB
                     accept={{
                         'image/jpeg': ['.jpg', '.jpeg'],
                         'image/png': ['.png'],

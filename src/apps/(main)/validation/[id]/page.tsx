@@ -92,7 +92,7 @@ const ValidationDetailPage = () => {
                     <Stack align='center' gap='lg'>
                         <Loader size='lg' color='teal' />
                         <Text size='lg' fw={500}>
-                            Đang tải thông tin xác thực...
+                            Đang tải thông tin thẩm định...
                         </Text>
                         <Text size='sm' c='dimmed'>
                             Vui lòng chờ trong giây lát
@@ -108,7 +108,7 @@ const ValidationDetailPage = () => {
             <Container size='xl' py='xl'>
                 <Center h={400}>
                     <Alert icon={<IconAlertCircle size='1rem' />} title='Lỗi!' color='red' variant='light'>
-                        {error?.message || 'Đã xảy ra lỗi khi tải thông tin xác thực'}
+                        {error?.message || 'Đã xảy ra lỗi khi tải thông tin thẩm định'}
                     </Alert>
                 </Center>
             </Container>
@@ -120,7 +120,7 @@ const ValidationDetailPage = () => {
             <Container size='xl' py='xl'>
                 <Center h={400}>
                     <Text size='lg' c='dimmed'>
-                        Không tìm thấy thông tin xác thực
+                        Không tìm thấy thông tin thẩm định
                     </Text>
                 </Center>
             </Container>
@@ -209,7 +209,7 @@ const ValidationDetailPage = () => {
 
                                         <Stack gap='md'>
                                             <Text size='sm' fw={500} c='teal'>
-                                                Chờ xác thực kết quả
+                                                Chờ thẩm định kết quả
                                             </Text>
                                             <Button
                                                 color='green'

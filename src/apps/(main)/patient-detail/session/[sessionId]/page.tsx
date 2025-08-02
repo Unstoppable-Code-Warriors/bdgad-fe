@@ -17,7 +17,7 @@ import {
     Modal
 } from '@mantine/core'
 import { Dropzone } from '@mantine/dropzone'
-import type { FileWithPath } from '@mantine/dropzone'
+import type { FileRejection, FileWithPath } from '@mantine/dropzone'
 import {
     IconArrowLeft,
     IconDownload,
@@ -34,7 +34,8 @@ import {
     IconSend,
     IconCheck,
     IconUpload,
-    IconPlus
+    IconPlus,
+    IconAlertCircle
 } from '@tabler/icons-react'
 import {
     usePatientLabSessionDetail,
@@ -112,6 +113,7 @@ const SessionDetailPage = () => {
     const [isSendModalOpen, setIsSendModalOpen] = useState(false)
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
     const [selectedFiles, setSelectedFiles] = useState<FileWithPath[]>([])
+    const [uploadError, setUploadError] = useState<string>('')
     const dropzoneRef = useRef<any>(null)
 
     const { data: sessionData, isLoading, error } = usePatientLabSessionDetail(sessionId!)
@@ -247,13 +249,15 @@ const SessionDetailPage = () => {
     )
 
     const handleOpenUploadModal = () => {
-        setSelectedFiles([]) // Clear any previous selections
+        setSelectedFiles([])
+        setUploadError('') // Clear error when opening modal
         setIsUploadModalOpen(true)
     }
 
     const handleCloseUploadModal = () => {
         setIsUploadModalOpen(false)
-        setSelectedFiles([]) // Clear selections when closing
+        setSelectedFiles([])
+        setUploadError('') 
     }
 
     const handleSubmitUpload = () => {
@@ -261,9 +265,45 @@ const SessionDetailPage = () => {
             handleUploadFiles(selectedFiles as File[])
         }
     }
+    const handleFileReject = useCallback((rejectedFiles: FileRejection[]) => {
+        console.log('rejected files', rejectedFiles)
 
-    // Handler for when files are dropped or selected
-    const handleFilesSelected = (files: FileWithPath[]) => {
+        const errorMessages = rejectedFiles.map(({ file, errors }) => {
+            const fileName = file.name
+            const errorList = errors.map((error) => {
+                switch (error.code) {
+                    case 'file-invalid-type':
+                        return `định dạng không được hỗ trợ`
+                    case 'file-too-large':
+                        return `quá lớn (tối đa 10MB)`
+                    case 'too-many-files':
+                        return `vượt quá số lượng file cho phép`
+                    default:
+                        return error.message
+                }
+            })
+            return `"${fileName}": ${errorList.join(', ')}`
+        })
+
+        const errorMessage = `Không thể tải file: ${errorMessages.join('; ')}`
+        
+        // Set error state
+        setUploadError(errorMessage)
+
+        // Show notification
+        notifications.show({
+            title: 'Lỗi tải file',
+            message: errorMessage,
+            color: 'red',
+            icon: <IconAlertCircle size='1rem' />,
+            autoClose: 8000
+        })
+    }, [])
+
+    const handleFilesSelected = useCallback((files: FileWithPath[]) => {
+        // Clear any previous errors when files are successfully selected
+        setUploadError('')
+        
         setSelectedFiles((prevFiles) => {
             // Create a new array combining existing files with new files
             const combinedFiles = [...prevFiles, ...files]
@@ -275,12 +315,7 @@ const SessionDetailPage = () => {
 
             return uniqueFiles
         })
-    }
-
-    // Handler to remove a specific file from selection
-    const handleRemoveFile = (indexToRemove: number) => {
-        setSelectedFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove))
-    }
+    }, [])
 
     if (isLoading) {
         return (
@@ -314,6 +349,11 @@ const SessionDetailPage = () => {
                 </Paper>
             </Container>
         )
+    }
+
+    function handleRemoveFile(index: number): void {
+        setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index))
+        setUploadError('')
     }
 
     return (
@@ -443,14 +483,15 @@ const SessionDetailPage = () => {
 
                                                 {/* File Info */}
                                                 <div>
-                                                    <Text fw={600} size='sm' mb='xs' lineClamp={2}>
-                                                        {file.fileName}
-                                                    </Text>
+                                                    <div style={{ height: '55px' }}>
+                                                        <Text fw={600} size='sm' mb='xs' lineClamp={2}>
+                                                            {file.fileName}
+                                                        </Text>
+                                                    </div>
                                                     <Text size='xs' c='dimmed' mb='sm'>
                                                         {formatFileSize(file.fileSize)} •{' '}
                                                         {new Date(file.uploadedAt).toLocaleDateString('vi-VN')}
                                                     </Text>
-
                                                     {/* Uploader Info */}
                                                     {file.uploader && (
                                                         <Group gap='xs' mb='sm'>
@@ -512,6 +553,7 @@ const SessionDetailPage = () => {
                         </Paper>
                     )}
                 </div>
+                
 
                 {/* Send Files Modal */}
                 <SendFilesModal
@@ -537,32 +579,53 @@ const SessionDetailPage = () => {
                     centered
                 >
                     <Stack gap='md'>
+                        {/* Error Alert */}
+                        {uploadError && (
+                            <Card withBorder p='md' bg='red.0' style={{ borderColor: '#fa5252' }}>
+                                <Group gap='sm'>
+                                    <IconAlertCircle size={20} color='#fa5252' />
+                                    <div style={{ flex: 1 }}>
+                                        <Text fw={600} c='red.7' size='sm'>
+                                            Lỗi tải file
+                                        </Text>
+                                        <Text c='red.6' size='sm'>
+                                            {uploadError}
+                                        </Text>
+                                    </div>
+                                    <ActionIcon
+                                        variant='subtle'
+                                        color='red'
+                                        size='sm'
+                                        onClick={() => setUploadError('')}
+                                    >
+                                        <IconTrash size={14} />
+                                    </ActionIcon>
+                                </Group>
+                            </Card>
+                        )}
+
                         <Dropzone
                             ref={dropzoneRef}
                             onDrop={handleFilesSelected}
-                            onReject={(files) => {
-                                console.log('rejected files', files)
-                                notifications.show({
-                                    title: 'Lỗi',
-                                    message:
-                                        'Một số file không được chấp nhận. Vui lòng kiểm tra định dạng và kích thước file.',
-                                    color: 'red'
-                                })
-                            }}
-                            maxSize={50 * 1024 ** 2} // 50MB
+                            onReject={handleFileReject}
+                            maxSize={10 * 1024 ** 2} // 10MB
                             accept={{
+                                'image/jpeg': ['.jpg', '.jpeg'],
+                                'image/png': ['.png'],
+                                'image/gif': ['.gif'],
                                 'application/pdf': ['.pdf'],
-                                'image/*': ['.jpg', '.jpeg', '.png', '.gif'],
                                 'application/msword': ['.doc'],
                                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-                                'application/zip': ['.zip'],
-                                'application/x-rar-compressed': ['.rar']
+                                'application/vnd.ms-excel': ['.xls'],
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
                             }}
                             multiple
                             style={{
-                                border: `2px dashed ${sessionData.typeLabSession === 'test' ? '#1971c2' : '#2f9e44'}`,
+                                border: `2px dashed ${uploadError ? '#fa5252' : sessionData.typeLabSession === 'test' ? '#1971c2' : '#2f9e44'}`,
                                 borderRadius: '12px',
-                                backgroundColor: sessionData.typeLabSession === 'test' ? '#e7f5ff' : '#ebfbee',
+                                backgroundColor: uploadError 
+                                    ? '#fff0f0' 
+                                    : sessionData.typeLabSession === 'test' ? '#e7f5ff' : '#ebfbee',
                                 padding: '40px 20px',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s ease'
@@ -577,12 +640,14 @@ const SessionDetailPage = () => {
                                     />
                                 </Dropzone.Accept>
                                 <Dropzone.Reject>
-                                    <IconFile size={52} color='#fa5252' stroke={1.5} />
+                                    <IconAlertCircle size={52} color='#fa5252' stroke={1.5} />
                                 </Dropzone.Reject>
                                 <Dropzone.Idle>
                                     <IconUpload
                                         size={52}
-                                        color={sessionData.typeLabSession === 'test' ? '#1971c2' : '#2f9e44'}
+                                        color={uploadError 
+                                            ? '#fa5252' 
+                                            : sessionData.typeLabSession === 'test' ? '#1971c2' : '#2f9e44'}
                                         stroke={1.5}
                                     />
                                 </Dropzone.Idle>
@@ -593,14 +658,22 @@ const SessionDetailPage = () => {
                                         inline
                                         fw={600}
                                         ta='center'
-                                        c={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
+                                        c={uploadError 
+                                            ? 'red' 
+                                            : sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
                                     >
-                                        {selectedFiles.length > 0
-                                            ? `Đã chọn ${selectedFiles.length} file - Thêm file khác`
-                                            : 'Kéo thả file vào đây hoặc click để chọn'}
+                                        {uploadError 
+                                            ? 'Có lỗi xảy ra - Vui lòng thử lại'
+                                            : selectedFiles.length > 0
+                                                ? `Đã chọn ${selectedFiles.length} file - Thêm file khác`
+                                                : 'Kéo thả file vào đây hoặc click để chọn'}
+                                    </Text>
+
+                                    <Text size='sm' c='dimmed' inline mt={7} ta='center'>
+                                        Chỉ hỗ trợ tập tin hình ảnh (.jpg, .png, .gif), PDF, Word (.doc, .docx) và Excel (.xls, .xlsx)
                                     </Text>
                                     <Text size='sm' c='dimmed' inline mt={7} ta='center'>
-                                        Hỗ trợ: PDF, JPG, PNG, DOC, DOCX, ZIP (tối đa 50MB mỗi file)
+                                        . Kích thước tối đa là 10MB.
                                     </Text>
                                 </div>
                             </Group>
@@ -616,6 +689,7 @@ const SessionDetailPage = () => {
                                         color='red'
                                         onClick={() => {
                                             setSelectedFiles([])
+                                            setUploadError('') 
                                         }}
                                     >
                                         Xóa tất cả
@@ -661,7 +735,7 @@ const SessionDetailPage = () => {
                             </Button>
                             <Button
                                 onClick={handleSubmitUpload}
-                                disabled={selectedFiles.length === 0}
+                                disabled={selectedFiles.length === 0 || !!uploadError}
                                 loading={uploadPatientFilesMutation.isPending}
                                 color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
                                 leftSection={<IconUpload size={16} />}

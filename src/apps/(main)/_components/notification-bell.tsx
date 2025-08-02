@@ -75,41 +75,33 @@ const NotificationBell = () => {
 
         switch (userRole) {
             case Role.LAB_TESTING_TECHNICIAN:
-                if (notification.barcode) {
-                    navigate(`/lab-test?search=${notification.barcode}`)
+                if (notification.labcode) {
+                    navigate(`/lab-test?search=${notification.labcode}`)
                 } else {
                     navigate('/lab-test')
                 }
                 break
 
             case Role.ANALYSIS_TECHNICIAN:
-                if (notification.barcode) {
-                    navigate(`/analysis?search=${notification.barcode}`)
+                if (notification.labcode) {
+                    navigate(`/analysis?search=${notification.labcode}`)
                 } else {
                     navigate('/analysis')
                 }
                 break
 
             case Role.VALIDATION_TECHNICIAN:
-                if (notification.barcode) {
-                    navigate(`/validation?search=${notification.barcode}`)
+                if (notification.labcode) {
+                    navigate(`/validation?search=${notification.labcode}`)
                 } else {
                     navigate('/validation')
                 }
                 break
 
-            case Role.DOCTOR:
-                if (notification.barcode) {
-                    navigate(`/doctor-dashboard?search=${notification.barcode}`)
-                } else {
-                    navigate('/doctor-dashboard')
-                }
-                break
-
             case Role.STAFF:
             default:
-                if (notification.barcode) {
-                    navigate(`/lab-test?search=${notification.barcode}`)
+                if (notification.labcode) {
+                    navigate(`/lab-test?search=${notification.labcode}`)
                 } else {
                     navigate('/lab-test')
                 }
@@ -307,16 +299,7 @@ const NotificationBell = () => {
                     )}
                 </ScrollArea>
 
-                {notifications.length > 0 && (
-                    <>
-                        <Divider />
-                        <UnstyledButton w='100%' p='sm'>
-                            <Text ta='center' size='sm' c='blue'>
-                                Xem tất cả thông báo
-                            </Text>
-                        </UnstyledButton>
-                    </>
-                )}
+                <UnstyledButton w='100%' p='sm'></UnstyledButton>
             </Menu.Dropdown>
         </Menu>
     )

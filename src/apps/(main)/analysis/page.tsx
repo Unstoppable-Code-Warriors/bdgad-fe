@@ -58,7 +58,8 @@ const AnalysisPage = () => {
     })
 
     // Filters
-    const [etlApprovalStatusFilter, setEtlApprovalStatusFilter] = useState<string>('')
+    const [fastqFilePairStatusFilter, setfastqFilePairStatusFilter] = useState<string>('')
+    const [etlStatusFilter, setEtlStatusFilter] = useState<string>('')
     const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
 
     // Debounced search
@@ -67,9 +68,10 @@ const AnalysisPage = () => {
     // Build filter object
     const filter: AnalysisFilter = useMemo(() => {
         const filterObj: AnalysisFilter = {}
-        if (etlApprovalStatusFilter) filterObj.etlApprovalStatus = etlApprovalStatusFilter
+        if (fastqFilePairStatusFilter) filterObj.fastqFilePairStatus = fastqFilePairStatusFilter
+        if (etlStatusFilter) filterObj.etlStatus = etlStatusFilter
         return filterObj
-    }, [etlApprovalStatusFilter])
+    }, [fastqFilePairStatusFilter, etlStatusFilter])
 
     // Fetch data
     const {
@@ -377,6 +379,31 @@ const AnalysisPage = () => {
                             onChange={(event) => setSearch(event.currentTarget.value)}
                         />
                         <Select
+                            placeholder='Lọc theo trạng thái FastQ'
+                            leftSection={<IconFilter size={16} />}
+                            data={[
+                                { value: '', label: 'Tất cả trạng thái FastQ' },
+                                { value: FastQFileStatus.UPLOADED, label: 'Đã tải lên' },
+                                { value: FastQFileStatus.WAIT_FOR_APPROVAL, label: 'Chờ phê duyệt' },
+                                { value: FastQFileStatus.APPROVED, label: 'Đã phê duyệt' },
+                                { value: FastQFileStatus.REJECTED, label: 'Từ chối' },
+                            ]}
+                            value={fastqFilePairStatusFilter}
+                            onChange={(value) => setfastqFilePairStatusFilter(value || '')}
+                            clearable
+                            rightSection={
+                                fastqFilePairStatusFilter && (
+                                    <ActionIcon
+                                        size='sm'
+                                        variant='transparent'
+                                        onClick={() => setfastqFilePairStatusFilter('')}
+                                    >
+                                        <IconX size={12} />
+                                    </ActionIcon>
+                                )
+                            }
+                        />
+                        <Select
                             placeholder='Lọc theo trạng thái ETL'
                             leftSection={<IconFilter size={16} />}
                             data={[
@@ -388,15 +415,15 @@ const AnalysisPage = () => {
                                 { value: AnalysisStatus.COMPLETED, label: 'Hoàn thành' },
                                 { value: AnalysisStatus.FAILED, label: 'Thất bại' }
                             ]}
-                            value={etlApprovalStatusFilter}
-                            onChange={(value) => setEtlApprovalStatusFilter(value || '')}
+                            value={etlStatusFilter}
+                            onChange={(value) => setEtlStatusFilter(value || '')}
                             clearable
                             rightSection={
-                                etlApprovalStatusFilter && (
+                                etlStatusFilter && (
                                     <ActionIcon
                                         size='sm'
                                         variant='transparent'
-                                        onClick={() => setEtlApprovalStatusFilter('')}
+                                        onClick={() => setEtlStatusFilter('')}
                                     >
                                         <IconX size={12} />
                                     </ActionIcon>

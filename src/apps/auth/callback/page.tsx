@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router'
 import { Container, Paper, Text, Loader, Alert, Stack, ThemeIcon } from '@mantine/core'
 import { IconCheck, IconX, IconAlertCircle } from '@tabler/icons-react'
-import { setTokensOutside } from '@/stores/auth.store'
+import { setTokensOutside, loginOutside } from '@/stores/auth.store'
 import { authNotifications } from '@/utils/notifications'
+import { authService } from '@/services/function/auth'
+import { getDefaultRouteByRole } from '@/utils/constant'
 
 const CallbackPage = () => {
     const [searchParams] = useSearchParams()
@@ -21,17 +23,43 @@ const CallbackPage = () => {
                 const message = searchParams.get('message')
 
                 if (status === 'success' && token) {
-                    // Successful authentication
-                    setTokensOutside(token)
-                    setSuccess(true)
-                    setProcessing(false)
+                    try {
+                        // Set token first to enable API calls
+                        setTokensOutside(token)
+                        
+                        const userResponse = await authService.me()
+                        if (userResponse.data?.user) {
+                            loginOutside(token, userResponse.data.user)
+                            
+                            const defaultRoute = getDefaultRouteByRole(Number(userResponse.data.user.roles[0].code))
+                            
+                            setSuccess(true)
+                            setProcessing(false)
+                            authNotifications.loginSuccess()
 
-                    authNotifications.loginSuccess()
-
-                    // Redirect to home after a short delay
-                    setTimeout(() => {
-                        navigate('/', { replace: true })
-                    }, 1500)
+                            setTimeout(() => {
+                                navigate(defaultRoute, { replace: true })
+                            }, 1500)
+                        } else {     
+                            setSuccess(true)
+                            setProcessing(false)
+                            authNotifications.loginSuccess()
+                            
+                            setTimeout(() => {
+                                navigate('/', { replace: true })
+                            }, 1500)
+                        }
+                    } catch (err) {
+                        console.error('Error getting user info:', err)
+                        // Fallback to home on error
+                        setSuccess(true)
+                        setProcessing(false)
+                        authNotifications.loginSuccess()
+                        
+                        setTimeout(() => {
+                            navigate('/', { replace: true })
+                        }, 1500)
+                    }
                 } else if (errorParam) {
                     // Authentication failed
                     let error = ''

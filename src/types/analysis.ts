@@ -114,7 +114,7 @@ export const analysisStatusConfig = {
     },
     [AnalysisStatus.APPROVED]: {
         label: 'Đã phê duyệt',
-        color: 'green'
+        color: '#28a745'
     },
     [AnalysisStatus.REJECTED]: {
         label: 'Từ chối',
@@ -126,7 +126,7 @@ export const analysisStatusConfig = {
     },
     [AnalysisStatus.COMPLETED]: {
         label: 'Hoàn thành',
-        color: 'teal'
+        color: '#17a2b8'
     },
     [AnalysisStatus.FAILED]: {
         label: 'Thất bại',
@@ -135,6 +135,7 @@ export const analysisStatusConfig = {
 }
 
 export interface AnalysisFilter {
+    fastqFilePairStatus?: string
     etlStatus?: string
     etlApprovalStatus?: string
 }

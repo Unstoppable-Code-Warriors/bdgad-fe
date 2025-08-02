@@ -16,11 +16,12 @@ import {
 import { useForm } from '@mantine/form'
 import { IconMail, IconLock, IconBrandGoogle, IconAlertCircle } from '@tabler/icons-react'
 import { authService } from '@/services/function/auth'
-import { setTokensOutside } from '@/stores/auth.store'
+import { loginOutside } from '@/stores/auth.store'
 import { Link, useNavigate } from 'react-router'
 import { emailValidator, normalizeEmail, suggestEmailCorrection } from '@/utils/validateEmail'
 import { authNotifications } from '@/utils/notifications'
 import { getLoginErrorMessage } from '@/utils/error'
+import { getDefaultRouteByRole } from '@/utils/constant'
 import { useGoogleAuth } from '@/hooks/use-google-auth'
 
 interface LoginFormValues {
@@ -82,9 +83,13 @@ const LoginPage = () => {
             if ('code' in response) {
                 setError(getLoginErrorMessage(response.code as string))
             } else {
-                setTokensOutside(response.data.token)
+                loginOutside(response.data.token, response.data.user)
                 authNotifications.loginSuccess()
-                navigate('/')
+                console.log('Login successful, redirecting to:', response.data)
+                
+                const defaultRoute = getDefaultRouteByRole(Number(response.data.user.roles[0].code))
+                console.log('Login successful, redirecting to:', defaultRoute)
+                navigate(defaultRoute)
             }
         } catch (err) {
             console.error('Error login:', err)
