@@ -58,3 +58,9 @@ export const useUploadPatientFiles = () => {
         }
     })
 }
+
+export const useDownloadEtlResult = () => {
+    return useMutation({
+        mutationFn: (etlResultId: number) => staffService.downloadEtlResult(etlResultId)
+    })
+}

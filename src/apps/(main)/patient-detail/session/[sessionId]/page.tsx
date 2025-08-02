@@ -40,7 +40,8 @@ import {
 import {
     usePatientLabSessionDetail,
     useDeletePatientFile,
-    useUploadPatientFiles
+    useUploadPatientFiles,
+    useDownloadEtlResult
 } from '@/services/hook/staff-patient-session.hook'
 import SendFilesModal from '../components/SendFilesModal'
 import { notifications } from '@mantine/notifications'
@@ -107,6 +108,64 @@ const formatFileSize = (bytes: number) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
+const getEtlStatusBadge = (status: string | null) => {
+    switch (status) {
+        case 'completed':
+            return (
+                <Badge color='green' variant='filled' size='sm'>
+                    Hoàn thành
+                </Badge>
+            )
+        case 'rejected':
+            return (
+                <Badge color='red' variant='filled' size='sm'>
+                    Bị từ chối
+                </Badge>
+            )
+        case 'pending':
+            return (
+                <Badge color='yellow' variant='filled' size='sm'>
+                    Đang xử lý
+                </Badge>
+            )
+        default:
+            return (
+                <Badge color='gray' variant='filled' size='sm'>
+                    Chưa rõ
+                </Badge>
+            )
+    }
+}
+
+const getFastqPairStatusBadge = (status: string) => {
+    switch (status) {
+        case 'completed':
+            return (
+                <Badge color='green' variant='light' size='xs'>
+                    Hoàn thành
+                </Badge>
+            )
+        case 'rejected':
+            return (
+                <Badge color='red' variant='light' size='xs'>
+                    Bị từ chối
+                </Badge>
+            )
+        case 'processing':
+            return (
+                <Badge color='blue' variant='light' size='xs'>
+                    Đang xử lý
+                </Badge>
+            )
+        default:
+            return (
+                <Badge color='gray' variant='light' size='xs'>
+                    {status}
+                </Badge>
+            )
+    }
+}
+
 const SessionDetailPage = () => {
     const { id: patientId, sessionId } = useParams<{ id: string; sessionId: string }>()
     const navigate = useNavigate()
@@ -121,6 +180,7 @@ const SessionDetailPage = () => {
     const downloadMutation = useDownloadPatientFile()
     const deletePatientFileMutation = useDeletePatientFile()
     const uploadPatientFilesMutation = useUploadPatientFiles()
+    const downloadEtlResultMutation = useDownloadEtlResult()
 
     const handleBack = () => {
         navigate(`/patient-detail/${patientId}`)
@@ -171,6 +231,51 @@ const SessionDetailPage = () => {
             }
         },
         [downloadMutation, sessionId]
+    )
+
+    const handleDownloadEtlResult = useCallback(
+        async (etlResultId: number) => {
+            try {
+                const response = await downloadEtlResultMutation.mutateAsync(etlResultId)
+
+                let downloadUrl: string
+
+                if (typeof response === 'string') {
+                    downloadUrl = response.trim()
+                } else if (response && typeof response === 'object') {
+                    downloadUrl = response.downloadUrl || response.url || response.data || String(response)
+                } else {
+                    throw new Error('Invalid response format')
+                }
+
+                // Validate URL
+                if (!downloadUrl || (!downloadUrl.startsWith('http') && !downloadUrl.startsWith('blob:'))) {
+                    throw new Error('Invalid download URL: ' + downloadUrl)
+                }
+
+                // Create download link and trigger download
+                const link = document.createElement('a')
+                link.href = downloadUrl
+                link.download = `etl-result-${etlResultId}.zip`
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+
+                notifications.show({
+                    title: 'Thành công',
+                    message: 'Kết quả phân tích đã được tải xuống thành công',
+                    color: 'green'
+                })
+            } catch (error) {
+                console.error('ETL download failed:', error)
+                notifications.show({
+                    title: 'Lỗi',
+                    message: `Không thể tải xuống kết quả phân tích: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    color: 'red'
+                })
+            }
+        },
+        [downloadEtlResultMutation]
     )
 
     const handleSendFiles = () => {
@@ -441,6 +546,116 @@ const SessionDetailPage = () => {
                         </Group>
                     </Group>
                 </Card>
+
+                {/* ETL Results History */}
+                {sessionData.etlResults && sessionData.etlResults.length > 0 && (
+                    <Card shadow='sm' padding='lg' withBorder>
+                        <Group mb='lg'>
+                            <Title order={3} c={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}>
+                                Lịch sử kết quả phân tích
+                            </Title>
+                            <Badge variant='light' color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}>
+                                {sessionData.etlResults?.length || 0} kết quả
+                            </Badge>
+                        </Group>
+
+                        <Stack gap='md'>
+                            {sessionData.etlResults.map((etlResult: any) => (
+                                <Card key={etlResult.id} withBorder p='md' radius='md'>
+                                    <Group justify='space-between' align='flex-start'>
+                                        <Stack gap='xs' flex={1}>
+                                            <Group>
+                                                <Text fw={600} size='sm'>
+                                                    Kết quả #{etlResult.id}
+                                                </Text>
+                                                {getEtlStatusBadge(etlResult.status)}
+                                            </Group>
+
+                                            <Group gap='lg'>
+                                                <Group>
+                                                    <IconUser size={14} />
+                                                    <Text size='xs' c='dimmed'>
+                                                        {etlResult.analyzer.name || 'Chưa có người phân tích'}
+                                                    </Text>
+                                                </Group>
+                                                <Group gap='xs'>
+                                                    <IconCalendarEvent size={14} />
+                                                    <Text size='xs' c='dimmed'>
+                                                        {new Date(etlResult.etlCompletedAt).toLocaleDateString('vi-VN')}{' '}
+                                                        lúc{' '}
+                                                        {new Date(etlResult.etlCompletedAt).toLocaleTimeString('vi-VN')}
+                                                    </Text>
+                                                </Group>
+
+                                                {etlResult.fastqPair && (
+                                                    <Group gap='xs'>
+                                                        <IconFile size={14} />
+                                                        <Text size='xs' c='dimmed'>
+                                                            FASTQ Pair #{etlResult.fastqPair.id}
+                                                        </Text>
+                                                        {getFastqPairStatusBadge(etlResult.fastqPair.status)}
+                                                    </Group>
+                                                )}
+                                            </Group>
+
+                                            {etlResult.reasonApprove && (
+                                                <Paper p='xs' bg='gray.0' radius='sm'>
+                                                    <Text size='xs' fs='italic'>
+                                                        "{etlResult.reasonApprove}"
+                                                    </Text>
+                                                </Paper>
+                                            )}
+
+                                            {etlResult.reasonReject && (
+                                                <Paper p='xs' bg='red.0' radius='sm'>
+                                                    <Group gap='xs'>
+                                                        <IconTrash size={12} color='red' />
+                                                        <Text size='xs' c='red' fw={500}>
+                                                            Lý do từ chối: {etlResult.reasonReject}
+                                                        </Text>
+                                                    </Group>
+                                                </Paper>
+                                            )}
+
+                                            <Group gap='md'>
+                                                {etlResult.rejector && (
+                                                    <Group gap='xs'>
+                                                        <IconUser size={12} />
+                                                        <Text size='xs' c='dimmed'>
+                                                            Từ chối bởi: {etlResult.rejector.name}
+                                                        </Text>
+                                                    </Group>
+                                                )}
+
+                                                {etlResult.approver && (
+                                                    <Group gap='xs'>
+                                                        <IconUser size={12} />
+                                                        <Text size='xs' c='dimmed'>
+                                                            Phê duyệt bởi: {etlResult.approver.name}
+                                                        </Text>
+                                                    </Group>
+                                                )}
+                                            </Group>
+                                        </Stack>
+
+                                        <Group gap='xs'>
+                                            <ActionIcon
+                                                variant='light'
+                                                color='blue'
+                                                size='sm'
+                                                onClick={() => handleDownloadEtlResult(etlResult.id)}
+                                                title='Tải xuống kết quả'
+                                                loading={downloadEtlResultMutation.isPending}
+                                            >
+                                                <IconDownload size={14} />
+                                            </ActionIcon>
+                                        </Group>
+                                    </Group>
+                                </Card>
+                            ))}
+                        </Stack>
+                    </Card>
+                )}
 
                 {/* Files Grid */}
                 <div>

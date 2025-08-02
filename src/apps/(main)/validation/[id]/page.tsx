@@ -34,8 +34,8 @@ const ValidationDetailPage = () => {
     // Mutations
     const downloadEtlResultMutation = useDownloadValidationEtlResult()
 
-    // Get the latest ETL result
-    const latestEtlResult = data?.latestEtlResult
+    // Get the latest ETL result from the array
+    const latestEtlResult = data?.etlResults && data.etlResults.length > 0 ? data.etlResults[0] : null
 
     const handleBack = () => {
         navigate('/validation')

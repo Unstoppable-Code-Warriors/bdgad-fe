@@ -1,8 +1,9 @@
-import { Card, Text, Badge, Group, Stack, ThemeIcon, Box, Timeline, Avatar } from '@mantine/core'
-import { IconHistory, IconUser, IconClock, IconMessage, IconCircleCheck, IconCircleX } from '@tabler/icons-react'
+import { Card, Text, Badge, Group, Stack, ThemeIcon, Box, Timeline } from '@mantine/core'
+import { IconHistory, IconClock, IconCircleCheck, IconCircleX, IconDna } from '@tabler/icons-react'
 import type { ValidationSessionWithLatestEtlResponse } from '@/types/validation'
 import { validationEtlStatusConfig, ValidationEtlStatus } from '@/types/validation'
 import { RejectionDisplay } from '@/components/RejectionDisplay'
+import { ApprovedDisplay } from '@/components/ApprovedDisplay'
 
 interface EtlResultHistoryProps {
     validation: ValidationSessionWithLatestEtlResponse
@@ -30,8 +31,9 @@ const getStatusIcon = (status: string) => {
 }
 
 export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
-    const etlResult = validation.latestEtlResult
-    const results = etlResult ? [etlResult] : []
+    // Use the etlResults array from the validation session
+    const results = validation.etlResults || []
+
     // const downloadEtlResultMutation = useDownloadEtlResult()
 
     // const handleDownloadEtlResult = async (etlResultId: number) => {
@@ -51,7 +53,7 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
     //         })
     //     }
     // }
-    if (!etlResult) {
+    if (results.length === 0) {
         return (
             <Card shadow='sm' padding='xl' radius='lg' withBorder>
                 <Group gap='sm' mb='lg'>
@@ -135,6 +137,17 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                                             </Text>
                                         </Group>
 
+                                        {/* FASTQ File Pair Information */}
+                                        {result.fastqPair && (
+                                            <Group gap='xs'>
+                                                <IconDna size={14} color='var(--mantine-color-blue-6)' />
+                                                <Text size='sm' c='dimmed'>
+                                                    Nguồn: Cặp file fastQ{' '}
+                                                    <span className='font-semibold'>#{result.fastqPair.id}</span>
+                                                </Text>
+                                            </Group>
+                                        )}
+
                                         {/* File Path */}
                                         {/* <Group gap='xs' align='flex-start'>
                                             <IconMessage size={14} color='var(--mantine-color-blue-6)' />
@@ -148,36 +161,23 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                                             </Box>
                                         </Group> */}
 
-                                        {/* Comment */}
-                                        {result.comment && (
-                                            <Group gap='xs' align='flex-start'>
-                                                <IconMessage size={14} color='var(--mantine-color-teal-6)' />
-                                                <Box style={{ flex: 1 }}>
-                                                    <Text size='sm' c='teal' fw={500}>
-                                                        Ghi chú phê duyệt:
-                                                    </Text>
-                                                    <Text size='sm' c='teal.7' style={{ wordBreak: 'break-word' }}>
-                                                        {result.comment}
-                                                    </Text>
-                                                    {result.commenter && (
-                                                        <Group gap='xs' mt='xs'>
-                                                            <Avatar size='sm' radius='xl' color='teal' variant='light'>
-                                                                <IconUser size={12} />
-                                                            </Avatar>
-                                                            <Text size='xs' c='dimmed'>
-                                                                Bởi: {result.commenter.name} ({result.commenter.email})
-                                                            </Text>
-                                                        </Group>
-                                                    )}
-                                                </Box>
-                                            </Group>
+                                        {/* Approval Display */}
+                                        {result.reasonApprove && result.approver && (
+                                            <ApprovedDisplay
+                                                approver={result.approver}
+                                                reasonApprove={result.reasonApprove}
+                                                approvalDate={result.etlCompletedAt}
+                                                itemType='Kết quả phân tích'
+                                                itemId={result.id}
+                                                compact
+                                            />
                                         )}
 
                                         {/* Rejection Reason */}
-                                        {result.redoReason && result.rejector && (
+                                        {result.reasonReject && result.rejector && (
                                             <RejectionDisplay
                                                 rejector={result.rejector}
-                                                redoReason={result.redoReason}
+                                                redoReason={result.reasonReject}
                                                 rejectionDate={result.etlCompletedAt}
                                                 itemType='Kết quả phân tích'
                                                 itemId={result.id}

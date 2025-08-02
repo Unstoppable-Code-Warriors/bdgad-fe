@@ -51,7 +51,7 @@ export const staffService = {
     // Upload patient files to session
     uploadPatientFiles: async (labSessionId: string, files: File[]): Promise<any> => {
         const formData = new FormData()
-        
+
         // Append each file to the FormData
         files.forEach((file) => {
             formData.append('files', file)
@@ -63,6 +63,11 @@ export const staffService = {
                 headers: {}
             })
             .json()
+    },
+
+    // Download ETL result
+    downloadEtlResult: async (etlResultId: number): Promise<any> => {
+        return backendApi.get(`${PREFIX}/etl-results/${etlResultId}/download`).json()
     },
 
     // Delete general file by ID

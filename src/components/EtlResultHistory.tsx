@@ -1,15 +1,22 @@
 import { Card, Text, Badge, Group, Stack, ThemeIcon, Box, Timeline, Avatar, Button, Divider } from '@mantine/core'
-import { IconChartLine, IconUser, IconClock, IconAlertTriangle, IconCheck } from '@tabler/icons-react'
+import { IconChartLine, IconUser, IconClock, IconAlertTriangle, IconCheck, IconDna } from '@tabler/icons-react'
 import { RejectionDisplay } from './RejectionDisplay'
+import { ApprovedDisplay } from './ApprovedDisplay'
 
 interface EtlResultData {
     id: number
     status: string | null
     createdAt?: string
     etlCompletedAt?: string
-    comment?: string
+    reasonApprove?: string
     error?: string
-    redoReason?: string | null
+    reasonReject?: string | null
+    fastqFilePairId?: number
+    fastqPair?: {
+        id: number
+        createdAt: string
+        status: string
+    }
     creator?: {
         id: number
         name: string
@@ -21,11 +28,6 @@ interface EtlResultData {
         email: string
     }
     approver?: {
-        id: number
-        name: string
-        email: string
-    }
-    commenter?: {
         id: number
         name: string
         email: string
@@ -51,9 +53,11 @@ interface EtlResultHistoryProps {
     icon?: React.ReactNode
     iconColor?: string
     statusConfig: Record<string, { label: string; color: string }>
+    fastqStatusConfig?: Record<string, { label: string; color: string }>
     actions?: EtlResultAction[]
     showCreator?: boolean
     showTimestamp?: boolean
+    showFastqPair?: boolean
     resultNamePrefix?: string
 }
 
@@ -69,8 +73,11 @@ export const EtlResultHistory = ({
     actions = [],
     showCreator = true,
     showTimestamp = true,
+    showFastqPair = false,
     resultNamePrefix = 'Kết quả ETL'
 }: EtlResultHistoryProps) => {
+    console.log('EtlResultHistory results:', results)
+
     const getStatusColor = (status: string) => {
         return statusConfig[status]?.color || 'gray'
     }
@@ -182,16 +189,27 @@ export const EtlResultHistory = ({
                                             </Group>
                                         )}
 
-                                        {/* Comment */}
-                                        {/* {result.comment && (
+                                        {/* FASTQ File Pair Information */}
+                                        {showFastqPair && result.fastqPair && (
+                                            <Group gap='xs'>
+                                                <IconDna size={14} color='var(--mantine-color-blue-6)' />
+                                                <Text size='sm' c='dimmed'>
+                                                    Nguồn: Cặp file fastQ{' '}
+                                                    <span className='font-semibold'>#{result.fastqPair.id}</span>
+                                                </Text>
+                                            </Group>
+                                        )}
+
+                                        {/* Approval Reason */}
+                                        {/* {result.reasonApprove && (
                                             <Group gap='xs' align='flex-start'>
                                                 <IconMessage size={14} color='var(--mantine-color-blue-6)' />
                                                 <Box style={{ flex: 1 }}>
                                                     <Text size='sm' c='dimmed' fw={500}>
-                                                        Ghi chú:
+                                                        Ghi chú phê duyệt:
                                                     </Text>
                                                     <Text size='sm' style={{ wordBreak: 'break-word' }}>
-                                                        {result.comment}
+                                                        {result.reasonApprove}
                                                     </Text>
                                                 </Box>
                                             </Group>
@@ -212,8 +230,20 @@ export const EtlResultHistory = ({
                                             </Group>
                                         )}
 
-                                        {/* Approver Info */}
-                                        {result.approver && (
+                                        {/* Approver Display */}
+                                        {result.approver && result.reasonApprove && (
+                                            <ApprovedDisplay
+                                                approver={result.approver}
+                                                reasonApprove={result.reasonApprove}
+                                                approvalDate={result.createdAt || result.etlCompletedAt || ''}
+                                                itemType={resultNamePrefix}
+                                                itemId={result.id}
+                                                compact
+                                            />
+                                        )}
+
+                                        {/* Simple Approver Info (when no approval reason) */}
+                                        {result.approver && !result.reasonApprove && (
                                             <Group gap='xs'>
                                                 <Avatar size='sm' radius='xl' color='green' variant='light'>
                                                     <IconCheck size={12} />
@@ -225,10 +255,10 @@ export const EtlResultHistory = ({
                                         )}
 
                                         {/* Rejection Display */}
-                                        {result.rejector && result.redoReason && (
+                                        {result.rejector && result.reasonReject && (
                                             <RejectionDisplay
                                                 rejector={result.rejector}
-                                                redoReason={result.redoReason}
+                                                redoReason={result.reasonReject}
                                                 rejectionDate={result.createdAt || result.etlCompletedAt || ''}
                                                 itemType={resultNamePrefix}
                                                 itemId={result.id}

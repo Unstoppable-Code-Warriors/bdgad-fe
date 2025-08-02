@@ -49,7 +49,7 @@ const AcceptEtlResultModalContent = ({ etlResultId, onSuccess }: AcceptEtlResult
 
     const handleAcceptEtlResult = async () => {
         acceptEtlResultMutation.mutate(
-            { etlResultId, data: { comment: comment.trim() || undefined } },
+            { etlResultId, data: { reasonApprove: comment.trim() || undefined } },
             {
                 onSuccess: () => {
                     notifications.show({

@@ -22,7 +22,6 @@ import {
     Card,
     Divider,
     ThemeIcon,
-    Avatar,
     Select,
     Alert
 } from '@mantine/core'
@@ -35,8 +34,7 @@ import {
     IconRefresh,
     IconSend,
     IconFileText,
-    IconChartLine,
-    IconUser
+    IconChartLine
 } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { AnalysisInfo } from './_components'
@@ -45,6 +43,7 @@ import { FileHistory } from '@/components/FileHistory'
 import { EtlResultHistory } from '@/components/EtlResultHistory'
 import { PageHeader } from '@/components/PageHeader'
 import { AnalysisStatus, analysisStatusConfig } from '@/types/analysis'
+import { statusConfig } from '@/types/lab-test.types'
 import { labTestService } from '@/services/function/lab-test'
 import { openRejectFastqModal } from '@/components/RejectFastqModal'
 
@@ -52,8 +51,9 @@ const AnalysisDetailPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const { data, isLoading, error, refetch } = useAnalysisSessionDetail(id)
+    console.log('Analysis Detail Data:', data)
     const [selectedValidationId, setSelectedValidationId] = useState<string | null>(
-        data?.validation ? String(data.validation.id) : null
+        data?.validation?.id ? String(data.validation.id) : null
     )
 
     // Mutations
@@ -152,10 +152,13 @@ const AnalysisDetailPage = () => {
     }
 
     const handleSendEtlResultToValidation = async (etlResultId: number) => {
-        if (!selectedValidationId) {
+        // Use selected validation ID
+        const validationId = selectedValidationId ? parseInt(selectedValidationId, 10) : undefined
+
+        if (!validationId) {
             notifications.show({
-                title: 'Thieu thong tin',
-                message: 'Vui long chon nguoi xac thuc truoc khi gui ket qua.',
+                title: 'Thiếu thông tin',
+                message: 'Vui lòng chọn người xác thực trước khi gửi kết quả.',
                 color: 'orange'
             })
             return
@@ -163,7 +166,7 @@ const AnalysisDetailPage = () => {
         sendEtlResultToValidationMutation.mutate(
             {
                 etlResultId: etlResultId,
-                validataionId: parseInt(selectedValidationId!)
+                validataionId: validationId
             },
             {
                 onSuccess: () => {
@@ -359,11 +362,6 @@ const AnalysisDetailPage = () => {
                                         </Group>
 
                                         <Divider />
-                                        {/* <Text size='sm' fw={500} c='teal'>
-                                            {latestEtlResult?.status === AnalysisStatus.REJECTED
-                                                ? 'phân tích'
-                                                : 'Phân tích mẫu'}
-                                        </Text> */}
                                         {latestEtlResult?.status === AnalysisStatus.REJECTED ? (
                                             <Button
                                                 color='orange'
@@ -405,54 +403,49 @@ const AnalysisDetailPage = () => {
                                     </Stack>
                                 )}
 
-                                {latestEtlResult?.status === AnalysisStatus.COMPLETED && (
+                                {(latestEtlResult?.status === AnalysisStatus.COMPLETED ||
+                                    latestEtlResult?.status === AnalysisStatus.REJECTED) && (
                                     <Stack gap='md'>
-                                        <Text size='sm' fw={500} c='green'>
-                                            Kết quả đã sẵn sàng
-                                        </Text>
-                                        <Button
-                                            color='teal'
-                                            onClick={() => handleDownloadEtlResult(latestEtlResult.id)}
-                                            leftSection={<IconDownload size={16} />}
-                                            loading={downloadEtlResultMutation.isPending}
-                                            disabled={downloadEtlResultMutation.isPending}
-                                            fullWidth
-                                            size='md'
-                                            radius='lg'
+                                        <Text
+                                            size='sm'
+                                            fw={500}
+                                            c={latestEtlResult?.status === AnalysisStatus.REJECTED ? 'orange' : 'green'}
                                         >
-                                            Tải xuống kết quả
-                                        </Button>
-                                        <Divider />
-                                        {data.validation ? (
-                                            <>
-                                                <Text fw={600}>Kỹ thuật viên phân tích</Text>
-                                                <Group gap='sm'>
-                                                    <Avatar size='lg' radius='md' color='green' variant='light'>
-                                                        <IconUser size={24} />
-                                                    </Avatar>
-                                                    <Box>
-                                                        <Text fw={700} size='lg'>
-                                                            {data.validation.name}
-                                                        </Text>
-                                                        <Text size='sm' c='dimmed'>
-                                                            {data.validation.email}
-                                                        </Text>
-                                                    </Box>
-                                                </Group>
-                                            </>
-                                        ) : (
-                                            <Select
-                                                label='Chọn kỹ thuật viên Thẩm Định'
-                                                placeholder='Chọn kỹ thuật viên...'
-                                                data={validations.data?.data?.users.map((user) => ({
-                                                    label: `${user.name} - ${user.email}`,
-                                                    value: String(user.id)
-                                                }))}
-                                                value={selectedValidationId}
-                                                onChange={setSelectedValidationId}
-                                                required
-                                            />
+                                            {latestEtlResult?.status === AnalysisStatus.REJECTED
+                                                ? 'Kết quả bị từ chối - Sẵn sàng gửi lại'
+                                                : 'Kết quả đã sẵn sàng'}
+                                        </Text>
+
+                                        {latestEtlResult?.status === AnalysisStatus.COMPLETED && (
+                                            <Button
+                                                color='teal'
+                                                onClick={() => handleDownloadEtlResult(latestEtlResult.id)}
+                                                leftSection={<IconDownload size={16} />}
+                                                loading={downloadEtlResultMutation.isPending}
+                                                disabled={downloadEtlResultMutation.isPending}
+                                                fullWidth
+                                                size='md'
+                                                radius='lg'
+                                            >
+                                                Tải xuống kết quả
+                                            </Button>
                                         )}
+
+                                        <Divider />
+
+                                        <Select
+                                            label='Chọn kỹ thuật viên Thẩm Định'
+                                            placeholder='Chọn kỹ thuật viên...'
+                                            data={validations.data?.data?.users.map((user) => ({
+                                                label: `${user.name} - ${user.email}`,
+                                                value: String(user.id)
+                                            }))}
+                                            disabled={latestEtlResult?.status !== AnalysisStatus.COMPLETED}
+                                            value={selectedValidationId}
+                                            onChange={setSelectedValidationId}
+                                            required
+                                        />
+
                                         <Button
                                             color='blue'
                                             variant='light'
@@ -461,7 +454,8 @@ const AnalysisDetailPage = () => {
                                             loading={sendEtlResultToValidationMutation.isPending}
                                             disabled={
                                                 sendEtlResultToValidationMutation.isPending ||
-                                                (!data.validation && selectedValidationId == undefined)
+                                                !selectedValidationId ||
+                                                latestEtlResult?.status !== AnalysisStatus.COMPLETED
                                             }
                                             fullWidth
                                             size='md'
@@ -624,6 +618,8 @@ const AnalysisDetailPage = () => {
                             icon={<IconChartLine size={20} />}
                             iconColor='teal'
                             statusConfig={analysisStatusConfig}
+                            fastqStatusConfig={statusConfig}
+                            showFastqPair={true}
                             resultNamePrefix='Kết quả phân tích'
                             actions={
                                 [

@@ -15,10 +15,9 @@ import {
     Card,
     Divider,
     ThemeIcon,
-    Select,
-    Avatar
+    Select
 } from '@mantine/core'
-import { IconAlertCircle, IconSend, IconUser } from '@tabler/icons-react'
+import { IconAlertCircle, IconSend } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { LabTestInfo, FileHistory } from './_components'
 import { FileUpload } from './_components/FileUploadPair'
@@ -29,6 +28,7 @@ const LabTestDetailPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const { data, isLoading, error } = useLabTestSessionDetail(id)
+    console.log('LabTestDetailPage data:', data)
     const [r1File, setR1File] = useState<File | null>(null)
     const [r2File, setR2File] = useState<File | null>(null)
     const sendToAnalysisMutation = useSendToAnalysis()
@@ -68,8 +68,8 @@ const LabTestDetailPage = () => {
             return
         }
 
-        // Prevent NaN by checking selectedAnalysisId
-        const analysisId = data?.analysis?.id ?? (selectedAnalysisId ? parseInt(selectedAnalysisId, 10) : undefined)
+        // Use selected analysis ID
+        const analysisId = selectedAnalysisId ? parseInt(selectedAnalysisId, 10) : undefined
 
         if (!analysisId) {
             notifications.show({
@@ -187,11 +187,7 @@ const LabTestDetailPage = () => {
                             <LabTestInfo data={data} latestFastqFilePair={latestFastqFilePair} />
 
                             {/* Patient Information */}
-                            <PatientInfo
-                                patient={data.patient}
-                                analysis={data.assignment?.labTesting}
-                                doctor={data.assignment?.doctor}
-                            />
+                            <PatientInfo patient={data.patient} analysis={data?.analysis} doctor={data?.doctor} />
                         </Stack>
                     </Grid.Col>
 
@@ -211,7 +207,8 @@ const LabTestDetailPage = () => {
                                 />
 
                                 {/* Action Panel */}
-                                {latestFastqFilePair?.status === 'uploaded' && (
+                                {(latestFastqFilePair?.status === 'uploaded' ||
+                                    latestFastqFilePair?.status === 'rejected') && (
                                     <Card shadow='sm' radius='lg' p='lg' withBorder>
                                         <Stack gap='lg'>
                                             <Group gap='sm'>
@@ -220,46 +217,34 @@ const LabTestDetailPage = () => {
                                                 </ThemeIcon>
                                                 <Box>
                                                     <Text fw={600} size='md'>
-                                                        Sẵn sàng phân tích
+                                                        Gửi phân tích
                                                     </Text>
                                                     <Text size='sm' c='dimmed'>
-                                                        File FastQ đã sẵn sàng để gửi phân tích
+                                                        {latestFastqFilePair?.status === 'rejected'
+                                                            ? 'File FastQ đã được sửa đổi và sẵn sàng gửi lại phân tích'
+                                                            : 'File FastQ đã sẵn sàng để gửi phân tích'}
                                                     </Text>
                                                 </Box>
                                             </Group>
 
                                             <Divider />
+                                            {/* Analysis Assignment Form */}
 
-                                            {data.assignment?.labTesting ? (
-                                                <>
-                                                    <Text fw={600}>Kỹ thuật viên phân tích</Text>
-                                                    <Group gap='sm'>
-                                                        <Avatar size='lg' radius='md' color='green' variant='light'>
-                                                            <IconUser size={24} />
-                                                        </Avatar>
-                                                        <Box>
-                                                            <Text fw={700} size='lg'>
-                                                                {data.assignment.labTesting.name}
-                                                            </Text>
-                                                            <Text size='sm' c='dimmed'>
-                                                                {data.assignment.labTesting.email}
-                                                            </Text>
-                                                        </Box>
-                                                    </Group>
-                                                </>
-                                            ) : (
-                                                <Select
-                                                    label='Chọn kỹ thuật viên Phân Tích'
-                                                    placeholder='Chọn người dùng...'
-                                                    data={analysises.data?.data?.users.map((user) => ({
-                                                        label: `${user.name} - ${user.email}`,
-                                                        value: String(user.id)
-                                                    }))}
-                                                    value={selectedAnalysisId}
-                                                    onChange={setSelectedAnalysisId}
-                                                    required
-                                                />
-                                            )}
+                                            <Select
+                                                label='Chọn kỹ thuật viên Phân Tích'
+                                                placeholder='Chọn người dùng...'
+                                                data={analysises.data?.data?.users.map((user) => ({
+                                                    label: `${user.name} - ${user.email}`,
+                                                    value: String(user.id)
+                                                }))}
+                                                disabled={
+                                                    sendToAnalysisMutation.isPending ||
+                                                    latestFastqFilePair?.status !== 'uploaded'
+                                                }
+                                                value={selectedAnalysisId}
+                                                onChange={setSelectedAnalysisId}
+                                                required
+                                            />
 
                                             <Divider />
 
@@ -270,7 +255,8 @@ const LabTestDetailPage = () => {
                                                 loading={sendToAnalysisMutation.isPending}
                                                 disabled={
                                                     sendToAnalysisMutation.isPending ||
-                                                    (!data.assignment?.labTesting && !selectedAnalysisId)
+                                                    !selectedAnalysisId ||
+                                                    latestFastqFilePair?.status !== 'uploaded'
                                                 }
                                                 fullWidth
                                                 size='md'

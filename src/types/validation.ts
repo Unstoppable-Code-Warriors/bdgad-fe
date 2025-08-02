@@ -25,14 +25,20 @@ export interface ValidationEtlResultResponse {
     resultPath: string
     etlCompletedAt: string
     status: string | null
-    redoReason: string | null
-    comment: string
+    reasonReject: string | null
+    reasonApprove: string
+    fastqFilePairId: number
+    fastqPair: {
+        id: number
+        createdAt: string
+        status: string
+    }
     rejector?: {
         id: number
         name: string
         email: string
     }
-    commenter?: {
+    approver?: {
         id: number
         name: string
         email: string
@@ -51,7 +57,25 @@ export interface ValidationSessionResponse {
 }
 
 export interface ValidationSessionWithLatestEtlResponse extends ValidationSessionResponse {
-    latestEtlResult: ValidationEtlResultResponse | null
+    etlResults: ValidationEtlResultResponse[]
+    latestEtlResult: {
+        id: number
+        resultPath: string
+        etlCompletedAt: string
+        status: string | null
+        reasonReject: string | null
+        reasonApprove: string
+        rejector: {
+            id: number
+            name: string
+            email: string
+        } | null
+        approver: {
+            id: number
+            name: string
+            email: string
+        } | null
+    } | null
 }
 
 export interface RejectEtlResultRequest {
@@ -59,7 +83,7 @@ export interface RejectEtlResultRequest {
 }
 
 export interface AcceptEtlResultRequest {
-    comment?: string
+    reasonApprove?: string
 }
 
 export interface ValidationEtlResultDownloadResponse {
