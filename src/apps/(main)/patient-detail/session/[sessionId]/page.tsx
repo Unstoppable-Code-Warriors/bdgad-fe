@@ -598,20 +598,20 @@ const SessionDetailPage = () => {
                                                 )}
                                             </Group>
 
-                                            {etlResult.comment && (
+                                            {etlResult.reasonApprove && (
                                                 <Paper p='xs' bg='gray.0' radius='sm'>
                                                     <Text size='xs' fs='italic'>
-                                                        "{etlResult.comment}"
+                                                        "{etlResult.reasonApprove}"
                                                     </Text>
                                                 </Paper>
                                             )}
 
-                                            {etlResult.redoReason && (
+                                            {etlResult.reasonReject && (
                                                 <Paper p='xs' bg='red.0' radius='sm'>
                                                     <Group gap='xs'>
                                                         <IconTrash size={12} color='red' />
                                                         <Text size='xs' c='red' fw={500}>
-                                                            Lý do từ chối: {etlResult.redoReason}
+                                                            Lý do từ chối: {etlResult.reasonReject}
                                                         </Text>
                                                     </Group>
                                                 </Paper>
@@ -627,11 +627,11 @@ const SessionDetailPage = () => {
                                                     </Group>
                                                 )}
 
-                                                {etlResult.commenter && (
+                                                {etlResult.approver && (
                                                     <Group gap='xs'>
                                                         <IconUser size={12} />
                                                         <Text size='xs' c='dimmed'>
-                                                            Nhận xét bởi: {etlResult.commenter.name}
+                                                            Phê duyệt bởi: {etlResult.approver.name}
                                                         </Text>
                                                     </Group>
                                                 )}

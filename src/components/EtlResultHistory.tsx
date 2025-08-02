@@ -7,9 +7,9 @@ interface EtlResultData {
     status: string | null
     createdAt?: string
     etlCompletedAt?: string
-    comment?: string
+    reasonApprove?: string
     error?: string
-    redoReason?: string | null
+    reasonReject?: string | null
     fastqFilePairId?: number
     fastqPair?: {
         id: number
@@ -27,11 +27,6 @@ interface EtlResultData {
         email: string
     }
     approver?: {
-        id: number
-        name: string
-        email: string
-    }
-    commenter?: {
         id: number
         name: string
         email: string
@@ -204,16 +199,16 @@ export const EtlResultHistory = ({
                                             </Group>
                                         )}
 
-                                        {/* Comment */}
-                                        {/* {result.comment && (
+                                        {/* Approval Reason */}
+                                        {/* {result.reasonApprove && (
                                             <Group gap='xs' align='flex-start'>
                                                 <IconMessage size={14} color='var(--mantine-color-blue-6)' />
                                                 <Box style={{ flex: 1 }}>
                                                     <Text size='sm' c='dimmed' fw={500}>
-                                                        Ghi chú:
+                                                        Ghi chú phê duyệt:
                                                     </Text>
                                                     <Text size='sm' style={{ wordBreak: 'break-word' }}>
-                                                        {result.comment}
+                                                        {result.reasonApprove}
                                                     </Text>
                                                 </Box>
                                             </Group>
@@ -247,10 +242,10 @@ export const EtlResultHistory = ({
                                         )}
 
                                         {/* Rejection Display */}
-                                        {result.rejector && result.redoReason && (
+                                        {result.rejector && result.reasonReject && (
                                             <RejectionDisplay
                                                 rejector={result.rejector}
-                                                redoReason={result.redoReason}
+                                                redoReason={result.reasonReject}
                                                 rejectionDate={result.createdAt || result.etlCompletedAt || ''}
                                                 itemType={resultNamePrefix}
                                                 itemId={result.id}

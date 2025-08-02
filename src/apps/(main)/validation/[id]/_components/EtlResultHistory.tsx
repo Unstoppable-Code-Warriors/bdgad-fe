@@ -149,7 +149,7 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                                         </Group> */}
 
                                         {/* Comment */}
-                                        {result.comment && (
+                                        {result.reasonApprove && (
                                             <Group gap='xs' align='flex-start'>
                                                 <IconMessage size={14} color='var(--mantine-color-teal-6)' />
                                                 <Box style={{ flex: 1 }}>
@@ -157,15 +157,15 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                                                         Ghi chú phê duyệt:
                                                     </Text>
                                                     <Text size='sm' c='teal.7' style={{ wordBreak: 'break-word' }}>
-                                                        {result.comment}
+                                                        {result.reasonApprove}
                                                     </Text>
-                                                    {result.commenter && (
+                                                    {result.approver && (
                                                         <Group gap='xs' mt='xs'>
                                                             <Avatar size='sm' radius='xl' color='teal' variant='light'>
                                                                 <IconUser size={12} />
                                                             </Avatar>
                                                             <Text size='xs' c='dimmed'>
-                                                                Bởi: {result.commenter.name} ({result.commenter.email})
+                                                                Bởi: {result.approver.name} ({result.approver.email})
                                                             </Text>
                                                         </Group>
                                                     )}
@@ -174,10 +174,10 @@ export const EtlResultHistory = ({ validation }: EtlResultHistoryProps) => {
                                         )}
 
                                         {/* Rejection Reason */}
-                                        {result.redoReason && result.rejector && (
+                                        {result.reasonReject && result.rejector && (
                                             <RejectionDisplay
                                                 rejector={result.rejector}
-                                                redoReason={result.redoReason}
+                                                redoReason={result.reasonReject}
                                                 rejectionDate={result.etlCompletedAt}
                                                 itemType='Kết quả phân tích'
                                                 itemId={result.id}

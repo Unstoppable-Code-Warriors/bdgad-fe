@@ -169,7 +169,7 @@ export const AnalysisInfo = ({ data, latestFastqFilePair, latestEtlResult }: Ana
             </Stack>
 
             {/* Additional Information */}
-            {(latestFastqFilePair?.redoReason || latestEtlResult?.comment) && (
+            {(latestFastqFilePair?.redoReason || latestEtlResult?.reasonApprove) && (
                 <>
                     <Divider my='xl' />
                     <Stack gap='md'>
@@ -186,14 +186,14 @@ export const AnalysisInfo = ({ data, latestFastqFilePair, latestEtlResult }: Ana
                             </Paper>
                         )}
 
-                        {latestEtlResult?.comment && (
+                        {latestEtlResult?.reasonApprove && (
                             <Paper p='lg' radius='md' bg='blue.0' withBorder>
                                 <Stack gap='xs'>
                                     <Text size='sm' fw={600} c='blue'>
-                                        Ghi chú phân tích:
+                                        Ghi chú phê duyệt:
                                     </Text>
                                     <Text size='sm' c='blue.7'>
-                                        {latestEtlResult.comment}
+                                        {latestEtlResult.reasonApprove}
                                     </Text>
                                 </Stack>
                             </Paper>

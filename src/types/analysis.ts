@@ -45,8 +45,8 @@ export interface EtlResultResponse {
     resultPath: string
     etlCompletedAt: string
     status: string | null
-    redoReason: string | null
-    comment: string
+    reasonReject: string | null
+    reasonApprove: string
     fastqFilePairId: number
     fastqPair: {
         id: number
@@ -58,7 +58,7 @@ export interface EtlResultResponse {
         name: string
         email: string
     }
-    commenter?: {
+    approver?: {
         id: number
         name: string
         email: string

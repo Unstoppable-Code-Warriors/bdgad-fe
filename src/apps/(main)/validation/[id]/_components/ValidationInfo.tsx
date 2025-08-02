@@ -115,31 +115,31 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
             </Grid>
 
             {/* Additional Information */}
-            {(etlResult?.comment || etlResult?.redoReason) && (
+            {(etlResult?.reasonApprove || etlResult?.reasonReject) && (
                 <>
                     <Divider my='xl' />
                     <Stack gap='md'>
-                        {etlResult?.comment && (
+                        {etlResult?.reasonApprove && (
                             <Paper p='lg' radius='md' bg='teal.0' withBorder>
                                 <Stack gap='xs'>
                                     <Text size='sm' fw={600} c='teal'>
-                                        Ghi chú:
+                                        Ghi chú phê duyệt:
                                     </Text>
                                     <Text size='sm' c='teal.7'>
-                                        {etlResult.comment}
+                                        {etlResult.reasonApprove}
                                     </Text>
                                 </Stack>
                             </Paper>
                         )}
 
-                        {etlResult?.redoReason && (
+                        {etlResult?.reasonReject && (
                             <Paper p='lg' radius='md' bg='red.0' withBorder>
                                 <Stack gap='xs'>
                                     <Text size='sm' fw={600} c='red'>
                                         Lý do từ chối:
                                     </Text>
                                     <Text size='sm' c='red.7'>
-                                        {etlResult.redoReason}
+                                        {etlResult.reasonReject}
                                     </Text>
                                 </Stack>
                             </Paper>
