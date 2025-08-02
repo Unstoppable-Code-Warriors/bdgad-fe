@@ -27,6 +27,12 @@ export interface ValidationEtlResultResponse {
     status: string | null
     redoReason: string | null
     comment: string
+    fastqFilePairId: number
+    fastqPair: {
+        id: number
+        createdAt: string
+        status: string
+    }
     rejector?: {
         id: number
         name: string
@@ -52,6 +58,11 @@ export interface ValidationSessionResponse {
 
 export interface ValidationSessionWithLatestEtlResponse extends ValidationSessionResponse {
     latestEtlResult: ValidationEtlResultResponse | null
+}
+
+export interface ValidationSessionWithAllEtlResponse extends ValidationSessionResponse {
+    latestEtlResult: ValidationEtlResultResponse | null
+    etlResults: ValidationEtlResultResponse[]
 }
 
 export interface RejectEtlResultRequest {

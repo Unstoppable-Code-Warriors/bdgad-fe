@@ -1,5 +1,5 @@
 import { Card, Text, Badge, Group, Stack, ThemeIcon, Box, Timeline, Avatar, Button, Divider } from '@mantine/core'
-import { IconChartLine, IconUser, IconClock, IconAlertTriangle, IconCheck } from '@tabler/icons-react'
+import { IconChartLine, IconUser, IconClock, IconAlertTriangle, IconCheck, IconDna } from '@tabler/icons-react'
 import { RejectionDisplay } from './RejectionDisplay'
 
 interface EtlResultData {
@@ -10,6 +10,12 @@ interface EtlResultData {
     comment?: string
     error?: string
     redoReason?: string | null
+    fastqFilePairId?: number
+    fastqPair?: {
+        id: number
+        createdAt: string
+        status: string
+    }
     creator?: {
         id: number
         name: string
@@ -51,9 +57,11 @@ interface EtlResultHistoryProps {
     icon?: React.ReactNode
     iconColor?: string
     statusConfig: Record<string, { label: string; color: string }>
+    fastqStatusConfig?: Record<string, { label: string; color: string }>
     actions?: EtlResultAction[]
     showCreator?: boolean
     showTimestamp?: boolean
+    showFastqPair?: boolean
     resultNamePrefix?: string
 }
 
@@ -69,8 +77,11 @@ export const EtlResultHistory = ({
     actions = [],
     showCreator = true,
     showTimestamp = true,
+    showFastqPair = false,
     resultNamePrefix = 'Kết quả ETL'
 }: EtlResultHistoryProps) => {
+    console.log('EtlResultHistory results:', results)
+
     const getStatusColor = (status: string) => {
         return statusConfig[status]?.color || 'gray'
     }
@@ -178,6 +189,17 @@ export const EtlResultHistory = ({
                                                     {new Date(
                                                         result.createdAt || result.etlCompletedAt || ''
                                                     ).toLocaleString('vi-VN')}
+                                                </Text>
+                                            </Group>
+                                        )}
+
+                                        {/* FASTQ File Pair Information */}
+                                        {showFastqPair && result.fastqPair && (
+                                            <Group gap='xs'>
+                                                <IconDna size={14} color='var(--mantine-color-blue-6)' />
+                                                <Text size='sm' c='dimmed'>
+                                                    Nguồn: Cặp file fastQ{' '}
+                                                    <span className='font-semibold'>#{result.fastqPair.id}</span>
                                                 </Text>
                                             </Group>
                                         )}

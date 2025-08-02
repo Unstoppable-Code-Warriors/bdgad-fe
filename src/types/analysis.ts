@@ -47,6 +47,12 @@ export interface EtlResultResponse {
     status: string | null
     redoReason: string | null
     comment: string
+    fastqFilePairId: number
+    fastqPair: {
+        id: number
+        createdAt: string
+        status: string
+    }
     rejector?: {
         id: number
         name: string
