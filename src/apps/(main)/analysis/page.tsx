@@ -386,7 +386,7 @@ const AnalysisPage = () => {
                                 { value: FastQFileStatus.UPLOADED, label: 'Đã tải lên' },
                                 { value: FastQFileStatus.WAIT_FOR_APPROVAL, label: 'Chờ phê duyệt' },
                                 { value: FastQFileStatus.APPROVED, label: 'Đã phê duyệt' },
-                                { value: FastQFileStatus.REJECTED, label: 'Từ chối' },
+                                { value: FastQFileStatus.REJECTED, label: 'Từ chối' }
                             ]}
                             value={fastqFilePairStatusFilter}
                             onChange={(value) => setfastqFilePairStatusFilter(value || '')}
@@ -420,11 +420,7 @@ const AnalysisPage = () => {
                             clearable
                             rightSection={
                                 etlStatusFilter && (
-                                    <ActionIcon
-                                        size='sm'
-                                        variant='transparent'
-                                        onClick={() => setEtlStatusFilter('')}
-                                    >
+                                    <ActionIcon size='sm' variant='transparent' onClick={() => setEtlStatusFilter('')}>
                                         <IconX size={12} />
                                     </ActionIcon>
                                 )

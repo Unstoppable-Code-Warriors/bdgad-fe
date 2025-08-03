@@ -1,8 +1,6 @@
 import type { FileWithPath } from '@mantine/dropzone'
 import { Badge } from '@mantine/core'
-import {
-    IconFile, IconPhoto, IconFileWord, IconFileSpreadsheet, 
-} from '@tabler/icons-react'
+import { IconFile, IconPhoto, IconFileWord, IconFileSpreadsheet } from '@tabler/icons-react'
 
 export const getFileType = (file: FileWithPath): 'image' | 'pdf' | 'document' | 'other' => {
     if (file.type.startsWith('image/')) return 'image'
@@ -15,13 +13,13 @@ export const getFileIcon = (file: FileWithPath) => {
     const type = getFileType(file)
     switch (type) {
         case 'pdf':
-            return <IconFileWord color="red" size={20} />
+            return <IconFileWord color='red' size={20} />
         case 'document':
-            return <IconFileSpreadsheet color="blue" size={20} />
+            return <IconFileSpreadsheet color='blue' size={20} />
         case 'image':
-            return <IconPhoto color="purple" size={20} />
+            return <IconPhoto color='purple' size={20} />
         default:
-            return <IconFile color="gray" size={20} />
+            return <IconFile color='gray' size={20} />
     }
 }
 
@@ -29,13 +27,29 @@ export const getFileTypeLabel = (file: FileWithPath) => {
     const type = getFileType(file)
     switch (type) {
         case 'image':
-            return <Badge color="purple" variant="light">Image</Badge>
+            return (
+                <Badge color='purple' variant='light'>
+                    Image
+                </Badge>
+            )
         case 'pdf':
-            return <Badge color="red" variant="light">PDF</Badge>
+            return (
+                <Badge color='red' variant='light'>
+                    PDF
+                </Badge>
+            )
         case 'document':
-            return <Badge color="blue" variant="light">Document</Badge>
+            return (
+                <Badge color='blue' variant='light'>
+                    Document
+                </Badge>
+            )
         default:
-            return <Badge color="gray" variant="light">Other</Badge>
+            return (
+                <Badge color='gray' variant='light'>
+                    Other
+                </Badge>
+            )
     }
 }
 

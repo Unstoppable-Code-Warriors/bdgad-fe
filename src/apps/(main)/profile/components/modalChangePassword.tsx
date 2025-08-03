@@ -1,15 +1,5 @@
 import { useState } from 'react'
-import {
-    Modal,
-    PasswordInput,
-    Button,
-    Group,
-    Stack,
-    Text,
-    List,
-    ThemeIcon,
-    Box
-} from '@mantine/core'
+import { Modal, PasswordInput, Button, Group, Stack, Text, List, ThemeIcon, Box } from '@mantine/core'
 import { IconLock, IconCheck, IconX } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
 import { authService } from '@/services/function/auth'
@@ -51,7 +41,6 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
         }
     })
 
-
     const handleChangePassword = async (values: typeof form.values) => {
         try {
             setIsLoading(true)
@@ -60,14 +49,13 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
                 newPassword: values.newPassword,
                 confirmPassword: values.confirmPassword
             })
-            
+
             if (response.code) {
                 setError(getChangePasswordErrorMessage(response.code))
             } else {
                 authNotifications.changePasswordSuccess()
                 handleClose()
             }
-            
         } catch (err: unknown) {
             console.error('Error changing password:', err)
             setError('Đã xảy ra lỗi khi đổi mật khẩu. Vui lòng thử lại.')
@@ -100,7 +88,11 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
                     <Text size='sm' c='dimmed'>
                         Cập nhật mật khẩu của bạn để bảo vệ tài khoản
                     </Text>
-                    {error && <Text size='sm' c='red'>{error}</Text>}
+                    {error && (
+                        <Text size='sm' c='red'>
+                            {error}
+                        </Text>
+                    )}
 
                     <PasswordInput
                         label='Mật khẩu hiện tại'
@@ -149,10 +141,13 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
                                     { text: 'Một chữ cái thường (a-z)', test: (pwd: string) => /[a-z]/.test(pwd) },
                                     { text: 'Một chữ cái hoa (A-Z)', test: (pwd: string) => /[A-Z]/.test(pwd) },
                                     { text: 'Một chữ số (0-9)', test: (pwd: string) => /\d/.test(pwd) },
-                                    { text: 'Một ký tự đặc biệt (!@#$%^&*)', test: (pwd: string) => /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(pwd) }
+                                    {
+                                        text: 'Một ký tự đặc biệt (!@#$%^&*)',
+                                        test: (pwd: string) => /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(pwd)
+                                    }
                                 ].map((req, index) => {
                                     const isMet = req.test(form.values.newPassword)
-                                    
+
                                     return (
                                         <List.Item
                                             key={index}
@@ -176,7 +171,6 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
                             </List>
                         </Box>
                     )}
-                    
 
                     <PasswordInput
                         label='Xác nhận mật khẩu mới'
@@ -197,21 +191,10 @@ const ModalChangePassword = ({ opened, onClose }: ModalChangePasswordProps) => {
                     />
 
                     <Group justify='flex-end' gap='md' mt='lg'>
-                        <Button
-                            variant='outline'
-                            onClick={handleClose}
-                            radius='md'
-                            color='red'
-                            disabled={isLoading}
-                        >
+                        <Button variant='outline' onClick={handleClose} radius='md' color='red' disabled={isLoading}>
                             Hủy
                         </Button>
-                        <Button
-                            type='submit'
-                            loading={isLoading}
-                            radius='md'
-                            color='blue'
-                        >
+                        <Button type='submit' loading={isLoading} radius='md' color='blue'>
                             Đổi mật khẩu
                         </Button>
                     </Group>

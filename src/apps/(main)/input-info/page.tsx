@@ -12,7 +12,7 @@ interface SubmittedFile {
     uploadedAt: string
     status: 'uploaded' | 'processing' | 'completed'
     type: 'image' | 'pdf' | 'document' | 'other'
-    ocrResult?: any 
+    ocrResult?: any
 }
 
 const InputInfoPage = () => {
@@ -63,9 +63,7 @@ const InputInfoPage = () => {
 
         try {
             // Include OCR results in the upload
-            const ocrResults = submittedFiles
-                .filter((file) => file.ocrResult)
-                .map((file) => file.ocrResult)
+            const ocrResults = submittedFiles.filter((file) => file.ocrResult).map((file) => file.ocrResult)
 
             const formData = {
                 files: submittedFiles.map((sf) => sf.file),

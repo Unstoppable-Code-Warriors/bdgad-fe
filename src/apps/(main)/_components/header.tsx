@@ -5,7 +5,7 @@ import NotificationBell from './notification-bell'
 import { useUser } from '@/services/hook/auth.hook'
 import { translateRole } from '@/types/role'
 const Header = () => {
-    const { data , isLoading } = useUser()
+    const { data, isLoading } = useUser()
     const userProfile = data?.data?.user
 
     return (
@@ -29,10 +29,10 @@ const Header = () => {
                             </Group>
                         </Stack>
                     )}
-                    
+
                     {/* Notification Bell */}
                     <NotificationBell />
-                    
+
                     <UserButton />
                 </Group>
             </Group>

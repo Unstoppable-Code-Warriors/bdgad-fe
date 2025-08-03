@@ -32,8 +32,7 @@ const UserButton = () => {
                 </Avatar>
             </Menu.Target>
 
-            <Menu.Dropdown>  
-                
+            <Menu.Dropdown>
                 <Menu.Divider />
 
                 <Menu.Item leftSection={<IconUser size={16} />} onClick={handleProfile}>

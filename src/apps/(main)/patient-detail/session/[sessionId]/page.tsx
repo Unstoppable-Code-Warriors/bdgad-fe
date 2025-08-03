@@ -362,7 +362,7 @@ const SessionDetailPage = () => {
     const handleCloseUploadModal = () => {
         setIsUploadModalOpen(false)
         setSelectedFiles([])
-        setUploadError('') 
+        setUploadError('')
     }
 
     const handleSubmitUpload = () => {
@@ -391,7 +391,7 @@ const SessionDetailPage = () => {
         })
 
         const errorMessage = `Không thể tải file: ${errorMessages.join('; ')}`
-        
+
         // Set error state
         setUploadError(errorMessage)
 
@@ -408,7 +408,7 @@ const SessionDetailPage = () => {
     const handleFilesSelected = useCallback((files: FileWithPath[]) => {
         // Clear any previous errors when files are successfully selected
         setUploadError('')
-        
+
         setSelectedFiles((prevFiles) => {
             // Create a new array combining existing files with new files
             const combinedFiles = [...prevFiles, ...files]
@@ -768,7 +768,6 @@ const SessionDetailPage = () => {
                         </Paper>
                     )}
                 </div>
-                
 
                 {/* Send Files Modal */}
                 <SendFilesModal
@@ -838,9 +837,11 @@ const SessionDetailPage = () => {
                             style={{
                                 border: `2px dashed ${uploadError ? '#fa5252' : sessionData.typeLabSession === 'test' ? '#1971c2' : '#2f9e44'}`,
                                 borderRadius: '12px',
-                                backgroundColor: uploadError 
-                                    ? '#fff0f0' 
-                                    : sessionData.typeLabSession === 'test' ? '#e7f5ff' : '#ebfbee',
+                                backgroundColor: uploadError
+                                    ? '#fff0f0'
+                                    : sessionData.typeLabSession === 'test'
+                                      ? '#e7f5ff'
+                                      : '#ebfbee',
                                 padding: '40px 20px',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s ease'
@@ -860,9 +861,13 @@ const SessionDetailPage = () => {
                                 <Dropzone.Idle>
                                     <IconUpload
                                         size={52}
-                                        color={uploadError 
-                                            ? '#fa5252' 
-                                            : sessionData.typeLabSession === 'test' ? '#1971c2' : '#2f9e44'}
+                                        color={
+                                            uploadError
+                                                ? '#fa5252'
+                                                : sessionData.typeLabSession === 'test'
+                                                  ? '#1971c2'
+                                                  : '#2f9e44'
+                                        }
                                         stroke={1.5}
                                     />
                                 </Dropzone.Idle>
@@ -873,19 +878,24 @@ const SessionDetailPage = () => {
                                         inline
                                         fw={600}
                                         ta='center'
-                                        c={uploadError 
-                                            ? 'red' 
-                                            : sessionData.typeLabSession === 'test' ? 'blue' : 'green'}
+                                        c={
+                                            uploadError
+                                                ? 'red'
+                                                : sessionData.typeLabSession === 'test'
+                                                  ? 'blue'
+                                                  : 'green'
+                                        }
                                     >
-                                        {uploadError 
+                                        {uploadError
                                             ? 'Có lỗi xảy ra - Vui lòng thử lại'
                                             : selectedFiles.length > 0
-                                                ? `Đã chọn ${selectedFiles.length} file - Thêm file khác`
-                                                : 'Kéo thả file vào đây hoặc click để chọn'}
+                                              ? `Đã chọn ${selectedFiles.length} file - Thêm file khác`
+                                              : 'Kéo thả file vào đây hoặc click để chọn'}
                                     </Text>
 
                                     <Text size='sm' c='dimmed' inline mt={7} ta='center'>
-                                        Chỉ hỗ trợ tập tin hình ảnh (.jpg, .png, .gif), PDF, Word (.doc, .docx) và Excel (.xls, .xlsx)
+                                        Chỉ hỗ trợ tập tin hình ảnh (.jpg, .png, .gif), PDF, Word (.doc, .docx) và Excel
+                                        (.xls, .xlsx)
                                     </Text>
                                     <Text size='sm' c='dimmed' inline mt={7} ta='center'>
                                         . Kích thước tối đa là 10MB.
@@ -904,7 +914,7 @@ const SessionDetailPage = () => {
                                         color='red'
                                         onClick={() => {
                                             setSelectedFiles([])
-                                            setUploadError('') 
+                                            setUploadError('')
                                         }}
                                     >
                                         Xóa tất cả

@@ -94,10 +94,10 @@ export const handleAuthError = (error: any): string => {
     if (error?.code) {
         return getLoginErrorMessage(error.code)
     }
-    
+
     if (error?.message) {
         return error.message
     }
-    
+
     return 'Đã xảy ra lỗi không xác định'
 }

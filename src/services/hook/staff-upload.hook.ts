@@ -3,12 +3,8 @@ import { staffService } from '../function/staff'
 
 export const useUploadMedicalTestRequisition = () => {
     return useMutation({
-        mutationFn: (formData: {
-            files: File[]
-            patientId: number
-            typeLabSession: string
-            ocrResult?: string
-        }) => staffService.uploadMedicalTestRequisition(formData),
+        mutationFn: (formData: { files: File[]; patientId: number; typeLabSession: string; ocrResult?: string }) =>
+            staffService.uploadMedicalTestRequisition(formData),
         onSuccess: (data) => {
             console.log('Upload successful:', data)
         },

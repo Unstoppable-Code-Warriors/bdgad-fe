@@ -72,9 +72,9 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack, existingOCRResult, isE
             if (isEditing && existingOCRResult) {
                 setProgress(50)
                 await new Promise((resolve) => setTimeout(resolve, 500))
-                
+
                 setOcrResult(existingOCRResult)
-                
+
                 // Map existing OCR result to form values
                 if (existingOCRResult?.ocrResult) {
                     const mappedValues = mapOCRToFormValues(existingOCRResult.ocrResult)
@@ -83,7 +83,7 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack, existingOCRResult, isE
                     console.log('Mapped form values:', mappedValues)
                     console.log('Form type detected:', mappedValues.form_type)
                 }
-                
+
                 setProgress(100)
             } else {
                 // Normal OCR processing
@@ -164,10 +164,9 @@ const OCRProcessor = ({ selectedFile, onComplete, onBack, existingOCRResult, isE
                                 {isEditing ? 'Đang tải dữ liệu' : 'Đang xử lý tài liệu'}
                             </Text>
                             <Text c='dimmed' mb='lg'>
-                                {isEditing 
+                                {isEditing
                                     ? 'Đang tải thông tin đã xử lý để chỉnh sửa...'
-                                    : 'Vui lòng đợi trong khi chúng tôi xử lý tài liệu của bạn. Quá trình này có thể mất vài phút tùy thuộc vào kích thước và độ phức tạp của tài liệu.'
-                                }
+                                    : 'Vui lòng đợi trong khi chúng tôi xử lý tài liệu của bạn. Quá trình này có thể mất vài phút tùy thuộc vào kích thước và độ phức tạp của tài liệu.'}
                             </Text>
 
                             <Progress value={progress} size='lg' radius='md' animated color='blue' mb='md' />

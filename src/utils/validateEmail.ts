@@ -4,12 +4,21 @@ export interface EmailValidationResult {
 }
 
 // RFC 5322 compliant email regex (simplified version)
-const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+const EMAIL_REGEX =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
 
 // Common email domains for additional validation
 const COMMON_DOMAINS = [
-    'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com',
-    'icloud.com', 'aol.com', 'protonmail.com', 'mail.com', 'zoho.com'
+    'gmail.com',
+    'yahoo.com',
+    'hotmail.com',
+    'outlook.com',
+    'live.com',
+    'icloud.com',
+    'aol.com',
+    'protonmail.com',
+    'mail.com',
+    'zoho.com'
 ]
 
 export const validateEmail = (email: string): EmailValidationResult => {
@@ -46,7 +55,7 @@ export const validateEmail = (email: string): EmailValidationResult => {
     }
 
     const [localPart, domain] = email.split('@')
-    
+
     if (localPart && localPart.length > 64) {
         errors.push('Email local part is too long (maximum 64 characters)')
     }
@@ -64,14 +73,14 @@ export const validateEmail = (email: string): EmailValidationResult => {
 export const emailValidator = (value: string): string | null => {
     const validation = validateEmail(value)
     if (!validation.isValid) {
-        return validation.errors[0] 
+        return validation.errors[0]
     }
     return null
 }
 
 export const isCommonEmailDomain = (email: string): boolean => {
     if (!email || !email.includes('@')) return false
-    
+
     const domain = email.split('@')[1]?.toLowerCase()
     return COMMON_DOMAINS.includes(domain)
 }
@@ -79,10 +88,10 @@ export const isCommonEmailDomain = (email: string): boolean => {
 // Function to suggest common email domain corrections
 export const suggestEmailCorrection = (email: string): string | null => {
     if (!email || !email.includes('@')) return null
-    
+
     const [localPart, domain] = email.split('@')
     const domainLower = domain?.toLowerCase()
-    
+
     // Common typos and their corrections
     const typoCorrections: Record<string, string> = {
         'gmial.com': 'gmail.com',
@@ -95,11 +104,11 @@ export const suggestEmailCorrection = (email: string): string | null => {
         'outlok.com': 'outlook.com',
         'outloook.com': 'outlook.com'
     }
-    
+
     if (domainLower && typoCorrections[domainLower]) {
         return `${localPart}@${typoCorrections[domainLower]}`
     }
-    
+
     return null
 }
 

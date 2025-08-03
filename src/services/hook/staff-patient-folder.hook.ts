@@ -1,15 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { staffService } from '../function/staff'
 
-export const usePatientFolders = (params: {
-    page?: number
-    limit?: number
-    search?: string
-    filter?: string
-    sortOrder?: string
-    dateFrom?: string
-    dateTo?: string
-} = {}) => {
+export const usePatientFolders = (
+    params: {
+        page?: number
+        limit?: number
+        search?: string
+        filter?: string
+        sortOrder?: string
+        dateFrom?: string
+        dateTo?: string
+    } = {}
+) => {
     return useQuery({
         queryKey: ['patient-folders', params],
         queryFn: () => staffService.getAllPatientFolders(params),
@@ -21,7 +23,7 @@ export const useCreatePatientFolder = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (patientData: { fullName: string; citizenId: string }) => 
+        mutationFn: (patientData: { fullName: string; citizenId: string }) =>
             staffService.createPatientFolder(patientData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['patient-folders'] })
@@ -36,7 +38,7 @@ export const useUpdatePatientFolder = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ id, data }: { id: string; data: { fullName?: string; citizenId?: string } }) => 
+        mutationFn: ({ id, data }: { id: string; data: { fullName?: string; citizenId?: string } }) =>
             staffService.updatePatientFolder(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['patient-folders'] })

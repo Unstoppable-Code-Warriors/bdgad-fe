@@ -1,6 +1,6 @@
 export interface Role {
     id: number
-    name: string,
+    name: string
     code: string
 }
 

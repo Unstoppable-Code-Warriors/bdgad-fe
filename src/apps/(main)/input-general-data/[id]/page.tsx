@@ -279,7 +279,7 @@ const CategoryDetailPage = () => {
                                                     {getFileIcon(file.fileType)}
                                                 </ThemeIcon>
                                                 <Box style={{ flex: 1, minWidth: 0, height: 60 }}>
-                                                    <Tooltip label={file.fileName} position='top'>   
+                                                    <Tooltip label={file.fileName} position='top'>
                                                         <Text fw={600} size='sm' lineClamp={2} c='dark'>
                                                             {file.fileName}
                                                         </Text>
@@ -413,9 +413,7 @@ const CategoryDetailPage = () => {
                 {/* Delete Confirmation Modal */}
                 <Modal opened={deleteModalOpened} onClose={closeDeleteModal} title='Xác nhận xóa tệp tin' size='sm'>
                     <Stack gap='md'>
-                        <Text>
-                            Bạn có chắc chắn muốn xóa tệp tin "{fileToDelete?.name}"?
-                        </Text>
+                        <Text>Bạn có chắc chắn muốn xóa tệp tin "{fileToDelete?.name}"?</Text>
                         <Group justify='flex-end'>
                             <Button variant='outline' onClick={closeDeleteModal}>
                                 Hủy

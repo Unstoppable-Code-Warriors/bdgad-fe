@@ -59,9 +59,9 @@ const OCRPage = () => {
     return (
         <Container size='xl' py='xl'>
             <Stack gap='lg'>
-                <OCRProcessor 
-                    selectedFile={selectedFile} 
-                    onComplete={handleComplete} 
+                <OCRProcessor
+                    selectedFile={selectedFile}
+                    onComplete={handleComplete}
                     onBack={handleBack}
                     existingOCRResult={location.state?.existingOCRResult}
                     isEditing={location.state?.isEditing}

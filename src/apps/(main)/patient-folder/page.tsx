@@ -324,7 +324,7 @@ const PatientFolderPage = () => {
                         </Text>
                     </Paper>
                 )}
-                <Paper p='md' withBorder style={{marginTop: '2rem'}}>
+                <Paper p='md' withBorder style={{ marginTop: '2rem' }}>
                     <Group justify='space-between' align='center'>
                         <Group gap='xs'>
                             <Text size='sm' c='dimmed'>

@@ -52,7 +52,7 @@ const NewPasswordPage = () => {
         setError(null)
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            await new Promise((resolve) => setTimeout(resolve, 1000))
             const response = await authService.resetPassword({
                 token,
                 newPassword: values.newPassword,
@@ -66,7 +66,7 @@ const NewPasswordPage = () => {
                 setSuccess(true)
             }
         } catch (err) {
-            console.error("Lỗi tạo lại mật khẩu :",err)
+            console.error('Lỗi tạo lại mật khẩu :', err)
             setError('Đã xảy ra lỗi khi tạo mật khẩu mới. Vui lòng thử lại.')
         } finally {
             setLoading(false)
@@ -78,9 +78,7 @@ const NewPasswordPage = () => {
     }
 
     // Get password validation result for display
-    const passwordValidation = form.values.newPassword 
-        ? validatePassword(form.values.newPassword) 
-        : null
+    const passwordValidation = form.values.newPassword ? validatePassword(form.values.newPassword) : null
 
     const passwordRequirements = getPasswordRequirementsText()
 
@@ -151,7 +149,7 @@ const NewPasswordPage = () => {
                                     leftSection={<IconLock size='1rem' />}
                                     {...form.getInputProps('newPassword')}
                                 />
-                                
+
                                 {/* Password Requirements */}
                                 <Paper p='sm' mt='xs' bg='gray.0' radius='sm'>
                                     <Text size='xs' fw={500} mb='xs' c='dimmed'>
@@ -175,13 +173,15 @@ const NewPasswordPage = () => {
                                                         isValid = /\d/.test(form.values.newPassword)
                                                         break
                                                     case 4: // Special char
-                                                        isValid = /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(form.values.newPassword)
+                                                        isValid = /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(
+                                                            form.values.newPassword
+                                                        )
                                                         break
                                                 }
                                             }
-                                            
+
                                             return (
-                                                <List.Item 
+                                                <List.Item
                                                     key={index}
                                                     icon={
                                                         isValid ? (
@@ -208,11 +208,11 @@ const NewPasswordPage = () => {
                                 {...form.getInputProps('confirmPassword')}
                             />
 
-                            <Button 
-                                type='submit' 
-                                fullWidth 
-                                mt='md' 
-                                loading={loading} 
+                            <Button
+                                type='submit'
+                                fullWidth
+                                mt='md'
+                                loading={loading}
                                 disabled={loading || (!!passwordValidation && !passwordValidation.isValid)}
                             >
                                 Tạo mật khẩu

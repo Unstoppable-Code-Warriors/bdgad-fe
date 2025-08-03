@@ -13,8 +13,8 @@ export const BaseMantineProvider = ({ children }: { children: React.ReactNode })
         <MantineProvider>
             <ModalsProvider>
                 {children}
-                <Notifications position="top-right" />
+                <Notifications position='top-right' />
             </ModalsProvider>
-        </MantineProvider>          
+        </MantineProvider>
     )
 }

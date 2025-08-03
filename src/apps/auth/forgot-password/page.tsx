@@ -60,14 +60,13 @@ const ForgotPasswordPage = () => {
                 email: normalizedValues.email,
                 redirectUrl
             })
-            
+
             if ('code' in response) {
                 setError(getForgotPasswordErrorMessage(response.code as string))
             } else {
                 authNotifications.forgotPasswordSuccess()
                 setSuccess(true)
             }
-
         } catch (err) {
             console.error('Error forgot password:', err)
             setError('Đã xảy ra lỗi khi gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại.')

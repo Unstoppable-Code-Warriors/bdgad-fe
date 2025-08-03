@@ -30,12 +30,12 @@ export const authLoader = () => {
 export const nonAuthLoader = () => {
     const accessToken = getAccessToken()
     const isAuthenticated = isUserAuthenticated()
-    
+
     // Check if this is a password-related request with a token
     const currentUrl = new URL(window.location.href)
     const isPasswordRoute = currentUrl.pathname === '/auth/reset-password'
     const hasToken = currentUrl.searchParams.has('token')
-    
+
     // If user is on password page with a token, clear their current session
     if (isPasswordRoute && hasToken && (accessToken || isAuthenticated)) {
         clearTokensOutside()
@@ -48,7 +48,7 @@ export const nonAuthLoader = () => {
         const user = getCurrentUser()
         const roleCode = Number(user?.roles?.[0]?.code)
         const defaultRoute = getDefaultRouteByRole(roleCode)
-        
+
         // User is already logged in, redirect to role-appropriate page
         throw redirect(defaultRoute)
     }

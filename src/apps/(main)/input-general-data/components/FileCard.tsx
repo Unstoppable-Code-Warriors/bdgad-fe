@@ -31,7 +31,7 @@ interface FileCardProps {
 
 const getFileIcon = (type: string) => {
     const iconProps = { size: 24, stroke: 1.5 }
-    
+
     switch (type) {
         case 'pdf':
             return <IconFileText {...iconProps} color='#e03131' />
@@ -113,9 +113,8 @@ const FileCard = ({ file, onDownload, onDelete }: FileCardProps) => {
         modals.openConfirmModal({
             title: 'Xóa tệp tin',
             children: (
-                <Text size="sm">
-                    Bạn có chắc chắn muốn xóa tệp tin "{file.fileName}" không? 
-                    Hành động này không thể hoàn tác.
+                <Text size='sm'>
+                    Bạn có chắc chắn muốn xóa tệp tin "{file.fileName}" không? Hành động này không thể hoàn tác.
                 </Text>
             ),
             labels: { confirm: 'Xóa', cancel: 'Hủy' },
@@ -192,13 +191,13 @@ const FileCard = ({ file, onDownload, onDelete }: FileCardProps) => {
 
                 {/* File Name */}
                 <Box style={{ flexGrow: 1 }}>
-                    <Tooltip label={file.fileName} position="top" withArrow>
-                        <Text 
-                            fw={600} 
-                            size='sm' 
-                            lineClamp={2} 
+                    <Tooltip label={file.fileName} position='top' withArrow>
+                        <Text
+                            fw={600}
+                            size='sm'
+                            lineClamp={2}
                             ta='center'
-                            style={{ 
+                            style={{
                                 color: '#212529',
                                 lineHeight: 1.4,
                                 fontSize: '14px'
@@ -213,10 +212,9 @@ const FileCard = ({ file, onDownload, onDelete }: FileCardProps) => {
                 <Stack gap='xs'>
                     {/* File Size */}
 
-                        <Text size='xs' c='green.7' ta='center' fw={500}>
-                           Kích thước: {formatFileSize(Number(file.fileSize))}
-                        </Text>
-                  
+                    <Text size='xs' c='green.7' ta='center' fw={500}>
+                        Kích thước: {formatFileSize(Number(file.fileSize))}
+                    </Text>
 
                     {/* Upload Date */}
                     <Flex align='center' gap='xs' justify='center'>
@@ -225,21 +223,21 @@ const FileCard = ({ file, onDownload, onDelete }: FileCardProps) => {
                             {new Date(file.uploadedAt).toLocaleDateString('vi-VN')}
                         </Text>
                     </Flex>
-                    
+
                     {/* Uploaded By */}
                     <Flex align='center' gap='xs' justify='center'>
                         <IconUser size={14} color='#868e96' />
                         <Text size='xs' c='dimmed' fw={500} lineClamp={1}>
-                           {file.uploader?.name || 'Không rõ'}
+                            {file.uploader?.name || 'Không rõ'}
                         </Text>
                     </Flex>
                 </Stack>
 
                 {/* Action Buttons */}
                 <Group justify='center' mt='auto' gap='sm'>
-                    <Tooltip label="Tải xuống" position="bottom" withArrow>
-                        <ActionIcon 
-                            variant='gradient' 
+                    <Tooltip label='Tải xuống' position='bottom' withArrow>
+                        <ActionIcon
+                            variant='gradient'
                             gradient={{ from: 'blue', to: 'cyan' }}
                             onClick={handleDownload}
                             loading={loading}
@@ -254,10 +252,10 @@ const FileCard = ({ file, onDownload, onDelete }: FileCardProps) => {
                             <IconDownload size={18} />
                         </ActionIcon>
                     </Tooltip>
-                    
-                    <Tooltip label="Xóa tệp tin" position="bottom" withArrow>
-                        <ActionIcon 
-                            variant='gradient' 
+
+                    <Tooltip label='Xóa tệp tin' position='bottom' withArrow>
+                        <ActionIcon
+                            variant='gradient'
                             gradient={{ from: 'red', to: 'pink' }}
                             onClick={handleDelete}
                             loading={loading}

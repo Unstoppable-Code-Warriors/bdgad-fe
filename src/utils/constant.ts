@@ -8,20 +8,20 @@ export enum Role {
 
 export const getDefaultRouteByRole = (roleCode?: number): string => {
     if (!roleCode) return '/'
-    
+
     switch (roleCode) {
         case Role.LAB_TESTING_TECHNICIAN:
             return '/lab-test'
-        
+
         case Role.VALIDATION_TECHNICIAN:
             return '/validation'
-        
+
         case Role.ANALYSIS_TECHNICIAN:
             return '/analysis'
-        
+
         case Role.DOCTOR:
             return '/patient-folder'
-        
+
         case Role.STAFF:
         default:
             return '/input-info'

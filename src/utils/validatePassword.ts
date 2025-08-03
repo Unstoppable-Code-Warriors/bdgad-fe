@@ -65,12 +65,12 @@ export const validatePassword = (
 // Convenience function for form validation
 export const passwordValidator = (value: string, requirements?: PasswordRequirements): string | null => {
     if (!value) return 'Mật khẩu là bắt buộc'
-    
+
     const validation = validatePassword(value, requirements)
     if (!validation.isValid) {
-        return validation.errors[0] 
+        return validation.errors[0]
     }
-    
+
     return null
 }
 
@@ -80,19 +80,19 @@ export const getPasswordRequirementsText = (requirements: PasswordRequirements =
     const texts: string[] = []
 
     texts.push(`Ít nhất ${config.minLength} ký tự`)
-    
+
     if (config.requireLowercase) {
         texts.push('Một chữ cái thường (a-z)')
     }
-    
+
     if (config.requireUppercase) {
         texts.push('Một chữ cái hoa (A-Z)')
     }
-    
+
     if (config.requireNumbers) {
         texts.push('Một chữ số (0-9)')
     }
-    
+
     if (config.requireSpecialChars) {
         texts.push('Một ký tự đặc biệt (!@#$%^&*()_+-=[]{}|;:,.<>?)')
     }

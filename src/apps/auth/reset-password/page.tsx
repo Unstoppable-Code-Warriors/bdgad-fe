@@ -52,7 +52,7 @@ const ResetPasswordPage = () => {
         setError(null)
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            await new Promise((resolve) => setTimeout(resolve, 1000))
             const response = await authService.resetPassword({
                 token,
                 newPassword: values.newPassword,
@@ -78,9 +78,7 @@ const ResetPasswordPage = () => {
     }
 
     // Get password validation result for display
-    const passwordValidation = form.values.newPassword 
-        ? validatePassword(form.values.newPassword) 
-        : null
+    const passwordValidation = form.values.newPassword ? validatePassword(form.values.newPassword) : null
 
     const passwordRequirements = getPasswordRequirementsText()
 
@@ -151,7 +149,7 @@ const ResetPasswordPage = () => {
                                     leftSection={<IconLock size='1rem' />}
                                     {...form.getInputProps('newPassword')}
                                 />
-                                
+
                                 {/* Password Requirements */}
                                 <Paper p='sm' mt='xs' bg='gray.0' radius='sm'>
                                     <Text size='xs' fw={500} mb='xs' c='dimmed'>
@@ -175,13 +173,15 @@ const ResetPasswordPage = () => {
                                                         isValid = /\d/.test(form.values.newPassword)
                                                         break
                                                     case 4: // Special char
-                                                        isValid = /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(form.values.newPassword)
+                                                        isValid = /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(
+                                                            form.values.newPassword
+                                                        )
                                                         break
                                                 }
                                             }
-                                            
+
                                             return (
-                                                <List.Item 
+                                                <List.Item
                                                     key={index}
                                                     icon={
                                                         isValid ? (
@@ -208,11 +208,11 @@ const ResetPasswordPage = () => {
                                 {...form.getInputProps('confirmPassword')}
                             />
 
-                            <Button 
-                                type='submit' 
-                                fullWidth 
-                                mt='md' 
-                                loading={loading} 
+                            <Button
+                                type='submit'
+                                fullWidth
+                                mt='md'
+                                loading={loading}
                                 disabled={loading || (!!passwordValidation && !passwordValidation.isValid)}
                             >
                                 Đặt lại mật khẩu

@@ -7,13 +7,10 @@ interface PageHeaderProps {
 
 const PageHeader = ({ onImport }: PageHeaderProps) => {
     return (
-        <Group justify="space-between">
+        <Group justify='space-between'>
             <Title order={2}></Title>
             <Group>
-                <Button 
-                    leftSection={<IconUpload size={16} />}
-                    onClick={onImport}
-                >
+                <Button leftSection={<IconUpload size={16} />} onClick={onImport}>
                     Tải lên file mới
                 </Button>
             </Group>

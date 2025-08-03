@@ -107,7 +107,7 @@ const ImportStep = ({ onFilesSubmitted }: ImportStepProps) => {
                 fileId: submittedFile.id,
                 submittedFiles: submittedFiles,
                 existingOCRResult: submittedFile.ocrResult,
-                isEditing: true 
+                isEditing: true
             }
         })
     }
@@ -129,7 +129,7 @@ const ImportStep = ({ onFilesSubmitted }: ImportStepProps) => {
             <SubmittedFilesTable
                 files={submittedFiles}
                 onStartOCR={handleOCRClick}
-                onViewOCR={handleViewOCR} 
+                onViewOCR={handleViewOCR}
                 onDelete={handleDeleteSubmittedFile}
             />
         </Stack>

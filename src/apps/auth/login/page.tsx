@@ -86,7 +86,7 @@ const LoginPage = () => {
                 loginOutside(response.data.token, response.data.user)
                 authNotifications.loginSuccess()
                 console.log('Login successful, redirecting to:', response.data)
-                
+
                 const defaultRoute = getDefaultRouteByRole(Number(response.data.user.roles[0].code))
                 console.log('Login successful, redirecting to:', defaultRoute)
                 navigate(defaultRoute)
@@ -133,91 +133,100 @@ const LoginPage = () => {
                                 justifyContent: 'center',
                                 padding: '2rem'
                             }}
-                        >
-                        </Box>
+                        ></Box>
                     </Box>
                 </Grid.Col>
 
                 {/* Right side - Login Form */}
-                <Grid.Col span={6} style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Grid.Col
+                    span={6}
+                    style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
                     <Box style={{ width: '100%', maxWidth: 480, padding: '2rem' }}>
-                            <Title ta='center' order={2} mb='md' c="dark">
-                                Chào mừng bạn!
-                            </Title>
-                            <Text c='dimmed' size='sm' ta='center' mb='xl'>
-                                Đăng nhập vào tài khoản của bạn để tiếp tục
-                            </Text>
+                        <Title ta='center' order={2} mb='md' c='dark'>
+                            Chào mừng bạn!
+                        </Title>
+                        <Text c='dimmed' size='sm' ta='center' mb='xl'>
+                            Đăng nhập vào tài khoản của bạn để tiếp tục
+                        </Text>
 
-                            <Paper withBorder shadow='lg' p={40} radius='md'>
-                                {error && (
-                                    <Alert icon={<IconAlertCircle size='1rem' />} color='red' mb='md' variant='light'>
-                                        {error}
-                                    </Alert>
-                                )}
+                        <Paper withBorder shadow='lg' p={40} radius='md'>
+                            {error && (
+                                <Alert icon={<IconAlertCircle size='1rem' />} color='red' mb='md' variant='light'>
+                                    {error}
+                                </Alert>
+                            )}
 
-                                <form onSubmit={form.onSubmit(handleLogin)}>
-                                    <Stack gap='md' >
-                                        <div>
-                                            <TextInput
-                                                label='Email'
-                                                placeholder='your@email.com'
-                                                leftSection={<IconMail size='1rem' />}
-                                                {...form.getInputProps('email')}
-                                                onChange={handleEmailChange}
-                                                disabled={isLoading}
-                                                size="md"
-                                            />
-
-                                            {/* Email suggestion */}
-                                            {emailSuggestion && (
-                                                <Text
-                                                    size='xs'
-                                                    c='blue'
-                                                    mt='xs'
-                                                    style={{ cursor: 'pointer' }}
-                                                    onClick={handleEmailSuggestionClick}
-                                                >
-                                                    Ý bạn là: {emailSuggestion}?
-                                                </Text>
-                                            )}
-                                        </div>
-
-                                        <PasswordInput
-                                            label='Mật khẩu'
-                                            placeholder='Mật khẩu của bạn'
-                                            leftSection={<IconLock size='1rem' />}
-                                            {...form.getInputProps('password')}
+                            <form onSubmit={form.onSubmit(handleLogin)}>
+                                <Stack gap='md'>
+                                    <div>
+                                        <TextInput
+                                            label='Email'
+                                            placeholder='your@email.com'
+                                            leftSection={<IconMail size='1rem' />}
+                                            {...form.getInputProps('email')}
+                                            onChange={handleEmailChange}
                                             disabled={isLoading}
-                                            size="md"
+                                            size='md'
                                         />
 
-                                        <Button type='submit' fullWidth mt='md' loading={loading} disabled={isLoading} size="md">
-                                            Đăng nhập
-                                        </Button>
+                                        {/* Email suggestion */}
+                                        {emailSuggestion && (
+                                            <Text
+                                                size='xs'
+                                                c='blue'
+                                                mt='xs'
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={handleEmailSuggestionClick}
+                                            >
+                                                Ý bạn là: {emailSuggestion}?
+                                            </Text>
+                                        )}
+                                    </div>
 
-                                        <Text ta='center' mt='xs'>
-                                            <Anchor component={Link} to='/auth/forgot-password' c='dimmed' size='sm'>
-                                                Quên mật khẩu?
-                                            </Anchor>
-                                        </Text>
+                                    <PasswordInput
+                                        label='Mật khẩu'
+                                        placeholder='Mật khẩu của bạn'
+                                        leftSection={<IconLock size='1rem' />}
+                                        {...form.getInputProps('password')}
+                                        disabled={isLoading}
+                                        size='md'
+                                    />
 
-                                        <Divider label='Hoặc tiếp tục với' labelPosition='center' my='lg' />
+                                    <Button
+                                        type='submit'
+                                        fullWidth
+                                        mt='md'
+                                        loading={loading}
+                                        disabled={isLoading}
+                                        size='md'
+                                    >
+                                        Đăng nhập
+                                    </Button>
 
-                                        <Button
-                                            variant='outline'
-                                            fullWidth
-                                            leftSection={<IconBrandGoogle size='1rem' />}
-                                            onClick={handleGoogleLogin}
-                                            loading={googleLoading}
-                                            disabled={isLoading}
-                                            size="md"
-                                        >
-                                            Đăng nhập với Google
-                                        </Button>
-                                    </Stack>
-                                </form>
-                            </Paper>
-                        </Box>
+                                    <Text ta='center' mt='xs'>
+                                        <Anchor component={Link} to='/auth/forgot-password' c='dimmed' size='sm'>
+                                            Quên mật khẩu?
+                                        </Anchor>
+                                    </Text>
+
+                                    <Divider label='Hoặc tiếp tục với' labelPosition='center' my='lg' />
+
+                                    <Button
+                                        variant='outline'
+                                        fullWidth
+                                        leftSection={<IconBrandGoogle size='1rem' />}
+                                        onClick={handleGoogleLogin}
+                                        loading={googleLoading}
+                                        disabled={isLoading}
+                                        size='md'
+                                    >
+                                        Đăng nhập với Google
+                                    </Button>
+                                </Stack>
+                            </form>
+                        </Paper>
+                    </Box>
                 </Grid.Col>
             </Grid>
         </Box>

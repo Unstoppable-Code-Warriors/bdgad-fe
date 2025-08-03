@@ -7,7 +7,7 @@ interface FileGridProps {
         id: string
         fileName: string
         fileType: string
-        filePath: string 
+        filePath: string
         fileSize: string
         uploadedAt: string
         uploader?: any
@@ -20,11 +20,11 @@ interface FileGridProps {
 const FileGrid = ({ files, onDownloadFile, onDeleteFile, loading }: FileGridProps) => {
     if (files.length === 0) {
         return (
-            <Paper 
-                p="xl" 
-                ta="center" 
-                withBorder 
-                radius="lg"
+            <Paper
+                p='xl'
+                ta='center'
+                withBorder
+                radius='lg'
                 style={{
                     background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
                     border: '2px dashed #dee2e6',
@@ -34,33 +34,30 @@ const FileGrid = ({ files, onDownloadFile, onDeleteFile, loading }: FileGridProp
                     justifyContent: 'center'
                 }}
             >
-                <Stack align="center" gap="lg">
+                <Stack align='center' gap='lg'>
                     <ThemeIcon
                         size={80}
-                        radius="xl"
-                        variant="light"
-                        color={loading ? "blue" : "gray"}
+                        radius='xl'
+                        variant='light'
+                        color={loading ? 'blue' : 'gray'}
                         style={{
-                            background: loading ? 'linear-gradient(45deg, #228be6, #339af0)' : 'linear-gradient(45deg, #868e96, #adb5bd)',
+                            background: loading
+                                ? 'linear-gradient(45deg, #228be6, #339af0)'
+                                : 'linear-gradient(45deg, #868e96, #adb5bd)',
                             color: 'white'
                         }}
                     >
-                        {loading ? (
-                            <IconUpload size={40} />
-                        ) : (
-                            <IconFileX size={40} />
-                        )}
+                        {loading ? <IconUpload size={40} /> : <IconFileX size={40} />}
                     </ThemeIcon>
-                    
-                    <Box ta="center">
-                        <Text size="lg" fw={600} c="dark" mb="xs">
+
+                    <Box ta='center'>
+                        <Text size='lg' fw={600} c='dark' mb='xs'>
                             {loading ? 'Đang tải dữ liệu...' : 'Chưa có file nào'}
                         </Text>
-                        <Text size="sm" c="dimmed" maw={400} mx="auto">
-                            {loading 
+                        <Text size='sm' c='dimmed' maw={400} mx='auto'>
+                            {loading
                                 ? 'Hệ thống đang tải danh sách file, vui lòng đợi trong giây lát.'
-                                : 'Hiện tại chưa có file nào được tải lên.'
-                            }
+                                : 'Hiện tại chưa có file nào được tải lên.'}
                         </Text>
                     </Box>
                 </Stack>
@@ -76,7 +73,7 @@ const FileGrid = ({ files, onDownloadFile, onDeleteFile, loading }: FileGridProp
                         file={{
                             id: file.id,
                             fileName: file.fileName,
-                            filePath: file.filePath, 
+                            filePath: file.filePath,
                             fileType: file.fileType,
                             fileSize: file.fileSize,
                             uploadedAt: file.uploadedAt,

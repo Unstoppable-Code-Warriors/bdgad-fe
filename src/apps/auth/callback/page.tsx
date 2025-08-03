@@ -26,13 +26,13 @@ const CallbackPage = () => {
                     try {
                         // Set token first to enable API calls
                         setTokensOutside(token)
-                        
+
                         const userResponse = await authService.me()
                         if (userResponse.data?.user) {
                             loginOutside(token, userResponse.data.user)
-                            
+
                             const defaultRoute = getDefaultRouteByRole(Number(userResponse.data.user.roles[0].code))
-                            
+
                             setSuccess(true)
                             setProcessing(false)
                             authNotifications.loginSuccess()
@@ -40,11 +40,11 @@ const CallbackPage = () => {
                             setTimeout(() => {
                                 navigate(defaultRoute, { replace: true })
                             }, 1500)
-                        } else {     
+                        } else {
                             setSuccess(true)
                             setProcessing(false)
                             authNotifications.loginSuccess()
-                            
+
                             setTimeout(() => {
                                 navigate('/', { replace: true })
                             }, 1500)
@@ -55,7 +55,7 @@ const CallbackPage = () => {
                         setSuccess(true)
                         setProcessing(false)
                         authNotifications.loginSuccess()
-                        
+
                         setTimeout(() => {
                             navigate('/', { replace: true })
                         }, 1500)

@@ -9,13 +9,13 @@ interface SubmittedFile {
     uploadedAt: string
     status: 'uploaded' | 'processing' | 'completed'
     type: 'image' | 'pdf' | 'document' | 'other'
-    ocrResult?: any 
+    ocrResult?: any
 }
 
 interface SubmittedFilesTableProps {
     files: SubmittedFile[]
     onStartOCR: (file: File) => void
-    onViewOCR?: (submittedFile: SubmittedFile) => void 
+    onViewOCR?: (submittedFile: SubmittedFile) => void
     onDelete: (id: string) => void
 }
 
@@ -31,7 +31,6 @@ const SubmittedFilesTable = ({ files, onStartOCR, onViewOCR, onDelete }: Submitt
         URL.revokeObjectURL(url)
     }
     const getOCRButton = (submittedFile: SubmittedFile) => {
-
         if (submittedFile.type !== 'image') return null
 
         if (submittedFile.ocrResult) {
@@ -133,11 +132,9 @@ const SubmittedFilesTable = ({ files, onStartOCR, onViewOCR, onDelete }: Submitt
                                 </Table.Td>
                                 <Table.Td>
                                     <Group gap='xs' align='center' style={{ minHeight: 36 }}>
-
                                         <Box style={{ width: 120, flexShrink: 0, marginRight: 45 }}>
                                             {getOCRButton(submittedFile)}
                                         </Box>
-                                        
 
                                         <Group gap='xs' align='center'>
                                             <ActionIcon

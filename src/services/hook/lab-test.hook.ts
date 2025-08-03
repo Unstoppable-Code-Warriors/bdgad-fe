@@ -33,7 +33,17 @@ export const useLabTestSessions = ({
 }) => {
     return useQuery({
         queryKey: ['lab-test-sessions', page, limit, search, sortBy, sortOrder, filter, dateFrom, dateTo],
-        queryFn: () => labTestService.getSessions({ page, limit, search, sortBy, sortOrder, filter, dateFrom: formatDateToISO(dateFrom), dateTo: formatDateToISO(dateTo) })
+        queryFn: () =>
+            labTestService.getSessions({
+                page,
+                limit,
+                search,
+                sortBy,
+                sortOrder,
+                filter,
+                dateFrom: formatDateToISO(dateFrom),
+                dateTo: formatDateToISO(dateTo)
+            })
     })
 }
 
