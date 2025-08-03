@@ -272,6 +272,7 @@ class WebSocketService {
 
 // Create singleton instance
 const webSocketService = new WebSocketService({
+    // url: import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:3000'
     url: import.meta.env.VITE_BACKEND_API_URL || 'https://be.bdgad.bio'
 })
 

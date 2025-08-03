@@ -1,32 +1,48 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
-import { Container, Center, Title, Select, Paper, Stack, Button, Group, Drawer } from '@mantine/core'
+import { Container, Center, Title, Select, Paper, Stack, Button, Group, Drawer, Alert, Text } from '@mantine/core'
 import { IconMicroscope, IconClipboardCheck, IconDeviceFloppy, IconArrowNarrowLeft } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import type { FileWithPath } from '@mantine/dropzone'
-import { useUploadMedicalTestRequisition } from '@/services/hook/staff-upload.hook'
+import { useUploadCategorizedFiles } from '@/services/hook/categorized-upload.hook'
 import { staffService } from '@/services/function/staff'
 import { getFileType } from './utils/fileUtils'
-import type { SubmittedFile, EditedOCRRes } from './types'
+import type { EditedOCRRes } from './types'
 import type { CommonOCRRes } from '@/types/ocr-file'
+import {
+    FileCategory,
+    type FileCategoryDto,
+    type OCRResultDto,
+    type CategorizedSubmittedFile
+} from '@/types/categorized-upload'
+import { validateCategorizedFiles, generateDefaultFileCategories } from './utils/fileValidation'
 import ImportStep from './components/ImportStep'
 import OCRDrawer from './components/OCRDrawer'
+import { FileCategorizationList } from './components/FileCategorizationList'
 
 const InputInfoPage = () => {
     const [typeLabSession, setTypeLabSession] = useState<string>('test')
-    const [submittedFiles, setSubmittedFiles] = useState<SubmittedFile[]>([])
     const [selectedFiles, setSelectedFiles] = useState<FileWithPath[]>([])
+    const [fileCategories, setFileCategories] = useState<FileCategoryDto[]>([])
+    const [submittedFiles, setSubmittedFiles] = useState<CategorizedSubmittedFile[]>([])
     const [isSaving, setIsSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [ocrDrawerOpen, setOcrDrawerOpen] = useState(false)
-    const [selectedFileForOCR, setSelectedFileForOCR] = useState<SubmittedFile | null>(null)
+    const [selectedFileForOCR, setSelectedFileForOCR] = useState<CategorizedSubmittedFile | null>(null)
     const [ocrProgress, setOcrProgress] = useState<{ [fileId: string]: number }>({})
+    const [validationResult, setValidationResult] = useState<{
+        isValid: boolean
+        errors: { [index: number]: string }
+        globalErrors: string[]
+        summary: string
+    }>({ isValid: true, errors: {}, globalErrors: [], summary: '' })
+
     const location = useLocation()
     const navigate = useNavigate()
 
     const patientId = location.state?.patientId || location.state?.patient?.id
 
-    const uploadMutation = useUploadMedicalTestRequisition()
+    const uploadMutation = useUploadCategorizedFiles()
 
     useEffect(() => {
         if (location.state?.ocrResult) {
@@ -46,11 +62,57 @@ const InputInfoPage = () => {
     // File handling functions
     const handleFileDrop = (files: FileWithPath[]) => {
         setSelectedFiles((prev) => [...prev, ...files])
+
+        // Auto-generate file categories for new files
+        const newCategories = generateDefaultFileCategories(files)
+        setFileCategories((prev) => [...prev, ...newCategories])
+
         setError(null)
+        validateFiles([...selectedFiles, ...files], [...fileCategories, ...newCategories])
     }
 
     const handleRemoveFile = (index: number) => {
         setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
+        setFileCategories((prev) => prev.filter((_, i) => i !== index))
+
+        const updatedFiles = selectedFiles.filter((_, i) => i !== index)
+        const updatedCategories = fileCategories.filter((_, i) => i !== index)
+        validateFiles(updatedFiles, updatedCategories)
+    }
+
+    const handleCategoryChange = (index: number, category: FileCategory) => {
+        setFileCategories((prev) => {
+            const updated = [...prev]
+            updated[index] = {
+                ...updated[index],
+                category,
+                fileName: selectedFiles[index]?.name || ''
+            }
+            validateFiles(selectedFiles, updated)
+            return updated
+        })
+    }
+
+    const handlePriorityChange = (index: number, priority: number) => {
+        setFileCategories((prev) => {
+            const updated = [...prev]
+            updated[index] = {
+                ...updated[index],
+                priority
+            }
+            return updated
+        })
+    }
+
+    const validateFiles = (files: FileWithPath[], categories: FileCategoryDto[]) => {
+        const result = validateCategorizedFiles(files as File[], categories)
+        setValidationResult(result)
+
+        if (result.globalErrors.length > 0) {
+            setError(result.globalErrors[0])
+        } else {
+            setError(null)
+        }
     }
 
     const handleSubmitFiles = () => {
@@ -59,18 +121,43 @@ const InputInfoPage = () => {
             return
         }
 
-        const newSubmittedFiles: SubmittedFile[] = selectedFiles.map((file) => ({
-            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-            file,
-            uploadedAt: new Date().toLocaleString('vi-VN'),
-            status: 'uploaded',
-            type: getFileType(file),
-            ocrStatus: 'idle'
-        }))
+        // Validate before submitting
+        const result = validateCategorizedFiles(selectedFiles as File[], fileCategories)
+        if (!result.isValid) {
+            setError(result.globalErrors[0] || 'Vui lòng khắc phục các lỗi trước khi tiếp tục')
+            return
+        }
+
+        console.log('Debug - handleSubmitFiles - selectedFiles:', selectedFiles)
+        console.log('Debug - handleSubmitFiles - fileCategories:', fileCategories)
+
+        const newSubmittedFiles: CategorizedSubmittedFile[] = selectedFiles.map((file, index) => {
+            const categoryData = fileCategories[index] || {
+                category: FileCategory.GENERAL,
+                priority: 5,
+                fileName: file.name
+            }
+
+            return {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                file,
+                uploadedAt: new Date().toLocaleString('vi-VN'),
+                status: 'uploaded',
+                type: getFileType(file),
+                ocrStatus: 'idle',
+                category: categoryData.category,
+                priority: categoryData.priority || 5,
+                isRequired: categoryData.category !== FileCategory.GENERAL
+            }
+        })
+
+        console.log('Debug - newSubmittedFiles:', newSubmittedFiles)
 
         const updatedSubmittedFiles = [...submittedFiles, ...newSubmittedFiles]
         setSubmittedFiles(updatedSubmittedFiles)
+        console.log('Debug - updatedSubmittedFiles after setSubmittedFiles:', updatedSubmittedFiles)
         setSelectedFiles([])
+        setFileCategories([])
         setError(null)
     }
 
@@ -199,7 +286,7 @@ const InputInfoPage = () => {
         }
     }
 
-    const handleViewOCR = (submittedFile: SubmittedFile) => {
+    const handleViewOCR = (submittedFile: CategorizedSubmittedFile) => {
         // Always get the latest file data from submittedFiles to ensure we have the most recent OCR result
         const latestFileData = submittedFiles.find((f) => f.id === submittedFile.id) || submittedFile
         console.log('Opening OCR drawer for file:', latestFileData)
@@ -359,33 +446,137 @@ const InputInfoPage = () => {
             return
         }
 
+        // Validate submitted files and categories - ensure data integrity
+        if (submittedFiles.length === 0) {
+            notifications.show({
+                title: 'Lỗi',
+                message: 'Không có file nào để upload',
+                color: 'red'
+            })
+            return
+        }
+
+        // Ensure all submitted files have valid categories and file names
+        const validSubmittedFiles = submittedFiles.filter(
+            (sf) => sf.file && sf.file.name && sf.category && Object.values(FileCategory).includes(sf.category)
+        )
+
+        console.log('Debug - submittedFiles before filtering:', submittedFiles)
+        console.log('Debug - validSubmittedFiles after filtering:', validSubmittedFiles)
+
+        if (validSubmittedFiles.length !== submittedFiles.length) {
+            console.error('Some files failed validation:', {
+                totalFiles: submittedFiles.length,
+                validFiles: validSubmittedFiles.length,
+                invalidFiles: submittedFiles.filter(
+                    (sf) =>
+                        !sf.file || !sf.file.name || !sf.category || !Object.values(FileCategory).includes(sf.category)
+                )
+            })
+            notifications.show({
+                title: 'Lỗi dữ liệu',
+                message: 'Một số file không có thông tin phân loại hợp lệ',
+                color: 'red'
+            })
+            return
+        }
+
+        const fileArray = validSubmittedFiles.map((sf) => sf.file)
+        const categoryArray = validSubmittedFiles.map((sf) => ({
+            category: sf.category || FileCategory.GENERAL, // Additional safety check
+            priority: sf.priority || 5,
+            fileName: sf.file?.name || 'unknown-file' // Additional safety check
+        }))
+
+        console.log('Debug - categoryArray:', categoryArray)
+
+        // Additional validation for categoryArray
+        const invalidCategories = categoryArray.filter((cat) => !cat.category || !cat.fileName)
+        if (invalidCategories.length > 0) {
+            console.error('Invalid categories detected:', invalidCategories)
+            notifications.show({
+                title: 'Lỗi dữ liệu',
+                message: 'Dữ liệu phân loại file không hợp lệ',
+                color: 'red'
+            })
+            return
+        }
+
+        const validation = validateCategorizedFiles(fileArray, categoryArray)
+        if (!validation.isValid) {
+            notifications.show({
+                title: 'Lỗi validation',
+                message: validation.globalErrors[0] || 'Có lỗi trong dữ liệu file',
+                color: 'red'
+            })
+            return
+        }
+
         setIsSaving(true)
 
         try {
-            // Include OCR results in the upload
-            const ocrResults = submittedFiles.filter((file) => file.ocrResult).map((file) => file.ocrResult)
+            // Prepare OCR results for files that have them
+            const ocrResults: OCRResultDto[] = validSubmittedFiles
+                .map((file, index) => {
+                    if (file.ocrResult && file.ocrStatus === 'success') {
+                        // Extract the actual OCR data from the nested structure
+                        const actualOcrData = file.ocrResult.ocrResult || file.ocrResult
 
-            const formData = {
-                files: submittedFiles.map((sf) => sf.file),
+                        return {
+                            fileIndex: Number(index), // Ensure it's a proper integer
+                            category: file.category, // Already validated above
+                            ocrData: actualOcrData, // Use the extracted data, not the full response
+                            confidence: file.ocrResult.confidence || 0.95
+                        }
+                    }
+                    return null
+                })
+                .filter(Boolean) as OCRResultDto[]
+
+            console.log('Debug - ocrResults:', ocrResults)
+
+            const uploadParams = {
+                files: validSubmittedFiles.map((sf) => sf.file),
                 patientId: parseInt(patientId),
                 typeLabSession: typeLabSession,
-                ocrResult: ocrResults.length > 0 ? JSON.stringify(ocrResults[0]) : undefined
+                fileCategories: categoryArray,
+                // Only include ocrResults if there are actual OCR results
+                ...(ocrResults.length > 0 ? { ocrResults } : {}),
+                labcode: ['O5123A', 'N5456B'] // Use the same labcode as the old implementation
             }
 
-            await uploadMutation.mutateAsync(formData)
+            console.log('Debug - uploadParams:', uploadParams)
+
+            const result = await uploadMutation.mutateAsync(uploadParams)
 
             notifications.show({
                 title: 'Thành công',
-                message: 'Upload file thành công',
+                message: `Upload thành công ${result.data.uploadedFilesCount} file`,
                 color: 'green'
             })
 
             navigate(`/patient-detail/${patientId}`)
         } catch (error) {
             console.error('Upload error:', error)
+
+            // Try to extract detailed error information
+            let errorMessage = 'Không thể upload file'
+            if (error && typeof error === 'object') {
+                const apiError = error as any
+                if (apiError.errorData && apiError.errorData.message) {
+                    if (Array.isArray(apiError.errorData.message)) {
+                        console.error('Backend validation errors:', apiError.errorData.message)
+                        errorMessage = `Lỗi validation: ${apiError.errorData.message.join(', ')}`
+                    } else {
+                        console.error('Backend error message:', apiError.errorData.message)
+                        errorMessage = `Lỗi: ${apiError.errorData.message}`
+                    }
+                }
+            }
+
             notifications.show({
                 title: 'Lỗi',
-                message: 'Không thể upload file',
+                message: errorMessage,
                 color: 'red'
             })
         } finally {
@@ -449,7 +640,7 @@ const InputInfoPage = () => {
                     </Stack>
                 </Paper>
 
-                {/* File Import Section */}
+                {/* File Import and Categorization Section */}
                 <ImportStep
                     selectedFiles={selectedFiles}
                     submittedFiles={submittedFiles}
@@ -462,6 +653,39 @@ const InputInfoPage = () => {
                     onViewOCR={handleViewOCR}
                     onDeleteSubmittedFile={handleDeleteSubmittedFile}
                 />
+
+                {/* File Categorization Step */}
+                {selectedFiles.length > 0 && (
+                    <Paper p='lg' withBorder mt='md'>
+                        <FileCategorizationList
+                            files={selectedFiles}
+                            fileCategories={fileCategories}
+                            validationErrors={validationResult.errors}
+                            onCategoryChange={handleCategoryChange}
+                            onPriorityChange={handlePriorityChange}
+                            onRemove={handleRemoveFile}
+                        />
+
+                        {/* Validation Summary */}
+                        {validationResult.globalErrors.length > 0 && (
+                            <Alert variant='light' color='red' mt='md'>
+                                <Stack gap='xs'>
+                                    {validationResult.globalErrors.map((error, index) => (
+                                        <Text key={index} size='sm'>
+                                            {error}
+                                        </Text>
+                                    ))}
+                                </Stack>
+                            </Alert>
+                        )}
+
+                        <Group justify='center' mt='md'>
+                            <Text size='sm' c={validationResult.isValid ? 'green' : 'red'}>
+                                {validationResult.summary}
+                            </Text>
+                        </Group>
+                    </Paper>
+                )}
 
                 {/* Save Files Button */}
                 {submittedFiles.length > 0 && (

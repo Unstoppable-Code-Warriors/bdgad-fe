@@ -19,7 +19,7 @@ import {
 import { DatePickerInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { IconRefresh, IconCheck } from '@tabler/icons-react'
-import type { SubmittedFile } from '../types'
+import type { CategorizedSubmittedFile } from '@/types/categorized-upload'
 import {
     getDefaultFormValues,
     formValidationRules,
@@ -37,7 +37,7 @@ import type { CommonOCRRes } from '@/types/ocr-file'
 import type { EditedOCRRes } from '../types'
 
 interface OCRDrawerProps {
-    file: SubmittedFile
+    file: CategorizedSubmittedFile
     ocrResult?: CommonOCRRes<EditedOCRRes>
     ocrProgress: number
     onUpdate: (data: CommonOCRRes<EditedOCRRes>) => void
@@ -153,11 +153,12 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                 variant='light'
                                                 color='orange'
                                                 leftSection={<IconRefresh size={16} />}
-                                                onClick={onRetryOCR}
-                                                loading={file.ocrStatus === 'processing'}
-                                                disabled={file.ocrStatus === 'processing'}
+                                                onClick={() => {
+                                                    onRetryOCR()
+                                                    onClose()
+                                                }}
                                             >
-                                                {file.ocrStatus === 'processing' ? 'Đang xử lý...' : 'Retry OCR'}
+                                                Retry OCR
                                             </Button>
                                             {file.ocrStatus === 'processing' && (
                                                 <Stack gap='xs' style={{ minWidth: '120px' }}>

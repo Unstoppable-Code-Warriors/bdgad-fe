@@ -1,7 +1,7 @@
 import type { FileWithPath } from '@mantine/dropzone'
 import { Stack, Alert } from '@mantine/core'
 import { IconAlertCircle } from '@tabler/icons-react'
-import type { SubmittedFile } from '../types'
+import type { CategorizedSubmittedFile } from '@/types/categorized-upload'
 
 import FileUploadZone from './FileUploadZone'
 import SelectedFilesList from './SelectedFilesList'
@@ -10,14 +10,14 @@ import SubmittedFilesTable from './SubmittedFilesTable'
 
 interface ImportStepProps {
     selectedFiles: FileWithPath[]
-    submittedFiles: SubmittedFile[]
+    submittedFiles: CategorizedSubmittedFile[]
     error: string | null
     ocrProgress: { [fileId: string]: number }
     onFileDrop: (files: FileWithPath[]) => void
     onRemoveFile: (index: number) => void
     onSubmitFiles: () => void
     onStartOCR: (fileId: string) => void
-    onViewOCR: (submittedFile: SubmittedFile) => void
+    onViewOCR: (submittedFile: CategorizedSubmittedFile) => void
     onDeleteSubmittedFile: (id: string) => void
 }
 

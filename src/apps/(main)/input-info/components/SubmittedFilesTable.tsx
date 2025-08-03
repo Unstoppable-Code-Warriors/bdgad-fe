@@ -2,13 +2,13 @@ import type { FileWithPath } from '@mantine/dropzone'
 import { Card, Stack, Group, Text, Badge, Table, Image, ActionIcon, Box, Button, Loader, Progress } from '@mantine/core'
 import { IconScan, IconEye, IconTrash, IconDownload, IconRefresh } from '@tabler/icons-react'
 import { getFileIcon, getFileTypeLabel, formatFileSize } from '../utils/fileUtils'
-import type { SubmittedFile } from '../types'
+import type { CategorizedSubmittedFile } from '@/types/categorized-upload'
 
 interface SubmittedFilesTableProps {
-    files: SubmittedFile[]
+    files: CategorizedSubmittedFile[]
     ocrProgress: { [fileId: string]: number }
     onStartOCR: (fileId: string) => void
-    onViewOCR?: (submittedFile: SubmittedFile) => void
+    onViewOCR?: (submittedFile: CategorizedSubmittedFile) => void
     onDelete: (id: string) => void
 }
 
@@ -23,7 +23,7 @@ const SubmittedFilesTable = ({ files, ocrProgress, onStartOCR, onViewOCR, onDele
         a.click()
         URL.revokeObjectURL(url)
     }
-    const getOCRButton = (submittedFile: SubmittedFile) => {
+    const getOCRButton = (submittedFile: CategorizedSubmittedFile) => {
         if (submittedFile.type !== 'image') return null
 
         // Check if any file is currently processing OCR
