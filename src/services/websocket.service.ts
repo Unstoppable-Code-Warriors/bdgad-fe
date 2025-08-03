@@ -27,6 +27,7 @@ class WebSocketService {
     private reconnectAttempts = 0
     private maxReconnectAttempts = 5
     private reconnectDelay = 1000
+    private isConnecting = false // Add connection state tracking
 
     constructor(config: WebSocketConfig) {
         this.config = {
@@ -39,8 +40,21 @@ class WebSocketService {
     connect(): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.socket?.connected) {
+                console.log('WebSocket already connected, skipping connection attempt')
                 resolve()
                 return
+            }
+
+            if (this.isConnecting) {
+                console.log('WebSocket connection already in progress, skipping')
+                reject(new Error('Connection already in progress'))
+                return
+            }
+
+            // Disconnect existing socket if not connected but exists
+            if (this.socket) {
+                this.socket.disconnect()
+                this.socket = null
             }
 
             const token = getAccessToken()
@@ -51,6 +65,7 @@ class WebSocketService {
                 return
             }
 
+            this.isConnecting = true
             this.notifyConnectionCallbacks({ connected: false, connecting: true, error: null })
 
             const socketUrl = `${this.config.url}${this.config.namespace}`
@@ -70,18 +85,21 @@ class WebSocketService {
             this.socket.on('connect', () => {
                 console.log('WebSocket connected successfully')
                 this.reconnectAttempts = 0
+                this.isConnecting = false
                 this.notifyConnectionCallbacks({ connected: true, connecting: false, error: null })
                 resolve()
             })
 
             this.socket.on('connect_error', (error: any) => {
                 console.error('WebSocket connection error:', error)
+                this.isConnecting = false
                 this.handleConnectionError(error.message)
                 reject(error)
             })
 
             this.socket.on('auth_error', (data: any) => {
                 console.error('WebSocket authentication error:', data)
+                this.isConnecting = false
                 this.notifyConnectionCallbacks({
                     connected: false,
                     connecting: false,
@@ -93,6 +111,7 @@ class WebSocketService {
     }
 
     disconnect(): void {
+        this.isConnecting = false
         if (this.socket) {
             this.socket.disconnect()
             this.socket = null
@@ -253,7 +272,7 @@ class WebSocketService {
 
 // Create singleton instance
 const webSocketService = new WebSocketService({
-    url: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
+    url: import.meta.env.VITE_BACKEND_API_URL || 'https://be.bdgad.bio'
 })
 
 export default webSocketService

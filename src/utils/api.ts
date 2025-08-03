@@ -7,7 +7,7 @@ const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_API_URL || 'https://be.bdg
 
 // Common configuration for all API instances
 const commonConfig: Options = {
-    timeout: 30000, // 30 seconds
+    timeout: 300000, // 30 seconds
     retry: {
         limit: 2,
         methods: ['get', 'put', 'head', 'delete', 'options', 'trace'],

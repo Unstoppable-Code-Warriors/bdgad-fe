@@ -115,6 +115,11 @@ export const useWebSocketNotifications = (
             return
         }
 
+        // Prevent multiple connections for the same user
+        if (webSocketService.isConnected()) {
+            return
+        }
+
         // Clean up previous callbacks
         if (connectionCallbackRef.current) {
             connectionCallbackRef.current()
