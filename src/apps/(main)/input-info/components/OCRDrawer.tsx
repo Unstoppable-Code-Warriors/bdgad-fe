@@ -13,7 +13,8 @@ import {
     Textarea,
     Select,
     Radio,
-    Progress
+    Progress,
+    Checkbox
 } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
@@ -27,7 +28,8 @@ import {
     genderOptions,
     cancerScreeningPackageOptions,
     cancerPanelOptions,
-    niptPackageOptions
+    niptPackageOptions,
+    supportPackageOptions
 } from '../forms'
 import type { FormValues } from '../forms'
 import { FormType } from '@/utils/constant'
@@ -155,13 +157,18 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                 loading={file.ocrStatus === 'processing'}
                                                 disabled={file.ocrStatus === 'processing'}
                                             >
-                                                Retry OCR
+                                                {file.ocrStatus === 'processing' ? 'Đang xử lý...' : 'Retry OCR'}
                                             </Button>
-                                            {file.ocrStatus === 'processing' && ocrProgress > 0 && (
+                                            {file.ocrStatus === 'processing' && (
                                                 <Stack gap='xs' style={{ minWidth: '120px' }}>
-                                                    <Progress value={ocrProgress} size='sm' color='orange' />
+                                                    <Progress
+                                                        value={ocrProgress || 0}
+                                                        size='sm'
+                                                        color='orange'
+                                                        animated
+                                                    />
                                                     <Text size='xs' ta='center' c='dimmed'>
-                                                        {ocrProgress}%
+                                                        {ocrProgress || 0}% - Đang xử lý OCR...
                                                     </Text>
                                                 </Stack>
                                             )}
@@ -186,16 +193,28 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
 
                 {/* Form */}
                 <Grid.Col span={6} style={{ height: '100%', overflow: 'auto' }}>
-                    <Card withBorder h='100%'>
+                    <Card withBorder h='100%' style={{ position: 'relative' }}>
                         <Stack gap='md' h='100%'>
                             <Group justify='space-between'>
                                 <Text fw={600} size='lg'>
                                     Extracted Data
                                 </Text>
+                                {file.ocrStatus === 'processing' && (
+                                    <Text size='sm' c='orange' fw={500}>
+                                        Đang xử lý OCR...
+                                    </Text>
+                                )}
                             </Group>
 
                             {ocrResult && (
-                                <div style={{ flex: 1, overflow: 'auto' }}>
+                                <div
+                                    style={{
+                                        flex: 1,
+                                        overflow: 'auto',
+                                        opacity: file.ocrStatus === 'processing' ? 0.6 : 1,
+                                        pointerEvents: file.ocrStatus === 'processing' ? 'none' : 'auto'
+                                    }}
+                                >
                                     <form onSubmit={form.onSubmit(handleFormSubmit)}>
                                         <Stack gap='md'>
                                             {/* Form Type Selection */}
@@ -235,17 +254,39 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                             </Group>
                                                         </Radio.Group>
                                                     </Group>
+                                                    <TextInput label='Địa chỉ' {...form.getInputProps('address')} />
+                                                    <Group grow>
+                                                        <TextInput
+                                                            label='Phòng khám/Bệnh viện'
+                                                            {...form.getInputProps('clinic')}
+                                                        />
+                                                        <TextInput label='Bác sỹ' {...form.getInputProps('doctor')} />
+                                                    </Group>
+                                                    <Group grow>
+                                                        <TextInput
+                                                            label='Số điện thoại bác sỹ'
+                                                            {...form.getInputProps('doctor_phone')}
+                                                        />
+                                                        <TextInput
+                                                            label='Số điện thoại'
+                                                            {...form.getInputProps('phone')}
+                                                        />
+                                                    </Group>
+                                                    <Group grow>
+                                                        <DatePickerInput
+                                                            label='Ngày thu mẫu'
+                                                            {...form.getInputProps('sample_collection_date')}
+                                                        />
+                                                        <TextInput
+                                                            label='Mã xét nghiệm'
+                                                            {...form.getInputProps('test_code')}
+                                                        />
+                                                    </Group>
                                                     <Select
-                                                        label='Gói tầm soát'
+                                                        label='Gói tầm soát ung thư di truyền'
                                                         {...form.getInputProps('cancer_screening_package')}
                                                         data={cancerScreeningPackageOptions}
                                                     />
-                                                    <DatePickerInput
-                                                        label='Ngày thu mẫu'
-                                                        {...form.getInputProps('sample_collection_date')}
-                                                    />
-                                                    <TextInput label='Bác sỹ' {...form.getInputProps('doctor')} />
-                                                    <TextInput label='Phòng khám' {...form.getInputProps('clinic')} />
                                                 </>
                                             )}
 
@@ -272,18 +313,103 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                             </Group>
                                                         </Radio.Group>
                                                     </Group>
+                                                    <TextInput label='Địa chỉ' {...form.getInputProps('address')} />
+                                                    <Group grow>
+                                                        <TextInput
+                                                            label='Phòng khám/Bệnh viện'
+                                                            {...form.getInputProps('clinic')}
+                                                        />
+                                                        <TextInput label='Bác sỹ' {...form.getInputProps('doctor')} />
+                                                    </Group>
+                                                    <Group grow>
+                                                        <TextInput
+                                                            label='Số điện thoại'
+                                                            {...form.getInputProps('phone')}
+                                                        />
+                                                        <TextInput label='Email' {...form.getInputProps('email')} />
+                                                    </Group>
+                                                    <Group grow>
+                                                        <DatePickerInput
+                                                            label='Ngày thu mẫu'
+                                                            {...form.getInputProps('sample_collection_date')}
+                                                        />
+                                                        <TextInput
+                                                            label='Mã xét nghiệm'
+                                                            {...form.getInputProps('test_code')}
+                                                        />
+                                                    </Group>
+                                                    <Checkbox
+                                                        label='Hút thuốc'
+                                                        {...form.getInputProps('smoking', { type: 'checkbox' })}
+                                                    />
+
+                                                    {/* Thông tin bệnh học */}
+                                                    <Title order={5} mt='md'>
+                                                        Thông tin bệnh học
+                                                    </Title>
+                                                    <Textarea
+                                                        label='Chẩn đoán lâm sàng'
+                                                        {...form.getInputProps('clinical_diagnosis')}
+                                                    />
+                                                    <Group grow>
+                                                        <TextInput
+                                                            label='Giai đoạn bệnh'
+                                                            {...form.getInputProps('disease_stage')}
+                                                        />
+                                                        <TextInput
+                                                            label='Kết quả giải phẫu'
+                                                            {...form.getInputProps('pathology_result')}
+                                                        />
+                                                    </Group>
+                                                    <Textarea
+                                                        label='Vị trí, kích thước, độ biệt hóa của khối u'
+                                                        {...form.getInputProps('tumor_location_size_differentiation')}
+                                                    />
+                                                    <Group grow>
+                                                        <TextInput
+                                                            label='Thời gian phát hiện'
+                                                            {...form.getInputProps('time_of_detection')}
+                                                        />
+                                                        <TextInput
+                                                            label='Đã được điều trị gì'
+                                                            {...form.getInputProps('treatment_received')}
+                                                        />
+                                                    </Group>
+
+                                                    {/* Loại bệnh phẩm */}
+                                                    <Title order={5} mt='md'>
+                                                        Loại bệnh phẩm
+                                                    </Title>
+                                                    <Group>
+                                                        <Checkbox
+                                                            label='Mô sinh thiết/FFPE'
+                                                            {...form.getInputProps('biopsy_tissue_ffpe', {
+                                                                type: 'checkbox'
+                                                            })}
+                                                        />
+                                                        <Checkbox
+                                                            label='Máu (STL-ctDNA)'
+                                                            {...form.getInputProps('blood_stl_ctdna', {
+                                                                type: 'checkbox'
+                                                            })}
+                                                        />
+                                                        <Checkbox
+                                                            label='Dịch màng phổi/bụng'
+                                                            {...form.getInputProps('pleural_peritoneal_fluid', {
+                                                                type: 'checkbox'
+                                                            })}
+                                                        />
+                                                    </Group>
+                                                    <TextInput label='Mã số GPB' {...form.getInputProps('gpb_code')} />
+
+                                                    {/* Loại ung thư và panel xét nghiệm */}
+                                                    <Title order={5} mt='md'>
+                                                        Loại ung thư và panel xét nghiệm
+                                                    </Title>
                                                     <Select
                                                         label='Loại xét nghiệm'
                                                         {...form.getInputProps('cancer_panel')}
                                                         data={cancerPanelOptions}
-                                                    />
-                                                    <DatePickerInput
-                                                        label='Ngày thu mẫu'
-                                                        {...form.getInputProps('sample_collection_date')}
-                                                    />
-                                                    <Textarea
-                                                        label='Chẩn đoán lâm sàng'
-                                                        {...form.getInputProps('clinical_diagnosis')}
                                                     />
                                                 </>
                                             )}
@@ -296,25 +422,145 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                             label='Ngày sinh'
                                                             {...form.getInputProps('date_of_birth')}
                                                         />
-                                                        <NumberInput
-                                                            label='Tuần thai'
-                                                            {...form.getInputProps('gestational_weeks')}
+                                                        <Radio.Group
+                                                            label='Giới tính'
+                                                            {...form.getInputProps('gender')}
+                                                        >
+                                                            <Group mt='xs'>
+                                                                {genderOptions.map((option) => (
+                                                                    <Radio
+                                                                        key={option.value}
+                                                                        value={option.value}
+                                                                        label={option.label}
+                                                                    />
+                                                                ))}
+                                                            </Group>
+                                                        </Radio.Group>
+                                                    </Group>
+                                                    <TextInput label='Địa chỉ' {...form.getInputProps('address')} />
+                                                    <Group grow>
+                                                        <TextInput
+                                                            label='Phòng khám/Bệnh viện'
+                                                            {...form.getInputProps('clinic')}
+                                                        />
+                                                        <TextInput label='Bác sỹ' {...form.getInputProps('doctor')} />
+                                                    </Group>
+                                                    <Group grow>
+                                                        <TextInput
+                                                            label='Số điện thoại bác sỹ'
+                                                            {...form.getInputProps('doctor_phone')}
+                                                        />
+                                                        <TextInput
+                                                            label='Số điện thoại'
+                                                            {...form.getInputProps('phone')}
                                                         />
                                                     </Group>
+                                                    <TextInput label='Email' {...form.getInputProps('email')} />
+                                                    <Group grow>
+                                                        <DatePickerInput
+                                                            label='Ngày thu mẫu'
+                                                            {...form.getInputProps('sample_collection_date')}
+                                                        />
+                                                        <TextInput
+                                                            label='Giờ thu mẫu'
+                                                            {...form.getInputProps('sample_collection_time')}
+                                                        />
+                                                    </Group>
+
+                                                    {/* Thông tin lâm sàng */}
+                                                    <Title order={5} mt='md'>
+                                                        Thông tin lâm sàng
+                                                    </Title>
+                                                    <Group>
+                                                        <Checkbox
+                                                            label='Đơn thai'
+                                                            {...form.getInputProps('single_pregnancy', {
+                                                                type: 'checkbox'
+                                                            })}
+                                                        />
+                                                        <Checkbox
+                                                            label='Song thai tiêu biến'
+                                                            {...form.getInputProps(
+                                                                'twin_pregnancy_minor_complication',
+                                                                { type: 'checkbox' }
+                                                            )}
+                                                        />
+                                                        <Checkbox
+                                                            label='Thai IVF'
+                                                            {...form.getInputProps('ivf_pregnancy', {
+                                                                type: 'checkbox'
+                                                            })}
+                                                        />
+                                                    </Group>
+                                                    <Group grow>
+                                                        <NumberInput
+                                                            label='Tuần thai'
+                                                            {...form.getInputProps('gestational_age_weeks')}
+                                                        />
+                                                        <DatePickerInput
+                                                            label='Ngày siêu âm'
+                                                            {...form.getInputProps('ultrasound_date')}
+                                                        />
+                                                    </Group>
+                                                    <Group grow>
+                                                        <TextInput
+                                                            label='Chiều dài đầu mông (CRL)'
+                                                            {...form.getInputProps('crown_rump_length_crl')}
+                                                        />
+                                                        <TextInput
+                                                            label='Độ mờ da gáy (NT)'
+                                                            {...form.getInputProps('nuchal_translucency')}
+                                                        />
+                                                    </Group>
+                                                    <Group grow>
+                                                        <NumberInput
+                                                            label='Chiều cao thai phụ (cm)'
+                                                            {...form.getInputProps('maternal_height')}
+                                                        />
+                                                        <NumberInput
+                                                            label='Cân nặng thai phụ (kg)'
+                                                            {...form.getInputProps('maternal_weight')}
+                                                        />
+                                                    </Group>
+                                                    <TextInput
+                                                        label='Nguy cơ sàng lọc trước'
+                                                        {...form.getInputProps('prenatal_screening_risk_nt')}
+                                                    />
+
+                                                    {/* Thực hiện xét nghiệm */}
+                                                    <Title order={5} mt='md'>
+                                                        Thực hiện xét nghiệm
+                                                    </Title>
                                                     <Select
                                                         label='Gói NIPT'
                                                         {...form.getInputProps('nipt_package')}
                                                         data={niptPackageOptions}
                                                     />
-                                                    <DatePickerInput
-                                                        label='Ngày thu mẫu'
-                                                        {...form.getInputProps('sample_collection_date')}
-                                                    />
-                                                    <TextInput label='Bác sỹ' {...form.getInputProps('doctor')} />
-                                                    <TextInput
-                                                        label='Điện thoại bác sỹ'
-                                                        {...form.getInputProps('doctor_phone')}
-                                                    />
+
+                                                    {/* Gói ưu đãi kèm theo - chỉ hiện khi chọn NIPT24, NIPT 5, hoặc NIPT CNV */}
+                                                    {['nipt_cnv', 'nipt_24', 'nipt_5'].includes(
+                                                        form.values.nipt_package
+                                                    ) && (
+                                                        <>
+                                                            <Title order={5} mt='md'>
+                                                                Lựa chọn ưu đãi kèm theo
+                                                            </Title>
+                                                            <Radio.Group
+                                                                label='Chọn gói hỗ trợ'
+                                                                {...form.getInputProps('support_package')}
+                                                            >
+                                                                <Stack gap='sm' mt='sm'>
+                                                                    {supportPackageOptions.map((option) => (
+                                                                        <Radio
+                                                                            key={option.value}
+                                                                            value={option.value}
+                                                                            label={option.label}
+                                                                        />
+                                                                    ))}
+                                                                </Stack>
+                                                            </Radio.Group>
+                                                        </>
+                                                    )}
                                                 </>
                                             )}
                                         </Stack>
@@ -324,16 +570,17 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
 
                             {/* Action Buttons */}
                             <Group justify='flex-end' mt='auto'>
-                                <Button variant='light' onClick={onClose}>
+                                <Button variant='light' onClick={onClose} disabled={file.ocrStatus === 'processing'}>
                                     Cancel
                                 </Button>
                                 <Button
                                     type='submit'
                                     leftSection={<IconCheck size={16} />}
                                     onClick={handleFormSubmit}
-                                    disabled={!ocrResult}
+                                    disabled={!ocrResult || file.ocrStatus === 'processing'}
+                                    loading={file.ocrStatus === 'processing'}
                                 >
-                                    Save Changes
+                                    {file.ocrStatus === 'processing' ? 'Đang xử lý...' : 'Save Changes'}
                                 </Button>
                             </Group>
                         </Stack>

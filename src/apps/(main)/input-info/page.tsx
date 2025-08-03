@@ -491,7 +491,7 @@ const InputInfoPage = () => {
                 size='80%'
                 title='OCR Result'
                 closeOnClickOutside={false}
-                closeOnEscape={true}
+                closeOnEscape={false}
             >
                 {selectedFileForOCR && (
                     <OCRDrawer
