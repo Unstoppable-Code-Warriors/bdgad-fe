@@ -4,9 +4,9 @@ import {
     useProcessAnalysis,
     useDownloadEtlResult,
     useSendEtlResultToValidation,
-    useRetryEtlProcess,
-    getAllValidations
+    useRetryEtlProcess
 } from '@/services/hook/analysis.hook'
+import { useUsersByRole } from '@/services/hook/auth.hook'
 import { useParams, useNavigate } from 'react-router'
 import {
     Container,
@@ -46,22 +46,28 @@ import { AnalysisStatus, analysisStatusConfig } from '@/types/analysis'
 import { statusConfig } from '@/types/lab-test.types'
 import { labTestService } from '@/services/function/lab-test'
 import { openRejectFastqModal } from '@/components/RejectFastqModal'
+import { Role } from '@/utils/constant'
 
 const AnalysisDetailPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const { data, isLoading, error, refetch } = useAnalysisSessionDetail(id)
+    const { data: validationTechniciansData, isLoading: isLoadingValidationTechnicians } = useUsersByRole(
+        Role.VALIDATION_TECHNICIAN
+    )
     console.log('Analysis Detail Data:', data)
     const [selectedValidationId, setSelectedValidationId] = useState<string | null>(
         data?.validation?.id ? String(data.validation.id) : null
     )
+
+    // Get validation technicians from the hook
+    const validationTechnicians = validationTechniciansData?.data?.users || []
 
     // Mutations
     const processAnalysisMutation = useProcessAnalysis()
     const downloadEtlResultMutation = useDownloadEtlResult()
     const sendEtlResultToValidationMutation = useSendEtlResultToValidation()
     const retryEtlProcessMutation = useRetryEtlProcess()
-    const validations = getAllValidations()
 
     // Get the latest FastQ file pair waiting for approval
     const latestFastqFilePair =
@@ -436,11 +442,14 @@ const AnalysisDetailPage = () => {
                                         <Select
                                             label='Chọn kỹ thuật viên Thẩm Định'
                                             placeholder='Chọn kỹ thuật viên...'
-                                            data={validations.data?.data?.users.map((user) => ({
+                                            data={validationTechnicians.map((user) => ({
                                                 label: `${user.name} - ${user.email}`,
                                                 value: String(user.id)
                                             }))}
-                                            disabled={latestEtlResult?.status !== AnalysisStatus.COMPLETED}
+                                            disabled={
+                                                latestEtlResult?.status !== AnalysisStatus.COMPLETED ||
+                                                isLoadingValidationTechnicians
+                                            }
                                             value={selectedValidationId}
                                             onChange={setSelectedValidationId}
                                             required

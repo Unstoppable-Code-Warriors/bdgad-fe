@@ -7,3 +7,11 @@ export const useUser = () => {
         queryFn: () => authService.me()
     })
 }
+
+export const useUsersByRole = (roleCode: number) => {
+    return useQuery({
+        queryKey: ['users', 'role', roleCode],
+        queryFn: () => authService.getUserByCode(roleCode),
+        enabled: !!roleCode
+    })
+}
