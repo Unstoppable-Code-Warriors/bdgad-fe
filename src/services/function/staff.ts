@@ -1,6 +1,7 @@
 import { backendApi } from '@/utils/api'
 import type { MedicalTestRequisitionUploadResponse } from '@/types'
 import type { GeneralFileDownloadResponse } from '@/types/general-file'
+import type { CommonOCRRes, OCRRes } from '@/types/ocr-file'
 
 const PREFIX = 'api/v1/staff'
 
@@ -220,12 +221,12 @@ export const staffService = {
     },
 
     // OCR file processing
-    ocrFile: async (file: File): Promise<any> => {
+    ocrFile: async (file: File) => {
         const formData = new FormData()
         formData.append('file', file)
 
         return backendApi
-            .post(`${PREFIX}/ocr`, {
+            .post<CommonOCRRes<OCRRes>>(`${PREFIX}/ocr`, {
                 body: formData,
                 headers: {}
             })

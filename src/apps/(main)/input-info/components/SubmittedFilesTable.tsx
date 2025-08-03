@@ -1,27 +1,18 @@
 import type { FileWithPath } from '@mantine/dropzone'
-import { Card, Stack, Group, Text, Badge, Table, Image, ActionIcon, Box, Button, Loader } from '@mantine/core'
+import { Card, Stack, Group, Text, Badge, Table, Image, ActionIcon, Box, Button, Loader, Progress } from '@mantine/core'
 import { IconScan, IconEye, IconTrash, IconDownload, IconRefresh } from '@tabler/icons-react'
 import { getFileIcon, getFileTypeLabel, formatFileSize } from '../utils/fileUtils'
-
-interface SubmittedFile {
-    id: string
-    file: FileWithPath
-    uploadedAt: string
-    status: 'uploaded' | 'processing' | 'completed'
-    type: 'image' | 'pdf' | 'document' | 'other'
-    ocrResult?: any
-    ocrStatus?: 'idle' | 'processing' | 'success' | 'failed'
-    ocrError?: string
-}
+import type { SubmittedFile } from '../types'
 
 interface SubmittedFilesTableProps {
     files: SubmittedFile[]
+    ocrProgress: { [fileId: string]: number }
     onStartOCR: (fileId: string) => void
     onViewOCR?: (submittedFile: SubmittedFile) => void
     onDelete: (id: string) => void
 }
 
-const SubmittedFilesTable = ({ files, onStartOCR, onViewOCR, onDelete }: SubmittedFilesTableProps) => {
+const SubmittedFilesTable = ({ files, ocrProgress, onStartOCR, onViewOCR, onDelete }: SubmittedFilesTableProps) => {
     if (files.length === 0) return null
 
     const handleDownload = (file: FileWithPath) => {
@@ -73,10 +64,14 @@ const SubmittedFilesTable = ({ files, onStartOCR, onViewOCR, onDelete }: Submitt
 
         // Show processing state
         if (isThisFileProcessing) {
+            const progress = ocrProgress[submittedFile.id] || 0
             return (
-                <Button size='sm' variant='light' color='blue' leftSection={<Loader size={14} />} disabled loading>
-                    Đang xử lý...
-                </Button>
+                <Stack gap='xs' style={{ minWidth: '120px' }}>
+                    <Button size='sm' variant='light' color='blue' leftSection={<Loader size={14} />} disabled loading>
+                        Đang xử lý...
+                    </Button>
+                    <Progress value={progress} size='sm' color='blue' />
+                </Stack>
             )
         }
 

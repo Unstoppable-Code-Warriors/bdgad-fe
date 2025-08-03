@@ -2,11 +2,8 @@ import { useState, useEffect } from 'react'
 import {
     Stack,
     Text,
-    Paper,
     Group,
-    Alert,
     Button,
-    Progress,
     Grid,
     Image,
     Card,
@@ -15,15 +12,14 @@ import {
     NumberInput,
     Textarea,
     Select,
-    Radio
+    Radio,
+    Progress
 } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
-import { IconScan, IconCheck, IconRefresh } from '@tabler/icons-react'
-import type { FileWithPath } from '@mantine/dropzone'
-import { staffService } from '@/services/function/staff'
+import { IconRefresh, IconCheck } from '@tabler/icons-react'
+import type { SubmittedFile } from '../types'
 import {
-    FormType,
     getDefaultFormValues,
     formValidationRules,
     mapOCRToFormValues,
@@ -32,32 +28,22 @@ import {
     cancerScreeningPackageOptions,
     cancerPanelOptions,
     niptPackageOptions
-} from '../ocr/Form'
-import type { FormValues } from '../ocr/Form'
-
-interface SubmittedFile {
-    id: string
-    file: FileWithPath
-    uploadedAt: string
-    status: 'uploaded' | 'processing' | 'completed'
-    type: 'image' | 'pdf' | 'document' | 'other'
-    ocrResult?: any
-    ocrStatus?: 'idle' | 'processing' | 'success' | 'failed'
-    ocrError?: string
-}
+} from '../forms'
+import type { FormValues } from '../forms'
+import { FormType } from '@/utils/constant'
+import type { CommonOCRRes } from '@/types/ocr-file'
+import type { EditedOCRRes } from '../types'
 
 interface OCRDrawerProps {
     file: SubmittedFile
-    onUpdate: (data: any) => void
+    ocrResult?: CommonOCRRes<EditedOCRRes>
+    ocrProgress: number
+    onUpdate: (data: CommonOCRRes<EditedOCRRes>) => void
     onClose: () => void
-    onRetryOCR?: (fileId: string) => void
+    onRetryOCR: () => void
 }
 
-const OCRDrawer = ({ file, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
-    const [isProcessing, setIsProcessing] = useState(false)
-    const [progress, setProgress] = useState(0)
-    const [error, setError] = useState<string | null>(null)
-    const [ocrData, setOcrData] = useState<any>(null)
+const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
     const [selectedFormType, setSelectedFormType] = useState<FormType>(FormType.HEREDITARY_CANCER)
 
     const form = useForm<FormValues>({
@@ -65,100 +51,77 @@ const OCRDrawer = ({ file, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
         validate: formValidationRules
     })
 
-    useEffect(() => {
-        if (file.ocrResult) {
-            setOcrData(file.ocrResult)
-            const mappedValues = mapOCRToFormValues(file.ocrResult)
-            form.setValues(mappedValues)
+    // Function to detect form type from OCR result
+    const detectFormType = (ocrResult: CommonOCRRes<EditedOCRRes>): FormType => {
+        if (ocrResult?.ocrResult) {
+            // Handle nested ocrResult structure
+            const innerResult = ocrResult.ocrResult
+            if (innerResult.document_name) {
+                switch (innerResult.document_name) {
+                    case 'gene_mutation':
+                        return FormType.GENE_MUTATION
+                    case 'prenatal_screening':
+                        return FormType.PRENATAL_TESTING
+                    case 'hereditary_cancer':
+                        return FormType.HEREDITARY_CANCER
+                    default:
+                        return FormType.HEREDITARY_CANCER
+                }
+            }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [file.ocrResult, selectedFormType])
+
+        // This part is not needed since document_name is inside ocrResult.ocrResult
+        return FormType.HEREDITARY_CANCER
+    }
+
+    useEffect(() => {
+        // Debug logging - can be removed in production
+        console.log('OCRDrawer received:', { ocrResult, file })
+
+        if (ocrResult) {
+            // Auto-detect form type from OCR result
+            const detectedFormType = detectFormType(ocrResult)
+            console.log('Detected form type:', detectedFormType)
+            setSelectedFormType(detectedFormType)
+
+            // Auto-fill form with OCR data
+            const mappedValues = mapOCRToFormValues(ocrResult)
+            console.log('Mapped values:', mappedValues)
+            // Also set the form_type field to match the selected form type
+            mappedValues.form_type = detectedFormType
+            form.setValues(mappedValues)
+        } else {
+            console.log('No OCR result provided to drawer')
+            // Reset form when no OCR result is available
+            form.reset()
+            setSelectedFormType(FormType.HEREDITARY_CANCER)
+        }
+    }, [ocrResult])
+
+    // Update form_type when selectedFormType changes
+    useEffect(() => {
+        form.setFieldValue('form_type', selectedFormType)
+    }, [selectedFormType])
 
     const handleFormSubmit = () => {
         const formData = form.values
-        onUpdate(formData)
-        onClose()
-    }
 
-    const handleRetryOCR = async () => {
-        setIsProcessing(true)
-        setProgress(0)
-        setError(null)
-        setOcrData(null)
-        form.reset()
+        // Get the original OCR result data
+        const originalData = ocrResult?.ocrResult || {}
 
-        try {
-            // Simulate progress
-            const progressInterval = setInterval(() => {
-                setProgress((prev) => {
-                    if (prev >= 90) {
-                        clearInterval(progressInterval)
-                        return 90
-                    }
-                    return prev + 10
-                })
-            }, 200)
-
-            const result = await staffService.ocrFile(file.file)
-
-            clearInterval(progressInterval)
-            setProgress(100)
-
-            setOcrData(result)
-            const mappedValues = mapOCRToFormValues(result)
-            form.setValues(mappedValues)
-
-            setTimeout(() => {
-                setIsProcessing(false)
-                setProgress(0)
-            }, 500)
-
-            // Notify parent component about the retry
-            if (onRetryOCR) {
-                onRetryOCR(file.id)
+        // Create updated OCR result structure that extends the original
+        const updatedOCRResult: CommonOCRRes<EditedOCRRes> = {
+            message: ocrResult?.message || 'Medical Test Requisition updated via manual edit',
+            ocrResult: {
+                ...originalData,
+                editedData: formData,
+                lastEditedAt: new Date().toISOString()
             }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to process OCR')
-            setIsProcessing(false)
-            setProgress(0)
         }
-    }
 
-    const processOCR = async () => {
-        setIsProcessing(true)
-        setProgress(0)
-        setError(null)
-
-        try {
-            // Simulate progress
-            const progressInterval = setInterval(() => {
-                setProgress((prev) => {
-                    if (prev >= 90) {
-                        clearInterval(progressInterval)
-                        return 90
-                    }
-                    return prev + 10
-                })
-            }, 200)
-
-            const result = await staffService.ocrFile(file.file)
-
-            clearInterval(progressInterval)
-            setProgress(100)
-
-            setOcrData(result)
-            const mappedValues = mapOCRToFormValues(result)
-            form.setValues(mappedValues)
-
-            setTimeout(() => {
-                setIsProcessing(false)
-                setProgress(0)
-            }, 500)
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to process OCR')
-            setIsProcessing(false)
-            setProgress(0)
-        }
+        console.log('Submitting updated OCR result:', updatedOCRResult)
+        onUpdate(updatedOCRResult)
+        onClose()
     }
 
     const imageUrl = file.file ? URL.createObjectURL(file.file) : null
@@ -169,28 +132,6 @@ const OCRDrawer = ({ file, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
             <Group justify='space-between' align='center'>
                 <Title order={3}>OCR Result - {file.file.name}</Title>
             </Group>
-
-            {/* Error Alert */}
-            {error && (
-                <Alert color='red' variant='light'>
-                    {error}
-                </Alert>
-            )}
-
-            {/* Processing Progress */}
-            {isProcessing && (
-                <Paper p='md' withBorder>
-                    <Stack gap='sm'>
-                        <Group justify='space-between'>
-                            <Text fw={500}>Processing OCR...</Text>
-                            <Text size='sm' c='dimmed'>
-                                {progress}%
-                            </Text>
-                        </Group>
-                        <Progress value={progress} animated />
-                    </Stack>
-                </Paper>
-            )}
 
             {/* Main Content */}
             <Grid style={{ flex: 1, overflow: 'hidden' }}>
@@ -203,29 +144,28 @@ const OCRDrawer = ({ file, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
                                     Image Preview
                                 </Text>
                                 <Group gap='xs'>
-                                    {!file.ocrResult && !ocrData && (
-                                        <Button
-                                            size='sm'
-                                            leftSection={<IconScan size={16} />}
-                                            onClick={processOCR}
-                                            loading={isProcessing}
-                                            disabled={isProcessing}
-                                        >
-                                            Start OCR
-                                        </Button>
-                                    )}
-                                    {(file.ocrResult || ocrData) && (
-                                        <Button
-                                            size='sm'
-                                            variant='light'
-                                            color='orange'
-                                            leftSection={<IconRefresh size={16} />}
-                                            onClick={handleRetryOCR}
-                                            loading={isProcessing}
-                                            disabled={isProcessing}
-                                        >
-                                            Retry OCR
-                                        </Button>
+                                    {ocrResult && (
+                                        <Stack gap='xs' align='flex-end'>
+                                            <Button
+                                                size='sm'
+                                                variant='light'
+                                                color='orange'
+                                                leftSection={<IconRefresh size={16} />}
+                                                onClick={onRetryOCR}
+                                                loading={file.ocrStatus === 'processing'}
+                                                disabled={file.ocrStatus === 'processing'}
+                                            >
+                                                Retry OCR
+                                            </Button>
+                                            {file.ocrStatus === 'processing' && ocrProgress > 0 && (
+                                                <Stack gap='xs' style={{ minWidth: '120px' }}>
+                                                    <Progress value={ocrProgress} size='sm' color='orange' />
+                                                    <Text size='xs' ta='center' c='dimmed'>
+                                                        {ocrProgress}%
+                                                    </Text>
+                                                </Stack>
+                                            )}
+                                        </Stack>
                                     )}
                                 </Group>
                             </Group>
@@ -254,7 +194,7 @@ const OCRDrawer = ({ file, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
                                 </Text>
                             </Group>
 
-                            {ocrData && (
+                            {ocrResult && (
                                 <div style={{ flex: 1, overflow: 'auto' }}>
                                     <form onSubmit={form.onSubmit(handleFormSubmit)}>
                                         <Stack gap='md'>
@@ -309,7 +249,7 @@ const OCRDrawer = ({ file, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
                                                 </>
                                             )}
 
-                                            {selectedFormType === FormType.GENE_MUTATION_TESTING && (
+                                            {selectedFormType === FormType.GENE_MUTATION && (
                                                 <>
                                                     <TextInput label='Họ và tên' {...form.getInputProps('full_name')} />
                                                     <Group grow>
@@ -348,7 +288,7 @@ const OCRDrawer = ({ file, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
                                                 </>
                                             )}
 
-                                            {selectedFormType === FormType.NON_INVASIVE_PRENATAL_TESTING && (
+                                            {selectedFormType === FormType.PRENATAL_TESTING && (
                                                 <>
                                                     <TextInput label='Họ và tên' {...form.getInputProps('full_name')} />
                                                     <Group grow>
@@ -391,7 +331,7 @@ const OCRDrawer = ({ file, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
                                     type='submit'
                                     leftSection={<IconCheck size={16} />}
                                     onClick={handleFormSubmit}
-                                    disabled={!ocrData}
+                                    disabled={!ocrResult}
                                 >
                                     Save Changes
                                 </Button>
