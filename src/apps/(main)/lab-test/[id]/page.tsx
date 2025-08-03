@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { getAllAnalysis, useLabTestSessionDetail, useSendToAnalysis } from '@/services/hook/lab-test.hook'
+import { useLabTestSessionDetail, useSendToAnalysis } from '@/services/hook/lab-test.hook'
+import { useUsersByRole } from '@/services/hook/auth.hook'
 import { useParams, useNavigate } from 'react-router'
 import {
     Container,
@@ -23,19 +24,23 @@ import { LabTestInfo, FileHistory } from './_components'
 import { FileUpload } from './_components/FileUploadPair'
 import { PatientInfo } from '@/components/PatientInfo'
 import { PageHeader } from '@/components/PageHeader'
+import { Role } from '@/utils/constant'
 
 const LabTestDetailPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const { data, isLoading, error } = useLabTestSessionDetail(id)
+    const { data: analysisTechniciansData, isLoading: isLoadingTechnicians } = useUsersByRole(Role.ANALYSIS_TECHNICIAN)
     console.log('LabTestDetailPage data:', data)
     const [r1File, setR1File] = useState<File | null>(null)
     const [r2File, setR2File] = useState<File | null>(null)
     const sendToAnalysisMutation = useSendToAnalysis()
-    const analysises = getAllAnalysis()
     const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(
         data?.analysis?.id ? String(data.analysis.id) : null
     )
+
+    // Get analysis technicians from the hook
+    const analysisTechnicians = analysisTechniciansData?.data?.users || []
 
     // Get the latest FastQ file pair
     const latestFastqFilePair = data?.fastqFilePairs && data.fastqFilePairs.length > 0 ? data.fastqFilePairs[0] : null
@@ -233,13 +238,14 @@ const LabTestDetailPage = () => {
                                             <Select
                                                 label='Chọn kỹ thuật viên Phân Tích'
                                                 placeholder='Chọn người dùng...'
-                                                data={analysises.data?.data?.users.map((user) => ({
+                                                data={analysisTechnicians.map((user) => ({
                                                     label: `${user.name} - ${user.email}`,
                                                     value: String(user.id)
                                                 }))}
                                                 disabled={
                                                     sendToAnalysisMutation.isPending ||
-                                                    latestFastqFilePair?.status !== 'uploaded'
+                                                    latestFastqFilePair?.status !== 'uploaded' ||
+                                                    isLoadingTechnicians
                                                 }
                                                 value={selectedAnalysisId}
                                                 onChange={setSelectedAnalysisId}
