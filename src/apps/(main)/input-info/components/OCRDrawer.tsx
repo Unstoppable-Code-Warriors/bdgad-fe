@@ -19,7 +19,7 @@ import {
 } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
-import { IconScan, IconCheck } from '@tabler/icons-react'
+import { IconScan, IconCheck, IconRefresh } from '@tabler/icons-react'
 import type { FileWithPath } from '@mantine/dropzone'
 import { staffService } from '@/services/function/staff'
 import {
@@ -50,9 +50,10 @@ interface OCRDrawerProps {
     file: SubmittedFile
     onUpdate: (data: any) => void
     onClose: () => void
+    onRetryOCR?: (fileId: string) => void
 }
 
-const OCRDrawer = ({ file, onUpdate, onClose }: OCRDrawerProps) => {
+const OCRDrawer = ({ file, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
     const [isProcessing, setIsProcessing] = useState(false)
     const [progress, setProgress] = useState(0)
     const [error, setError] = useState<string | null>(null)
@@ -77,6 +78,50 @@ const OCRDrawer = ({ file, onUpdate, onClose }: OCRDrawerProps) => {
         const formData = form.values
         onUpdate(formData)
         onClose()
+    }
+
+    const handleRetryOCR = async () => {
+        setIsProcessing(true)
+        setProgress(0)
+        setError(null)
+        setOcrData(null)
+        form.reset()
+
+        try {
+            // Simulate progress
+            const progressInterval = setInterval(() => {
+                setProgress((prev) => {
+                    if (prev >= 90) {
+                        clearInterval(progressInterval)
+                        return 90
+                    }
+                    return prev + 10
+                })
+            }, 200)
+
+            const result = await staffService.ocrFile(file.file)
+
+            clearInterval(progressInterval)
+            setProgress(100)
+
+            setOcrData(result)
+            const mappedValues = mapOCRToFormValues(result)
+            form.setValues(mappedValues)
+
+            setTimeout(() => {
+                setIsProcessing(false)
+                setProgress(0)
+            }, 500)
+
+            // Notify parent component about the retry
+            if (onRetryOCR) {
+                onRetryOCR(file.id)
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to process OCR')
+            setIsProcessing(false)
+            setProgress(0)
+        }
     }
 
     const processOCR = async () => {
@@ -157,17 +202,32 @@ const OCRDrawer = ({ file, onUpdate, onClose }: OCRDrawerProps) => {
                                 <Text fw={600} size='lg'>
                                     Image Preview
                                 </Text>
-                                {!file.ocrResult && (
-                                    <Button
-                                        size='sm'
-                                        leftSection={<IconScan size={16} />}
-                                        onClick={processOCR}
-                                        loading={isProcessing}
-                                        disabled={isProcessing}
-                                    >
-                                        Start OCR
-                                    </Button>
-                                )}
+                                <Group gap='xs'>
+                                    {!file.ocrResult && !ocrData && (
+                                        <Button
+                                            size='sm'
+                                            leftSection={<IconScan size={16} />}
+                                            onClick={processOCR}
+                                            loading={isProcessing}
+                                            disabled={isProcessing}
+                                        >
+                                            Start OCR
+                                        </Button>
+                                    )}
+                                    {(file.ocrResult || ocrData) && (
+                                        <Button
+                                            size='sm'
+                                            variant='light'
+                                            color='orange'
+                                            leftSection={<IconRefresh size={16} />}
+                                            onClick={handleRetryOCR}
+                                            loading={isProcessing}
+                                            disabled={isProcessing}
+                                        >
+                                            Retry OCR
+                                        </Button>
+                                    )}
+                                </Group>
                             </Group>
 
                             {imageUrl && (

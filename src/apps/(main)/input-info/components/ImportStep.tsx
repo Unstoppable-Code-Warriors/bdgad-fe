@@ -168,6 +168,36 @@ const ImportStep = ({ onFilesSubmitted }: ImportStepProps) => {
         setSelectedFileForOCR(null)
     }
 
+    const handleOCRRetry = async (fileId: string) => {
+        // This function will be called when retry is successful
+        // The actual OCR processing is done in the drawer
+        // We just need to update the file status in our local state
+        setSubmittedFiles((prev) =>
+            prev.map((file) =>
+                file.id === fileId
+                    ? {
+                          ...file,
+                          ocrStatus: 'success' as const,
+                          status: 'completed' as const
+                      }
+                    : file
+            )
+        )
+
+        const updatedFiles = submittedFiles.map((file) =>
+            file.id === fileId
+                ? {
+                      ...file,
+                      ocrStatus: 'success' as const,
+                      status: 'completed' as const
+                  }
+                : file
+        )
+        if (onFilesSubmitted) {
+            onFilesSubmitted(updatedFiles)
+        }
+    }
+
     const handleOCRResultUpdate = (updatedResult: any) => {
         if (!selectedFileForOCR) return
 
@@ -221,6 +251,7 @@ const ImportStep = ({ onFilesSubmitted }: ImportStepProps) => {
                         file={selectedFileForOCR}
                         onUpdate={handleOCRResultUpdate}
                         onClose={handleOCRDrawerClose}
+                        onRetryOCR={handleOCRRetry}
                     />
                 )}
             </Drawer>
