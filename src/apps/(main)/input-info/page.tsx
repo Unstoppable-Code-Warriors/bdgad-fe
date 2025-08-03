@@ -11,6 +11,7 @@ import type { EditedOCRRes } from './types'
 import type { CommonOCRRes } from '@/types/ocr-file'
 import {
     FileCategory,
+    FILE_CATEGORY_OPTIONS,
     type FileCategoryDto,
     type OCRResultDto,
     type CategorizedSubmittedFile
@@ -83,9 +84,14 @@ const InputInfoPage = () => {
     const handleCategoryChange = (index: number, category: FileCategory) => {
         setFileCategories((prev) => {
             const updated = [...prev]
+            // Auto-assign priority based on category
+            const categoryOption = FILE_CATEGORY_OPTIONS.find((opt) => opt.value === category)
+            const autoPriority = categoryOption?.priority || 5
+
             updated[index] = {
                 ...updated[index],
                 category,
+                priority: autoPriority,
                 fileName: selectedFiles[index]?.name || ''
             }
             validateFiles(selectedFiles, updated)
@@ -93,16 +99,7 @@ const InputInfoPage = () => {
         })
     }
 
-    const handlePriorityChange = (index: number, priority: number) => {
-        setFileCategories((prev) => {
-            const updated = [...prev]
-            updated[index] = {
-                ...updated[index],
-                priority
-            }
-            return updated
-        })
-    }
+    // ...existing code...
 
     const validateFiles = (files: FileWithPath[], categories: FileCategoryDto[]) => {
         const result = validateCategorizedFiles(files as File[], categories)
@@ -662,7 +659,6 @@ const InputInfoPage = () => {
                             fileCategories={fileCategories}
                             validationErrors={validationResult.errors}
                             onCategoryChange={handleCategoryChange}
-                            onPriorityChange={handlePriorityChange}
                             onRemove={handleRemoveFile}
                         />
 

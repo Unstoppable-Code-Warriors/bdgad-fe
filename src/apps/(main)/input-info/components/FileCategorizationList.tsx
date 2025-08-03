@@ -1,4 +1,4 @@
-import { Card, Group, Text, Badge, Select, NumberInput, Stack, ActionIcon, Alert, Tooltip } from '@mantine/core'
+import { Card, Group, Text, Badge, Select, Stack, ActionIcon, Alert, Tooltip } from '@mantine/core'
 import { IconFile, IconTrash, IconInfoCircle } from '@tabler/icons-react'
 import type { FileWithPath } from '@mantine/dropzone'
 import { FileCategory, FILE_CATEGORY_OPTIONS, type FileCategoryDto } from '@/types/categorized-upload'
@@ -6,24 +6,20 @@ import { FileCategory, FILE_CATEGORY_OPTIONS, type FileCategoryDto } from '@/typ
 interface FileCategoryCardProps {
     file: FileWithPath
     category?: FileCategory
-    priority?: number
     index: number
     isValid: boolean
     validationMessage?: string
     onCategoryChange: (index: number, category: FileCategory) => void
-    onPriorityChange: (index: number, priority: number) => void
     onRemove: (index: number) => void
 }
 
 export const FileCategoryCard = ({
     file,
     category,
-    priority = 5,
     index,
     isValid,
     validationMessage,
     onCategoryChange,
-    onPriorityChange,
     onRemove
 }: FileCategoryCardProps) => {
     const selectedOption = category ? FILE_CATEGORY_OPTIONS.find((opt) => opt.value === category) : undefined
@@ -46,30 +42,19 @@ export const FileCategoryCard = ({
                     </ActionIcon>
                 </Group>
 
-                <Group grow>
-                    <Select
-                        label='Loại file'
-                        placeholder='Chọn loại file'
-                        value={category || ''}
-                        onChange={(value) => onCategoryChange(index, value as FileCategory)}
-                        data={FILE_CATEGORY_OPTIONS.map((option) => ({
-                            value: option.value,
-                            label: option.label
-                        }))}
-                        size='sm'
-                        required
-                        error={!isValid && !category ? 'Vui lòng chọn loại file' : undefined}
-                    />
-                    <NumberInput
-                        label='Mức độ ưu tiên'
-                        placeholder='1-10'
-                        value={priority}
-                        onChange={(value) => onPriorityChange(index, Number(value) || 5)}
-                        min={1}
-                        max={10}
-                        size='sm'
-                    />
-                </Group>
+                <Select
+                    label='Loại file'
+                    placeholder='Chọn loại file'
+                    value={category || ''}
+                    onChange={(value) => onCategoryChange(index, value as FileCategory)}
+                    data={FILE_CATEGORY_OPTIONS.map((option) => ({
+                        value: option.value,
+                        label: option.label
+                    }))}
+                    size='sm'
+                    required
+                    error={!isValid && !category ? 'Vui lòng chọn loại file' : undefined}
+                />
 
                 {selectedOption && (
                     <Group gap='xs'>
@@ -104,7 +89,6 @@ interface FileCategorizationListProps {
     fileCategories: FileCategoryDto[]
     validationErrors: { [index: number]: string }
     onCategoryChange: (index: number, category: FileCategory) => void
-    onPriorityChange: (index: number, priority: number) => void
     onRemove: (index: number) => void
 }
 
@@ -113,7 +97,6 @@ export const FileCategorizationList = ({
     fileCategories,
     validationErrors,
     onCategoryChange,
-    onPriorityChange,
     onRemove
 }: FileCategorizationListProps) => {
     if (files.length === 0) {
@@ -136,12 +119,10 @@ export const FileCategorizationList = ({
                     key={`${file.name}-${index}`}
                     file={file}
                     category={fileCategories[index]?.category}
-                    priority={fileCategories[index]?.priority}
                     index={index}
                     isValid={!validationErrors[index]}
                     validationMessage={validationErrors[index]}
                     onCategoryChange={onCategoryChange}
-                    onPriorityChange={onPriorityChange}
                     onRemove={onRemove}
                 />
             ))}

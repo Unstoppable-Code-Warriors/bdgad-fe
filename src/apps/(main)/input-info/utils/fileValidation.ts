@@ -1,4 +1,4 @@
-import { FileCategory, VALIDATION_RULES, type FileCategoryDto } from '@/types/categorized-upload'
+import { FileCategory, VALIDATION_RULES, FILE_CATEGORY_OPTIONS, type FileCategoryDto } from '@/types/categorized-upload'
 
 export interface ValidationResult {
     isValid: boolean
@@ -101,35 +101,26 @@ export const generateDefaultFileCategories = (files: File[]): FileCategoryDto[] 
     return files.map((file) => {
         // Try to guess category based on filename
         const fileName = file.name.toLowerCase()
+        let category: FileCategory
 
         if (fileName.includes('prenatal') || fileName.includes('nipt') || fileName.includes('sàng lọc')) {
-            return {
-                category: FileCategory.PRENATAL_SCREENING,
-                priority: 9,
-                fileName: file.name
-            }
+            category = FileCategory.PRENATAL_SCREENING
+        } else if (fileName.includes('cancer') || fileName.includes('ung thư') || fileName.includes('bcare')) {
+            category = FileCategory.HEREDITARY_CANCER
+        } else if (fileName.includes('gene') || fileName.includes('mutation') || fileName.includes('đột biến')) {
+            category = FileCategory.GENE_MUTATION
+        } else {
+            // Default to general
+            category = FileCategory.GENERAL
         }
 
-        if (fileName.includes('cancer') || fileName.includes('ung thư') || fileName.includes('bcare')) {
-            return {
-                category: FileCategory.HEREDITARY_CANCER,
-                priority: 8,
-                fileName: file.name
-            }
-        }
+        // Get priority from FILE_CATEGORY_OPTIONS
+        const categoryOption = FILE_CATEGORY_OPTIONS.find((opt) => opt.value === category)
+        const priority = categoryOption?.priority || 5
 
-        if (fileName.includes('gene') || fileName.includes('mutation') || fileName.includes('đột biến')) {
-            return {
-                category: FileCategory.GENE_MUTATION,
-                priority: 7,
-                fileName: file.name
-            }
-        }
-
-        // Default to general
         return {
-            category: FileCategory.GENERAL,
-            priority: 5,
+            category,
+            priority,
             fileName: file.name
         }
     })
