@@ -38,15 +38,7 @@ const InputInfoPage = () => {
 
     const handleOCRComplete = (data: any) => {
         console.log('OCR completed:', data)
-
-        // Update the corresponding file with OCR result
-        setSubmittedFiles((prev) =>
-            prev.map((file) => ({
-                ...file,
-                ocrResult: data,
-                status: 'completed' as const
-            }))
-        )
+        // The OCR complete handling is now done inline in ImportStep
     }
 
     const handleSaveFiles = async () => {
@@ -144,7 +136,7 @@ const InputInfoPage = () => {
                 </Stack>
             </Paper>
 
-            <ImportStep onFilesSubmitted={handleFilesSubmitted} onOCRComplete={handleOCRComplete} />
+            <ImportStep onFilesSubmitted={handleFilesSubmitted} />
 
             {/* Save Files Button */}
             {submittedFiles.length > 0 && (

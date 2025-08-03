@@ -1,6 +1,6 @@
 import type { FileWithPath } from '@mantine/dropzone'
-import { Card, Stack, Group, Text, Badge, Table, Image, ActionIcon, Box, Button } from '@mantine/core'
-import { IconScan, IconEye, IconTrash, IconDownload } from '@tabler/icons-react'
+import { Card, Stack, Group, Text, Badge, Table, Image, ActionIcon, Box, Button, Loader } from '@mantine/core'
+import { IconScan, IconEye, IconTrash, IconDownload, IconRefresh } from '@tabler/icons-react'
 import { getFileIcon, getFileTypeLabel, formatFileSize } from '../utils/fileUtils'
 
 interface SubmittedFile {
@@ -10,11 +10,13 @@ interface SubmittedFile {
     status: 'uploaded' | 'processing' | 'completed'
     type: 'image' | 'pdf' | 'document' | 'other'
     ocrResult?: any
+    ocrStatus?: 'idle' | 'processing' | 'success' | 'failed'
+    ocrError?: string
 }
 
 interface SubmittedFilesTableProps {
     files: SubmittedFile[]
-    onStartOCR: (file: File) => void
+    onStartOCR: (fileId: string) => void
     onViewOCR?: (submittedFile: SubmittedFile) => void
     onDelete: (id: string) => void
 }
@@ -33,7 +35,12 @@ const SubmittedFilesTable = ({ files, onStartOCR, onViewOCR, onDelete }: Submitt
     const getOCRButton = (submittedFile: SubmittedFile) => {
         if (submittedFile.type !== 'image') return null
 
-        if (submittedFile.ocrResult) {
+        // Check if any file is currently processing OCR
+        const isAnyFileProcessing = files.some((file) => file.ocrStatus === 'processing')
+        const isThisFileProcessing = submittedFile.ocrStatus === 'processing'
+
+        // Show OCR result if available
+        if (submittedFile.ocrStatus === 'success' && submittedFile.ocrResult) {
             return (
                 <Button
                     size='sm'
@@ -42,21 +49,48 @@ const SubmittedFilesTable = ({ files, onStartOCR, onViewOCR, onDelete }: Submitt
                     leftSection={<IconEye size={14} />}
                     onClick={() => onViewOCR?.(submittedFile)}
                 >
-                    Chỉnh sửa OCR
+                    Xem OCR
                 </Button>
             )
         }
 
+        // Show retry button if failed
+        if (submittedFile.ocrStatus === 'failed') {
+            return (
+                <Button
+                    size='sm'
+                    variant='light'
+                    color='red'
+                    leftSection={<IconRefresh size={14} />}
+                    onClick={() => onStartOCR(submittedFile.id)}
+                    disabled={isAnyFileProcessing}
+                    title={submittedFile.ocrError}
+                >
+                    Thử lại
+                </Button>
+            )
+        }
+
+        // Show processing state
+        if (isThisFileProcessing) {
+            return (
+                <Button size='sm' variant='light' color='blue' leftSection={<Loader size={14} />} disabled loading>
+                    Đang xử lý...
+                </Button>
+            )
+        }
+
+        // Show OCR button
         return (
             <Button
                 size='sm'
                 variant='light'
                 color='blue'
                 leftSection={<IconScan size={14} />}
-                onClick={() => onStartOCR(submittedFile.file)}
-                disabled={submittedFile.status === 'processing'}
+                onClick={() => onStartOCR(submittedFile.id)}
+                disabled={isAnyFileProcessing}
             >
-                {submittedFile.status === 'processing' ? 'Processing...' : 'OCR'}
+                OCR
             </Button>
         )
     }
