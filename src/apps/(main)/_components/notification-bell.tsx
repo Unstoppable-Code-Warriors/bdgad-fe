@@ -32,7 +32,7 @@ const NotificationBell = () => {
 
     const markAsReadMutation = useMarkNotificationAsRead()
 
-    const notifications = notificationsResponse || []
+    const notifications = useMemo(() => notificationsResponse || [], [notificationsResponse])
 
     const unreadCount = useMemo(() => notifications.filter((n: Notification) => !n.isRead).length, [notifications])
 
