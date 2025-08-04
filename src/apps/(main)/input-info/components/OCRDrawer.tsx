@@ -108,6 +108,16 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
     const handleFormSubmit = () => {
         const formData = form.values
 
+        // Convert specimen_type radio value back to boolean fields for backward compatibility
+        const processedFormData = {
+            ...formData,
+            biopsy_tissue_ffpe: formData.specimen_type === 'biopsy_tissue_ffpe',
+            blood_stl_ctdna: formData.specimen_type === 'blood_stl_ctdna',
+            pleural_peritoneal_fluid: formData.specimen_type === 'pleural_peritoneal_fluid'
+        }
+
+        console.log('Submitting form data:', processedFormData)
+
         // Get the original OCR result data
         const originalData = ocrResult?.ocrResult || {}
 
@@ -116,7 +126,7 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
             message: ocrResult?.message || 'Medical Test Requisition updated via manual edit',
             ocrResult: {
                 ...originalData,
-                editedData: formData,
+                editedData: processedFormData,
                 lastEditedAt: new Date().toISOString()
             }
         }
@@ -381,26 +391,22 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                     <Title order={5} mt='md'>
                                                         Loại bệnh phẩm
                                                     </Title>
-                                                    <Group>
-                                                        <Checkbox
-                                                            label='Mô sinh thiết/FFPE'
-                                                            {...form.getInputProps('biopsy_tissue_ffpe', {
-                                                                type: 'checkbox'
-                                                            })}
-                                                        />
-                                                        <Checkbox
-                                                            label='Máu (STL-ctDNA)'
-                                                            {...form.getInputProps('blood_stl_ctdna', {
-                                                                type: 'checkbox'
-                                                            })}
-                                                        />
-                                                        <Checkbox
-                                                            label='Dịch màng phổi/bụng'
-                                                            {...form.getInputProps('pleural_peritoneal_fluid', {
-                                                                type: 'checkbox'
-                                                            })}
-                                                        />
-                                                    </Group>
+                                                    <Radio.Group
+                                                        label='Chọn loại bệnh phẩm'
+                                                        {...form.getInputProps('specimen_type')}
+                                                    >
+                                                        <Stack gap='sm' mt='sm'>
+                                                            <Radio
+                                                                value='biopsy_tissue_ffpe'
+                                                                label='Mô sinh thiết/FFPE'
+                                                            />
+                                                            <Radio value='blood_stl_ctdna' label='Máu (STL-ctDNA)' />
+                                                            <Radio
+                                                                value='pleural_peritoneal_fluid'
+                                                                label='Dịch màng phổi/bụng'
+                                                            />
+                                                        </Stack>
+                                                    </Radio.Group>
                                                     <TextInput label='Mã số GPB' {...form.getInputProps('gpb_code')} />
 
                                                     {/* Loại ung thư và panel xét nghiệm */}

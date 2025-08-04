@@ -149,11 +149,6 @@ export const uploadCategorizedPatientFiles = async (
         console.log('ocrResults parsed back:', JSON.parse(ocrJson))
     }
 
-    if (params.labcode && params.labcode.length > 0) {
-        formData.append('labcode', JSON.stringify(params.labcode))
-        console.log('labcode:', JSON.stringify(params.labcode))
-    }
-
     // Debug FormData contents
     console.log('=== FormData Debug ===')
     for (const [key, value] of formData.entries()) {

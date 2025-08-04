@@ -42,19 +42,21 @@ export const FileCategoryCard = ({
                     </ActionIcon>
                 </Group>
 
-                <Select
-                    label='Loại file'
-                    placeholder='Chọn loại file'
-                    value={category || ''}
-                    onChange={(value) => onCategoryChange(index, value as FileCategory)}
-                    data={FILE_CATEGORY_OPTIONS.map((option) => ({
-                        value: option.value,
-                        label: option.label
-                    }))}
-                    size='sm'
-                    required
-                    error={!isValid && !category ? 'Vui lòng chọn loại file' : undefined}
-                />
+                <Group grow>
+                    <Select
+                        label='Loại file'
+                        placeholder='Chọn loại file'
+                        value={category || ''}
+                        onChange={(value) => onCategoryChange(index, value as FileCategory)}
+                        data={FILE_CATEGORY_OPTIONS.map((option) => ({
+                            value: option.value,
+                            label: option.label
+                        }))}
+                        size='sm'
+                        required
+                        error={!isValid && !category ? 'Vui lòng chọn loại file' : undefined}
+                    />
+                </Group>
 
                 {selectedOption && (
                     <Group gap='xs'>
