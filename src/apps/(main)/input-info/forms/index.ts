@@ -28,6 +28,7 @@ export interface FormValues {
     treatment_received: string
 
     // Loại bệnh phẩm (chỉ phiếu 2)
+    specimen_type: string // Radio group: 'biopsy_tissue_ffpe' | 'blood_stl_ctdna' | 'pleural_peritoneal_fluid' | ''
     biopsy_tissue_ffpe: boolean
     blood_stl_ctdna: boolean
     pleural_peritoneal_fluid: boolean
@@ -77,17 +78,17 @@ export const genderOptions = [
 ]
 
 export const cancerScreeningPackageOptions = [
-    { value: 'bcare', label: 'Ung thư vú (BCARE)' },
-    { value: 'more_care', label: '15 loại ung thư di truyền (MORE CARE)' },
-    { value: 'vip_care', label: '20 loại ung thư di truyền (VIP CARE)' }
+    { value: 'breast_cancer_bcare', label: 'Ung thư vú (BCARE)' },
+    { value: '15_hereditary_cancer_types_more_care', label: '15 loại ung thư di truyền (MORE CARE)' },
+    { value: '20_hereditary_cancer_types_vip_care', label: '20 loại ung thư di truyền (VIP CARE)' }
 ]
 
 export const niptPackageOptions = [
-    { value: 'nipt_cnv', label: 'NIPT CNV' },
-    { value: 'nipt_24', label: 'NIPT 24' },
-    { value: 'nipt_5', label: 'NIPT 5' },
-    { value: 'nipt_4', label: 'NIPT 4' },
-    { value: 'nipt_3', label: 'NIPT 3' }
+    { value: 'NIPT CNV', label: 'NIPT CNV' },
+    { value: 'NIPT 24', label: 'NIPT 24' },
+    { value: 'NIPT 5', label: 'NIPT 5' },
+    { value: 'NIPT 4', label: 'NIPT 4' },
+    { value: 'NIPT 3', label: 'NIPT 3' }
 ]
 
 export const supportPackageOptions = [
@@ -100,8 +101,8 @@ export const supportPackageOptions = [
 ]
 
 export const cancerPanelOptions = [
-    { value: 'onco_81', label: 'Onco 81' },
-    { value: 'onco_500_plus', label: 'Onco500 Plus' },
+    { value: 'Onco81', label: 'Onco 81' },
+    { value: 'Onco500', label: 'Onco500 Plus' },
     { value: 'lung_cancer', label: 'Ung thư phổi' },
     { value: 'ovarian_cancer', label: 'Ung thư buồng trứng' },
     { value: 'colorectal_cancer', label: 'Ung thư đại trực tràng' },
@@ -137,6 +138,7 @@ export const getDefaultFormValues = (): FormValues => ({
     tumor_location_size_differentiation: '',
     time_of_detection: '',
     treatment_received: '',
+    specimen_type: '',
     biopsy_tissue_ffpe: false,
     blood_stl_ctdna: false,
     pleural_peritoneal_fluid: false,
@@ -220,6 +222,16 @@ export const mapOCRToFormValues = (ocrResult: CommonOCRRes<EditedOCRRes> | undef
     if (data.gene_mutation_testing?.specimen_and_test_information) {
         const specimenInfo = data.gene_mutation_testing.specimen_and_test_information
         if (specimenInfo.specimen_type) {
+            // Map individual boolean fields to the radio group value
+            if (specimenInfo.specimen_type.biopsy_tissue_ffpe) {
+                geneMutationInfo.specimen_type = 'biopsy_tissue_ffpe'
+            } else if (specimenInfo.specimen_type.blood_stl_ctdna) {
+                geneMutationInfo.specimen_type = 'blood_stl_ctdna'
+            } else if (specimenInfo.specimen_type.pleural_peritoneal_fluid) {
+                geneMutationInfo.specimen_type = 'pleural_peritoneal_fluid'
+            }
+
+            // Keep the original boolean fields for backward compatibility
             geneMutationInfo.biopsy_tissue_ffpe = specimenInfo.specimen_type.biopsy_tissue_ffpe || false
             geneMutationInfo.blood_stl_ctdna = specimenInfo.specimen_type.blood_stl_ctdna || false
             geneMutationInfo.pleural_peritoneal_fluid = specimenInfo.specimen_type.pleural_peritoneal_fluid || false
