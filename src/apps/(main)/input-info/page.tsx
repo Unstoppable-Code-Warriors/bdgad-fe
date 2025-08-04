@@ -20,6 +20,7 @@ import { validateCategorizedFiles, generateDefaultFileCategories } from './utils
 import ImportStep from './components/ImportStep'
 import OCRDrawer from './components/OCRDrawer'
 import { FileCategorizationList } from './components/FileCategorizationList'
+import SubmitButton from './components/SubmitButton'
 
 const InputInfoPage = () => {
     const [typeLabSession, setTypeLabSession] = useState<string>('test')
@@ -102,7 +103,7 @@ const InputInfoPage = () => {
     // ...existing code...
 
     const validateFiles = (files: FileWithPath[], categories: FileCategoryDto[]) => {
-        const result = validateCategorizedFiles(files as File[], categories)
+        const result = validateCategorizedFiles(files as File[], categories, submittedFiles)
         setValidationResult(result)
 
         if (result.globalErrors.length > 0) {
@@ -119,7 +120,7 @@ const InputInfoPage = () => {
         }
 
         // Validate before submitting
-        const result = validateCategorizedFiles(selectedFiles as File[], fileCategories)
+        const result = validateCategorizedFiles(selectedFiles as File[], fileCategories, submittedFiles)
         if (!result.isValid) {
             setError(result.globalErrors[0] || 'Vui lòng khắc phục các lỗi trước khi tiếp tục')
             return
@@ -433,6 +434,11 @@ const InputInfoPage = () => {
         )
     }
 
+    // Function to check if any file is currently processing OCR
+    const isAnyFileProcessingOCR = () => {
+        return submittedFiles.some(file => file.ocrStatus === 'processing')
+    }
+
     const handleSaveFiles = async () => {
         if (submittedFiles.length === 0) {
             notifications.show({
@@ -499,7 +505,7 @@ const InputInfoPage = () => {
             return
         }
 
-        const validation = validateCategorizedFiles(fileArray, categoryArray)
+        const validation = validateCategorizedFiles(fileArray, categoryArray, submittedFiles)
         if (!validation.isValid) {
             notifications.show({
                 title: 'Lỗi validation',
@@ -639,13 +645,10 @@ const InputInfoPage = () => {
 
                 {/* File Import and Categorization Section */}
                 <ImportStep
-                    selectedFiles={selectedFiles}
                     submittedFiles={submittedFiles}
                     error={error}
                     ocrProgress={ocrProgress}
                     onFileDrop={handleFileDrop}
-                    onRemoveFile={handleRemoveFile}
-                    onSubmitFiles={handleSubmitFiles}
                     onStartOCR={handleOCRClick}
                     onViewOCR={handleViewOCR}
                     onDeleteSubmittedFile={handleDeleteSubmittedFile}
@@ -680,23 +683,38 @@ const InputInfoPage = () => {
                                 {validationResult.summary}
                             </Text>
                         </Group>
+
+                        {/* Continue Button */}
+                        <SubmitButton 
+                            fileCount={selectedFiles.length} 
+                            onSubmit={handleSubmitFiles} 
+                        />
                     </Paper>
                 )}
 
                 {/* Save Files Button */}
                 {submittedFiles.length > 0 && (
                     <Paper p='lg' withBorder mt='xl'>
+                        {isAnyFileProcessingOCR() && (
+                            <Alert variant='light' color='orange' mb='md'>
+                                <Text size='sm'>
+                                    <strong>Chưa thể lưu:</strong> Đang xử lý OCR, vui lòng chờ hoàn thành.
+                                </Text>
+                            </Alert>
+                        )}
                         <Group justify='right' mb='md'>
                             <Button
                                 size='lg'
                                 leftSection={<IconDeviceFloppy size={20} />}
                                 onClick={handleSaveFiles}
                                 loading={isSaving}
-                                disabled={isSaving}
-                                color='green'
+                                disabled={isSaving || isAnyFileProcessingOCR()}
+                                color={!isAnyFileProcessingOCR() ? 'green' : 'gray'}
                                 style={{ minWidth: 200 }}
                             >
-                                {isSaving ? 'Đang lưu...' : `Lưu ${submittedFiles.length} file`}
+                                {isSaving ? 'Đang lưu...' : 
+                                 isAnyFileProcessingOCR() ? 'Đang xử lý OCR...' :
+                                 `Lưu ${submittedFiles.length} file`}
                             </Button>
                         </Group>
                     </Paper>

@@ -23,9 +23,7 @@ import {
     IconStethoscope,
     IconUser,
     IconPlus,
-    IconPhone,
     IconId,
-    IconMapPin,
     IconBarcode
 } from '@tabler/icons-react'
 import { usePatientLabSessions } from '@/services/hook/staff-patient-session.hook'
@@ -238,7 +236,7 @@ const PatientDetailPage = () => {
                                         </Stack>
                                     </Grid.Col>
 
-                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
+                                    {/* <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
                                         <Stack gap='xs'>
                                             <Group gap='xs'>
                                                 <IconCalendarEvent size={16} color='#495057' />
@@ -252,9 +250,9 @@ const PatientDetailPage = () => {
                                                 </Text>
                                             </Group>
                                         </Stack>
-                                    </Grid.Col>
+                                    </Grid.Col> */}
 
-                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
+                                    {/* <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
                                         <Stack gap='xs'>
                                             <Group gap='xs'>
                                                 <IconPhone size={16} color='#495057' />
@@ -266,7 +264,7 @@ const PatientDetailPage = () => {
                                                 </Text>
                                             </Group>
                                         </Stack>
-                                    </Grid.Col>
+                                    </Grid.Col> */}
 
                                     <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
                                         <Stack gap='xs'>
@@ -282,7 +280,7 @@ const PatientDetailPage = () => {
                                         </Stack>
                                     </Grid.Col>
 
-                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
+                                    {/* <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
                                         <Stack gap='xs'>
                                             <Group gap='xs'>
                                                 <IconMapPin size={16} color='#495057' />
@@ -294,7 +292,7 @@ const PatientDetailPage = () => {
                                                 </Text>
                                             </Group>
                                         </Stack>
-                                    </Grid.Col>
+                                    </Grid.Col> */}
                                 </Grid>
                             </Stack>
                         </Card>

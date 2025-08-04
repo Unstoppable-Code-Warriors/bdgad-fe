@@ -70,15 +70,15 @@ export interface CategorizedSubmittedFile {
 export const FILE_CATEGORY_OPTIONS = [
     {
         value: FileCategory.PRENATAL_SCREENING,
-        label: 'Sàng lọc tiền sản',
-        description: 'Tài liệu sàng lọc tiền sản',
+        label: 'Phiếu đồng thuận thực hiện xét nghiệm sàng lọc tiền sinh không xâm lấn',
+        description: 'Phiếu đồng thuận thực hiện xét nghiệm sàng lọc tiền sinh không xâm lấn',
         priority: 9,
         isSpecial: true,
         color: 'blue'
     },
     {
         value: FileCategory.HEREDITARY_CANCER,
-        label: 'Ung thư di truyền',
+        label: 'Phiếu đồng thuận thực hiện xét nghiệm tầm soát nguy cơ ung thư di truyền',
         description: 'Tài liệu sàng lọc ung thư di truyền',
         priority: 8,
         isSpecial: true,
@@ -86,7 +86,7 @@ export const FILE_CATEGORY_OPTIONS = [
     },
     {
         value: FileCategory.GENE_MUTATION,
-        label: 'Đột biến gen',
+        label: 'Phiếu xét nghiệm đột biến gen',
         description: 'Tài liệu xét nghiệm đột biến gen',
         priority: 7,
         isSpecial: true,

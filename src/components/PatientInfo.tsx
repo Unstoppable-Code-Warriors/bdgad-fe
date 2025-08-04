@@ -1,5 +1,5 @@
 import { Card, Text, Group, Stack, ThemeIcon, Box, Grid, Paper, Avatar } from '@mantine/core'
-import { IconUser, IconId, IconPhone, IconMapPin, IconStethoscope, IconMail, IconMicroscope } from '@tabler/icons-react'
+import { IconUser, IconId, IconStethoscope, IconMail, IconMicroscope } from '@tabler/icons-react'
 
 interface PatientData {
     fullName: string
@@ -104,18 +104,18 @@ export const PatientInfo = ({
                                         {patient.citizenId}
                                     </Text>
                                 </Group>
-                                <Group justify='space-between'>
+                                {/* <Group justify='space-between'>
                                     <Text size='sm' c='dimmed'>
                                         Ngày sinh:
                                     </Text>
                                     <Text fw={600} size='sm'>
                                         {new Date(patient.dateOfBirth).toLocaleDateString('vi-VN')}
                                     </Text>
-                                </Group>
+                                </Group> */}
                             </Stack>
                         </Grid.Col>
 
-                        <Grid.Col span={6}>
+                        {/* <Grid.Col span={6}>
                             <Group gap='xs' mb='xs'>
                                 <IconPhone size={16} color='var(--mantine-color-orange-6)' />
                                 <Text size='sm' fw={500} c='orange'>
@@ -132,10 +132,10 @@ export const PatientInfo = ({
                                     </Text>
                                 </Group>
                             </Stack>
-                        </Grid.Col>
+                        </Grid.Col> */}
                     </Grid>
 
-                    {patient.address && (
+                    {/* {patient.address && (
                         <Paper p='md' radius='md' bg='white' withBorder>
                             <Group gap='xs' mb='xs'>
                                 <IconMapPin size={16} color='var(--mantine-color-teal-6)' />
@@ -145,7 +145,7 @@ export const PatientInfo = ({
                             </Group>
                             <Text size='sm'>{patient.address}</Text>
                         </Paper>
-                    )}
+                    )} */}
                 </Stack>
             </Paper>
 

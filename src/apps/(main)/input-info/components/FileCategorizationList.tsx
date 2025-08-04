@@ -1,5 +1,5 @@
-import { Card, Group, Text, Badge, Select, Stack, ActionIcon, Alert, Tooltip } from '@mantine/core'
-import { IconFile, IconTrash, IconInfoCircle } from '@tabler/icons-react'
+import { Card, Group, Text, Badge, Select, Stack, ActionIcon, Alert } from '@mantine/core'
+import { IconFile, IconTrash } from '@tabler/icons-react'
 import type { FileWithPath } from '@mantine/dropzone'
 import { FileCategory, FILE_CATEGORY_OPTIONS, type FileCategoryDto } from '@/types/categorized-upload'
 
@@ -58,19 +58,19 @@ export const FileCategoryCard = ({
 
                 {selectedOption && (
                     <Group gap='xs'>
-                        <Badge size='sm' color={selectedOption.color}>
+                        {/* <Badge size='sm' color={selectedOption.color}>
                             {selectedOption.label}
-                        </Badge>
+                        </Badge> */}
                         {selectedOption.isSpecial && (
                             <Badge size='sm' variant='light' color='blue'>
                                 Xử lý OCR đặc biệt
                             </Badge>
                         )}
-                        <Tooltip label={selectedOption.description}>
+                        {/* <Tooltip label={selectedOption.description}>
                             <ActionIcon variant='transparent' size='sm'>
                                 <IconInfoCircle size={14} />
                             </ActionIcon>
-                        </Tooltip>
+                        </Tooltip> */}
                     </Group>
                 )}
 

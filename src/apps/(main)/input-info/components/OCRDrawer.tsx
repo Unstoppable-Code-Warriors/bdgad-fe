@@ -143,7 +143,7 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                         <Stack gap='sm' h='100%'>
                             <Group justify='space-between'>
                                 <Text fw={600} size='lg'>
-                                    Image Preview
+                                    Ảnh 
                                 </Text>
                                 <Group gap='xs'>
                                     {ocrResult && (
@@ -158,7 +158,7 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                     onClose()
                                                 }}
                                             >
-                                                Retry OCR
+                                                Thử lại OCR
                                             </Button>
                                             {file.ocrStatus === 'processing' && (
                                                 <Stack gap='xs' style={{ minWidth: '120px' }}>
@@ -198,7 +198,7 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                         <Stack gap='md' h='100%'>
                             <Group justify='space-between'>
                                 <Text fw={600} size='lg'>
-                                    Extracted Data
+                                    Dữ liệu đã trích xuất
                                 </Text>
                                 {file.ocrStatus === 'processing' && (
                                     <Text size='sm' c='orange' fw={500}>
@@ -220,7 +220,7 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                         <Stack gap='md'>
                                             {/* Form Type Selection */}
                                             <Select
-                                                label='Form Type'
+                                                label='Loại biểu mẫu'
                                                 value={selectedFormType}
                                                 onChange={(value) =>
                                                     setSelectedFormType(

@@ -19,12 +19,11 @@ export const getDefaultRouteByRole = (roleCode?: number): string => {
         case Role.ANALYSIS_TECHNICIAN:
             return '/analysis'
 
-        case Role.DOCTOR:
+        case Role.STAFF:
             return '/patient-folder'
 
-        case Role.STAFF:
         default:
-            return '/input-info'
+            return '/'
     }
 }
 export enum FormType {

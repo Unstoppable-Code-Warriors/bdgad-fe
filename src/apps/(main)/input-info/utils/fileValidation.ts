@@ -1,4 +1,4 @@
-import { FileCategory, VALIDATION_RULES, FILE_CATEGORY_OPTIONS, type FileCategoryDto } from '@/types/categorized-upload'
+import { FileCategory, VALIDATION_RULES, FILE_CATEGORY_OPTIONS, type FileCategoryDto, type CategorizedSubmittedFile } from '@/types/categorized-upload'
 
 export interface ValidationResult {
     isValid: boolean
@@ -7,7 +7,11 @@ export interface ValidationResult {
     summary: string
 }
 
-export const validateCategorizedFiles = (files: File[], fileCategories: FileCategoryDto[]): ValidationResult => {
+export const validateCategorizedFiles = (
+    files: File[], 
+    fileCategories: FileCategoryDto[], 
+    submittedFiles: CategorizedSubmittedFile[] = []
+): ValidationResult => {
     const errors: { [index: number]: string } = {}
     const globalErrors: string[] = []
 
@@ -63,17 +67,28 @@ export const validateCategorizedFiles = (files: File[], fileCategories: FileCate
         }
     })
 
-    // Check if at least one special category is present
+    // Check if at least one special category is present (including submitted files)
     const hasSpecialFile = specialCategories.length > 0
-    if (!hasSpecialFile) {
+    const hasSubmittedSpecialFiles = submittedFiles.some(file => {
+        const categoryOption = FILE_CATEGORY_OPTIONS.find(opt => opt.value === file.category)
+        return categoryOption?.isSpecial === true
+    })
+    
+    if (!hasSpecialFile && !hasSubmittedSpecialFiles) {
         globalErrors.push('Cần ít nhất một file đặc biệt (không phải file chung)')
     }
 
     // Check for required categories (if specified)
 
     const isValid = Object.keys(errors).length === 0 && globalErrors.length === 0
+    const totalFiles = files.length + submittedFiles.length
+    const totalSpecialFiles = specialCategories.length + submittedFiles.filter(file => {
+        const categoryOption = FILE_CATEGORY_OPTIONS.find(opt => opt.value === file.category)
+        return categoryOption?.isSpecial === true
+    }).length
+    
     const summary = isValid
-        ? `✓ Hợp lệ: ${files.length} file, ${specialCategories.length} file đặc biệt`
+        ? `✓ Hợp lệ: ${files.length} file mới${submittedFiles.length > 0 ? ` (tổng: ${totalFiles} file, ${totalSpecialFiles} file đặc biệt)` : `, ${specialCategories.length} file đặc biệt`}`
         : `✗ Có ${Object.keys(errors).length + globalErrors.length} lỗi cần khắc phục`
 
     return {

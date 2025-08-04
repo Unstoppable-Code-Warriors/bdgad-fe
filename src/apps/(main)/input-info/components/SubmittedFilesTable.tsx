@@ -95,21 +95,21 @@ const SubmittedFilesTable = ({ files, ocrProgress, onStartOCR, onViewOCR, onDele
             <Stack gap='md'>
                 <Group justify='space-between'>
                     <Text size='lg' fw={600} c='green.7'>
-                        Submitted Files
+                        File đã upload
                     </Text>
                     <Badge color='green' variant='light'>
-                        {files.length} file(s)
+                        {files.length} file
                     </Badge>
                 </Group>
 
                 <Table striped highlightOnHover>
                     <Table.Thead>
                         <Table.Tr>
-                            <Table.Th>Preview</Table.Th>
-                            <Table.Th>File Name</Table.Th>
-                            <Table.Th>Type</Table.Th>
-                            <Table.Th>Size</Table.Th>
-                            <Table.Th>Actions</Table.Th>
+                            <Table.Th>File</Table.Th>
+                            <Table.Th>Tên file</Table.Th>
+                            <Table.Th>Loại</Table.Th>
+                            <Table.Th>Kích thước</Table.Th>
+                            <Table.Th>Thao tác</Table.Th>
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -151,7 +151,7 @@ const SubmittedFilesTable = ({ files, ocrProgress, onStartOCR, onViewOCR, onDele
                                             {submittedFile.file.name}
                                         </Text>
                                         <Text size='xs' c='dimmed'>
-                                            Uploaded: {submittedFile.uploadedAt}
+                                            Đã tải lên: {submittedFile.uploadedAt}
                                         </Text>
                                     </Stack>
                                 </Table.Td>
@@ -170,7 +170,7 @@ const SubmittedFilesTable = ({ files, ocrProgress, onStartOCR, onViewOCR, onDele
                                                 variant='light'
                                                 color='green'
                                                 onClick={() => handleDownload(submittedFile.file)}
-                                                title='Download file'
+                                                title='Tải xuống file'
                                                 size='sm'
                                             >
                                                 <IconDownload size='1rem' />
@@ -180,7 +180,7 @@ const SubmittedFilesTable = ({ files, ocrProgress, onStartOCR, onViewOCR, onDele
                                                 variant='light'
                                                 color='red'
                                                 onClick={() => onDelete(submittedFile.id)}
-                                                title='Delete file'
+                                                title='Xóa file'
                                                 size='sm'
                                             >
                                                 <IconTrash size='1rem' />
