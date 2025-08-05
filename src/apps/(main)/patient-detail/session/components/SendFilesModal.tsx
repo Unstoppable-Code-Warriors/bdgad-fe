@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react'
-import { Modal, Stack, Button, Group, Select, Text, Alert, Divider, Badge } from '@mantine/core'
+import { Modal, Stack, Button, Group, Select, Text, Alert, Divider, Badge, Box } from '@mantine/core'
 import { IconSend, IconMicroscope, IconClipboardCheck, IconAlertCircle, IconCheck } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { Role } from '@/utils/constant'
 import { authService } from '@/services/function/auth'
 import { useAssignSession } from '@/services/hook/staff-patient-session.hook'
+
+interface AssignmentItem {
+    labcode: string
+    labTestingId: number | null
+}
 
 interface SendFilesModalProps {
     opened: boolean
@@ -12,12 +17,14 @@ interface SendFilesModalProps {
     sessionType: string
     sessionId: string
     patientId: string
-    sessionData?: any // Thêm sessionData để check trạng thái
+    sessionData?: any
 }
 
 const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }: SendFilesModalProps) => {
+    console.log('Session data from modal:', sessionData)
+    console.log('Labcodes extracted:', sessionData?.labcodes)
     const [selectedDoctor, setSelectedDoctor] = useState<string>('')
-    const [selectedLabTech, setSelectedLabTech] = useState<string>('')
+    const [assignments, setAssignments] = useState<AssignmentItem[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -27,10 +34,19 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
 
     const assignSessionMutation = useAssignSession()
 
+    // Extract labcodes from sessionData
+    const labcodes = Array.isArray(sessionData?.labcodes)
+        ? sessionData.labcodes
+        : sessionData?.labcode
+          ? Array.isArray(sessionData.labcode)
+              ? sessionData.labcode
+              : [sessionData.labcode]
+          : []
+
     // Check if session is already assigned
-    const hasDoctor = sessionData?.assignment?.doctor?.id
-    const hasLabTech = sessionData?.assignment?.labTesting?.id || sessionData?.labTesting?.id
-    const isAlreadyAssigned = sessionType === 'test' ? hasDoctor && hasLabTech : hasDoctor
+    const hasDoctor = labcodes.length > 0 && labcodes.every((item: any) => item.assignment?.doctor?.id)
+    const hasAnyLabTesting = assignments.some((item) => item.labTestingId !== null)
+    const isAlreadyAssigned = sessionType === 'test' ? hasDoctor && hasAnyLabTesting : hasDoctor
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -59,25 +75,46 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
     useEffect(() => {
         if (!opened) {
             setSelectedDoctor('')
-            setSelectedLabTech('')
+            setAssignments([])
             setError(null)
         } else {
-            // Pre-fill với thông tin hiện tại nếu có
-            if (hasDoctor) {
-                setSelectedDoctor(hasDoctor.toString())
-            }
-            if (hasLabTech) {
-                setSelectedLabTech(hasLabTech.toString())
+            // Initialize assignments from existing data
+            const initialAssignments: AssignmentItem[] = labcodes.map((labcodeItem: any) => ({
+                labcode: labcodeItem.labcode || labcodeItem.code || labcodeItem.name || '',
+                labTestingId: labcodeItem.assignment?.labTesting?.id || null
+            }))
+
+            // Only update assignments if they've actually changed
+            setAssignments((prev) => {
+                if (prev.length !== initialAssignments.length) return initialAssignments
+
+                const hasChanged = initialAssignments.some(
+                    (newItem, index) =>
+                        prev[index]?.labcode !== newItem.labcode || prev[index]?.labTestingId !== newItem.labTestingId
+                )
+
+                return hasChanged ? initialAssignments : prev
+            })
+
+            // Pre-fill doctor if exists (get from first labcode assignment)
+            const firstDoctorId = labcodes.length > 0 ? labcodes[0].assignment?.doctor?.id : null
+            if (firstDoctorId) {
+                setSelectedDoctor(firstDoctorId.toString())
             }
         }
-    }, [opened, hasDoctor, hasLabTech])
+    }, [opened, sessionData?.labcodes])
 
-    // Clear error when user makes changes
-    useEffect(() => {
+    const handleLabTestingChange = (labcode: string, labTestingId: string | null) => {
+        setAssignments((prev) =>
+            prev.map((item) =>
+                item.labcode === labcode ? { ...item, labTestingId: labTestingId ? Number(labTestingId) : null } : item
+            )
+        )
+        // Clear error when user makes changes
         if (error) {
             setError(null)
         }
-    }, [selectedDoctor, selectedLabTech])
+    }
 
     const handleSendFiles = async () => {
         setError(null)
@@ -88,15 +125,23 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
             return
         }
 
-        if (sessionType === 'test' && !selectedLabTech) {
-            setError('Vui lòng chọn kỹ thuật viên xét nghiệm')
-            return
+        if (sessionType === 'test') {
+            const missingLabTesting = assignments.some((item) => item.labTestingId === null)
+            if (missingLabTesting) {
+                setError('Vui lòng chọn kỹ thuật viên xét nghiệm cho tất cả labcode')
+                return
+            }
         }
 
         try {
             const assignData = {
                 doctorId: Number(selectedDoctor),
-                ...(sessionType === 'test' && selectedLabTech && { labTestingId: Number(selectedLabTech) })
+                assignment: assignments
+                    .filter((item) => sessionType !== 'test' || item.labTestingId !== null)
+                    .map((item) => ({
+                        labcode: item.labcode,
+                        labTestingId: item.labTestingId!
+                    }))
             }
 
             await assignSessionMutation.mutateAsync({
@@ -135,8 +180,11 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
     const isSending = assignSessionMutation.isPending
 
     // Get current assigned names for display
-    const currentDoctorName = sessionData?.assignment?.doctor?.name
-    const currentLabTechName = sessionData?.assignment?.labTesting?.name || sessionData?.labTesting?.name
+    const currentDoctorName = labcodes.length > 0 ? labcodes[0].assignment?.doctor?.name : null
+    const getCurrentLabTechName = (labcode: string) => {
+        const labcodeItem = labcodes.find((item: any) => item.labcode === labcode)
+        return labcodeItem?.assignment?.labTesting?.name
+    }
 
     return (
         <Modal
@@ -165,33 +213,6 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                     </Alert>
                 )}
 
-                {/* Already Assigned Status */}
-                {isAlreadyAssigned && (
-                    <Alert icon={<IconCheck size={16} />} color='green' variant='light'>
-                        <Stack gap='xs'>
-                            <Text size='sm' fw={500}>
-                                Yêu cầu đã được gửi cho:
-                            </Text>
-                            {currentDoctorName && (
-                                <Group gap='xs'>
-                                    <Badge color='blue' variant='light' size='sm'>
-                                        Bác sĩ
-                                    </Badge>
-                                    <Text size='sm'>{currentDoctorName}</Text>
-                                </Group>
-                            )}
-                            {sessionType === 'test' && currentLabTechName && (
-                                <Group gap='xs'>
-                                    <Badge color='orange' variant='light' size='sm'>
-                                        Kỹ thuật viên
-                                    </Badge>
-                                    <Text size='sm'>{currentLabTechName}</Text>
-                                </Group>
-                            )}
-                        </Stack>
-                    </Alert>
-                )}
-
                 {/* Session Type Info */}
                 <Alert
                     icon={sessionType === 'test' ? <IconMicroscope size={16} /> : <IconClipboardCheck size={16} />}
@@ -214,7 +235,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                 <div>
                     <Text size='sm' fw={500} mb='xs'>
                         Chọn bác sĩ <span style={{ color: 'red' }}>*</span>
-                        {hasDoctor && (
+                        {currentDoctorName && (
                             <Badge ml='xs' color='green' variant='light' size='xs'>
                                 Đã có
                             </Badge>
@@ -223,7 +244,13 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                     <Select
                         placeholder='Chọn bác sĩ...'
                         value={selectedDoctor}
-                        onChange={(value) => setSelectedDoctor(value || '')}
+                        onChange={(value) => {
+                            setSelectedDoctor(value || '')
+                            // Clear error when user makes changes
+                            if (error) {
+                                setError(null)
+                            }
+                        }}
                         data={doctorOptions}
                         searchable
                         nothingFoundMessage='Không tìm thấy bác sĩ'
@@ -238,30 +265,49 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                     )}
                 </div>
 
-                {/* Lab Technician Selection (only for test sessions) */}
-                {sessionType === 'test' && (
+                {/* Lab Technician Selection per Labcode (only for test sessions) */}
+                {sessionType === 'test' && assignments.length > 0 && (
                     <>
                         <Divider />
                         <div>
-                            <Text size='sm' fw={500} mb='xs'>
-                                Chọn kỹ thuật viên xét nghiệm <span style={{ color: 'red' }}>*</span>
-                                {hasLabTech && (
-                                    <Badge ml='xs' color='green' variant='light' size='xs'>
-                                        Đã có
-                                    </Badge>
-                                )}
+                            <Text size='sm' fw={500} mb='md'>
+                                Phân công kỹ thuật viên xét nghiệm <span style={{ color: 'red' }}>*</span>
                             </Text>
-                            <Select
-                                placeholder='Chọn kỹ thuật viên...'
-                                value={selectedLabTech}
-                                onChange={(value) => setSelectedLabTech(value || '')}
-                                data={labTechOptions}
-                                searchable
-                                nothingFoundMessage='Không tìm thấy kỹ thuật viên'
-                                size='md'
-                                disabled={isLoading}
-                                error={error && sessionType === 'test' && !selectedLabTech ? true : false}
-                            />
+                            <Stack gap='md'>
+                                {assignments.map((assignment) => {
+                                    const currentLabTechName = getCurrentLabTechName(assignment.labcode)
+                                    return (
+                                        <Box
+                                            key={assignment.labcode}
+                                            p='sm'
+                                            bg='gray.0'
+                                            style={{ borderRadius: '6px' }}
+                                        >
+                                            <Group justify='space-between' mb='xs'>
+                                                <Text size='sm' fw={500}>
+                                                    Labcode: {assignment.labcode}
+                                                </Text>
+                                                {currentLabTechName && (
+                                                    <Badge color='green' variant='light' size='xs'>
+                                                        Đã có
+                                                    </Badge>
+                                                )}
+                                            </Group>
+                                            <Select
+                                                placeholder='Chọn kỹ thuật viên...'
+                                                value={assignment.labTestingId?.toString() || ''}
+                                                onChange={(value) => handleLabTestingChange(assignment.labcode, value)}
+                                                data={labTechOptions}
+                                                searchable
+                                                nothingFoundMessage='Không tìm thấy kỹ thuật viên'
+                                                size='md'
+                                                disabled={isLoading}
+                                                error={error && assignment.labTestingId === null ? true : false}
+                                            />
+                                        </Box>
+                                    )
+                                })}
+                            </Stack>
                             {!isLoading && labTechOptions.length === 0 && (
                                 <Text size='xs' c='dimmed' mt='xs'>
                                     Không có kỹ thuật viên xét nghiệm nào trong hệ thống
