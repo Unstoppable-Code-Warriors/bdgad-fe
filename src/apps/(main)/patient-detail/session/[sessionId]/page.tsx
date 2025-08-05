@@ -176,6 +176,7 @@ const SessionDetailPage = () => {
     const dropzoneRef = useRef<any>(null)
 
     const { data: sessionData, isLoading, error } = usePatientLabSessionDetail(sessionId!)
+    console.log('Session Data:', sessionData)
 
     const downloadMutation = useDownloadPatientFile()
     const deletePatientFileMutation = useDeletePatientFile()
@@ -479,8 +480,9 @@ const SessionDetailPage = () => {
                     {sessionData?.patientFiles &&
                         sessionData.patientFiles.length > 0 &&
                         (() => {
-                            const hasDoctor = sessionData?.assignment?.doctor?.id
-                            const hasLabTech = sessionData?.assignment?.labTesting?.id || sessionData?.labTesting?.id
+                            const hasDoctor = sessionData?.labcode?.assignment?.doctor?.id
+                            const hasLabTech =
+                                sessionData?.labcode?.assignment?.labTesting?.id || sessionData?.labTesting?.id
                             const isAlreadyAssigned =
                                 sessionData.typeLabSession === 'test' ? hasDoctor && hasLabTech : hasDoctor
 

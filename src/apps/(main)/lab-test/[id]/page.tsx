@@ -31,13 +31,14 @@ const LabTestDetailPage = () => {
     const navigate = useNavigate()
     const { data, isLoading, error } = useLabTestSessionDetail(id)
     const { data: analysisTechniciansData, isLoading: isLoadingTechnicians } = useUsersByRole(Role.ANALYSIS_TECHNICIAN)
-    console.log('LabTestDetailPage data:', data)
     const [r1File, setR1File] = useState<File | null>(null)
     const [r2File, setR2File] = useState<File | null>(null)
     const sendToAnalysisMutation = useSendToAnalysis()
     const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(
         data?.analysis?.id ? String(data.analysis.id) : null
     )
+
+    console.log('Lua chon ktv phan tich:', selectedAnalysisId)
 
     // Get analysis technicians from the hook
     const analysisTechnicians = analysisTechniciansData?.data?.users || []
@@ -75,6 +76,7 @@ const LabTestDetailPage = () => {
 
         // Use selected analysis ID
         const analysisId = selectedAnalysisId ? parseInt(selectedAnalysisId, 10) : undefined
+        console.log('Sending to analysis with ID:', analysisId)
 
         if (!analysisId) {
             notifications.show({
