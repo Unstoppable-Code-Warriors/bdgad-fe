@@ -4,18 +4,52 @@ import { Stack, Text, Group, rem, Card } from '@mantine/core'
 import { IconUpload, IconX, IconFile, IconAlertCircle } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { useState } from 'react'
+import type { CategorizedSubmittedFile } from '@/types/categorized-upload'
 
 interface FileUploadZoneProps {
     onDrop: (files: FileWithPath[]) => void
     onReject?: (files: FileRejection[]) => void
+    existingFiles?: CategorizedSubmittedFile[]
 }
 
-const FileUploadZone = ({ onDrop, onReject }: FileUploadZoneProps) => {
+const FileUploadZone = ({ onDrop, onReject, existingFiles = [] }: FileUploadZoneProps) => {
     const [, setError] = useState<string | null>(null)
 
     const handleFileDrop = (files: FileWithPath[]) => {
         setError(null)
-        onDrop(files)
+
+        // Check for duplicate filenames
+        const existingFileNames = existingFiles.map((file) => file.file.name)
+        const duplicateFiles: string[] = []
+        const validFiles: FileWithPath[] = []
+
+        files.forEach((file) => {
+            if (existingFileNames.includes(file.name)) {
+                duplicateFiles.push(file.name)
+            } else {
+                validFiles.push(file)
+            }
+        })
+
+        // Show notification for duplicate files
+        if (duplicateFiles.length > 0) {
+            const duplicateMessage =
+                duplicateFiles.length === 1
+                    ? `File "${duplicateFiles[0]}" đã tồn tại và sẽ không được thêm vào`
+                    : `Các file sau đã tồn tại và sẽ không được thêm vào: ${duplicateFiles.map((name) => `"${name}"`).join(', ')}`
+
+            notifications.show({
+                title: 'File trùng lặp',
+                message: duplicateMessage,
+                color: 'orange',
+                autoClose: 5000
+            })
+        }
+
+        // Only proceed with valid files (non-duplicates)
+        if (validFiles.length > 0) {
+            onDrop(validFiles)
+        }
     }
 
     const handleFileReject = (rejectedFiles: FileRejection[]) => {

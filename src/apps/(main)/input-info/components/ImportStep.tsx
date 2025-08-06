@@ -25,8 +25,7 @@ const ImportStep = ({
 }: ImportStepProps) => {
     return (
         <Stack gap='lg' mt='xl'>
-
-            <FileUploadZone onDrop={onFileDrop} />
+            <FileUploadZone onDrop={onFileDrop} existingFiles={submittedFiles} />
 
             <SubmittedFilesTable
                 files={submittedFiles}
