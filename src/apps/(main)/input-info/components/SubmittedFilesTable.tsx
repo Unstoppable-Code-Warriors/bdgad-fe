@@ -172,6 +172,7 @@ const SubmittedFilesTable = ({ files, ocrProgress, onStartOCR, onViewOCR, onDele
                                                 onClick={() => handleDownload(submittedFile.file)}
                                                 title='Tải xuống file'
                                                 size='sm'
+                                                disabled={files.some((file) => file.ocrStatus === 'processing')}
                                             >
                                                 <IconDownload size='1rem' />
                                             </ActionIcon>
@@ -182,6 +183,7 @@ const SubmittedFilesTable = ({ files, ocrProgress, onStartOCR, onViewOCR, onDele
                                                 onClick={() => onDelete(submittedFile.id)}
                                                 title='Xóa file'
                                                 size='sm'
+                                                disabled={files.some((file) => file.ocrStatus === 'processing')}
                                             >
                                                 <IconTrash size='1rem' />
                                             </ActionIcon>

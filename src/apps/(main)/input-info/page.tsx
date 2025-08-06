@@ -29,6 +29,7 @@ const InputInfoPage = () => {
     const [submittedFiles, setSubmittedFiles] = useState<CategorizedSubmittedFile[]>([])
     const [isSaving, setIsSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [ocrError, setOcrError] = useState<string | null>(null)
     const [ocrDrawerOpen, setOcrDrawerOpen] = useState(false)
     const [selectedFileForOCR, setSelectedFileForOCR] = useState<CategorizedSubmittedFile | null>(null)
     const [ocrProgress, setOcrProgress] = useState<{ [fileId: string]: number }>({})
@@ -436,8 +437,18 @@ const InputInfoPage = () => {
 
     // Function to check if any file is currently processing OCR
     const isAnyFileProcessingOCR = () => {
-        return submittedFiles.some(file => file.ocrStatus === 'processing')
+        return submittedFiles.some((file) => file.ocrStatus === 'processing')
     }
+
+    // Function to check and update OCR error based on OCR results
+    useEffect(() => {
+        const filesWithOCR = submittedFiles.filter((file) => file.ocrResult && file.ocrStatus === 'success')
+
+        if (filesWithOCR.length > 0) {
+            // If there are files with OCR results, clear the OCR error
+            setOcrError(null)
+        }
+    }, [submittedFiles])
 
     const handleSaveFiles = async () => {
         if (submittedFiles.length === 0) {
@@ -448,6 +459,18 @@ const InputInfoPage = () => {
             })
             return
         }
+
+        // Check if at least one file has OCR result
+        const filesWithOCR = submittedFiles.filter((file) => file.ocrResult && file.ocrStatus === 'success')
+
+        if (filesWithOCR.length === 0) {
+            console.error('Error log: Must perform at least one OCR result to generate labcode')
+            setOcrError('Phải thực hiện ít nhất một OCR để tạo mã xét nghiệm labcode')
+            return
+        }
+
+        // Clear OCR error if validation passes
+        setOcrError(null)
 
         // Validate submitted files and categories - ensure data integrity
         if (submittedFiles.length === 0) {
@@ -685,10 +708,7 @@ const InputInfoPage = () => {
                         </Group>
 
                         {/* Continue Button */}
-                        <SubmitButton 
-                            fileCount={selectedFiles.length} 
-                            onSubmit={handleSubmitFiles} 
-                        />
+                        <SubmitButton fileCount={selectedFiles.length} onSubmit={handleSubmitFiles} />
                     </Paper>
                 )}
 
@@ -702,6 +722,13 @@ const InputInfoPage = () => {
                                 </Text>
                             </Alert>
                         )}
+                        {ocrError && (
+                            <Alert variant='light' color='red' mb='md'>
+                                <Text size='sm'>
+                                    <strong>Lỗi:</strong> {ocrError}
+                                </Text>
+                            </Alert>
+                        )}
                         <Group justify='right' mb='md'>
                             <Button
                                 size='lg'
@@ -712,9 +739,11 @@ const InputInfoPage = () => {
                                 color={!isAnyFileProcessingOCR() ? 'green' : 'gray'}
                                 style={{ minWidth: 200 }}
                             >
-                                {isSaving ? 'Đang lưu...' : 
-                                 isAnyFileProcessingOCR() ? 'Đang xử lý OCR...' :
-                                 `Lưu ${submittedFiles.length} file`}
+                                {isSaving
+                                    ? 'Đang lưu...'
+                                    : isAnyFileProcessingOCR()
+                                      ? 'Đang xử lý OCR...'
+                                      : `Lưu ${submittedFiles.length} file`}
                             </Button>
                         </Group>
                     </Paper>

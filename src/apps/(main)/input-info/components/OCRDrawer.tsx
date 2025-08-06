@@ -108,27 +108,190 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
     const handleFormSubmit = () => {
         const formData = form.values
 
-        // Convert specimen_type radio value back to boolean fields for backward compatibility
-        const processedFormData = {
-            ...formData,
-            biopsy_tissue_ffpe: formData.specimen_type === 'biopsy_tissue_ffpe',
-            blood_stl_ctdna: formData.specimen_type === 'blood_stl_ctdna',
-            pleural_peritoneal_fluid: formData.specimen_type === 'pleural_peritoneal_fluid'
-        }
-
-        console.log('Submitting form data:', processedFormData)
+        console.log('Submitting form data:', formData)
 
         // Get the original OCR result data
         const originalData = ocrResult?.ocrResult || {}
 
-        // Create updated OCR result structure that extends the original
+        // Create a deep copy of the original data to avoid mutations
+        const updatedData = JSON.parse(JSON.stringify(originalData))
+
+        // Map form fields to their corresponding OCR result fields
+        // Basic fields that map directly
+        if (formData.full_name !== undefined) updatedData.full_name = formData.full_name
+        if (formData.gender !== undefined) updatedData.gender = formData.gender
+        if (formData.clinic !== undefined) updatedData.clinic = formData.clinic
+        if (formData.doctor !== undefined) updatedData.doctor = formData.doctor
+        if (formData.doctor_phone !== undefined) updatedData.doctor_phone = formData.doctor_phone
+        if (formData.phone !== undefined) updatedData.phone = formData.phone
+        if (formData.email !== undefined) updatedData.email = formData.email
+        if (formData.address !== undefined) updatedData.address = formData.address
+        if (formData.test_code !== undefined) updatedData['Test code'] = formData.test_code
+
+        // Date fields - convert to ISO string if valid
+        if (formData.date_of_birth && !isNaN(formData.date_of_birth.getTime())) {
+            updatedData.date_of_birth = formData.date_of_birth.toISOString()
+        }
+        if (formData.sample_collection_date && !isNaN(formData.sample_collection_date.getTime())) {
+            updatedData.sample_collection_date = formData.sample_collection_date.toISOString()
+        }
+
+        // Sample collection time
+        if (formData.sample_collection_time !== undefined) {
+            updatedData.sample_collection_time = formData.sample_collection_time
+        }
+
+        // Smoking field - convert boolean to string for OCR format
+        if (formData.smoking !== undefined) {
+            updatedData.smoking = formData.smoking ? 'yes' : 'no'
+        }
+
+        // Update nested structures based on form type
+        if (selectedFormType === FormType.GENE_MUTATION && updatedData.gene_mutation_testing) {
+            // Update clinical information
+            if (updatedData.gene_mutation_testing.clinical_information) {
+                const clinicalInfo = updatedData.gene_mutation_testing.clinical_information
+                if (formData.clinical_diagnosis !== undefined)
+                    clinicalInfo.clinical_diagnosis = formData.clinical_diagnosis
+                if (formData.disease_stage !== undefined) clinicalInfo.disease_stage = formData.disease_stage
+                if (formData.pathology_result !== undefined) clinicalInfo.pathology_result = formData.pathology_result
+                if (formData.tumor_location_size_differentiation !== undefined)
+                    clinicalInfo.tumor_location_size_differentiation = formData.tumor_location_size_differentiation
+                if (formData.time_of_detection !== undefined)
+                    clinicalInfo.time_of_detection = formData.time_of_detection
+                if (formData.treatment_received !== undefined)
+                    clinicalInfo.treatment_received = formData.treatment_received
+            }
+
+            // Update specimen information
+            if (updatedData.gene_mutation_testing.specimen_and_test_information) {
+                const specimenInfo = updatedData.gene_mutation_testing.specimen_and_test_information
+                if (formData.gpb_code !== undefined) specimenInfo.gpb_code = formData.gpb_code
+
+                // Update specimen type based on form selection
+                if (formData.specimen_type && specimenInfo.specimen_type) {
+                    specimenInfo.specimen_type.biopsy_tissue_ffpe = formData.specimen_type === 'biopsy_tissue_ffpe'
+                    specimenInfo.specimen_type.blood_stl_ctdna = formData.specimen_type === 'blood_stl_ctdna'
+                    specimenInfo.specimen_type.pleural_peritoneal_fluid =
+                        formData.specimen_type === 'pleural_peritoneal_fluid'
+                }
+
+                // Update cancer panel selection
+                if (formData.cancer_panel && specimenInfo.cancer_type_and_test_panel_please_tick_one) {
+                    const panels = specimenInfo.cancer_type_and_test_panel_please_tick_one
+
+                    // Create mapping from form values to OCR keys
+                    const panelMapping: { [key: string]: string } = {
+                        Onco81: 'onco_81',
+                        Onco500: 'onco_500_plus',
+                        lung_cancer: 'lung_cancer',
+                        ovarian_cancer: 'ovarian_cancer',
+                        colorectal_cancer: 'colorectal_cancer',
+                        prostate_cancer: 'prostate_cancer',
+                        breast_cancer: 'breast_cancer',
+                        cervical_cancer: 'cervical_cancer',
+                        gastric_cancer: 'gastric_cancer',
+                        pancreatic_cancer: 'pancreatic_cancer',
+                        thyroid_cancer: 'thyroid_cancer',
+                        gastrointestinal_stromal_tumor_gist: 'gastrointestinal_stromal_tumor_gist'
+                    }
+
+                    // Reset all panels to false first
+                    Object.keys(panels).forEach((key) => {
+                        if (panels[key] && typeof panels[key] === 'object' && 'is_selected' in panels[key]) {
+                            panels[key].is_selected = false
+                        }
+                    })
+
+                    // Set the selected panel to true
+                    const ocrKey = panelMapping[formData.cancer_panel]
+                    if (ocrKey && panels[ocrKey]) {
+                        panels[ocrKey].is_selected = true
+                    }
+                }
+            }
+        }
+
+        if (selectedFormType === FormType.PRENATAL_TESTING && updatedData.non_invasive_prenatal_testing) {
+            // Update clinical information
+            if (updatedData.non_invasive_prenatal_testing.clinical_information) {
+                const clinicalInfo = updatedData.non_invasive_prenatal_testing.clinical_information
+
+                // Update pregnancy type
+                if (formData.single_pregnancy !== undefined && clinicalInfo.single_pregnancy) {
+                    clinicalInfo.single_pregnancy.yes = formData.single_pregnancy
+                    clinicalInfo.single_pregnancy.no = !formData.single_pregnancy
+                }
+                if (
+                    formData.twin_pregnancy_minor_complication !== undefined &&
+                    clinicalInfo.twin_pregnancy_minor_complication
+                ) {
+                    clinicalInfo.twin_pregnancy_minor_complication.yes = formData.twin_pregnancy_minor_complication
+                    clinicalInfo.twin_pregnancy_minor_complication.no = !formData.twin_pregnancy_minor_complication
+                }
+                if (formData.ivf_pregnancy !== undefined && clinicalInfo.ivf_pregnancy) {
+                    clinicalInfo.ivf_pregnancy.yes = formData.ivf_pregnancy
+                    clinicalInfo.ivf_pregnancy.no = !formData.ivf_pregnancy
+                }
+
+                // Update other clinical fields
+                if (formData.gestational_age_weeks !== undefined)
+                    clinicalInfo.gestational_age_weeks = formData.gestational_age_weeks.toString()
+                if (formData.maternal_height !== undefined)
+                    clinicalInfo.maternal_height = formData.maternal_height.toString()
+                if (formData.maternal_weight !== undefined)
+                    clinicalInfo.maternal_weight = formData.maternal_weight.toString()
+                if (formData.crown_rump_length_crl !== undefined)
+                    clinicalInfo.crown_rump_length_crl = formData.crown_rump_length_crl
+                if (formData.nuchal_translucency !== undefined)
+                    clinicalInfo.nuchal_translucency = formData.nuchal_translucency
+                if (formData.prenatal_screening_risk_nt !== undefined)
+                    clinicalInfo.prenatal_screening_risk_nt = formData.prenatal_screening_risk_nt
+
+                if (formData.ultrasound_date && !isNaN(formData.ultrasound_date.getTime())) {
+                    clinicalInfo.ultrasound_date = formData.ultrasound_date.toISOString()
+                }
+            }
+
+            // Update NIPT package selection
+            if (formData.nipt_package && updatedData.non_invasive_prenatal_testing.test_options) {
+                updatedData.non_invasive_prenatal_testing.test_options =
+                    updatedData.non_invasive_prenatal_testing.test_options.map((option: any) => ({
+                        ...option,
+                        is_selected: option.package_name === formData.nipt_package
+                    }))
+            }
+
+            // Update support package selection
+            if (formData.support_package && updatedData.additional_selection_notes) {
+                const supportNotes = updatedData.additional_selection_notes
+                supportNotes.torch_fetal_infection_risk_survey =
+                    formData.support_package === 'torch_fetal_infection_risk_survey'
+                supportNotes.carrier_18_common_recessive_hereditary_disease_genes_in_vietnamese_thalassemia_hypo_hyper_thyroidism_g6pd_deficiency_pompe_wilson_cf =
+                    formData.support_package === 'carrier_18_genes'
+                supportNotes.no_support_package_selected = formData.support_package === 'no_support_package'
+            }
+        }
+
+        if (selectedFormType === FormType.HEREDITARY_CANCER && updatedData.hereditary_cancer) {
+            // Update cancer screening package selection
+            if (formData.cancer_screening_package) {
+                const cancerScreening = updatedData.hereditary_cancer
+                cancerScreening.breast_cancer_bcare.is_selected =
+                    formData.cancer_screening_package === 'breast_cancer_bcare'
+                cancerScreening['15_hereditary_cancer_types_more_care'].is_selected =
+                    formData.cancer_screening_package === '15_hereditary_cancer_types_more_care'
+                cancerScreening['20_hereditary_cancer_types_vip_care'].is_selected =
+                    formData.cancer_screening_package === '20_hereditary_cancer_types_vip_care'
+            }
+        }
+
+        // Add timestamp for tracking changes
+        updatedData.lastEditedAt = new Date().toISOString()
+
         const updatedOCRResult: CommonOCRRes<EditedOCRRes> = {
             message: ocrResult?.message || 'Medical Test Requisition updated via manual edit',
-            ocrResult: {
-                ...originalData,
-                editedData: processedFormData,
-                lastEditedAt: new Date().toISOString()
-            }
+            ocrResult: updatedData as unknown as EditedOCRRes
         }
 
         console.log('Submitting updated OCR result:', updatedOCRResult)
@@ -153,7 +316,7 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                         <Stack gap='sm' h='100%'>
                             <Group justify='space-between'>
                                 <Text fw={600} size='lg'>
-                                    Ảnh 
+                                    Ảnh
                                 </Text>
                                 <Group gap='xs'>
                                     {ocrResult && (

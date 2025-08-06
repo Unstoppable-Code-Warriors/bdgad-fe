@@ -237,6 +237,38 @@ export const mapOCRToFormValues = (ocrResult: CommonOCRRes<EditedOCRRes> | undef
             geneMutationInfo.pleural_peritoneal_fluid = specimenInfo.specimen_type.pleural_peritoneal_fluid || false
         }
         geneMutationInfo.gpb_code = specimenInfo.gpb_code || ''
+
+        // Extract cancer panel selection
+        if (specimenInfo.cancer_type_and_test_panel_please_tick_one) {
+            const panels = specimenInfo.cancer_type_and_test_panel_please_tick_one
+
+            // Create reverse mapping from OCR keys to form values
+            const ocrToFormMapping: { [key: string]: string } = {
+                onco_81: 'Onco81',
+                onco_500_plus: 'Onco500',
+                lung_cancer: 'lung_cancer',
+                ovarian_cancer: 'ovarian_cancer',
+                colorectal_cancer: 'colorectal_cancer',
+                prostate_cancer: 'prostate_cancer',
+                breast_cancer: 'breast_cancer',
+                cervical_cancer: 'cervical_cancer',
+                gastric_cancer: 'gastric_cancer',
+                pancreatic_cancer: 'pancreatic_cancer',
+                thyroid_cancer: 'thyroid_cancer',
+                gastrointestinal_stromal_tumor_gist: 'gastrointestinal_stromal_tumor_gist'
+            }
+
+            // Find the selected panel
+            for (const [ocrKey, panel] of Object.entries(panels)) {
+                if (panel && typeof panel === 'object' && 'is_selected' in panel && panel.is_selected) {
+                    const formValue = ocrToFormMapping[ocrKey]
+                    if (formValue) {
+                        geneMutationInfo.cancer_panel = formValue
+                        break
+                    }
+                }
+            }
+        }
     }
 
     // Extract prenatal testing info if available
@@ -255,10 +287,54 @@ export const mapOCRToFormValues = (ocrResult: CommonOCRRes<EditedOCRRes> | undef
         prenatalInfo.prenatal_screening_risk_nt = clinicalInfo.prenatal_screening_risk_nt || ''
     }
 
+    // Extract NIPT package selection from test_options
+    if (
+        data.non_invasive_prenatal_testing?.test_options &&
+        Array.isArray(data.non_invasive_prenatal_testing.test_options)
+    ) {
+        const testOptions = data.non_invasive_prenatal_testing.test_options
+
+        // Find the selected NIPT package
+        const selectedOption = testOptions.find(
+            (option) => option && typeof option === 'object' && 'is_selected' in option && option.is_selected
+        )
+        if (selectedOption && 'package_name' in selectedOption) {
+            prenatalInfo.nipt_package = selectedOption.package_name
+        }
+    }
+
+    // Extract support package selection
+    if (data.additional_selection_notes) {
+        const supportNotes = data.additional_selection_notes
+        if (supportNotes.torch_fetal_infection_risk_survey) {
+            prenatalInfo.support_package = 'torch'
+        } else if (
+            supportNotes.carrier_18_common_recessive_hereditary_disease_genes_in_vietnamese_thalassemia_hypo_hyper_thyroidism_g6pd_deficiency_pompe_wilson_cf
+        ) {
+            prenatalInfo.support_package = 'carrier'
+        } else if (supportNotes.no_support_package_selected) {
+            prenatalInfo.support_package = 'no_support'
+        }
+    }
+
+    // Extract hereditary cancer screening package selection
+    const hereditaryInfo: Partial<FormValues> = {}
+    if (data.hereditary_cancer) {
+        const cancerScreening = data.hereditary_cancer
+        if (cancerScreening.breast_cancer_bcare?.is_selected) {
+            hereditaryInfo.cancer_screening_package = 'breast_cancer_bcare'
+        } else if (cancerScreening['15_hereditary_cancer_types_more_care']?.is_selected) {
+            hereditaryInfo.cancer_screening_package = '15_hereditary_cancer_types_more_care'
+        } else if (cancerScreening['20_hereditary_cancer_types_vip_care']?.is_selected) {
+            hereditaryInfo.cancer_screening_package = '20_hereditary_cancer_types_vip_care'
+        }
+    }
+
     return {
         ...defaultValues,
         ...basicInfo,
         ...geneMutationInfo,
-        ...prenatalInfo
+        ...prenatalInfo,
+        ...hereditaryInfo
     }
 }
