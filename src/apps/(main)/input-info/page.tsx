@@ -581,7 +581,7 @@ const InputInfoPage = () => {
                 color: 'green'
             })
 
-            // navigate(`/patient-detail/${patientId}`)
+            navigate(`/patient-detail/${patientId}`)
         } catch (error) {
             console.error('Upload error:', error)
 
