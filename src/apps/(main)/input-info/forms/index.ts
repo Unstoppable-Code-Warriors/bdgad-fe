@@ -188,16 +188,39 @@ export const mapOCRToFormValues = (ocrResult: CommonOCRRes<EditedOCRRes> | undef
         return data.editedData
     }
 
+    // Helper function to safely parse dates
+    const safeDateParse = (dateValue: any): Date | null => {
+        if (!dateValue) return null
+
+        // If it's already a Date object, check if it's valid
+        if (dateValue instanceof Date) {
+            return isNaN(dateValue.getTime()) ? null : dateValue
+        }
+
+        // If it's a string, try to parse it
+        if (typeof dateValue === 'string') {
+            // Skip obviously invalid date strings
+            if (dateValue.toLowerCase().includes('invalid') || dateValue === 'Invalid Date {}') {
+                return null
+            }
+
+            const parsed = new Date(dateValue)
+            return isNaN(parsed.getTime()) ? null : parsed
+        }
+
+        return null
+    }
+
     // Extract basic information
     const basicInfo: Partial<FormValues> = {
         form_type: data.document_name || '',
         full_name: data.full_name || '',
         clinic: data.clinic || '',
-        date_of_birth: data.date_of_birth ? new Date(data.date_of_birth) : null,
+        date_of_birth: safeDateParse(data.date_of_birth),
         gender: data.gender || '',
         doctor: data.doctor || '',
         doctor_phone: data.doctor_phone || '',
-        sample_collection_date: data.sample_collection_date ? new Date(data.sample_collection_date) : null,
+        sample_collection_date: safeDateParse(data.sample_collection_date),
         sample_collection_time: data.sample_collection_time || '',
         phone: data.phone || '',
         email: data.email || '',
@@ -279,7 +302,7 @@ export const mapOCRToFormValues = (ocrResult: CommonOCRRes<EditedOCRRes> | undef
         prenatalInfo.twin_pregnancy_minor_complication = clinicalInfo.twin_pregnancy_minor_complication?.yes || false
         prenatalInfo.ivf_pregnancy = clinicalInfo.ivf_pregnancy?.yes || false
         prenatalInfo.gestational_age_weeks = parseInt(clinicalInfo.gestational_age_weeks || '0') || 0
-        prenatalInfo.ultrasound_date = clinicalInfo.ultrasound_date ? new Date(clinicalInfo.ultrasound_date) : null
+        prenatalInfo.ultrasound_date = safeDateParse(clinicalInfo.ultrasound_date)
         prenatalInfo.crown_rump_length_crl = clinicalInfo.crown_rump_length_crl || ''
         prenatalInfo.nuchal_translucency = clinicalInfo.nuchal_translucency || ''
         prenatalInfo.maternal_height = parseFloat(clinicalInfo.maternal_height || '0') || 0
