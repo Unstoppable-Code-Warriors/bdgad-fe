@@ -94,7 +94,7 @@ export const FILE_CATEGORY_OPTIONS = [
     },
     {
         value: FileCategory.GENERAL,
-        label: 'Tài liệu chung',
+        label: 'Tài liệu khác',
         description: 'Tài liệu không yêu cầu xử lý OCR đặc biệt',
         priority: 5,
         isSpecial: false,

@@ -111,9 +111,6 @@ export const FileCategorizationList = ({
                 <Text fw={600} size='lg'>
                     Phân loại file ({files.length})
                 </Text>
-                <Text size='sm' c='dimmed'>
-                    Cần ít nhất 1 file đặc biệt (không phải file chung)
-                </Text>
             </Group>
 
             {files.map((file, index) => (

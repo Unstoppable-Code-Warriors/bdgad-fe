@@ -480,9 +480,9 @@ const SessionDetailPage = () => {
                     {sessionData?.patientFiles &&
                         sessionData.patientFiles.length > 0 &&
                         (() => {
-                            const hasDoctor = sessionData?.labcode?.assignment?.doctor?.id
+                            const hasDoctor = sessionData?.labcodes?.[0]?.assignment?.doctor?.id
                             const hasLabTech =
-                                sessionData?.labcode?.assignment?.labTesting?.id || sessionData?.labTesting?.id
+                                sessionData?.labcodes?.[0]?.assignment?.labTesting?.id || sessionData?.labTesting?.id
                             const isAlreadyAssigned =
                                 sessionData.typeLabSession === 'test' ? hasDoctor && hasLabTech : hasDoctor
 

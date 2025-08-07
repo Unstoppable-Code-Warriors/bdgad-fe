@@ -741,7 +741,7 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                             {/* Action Buttons */}
                             <Group justify='flex-end' mt='auto'>
                                 <Button variant='light' onClick={onClose} disabled={file.ocrStatus === 'processing'}>
-                                    Cancel
+                                    Hủy
                                 </Button>
                                 <Button
                                     type='submit'
@@ -750,7 +750,7 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                     disabled={!ocrResult || file.ocrStatus === 'processing'}
                                     loading={file.ocrStatus === 'processing'}
                                 >
-                                    {file.ocrStatus === 'processing' ? 'Đang xử lý...' : 'Save Changes'}
+                                    {file.ocrStatus === 'processing' ? 'Đang xử lý...' : 'Lưu thay đổi'}
                                 </Button>
                             </Group>
                         </Stack>

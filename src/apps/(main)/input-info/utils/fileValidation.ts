@@ -75,7 +75,7 @@ export const validateCategorizedFiles = (
     })
     
     if (!hasSpecialFile && !hasSubmittedSpecialFiles) {
-        globalErrors.push('Cần ít nhất một file đặc biệt (không phải file chung)')
+        globalErrors.push('Cần ít nhất phiếu chỉ định (sàng lọc tiền sinh, ung thư di truyền, đột biến gen)')
     }
 
     // Check for required categories (if specified)
@@ -88,7 +88,7 @@ export const validateCategorizedFiles = (
     }).length
     
     const summary = isValid
-        ? `✓ Hợp lệ: ${files.length} file mới${submittedFiles.length > 0 ? ` (tổng: ${totalFiles} file, ${totalSpecialFiles} file đặc biệt)` : `, ${specialCategories.length} file đặc biệt`}`
+        ? `✓ Hợp lệ: ${files.length} file mới${submittedFiles.length > 0 ? ` (tổng: ${totalFiles} file, ${totalSpecialFiles} phiếu chỉ định)` : `, ${specialCategories.length} phiếu chỉ định`}`
         : `✗ Có ${Object.keys(errors).length + globalErrors.length} lỗi cần khắc phục`
 
     return {

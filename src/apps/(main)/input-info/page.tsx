@@ -19,8 +19,6 @@ import {
 import { validateCategorizedFiles, generateDefaultFileCategories } from './utils/fileValidation'
 import ImportStep from './components/ImportStep'
 import OCRDrawer from './components/OCRDrawer'
-import { FileCategorizationList } from './components/FileCategorizationList'
-import SubmitButton from './components/SubmitButton'
 
 const InputInfoPage = () => {
     const [typeLabSession, setTypeLabSession] = useState<string>('test')
@@ -461,13 +459,13 @@ const InputInfoPage = () => {
         }
 
         // Check if at least one file has OCR result
-        const filesWithOCR = submittedFiles.filter((file) => file.ocrResult && file.ocrStatus === 'success')
+        //const filesWithOCR = submittedFiles.filter((file) => file.ocrResult && file.ocrStatus === 'success')
 
-        if (filesWithOCR.length === 0) {
-            console.error('Error log: Must perform at least one OCR result to generate labcode')
-            setOcrError('Phải thực hiện ít nhất một OCR để tạo mã xét nghiệm labcode')
-            return
-        }
+        // if (filesWithOCR.length === 0) {
+        //     console.error('Error log: Must perform at least one OCR result to generate labcode')
+        //     setOcrError('Phải thực hiện ít nhất một OCR để tạo mã xét nghiệm labcode')
+        //     return
+        // }
 
         // Clear OCR error if validation passes
         setOcrError(null)
@@ -668,49 +666,20 @@ const InputInfoPage = () => {
 
                 {/* File Import and Categorization Section */}
                 <ImportStep
+                    selectedFiles={selectedFiles}
+                    fileCategories={fileCategories}
                     submittedFiles={submittedFiles}
                     error={error}
                     ocrProgress={ocrProgress}
+                    validationResult={validationResult}
                     onFileDrop={handleFileDrop}
+                    onCategoryChange={handleCategoryChange}
+                    onRemoveFile={handleRemoveFile}
+                    onSubmitFiles={handleSubmitFiles}
                     onStartOCR={handleOCRClick}
                     onViewOCR={handleViewOCR}
                     onDeleteSubmittedFile={handleDeleteSubmittedFile}
                 />
-
-                {/* File Categorization Step */}
-                {selectedFiles.length > 0 && (
-                    <Paper p='lg' withBorder mt='md'>
-                        <FileCategorizationList
-                            files={selectedFiles}
-                            fileCategories={fileCategories}
-                            validationErrors={validationResult.errors}
-                            onCategoryChange={handleCategoryChange}
-                            onRemove={handleRemoveFile}
-                        />
-
-                        {/* Validation Summary */}
-                        {validationResult.globalErrors.length > 0 && (
-                            <Alert variant='light' color='red' mt='md'>
-                                <Stack gap='xs'>
-                                    {validationResult.globalErrors.map((error, index) => (
-                                        <Text key={index} size='sm'>
-                                            {error}
-                                        </Text>
-                                    ))}
-                                </Stack>
-                            </Alert>
-                        )}
-
-                        <Group justify='center' mt='md'>
-                            <Text size='sm' c={validationResult.isValid ? 'green' : 'red'}>
-                                {validationResult.summary}
-                            </Text>
-                        </Group>
-
-                        {/* Continue Button */}
-                        <SubmitButton fileCount={selectedFiles.length} onSubmit={handleSubmitFiles} />
-                    </Paper>
-                )}
 
                 {/* Save Files Button */}
                 {submittedFiles.length > 0 && (
