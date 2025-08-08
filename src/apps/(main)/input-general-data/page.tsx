@@ -7,7 +7,7 @@ import FileStatistics from './components/FileStatistics'
 import CategoryCard from './components/CategoryCard'
 import CreateCategoryModal from './components/CreateCategoryModal'
 import type { CategoryGeneralFile } from '@/types/general-file'
-import { useCategoryGeneralFiles } from '@/services/hook/staff-category-general-files.hook'
+import { useCategoryGeneralFiles, useSendGeneralFilesToEmr } from '@/services/hook/staff-category-general-files.hook'
 
 const InputGeneralDataPage = () => {
     const [createCategoryModalOpened, setCreateCategoryModalOpened] = useState(false)
@@ -17,6 +17,7 @@ const InputGeneralDataPage = () => {
 
     // Use hooks
     const { data: categoriesResponse, isLoading } = useCategoryGeneralFiles()
+    const sendEmrMutation = useSendGeneralFilesToEmr()
 
     const categories = categoriesResponse?.data || categoriesResponse || []
 
@@ -61,7 +62,7 @@ const InputGeneralDataPage = () => {
         setSelectedCategories(newSelected)
     }
 
-    const handleSendEmr = () => {
+    const handleSendEmr = async () => {
         const selectedCategoryData = categories.filter((category: CategoryGeneralFile) =>
             selectedCategories.has(category.id)
         )
@@ -69,15 +70,29 @@ const InputGeneralDataPage = () => {
         console.log('Sending EMR for categories:', selectedCategoryData)
         console.log('Selected category IDs:', Array.from(selectedCategories))
 
-        notifications.show({
-            title: 'EMR Send',
-            message: `Đã gửi ${selectedCategories.size} danh mục tới hệ thống EMR`,
-            color: 'blue'
-        })
+        try {
+            await sendEmrMutation.mutateAsync({
+                categoryGeneralFileIds: Array.from(selectedCategories)
+            })
 
-        // Reset after sending
-        setSelectedCategories(new Set())
-        setIsEmrSendMode(false)
+            notifications.show({
+                title: 'Thành công',
+                message: `Đã gửi ${selectedCategories.size} danh mục tới hệ thống EMR thành công`,
+                color: 'green'
+            })
+
+            // Reset after sending
+            setSelectedCategories(new Set())
+            setIsEmrSendMode(false)
+        } catch (error: any) {
+            console.error('EMR send error:', error)
+
+            notifications.show({
+                title: 'Lỗi',
+                message: error?.message || 'Không thể gửi dữ liệu tới hệ thống EMR',
+                color: 'red'
+            })
+        }
     }
 
     return (
@@ -96,8 +111,14 @@ const InputGeneralDataPage = () => {
                             {isEmrSendMode ? 'Hủy chọn' : 'Gửi EMR'}
                         </Button>
                         {isEmrSendMode && selectedCategories.size > 0 && (
-                            <Button color='green' leftSection={<IconSend size={16} />} onClick={handleSendEmr}>
-                                Gửi ({selectedCategories.size})
+                            <Button
+                                color='green'
+                                leftSection={<IconSend size={16} />}
+                                onClick={handleSendEmr}
+                                loading={sendEmrMutation.isPending}
+                                disabled={sendEmrMutation.isPending}
+                            >
+                                {sendEmrMutation.isPending ? 'Đang gửi...' : `Gửi (${selectedCategories.size})`}
                             </Button>
                         )}
                         <Button leftSection={<IconPlus size={16} />} onClick={handleCreateCategory}>
@@ -106,7 +127,7 @@ const InputGeneralDataPage = () => {
                     </Group>
                 </Group>
 
-                <FileStatistics totalFiles={totalFiles} />
+                <FileStatistics totalFiles={totalFiles} totalCategories={categories.length} />
 
                 {/* Categories Grid */}
                 {isLoading ? (

@@ -93,9 +93,9 @@ const CategoryCard = ({
 
     const handleCardClick = () => {
         if (isEmrSendMode) {
-            // Check if category has files before allowing selection
-            if (!category.generalFiles || category.generalFiles.length === 0) {
-                return // Don't allow selection of empty categories
+            // Check if category has files and has unsent files before allowing selection
+            if (!category.generalFiles || category.generalFiles.length === 0 || allFilesSentToEmr) {
+                return // Don't allow selection of empty categories or categories with all files sent
             }
             // In EMR send mode, toggle selection
             onSelectionChange?.(category.id, !isSelected)
@@ -106,6 +106,14 @@ const CategoryCard = ({
     }
 
     const hasFiles = category.generalFiles && category.generalFiles.length > 0
+    const hasEmrSentFiles =
+        category.generalFiles?.some((file) => file.sendEmrAt !== null && file.sendEmrAt !== undefined) || false
+
+    // Calculate EMR status
+    const totalFiles = category.generalFiles?.length || 0
+    const emrSentFiles =
+        category.generalFiles?.filter((file) => file.sendEmrAt !== null && file.sendEmrAt !== undefined).length || 0
+    const allFilesSentToEmr = totalFiles > 0 && emrSentFiles === totalFiles
 
     const handleUpdate = async (values: UpdateCategoryRequest) => {
         try {
@@ -171,11 +179,13 @@ const CategoryCard = ({
                 radius='md'
                 withBorder
                 style={{
-                    cursor: isEmrSendMode && !hasFiles ? 'not-allowed' : 'pointer',
+                    cursor: isEmrSendMode && (!hasFiles || allFilesSentToEmr) ? 'not-allowed' : 'pointer',
                     height: '100%',
                     border: isEmrSendMode && isSelected ? '2px solid var(--mantine-color-blue-6)' : undefined,
                     backgroundColor: isEmrSendMode && isSelected ? 'var(--mantine-color-blue-0)' : undefined,
-                    opacity: isEmrSendMode && !hasFiles ? 0.6 : 1
+                    opacity: isEmrSendMode && (!hasFiles || allFilesSentToEmr) ? 0.6 : 1,
+                    display: 'flex',
+                    flexDirection: 'column'
                 }}
                 onClick={handleCardClick}
             >
@@ -184,10 +194,10 @@ const CategoryCard = ({
                         {isEmrSendMode && (
                             <Checkbox
                                 checked={isSelected}
-                                disabled={!hasFiles}
+                                disabled={!hasFiles || allFilesSentToEmr}
                                 onChange={(event) => {
                                     event.stopPropagation()
-                                    if (hasFiles) {
+                                    if (hasFiles && !allFilesSentToEmr) {
                                         onSelectionChange?.(category.id, event.currentTarget.checked)
                                     }
                                 }}
@@ -219,16 +229,18 @@ const CategoryCard = ({
                                 >
                                     Chỉnh sửa
                                 </Menu.Item>
-                                <Menu.Item
-                                    color='red'
-                                    leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        setDeleteModalOpened(true)
-                                    }}
-                                >
-                                    Xóa
-                                </Menu.Item>
+                                {!hasEmrSentFiles && (
+                                    <Menu.Item
+                                        color='red'
+                                        leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            setDeleteModalOpened(true)
+                                        }}
+                                    >
+                                        Xóa
+                                    </Menu.Item>
+                                )}
                             </Menu.Dropdown>
                         </Menu>
                     )}
@@ -241,15 +253,31 @@ const CategoryCard = ({
                     multiline
                     style={{ maxWidth: '250px', lineHeight: 1.4 }}
                 >
-                    <Text size='sm' c='dimmed' mb='md' lineClamp={2}>
+                    <Text
+                        size='sm'
+                        c='dimmed'
+                        lineClamp={2}
+                        style={{
+                            flexGrow: 1,
+                            minHeight: '2.5rem', // Ensures consistent height for 2 lines
+                            marginBottom: '1rem'
+                        }}
+                    >
                         {category.description}
                     </Text>
                 </Tooltip>
 
-                <Group justify='space-between'>
-                    <Badge color='blue' variant='light'>
-                        {category.generalFiles?.length} tệp tin
-                    </Badge>
+                <Group justify='space-between' style={{ marginTop: 'auto' }}>
+                    <Group>
+                        <Badge color='blue' variant='light'>
+                            {category.generalFiles?.length} tệp tin
+                        </Badge>
+                        {hasEmrSentFiles && (
+                            <Badge color={allFilesSentToEmr ? 'green' : 'yellow'} variant='filled'>
+                                {`EMR đã gửi (${emrSentFiles}/${totalFiles})`}
+                            </Badge>
+                        )}
+                    </Group>
                 </Group>
             </Card>
 

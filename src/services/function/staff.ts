@@ -260,5 +260,14 @@ export const staffService = {
 
     deleteCategoryGeneralFile: async (id: string): Promise<any> => {
         return backendApi.delete(`${PREFIX}/category-general-files/${id}`).json()
+    },
+
+    // Send general files to EMR
+    sendGeneralFilesToEmr: async (data: { categoryGeneralFileIds: number[] }): Promise<any> => {
+        return backendApi
+            .post(`${PREFIX}/general-files/send-to-emr`, {
+                json: data
+            })
+            .json()
     }
 }
