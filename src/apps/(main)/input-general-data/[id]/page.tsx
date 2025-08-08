@@ -221,9 +221,17 @@ const CategoryDetailPage = () => {
                                     <Text size='xl' fw={700} c='dark' mb={4}>
                                         {category?.name || 'Chi tiết danh mục'}
                                     </Text>
-                                    <Text c='dimmed' size='sm' fw={500}>
-                                        {category?.description || 'Không có mô tả'}
-                                    </Text>
+                                    <Tooltip
+                                        label={category?.description || 'Không có mô tả'}
+                                        position='top'
+                                        disabled={(category?.description || '').length <= 100}
+                                        multiline
+                                        style={{ maxWidth: '300px', lineHeight: 1.4 }}
+                                    >
+                                        <Text c='dimmed' size='sm' fw={500} lineClamp={2} w={800}>
+                                            {category?.description || 'Không có mô tả'}
+                                        </Text>
+                                    </Tooltip>
                                     <Badge size='sm' variant='gradient' gradient={{ from: 'blue', to: 'cyan' }} mt={8}>
                                         {category?.generalFiles?.length || 0} tệp tin
                                     </Badge>

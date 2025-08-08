@@ -13,7 +13,8 @@ import {
     TextInput,
     Textarea,
     Alert,
-    Tooltip
+    Tooltip,
+    Checkbox
 } from '@mantine/core'
 import { IconDots, IconEdit, IconTrash, IconFolder, IconAlertCircle } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
@@ -27,6 +28,9 @@ import {
 interface CategoryCardProps {
     category: CategoryGeneralFile
     onOpenCategory: (category: CategoryGeneralFile) => void
+    isEmrSendMode?: boolean
+    isSelected?: boolean
+    onSelectionChange?: (categoryId: number, checked: boolean) => void
 }
 
 // Validation function for name and description (same as CreateCategoryModal)
@@ -52,7 +56,13 @@ const validateText = (value: string, minLength: number, maxLength: number, field
     return null
 }
 
-const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
+const CategoryCard = ({
+    category,
+    onOpenCategory,
+    isEmrSendMode = false,
+    isSelected = false,
+    onSelectionChange
+}: CategoryCardProps) => {
     const [editModalOpened, setEditModalOpened] = useState(false)
     const [deleteModalOpened, setDeleteModalOpened] = useState(false)
     const [editErrorMessage, setEditErrorMessage] = useState<string | null>(null)
@@ -80,6 +90,22 @@ const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
         setEditErrorMessage(null)
         setEditModalOpened(true)
     }
+
+    const handleCardClick = () => {
+        if (isEmrSendMode) {
+            // Check if category has files before allowing selection
+            if (!category.generalFiles || category.generalFiles.length === 0) {
+                return // Don't allow selection of empty categories
+            }
+            // In EMR send mode, toggle selection
+            onSelectionChange?.(category.id, !isSelected)
+        } else {
+            // Normal mode, open category
+            onOpenCategory(category)
+        }
+    }
+
+    const hasFiles = category.generalFiles && category.generalFiles.length > 0
 
     const handleUpdate = async (values: UpdateCategoryRequest) => {
         try {
@@ -144,11 +170,30 @@ const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
                 padding='lg'
                 radius='md'
                 withBorder
-                style={{ cursor: 'pointer', height: '100%' }}
-                onClick={() => onOpenCategory(category)}
+                style={{
+                    cursor: isEmrSendMode && !hasFiles ? 'not-allowed' : 'pointer',
+                    height: '100%',
+                    border: isEmrSendMode && isSelected ? '2px solid var(--mantine-color-blue-6)' : undefined,
+                    backgroundColor: isEmrSendMode && isSelected ? 'var(--mantine-color-blue-0)' : undefined,
+                    opacity: isEmrSendMode && !hasFiles ? 0.6 : 1
+                }}
+                onClick={handleCardClick}
             >
                 <Group justify='space-between' mb='xs'>
                     <Group>
+                        {isEmrSendMode && (
+                            <Checkbox
+                                checked={isSelected}
+                                disabled={!hasFiles}
+                                onChange={(event) => {
+                                    event.stopPropagation()
+                                    if (hasFiles) {
+                                        onSelectionChange?.(category.id, event.currentTarget.checked)
+                                    }
+                                }}
+                                size='md'
+                            />
+                        )}
                         <IconFolder size={24} color='var(--mantine-color-blue-6)' />
                         <Tooltip label={category.name} position='top' disabled={category.name.length <= 30}>
                             <Text fw={500} size='lg' lineClamp={1} style={{ maxWidth: '200px' }}>
@@ -156,35 +201,37 @@ const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
                             </Text>
                         </Tooltip>
                     </Group>
-                    <Menu shadow='md' width={200}>
-                        <Menu.Target>
-                            <ActionIcon variant='subtle' color='gray' onClick={(e) => e.stopPropagation()}>
-                                <IconDots style={{ width: rem(16), height: rem(16) }} />
-                            </ActionIcon>
-                        </Menu.Target>
+                    {!isEmrSendMode && (
+                        <Menu shadow='md' width={200}>
+                            <Menu.Target>
+                                <ActionIcon variant='subtle' color='gray' onClick={(e) => e.stopPropagation()}>
+                                    <IconDots style={{ width: rem(16), height: rem(16) }} />
+                                </ActionIcon>
+                            </Menu.Target>
 
-                        <Menu.Dropdown>
-                            <Menu.Item
-                                leftSection={<IconEdit style={{ width: rem(14), height: rem(14) }} />}
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleEdit()
-                                }}
-                            >
-                                Chỉnh sửa
-                            </Menu.Item>
-                            <Menu.Item
-                                color='red'
-                                leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    setDeleteModalOpened(true)
-                                }}
-                            >
-                                Xóa
-                            </Menu.Item>
-                        </Menu.Dropdown>
-                    </Menu>
+                            <Menu.Dropdown>
+                                <Menu.Item
+                                    leftSection={<IconEdit style={{ width: rem(14), height: rem(14) }} />}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleEdit()
+                                    }}
+                                >
+                                    Chỉnh sửa
+                                </Menu.Item>
+                                <Menu.Item
+                                    color='red'
+                                    leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        setDeleteModalOpened(true)
+                                    }}
+                                >
+                                    Xóa
+                                </Menu.Item>
+                            </Menu.Dropdown>
+                        </Menu>
+                    )}
                 </Group>
 
                 <Tooltip
