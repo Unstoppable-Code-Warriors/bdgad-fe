@@ -187,9 +187,17 @@ const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
                     </Menu>
                 </Group>
 
-                <Text size='sm' c='dimmed' mb='md'>
-                    {category.description}
-                </Text>
+                <Tooltip
+                    label={category.description}
+                    position='top'
+                    disabled={category.description.length <= 100}
+                    multiline
+                    style={{ maxWidth: '250px', lineHeight: 1.4 }}
+                >
+                    <Text size='sm' c='dimmed' mb='md' lineClamp={2}>
+                        {category.description}
+                    </Text>
+                </Tooltip>
 
                 <Group justify='space-between'>
                     <Badge color='blue' variant='light'>
