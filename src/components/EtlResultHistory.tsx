@@ -1,5 +1,13 @@
 import { Card, Text, Badge, Group, Stack, ThemeIcon, Box, Timeline, Avatar, Button, Divider } from '@mantine/core'
-import { IconChartLine, IconUser, IconClock, IconAlertTriangle, IconCheck, IconDna } from '@tabler/icons-react'
+import {
+    IconChartLine,
+    IconUser,
+    IconClock,
+    IconAlertTriangle,
+    IconCheck,
+    IconDna,
+    IconDownload
+} from '@tabler/icons-react'
 import { RejectionDisplay } from './RejectionDisplay'
 import { ApprovedDisplay } from './ApprovedDisplay'
 
@@ -11,6 +19,7 @@ interface EtlResultData {
     reasonApprove?: string
     error?: string
     reasonReject?: string | null
+    resultPath?: string
     fastqFilePairId?: number
     fastqPair?: {
         id: number
@@ -59,6 +68,7 @@ interface EtlResultHistoryProps {
     showTimestamp?: boolean
     showFastqPair?: boolean
     resultNamePrefix?: string
+    onDownload?: (resultId: number, resultPath?: string) => void
 }
 
 export const EtlResultHistory = ({
@@ -84,6 +94,10 @@ export const EtlResultHistory = ({
 
     const getStatusLabel = (status: string) => {
         return statusConfig[status]?.label || status
+    }
+
+    const handleDownloadETLResult = (resultId: number, resultPath?: string) => {
+        console.log(`Downloading ETL result ${resultId} from path: ${resultPath}`)
     }
 
     if (!results || results.length === 0) {
@@ -200,21 +214,6 @@ export const EtlResultHistory = ({
                                             </Group>
                                         )}
 
-                                        {/* Approval Reason */}
-                                        {/* {result.reasonApprove && (
-                                            <Group gap='xs' align='flex-start'>
-                                                <IconMessage size={14} color='var(--mantine-color-blue-6)' />
-                                                <Box style={{ flex: 1 }}>
-                                                    <Text size='sm' c='dimmed' fw={500}>
-                                                        Ghi chú phê duyệt:
-                                                    </Text>
-                                                    <Text size='sm' style={{ wordBreak: 'break-word' }}>
-                                                        {result.reasonApprove}
-                                                    </Text>
-                                                </Box>
-                                            </Group>
-                                        )} */}
-
                                         {/* Error */}
                                         {result.error && (
                                             <Group gap='xs' align='flex-start'>
@@ -264,6 +263,25 @@ export const EtlResultHistory = ({
                                                 itemId={result.id}
                                                 compact
                                             />
+                                        )}
+
+                                        {/* Download Button */}
+                                        {(result.resultPath) && (
+                                            <>
+                                                <Divider my='xs' />
+                                                <Group gap='sm' justify='flex-end'>
+                                                    <Button
+                                                        variant='light'
+                                                        color='blue'
+                                                        leftSection={<IconDownload size={16} />}
+                                                        onClick={() => handleDownloadETLResult(result.id, result.resultPath)}
+                                                        size='sm'
+                                                        radius='md'
+                                                    >
+                                                        Tải xuống kết quả
+                                                    </Button>
+                                                </Group>
+                                            </>
                                         )}
 
                                         {/* Action buttons */}

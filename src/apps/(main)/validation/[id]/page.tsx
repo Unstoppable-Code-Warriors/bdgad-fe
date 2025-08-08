@@ -19,10 +19,11 @@ import {
 } from '@mantine/core'
 import { IconAlertCircle, IconDownload, IconCheck, IconX, IconShieldCheck, IconXboxX } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
-import { ValidationInfo, EtlResultHistory } from './_components'
+import { ValidationInfo } from './_components/ValidationInfo'
+import { EtlResultHistory } from '@/components/EtlResultHistory'
 import { PatientInfo } from '@/components/PatientInfo'
 import { PageHeader } from '@/components/PageHeader'
-import { ValidationEtlStatus } from '@/types/validation'
+import { ValidationEtlStatus, validationEtlStatusConfig } from '@/types/validation'
 import { openRejectEtlResultModal } from '@/components/RejectEtlResultModal'
 import { openAcceptEtlResultModal } from '@/components/AcceptEtlResultModal'
 
@@ -284,7 +285,12 @@ const ValidationDetailPage = () => {
                 </Grid>
 
                 {/* ETL Result History */}
-                <EtlResultHistory validation={data} />
+                <EtlResultHistory 
+                    results={data.etlResults} 
+                    statusConfig={validationEtlStatusConfig}
+                    title="Lịch sử kết quả phân tích"
+                    subtitle="Theo dõi các kết quả phân tích đã hoàn thành"
+                />
             </Stack>
         </Container>
     )
