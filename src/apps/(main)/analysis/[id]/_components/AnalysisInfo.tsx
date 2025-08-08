@@ -88,7 +88,7 @@ export const AnalysisInfo = ({ data, latestFastqFilePair, latestEtlResult }: Ana
                                         Ngày yêu cầu:
                                     </Text>
                                     <Text fw={600} size='sm'>
-                                        {new Date(data.requestDate).toLocaleDateString('vi-VN')}
+                                        {new Date(data.requestDateAnalysis).toLocaleDateString('vi-VN')}
                                     </Text>
                                 </Group>
 

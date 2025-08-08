@@ -185,7 +185,7 @@ const ValidationPage = () => {
                 title: 'Ngày yêu cầu',
                 sortable: true,
                 width: 120,
-                render: (record) => new Date(record.requestDate).toLocaleDateString('vi-VN')
+                render: (record) => new Date(record.requestDateValidation).toLocaleDateString('vi-VN')
             },
             {
                 accessor: 'latestEtlResult.status',

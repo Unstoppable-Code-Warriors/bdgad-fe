@@ -49,7 +49,7 @@ export interface ValidationSessionResponse {
     id: number
     labcode: string[]
     barcode: string
-    requestDate: string
+    requestDateValidation: string
     createdAt: string
     metadata: Record<string, any>
     patient: ValidationPatientResponse

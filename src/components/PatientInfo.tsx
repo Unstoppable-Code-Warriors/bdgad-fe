@@ -8,6 +8,7 @@ interface PatientData {
     phone: string
     address: string
     healthInsuranceCode?: string
+    barcode?: string
 }
 
 interface DoctorData {
@@ -82,7 +83,7 @@ export const PatientInfo = ({
                                 {patient.fullName}
                             </Text>
                             <Text size='sm' c='dimmed'>
-                                {calculateAge(patient.dateOfBirth)} tuổi • ID: {patient.citizenId}
+                                {calculateAge(patient.dateOfBirth)} tuổi
                             </Text>
                         </Box>
                     </Group>
@@ -96,22 +97,22 @@ export const PatientInfo = ({
                                 </Text>
                             </Group>
                             <Stack gap='sm'>
-                                <Group justify='space-between'>
+                                <Group>
+                                    <Text size='sm' c='dimmed'>
+                                        Barcode:
+                                    </Text>
+                                    <Text fw={600} size='sm'>
+                                        {patient.barcode}
+                                    </Text>
+                                </Group>
+                                <Group>
                                     <Text size='sm' c='dimmed'>
                                         CCCD/CMND:
                                     </Text>
-                                    <Text fw={600} size='sm' ff='monospace'>
+                                    <Text fw={600} size='sm'>
                                         {patient.citizenId}
                                     </Text>
                                 </Group>
-                                {/* <Group justify='space-between'>
-                                    <Text size='sm' c='dimmed'>
-                                        Ngày sinh:
-                                    </Text>
-                                    <Text fw={600} size='sm'>
-                                        {new Date(patient.dateOfBirth).toLocaleDateString('vi-VN')}
-                                    </Text>
-                                </Group> */}
                             </Stack>
                         </Grid.Col>
 

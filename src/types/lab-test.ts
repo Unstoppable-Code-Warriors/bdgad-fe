@@ -13,7 +13,7 @@ export interface LabTestSession {
     id: number
     labcode: string
     barcode: string
-    requestDate: string
+    requestDateLabTesting: string
     createdAt: string
     metadata: Record<string, any>
     patient: Patient

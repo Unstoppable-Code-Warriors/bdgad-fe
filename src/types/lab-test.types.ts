@@ -84,7 +84,8 @@ export const LAB_TEST_STATUS = {
     UPLOADED: 'uploaded',
     WAIT_FOR_APPROVAL: 'wait_for_approval',
     APPROVED: 'approved',
-    REJECTED: 'rejected'
+    REJECTED: 'rejected',
+    NOT_UPLOADED: 'not_uploaded',
 } as const
 
 export type LabTestStatus = (typeof LAB_TEST_STATUS)[keyof typeof LAB_TEST_STATUS]
@@ -105,5 +106,9 @@ export const statusConfig = {
     [LAB_TEST_STATUS.REJECTED]: {
         label: 'Từ chối',
         color: 'red'
+    },
+    [LAB_TEST_STATUS.NOT_UPLOADED]: {
+        label: 'Chưa tải lên',
+        color: 'gray'
     }
 } as const

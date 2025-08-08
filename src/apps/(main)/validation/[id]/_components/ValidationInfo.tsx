@@ -86,7 +86,7 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                                         Ngày yêu cầu:
                                     </Text>
                                     <Text fw={600} size='sm'>
-                                        {new Date(validation.requestDate).toLocaleDateString('vi-VN')}
+                                        {new Date(validation.requestDateValidation).toLocaleDateString('vi-VN')}
                                     </Text>
                                 </Group>
 

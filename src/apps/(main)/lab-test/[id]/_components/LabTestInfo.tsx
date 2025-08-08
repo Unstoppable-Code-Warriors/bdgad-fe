@@ -6,7 +6,7 @@ interface LabTestInfoProps {
     data: {
         labcode: string
         barcode: string
-        requestDate: string
+        requestDateLabTesting: string
         createdAt: string
     }
     latestFastqFilePair?: FastqFilePair | null
@@ -83,7 +83,7 @@ export const LabTestInfo = ({ data, latestFastqFilePair }: LabTestInfoProps) => 
                                         Ngày yêu cầu:
                                     </Text>
                                     <Text fw={600} size='sm'>
-                                        {new Date(data.requestDate).toLocaleDateString('vi-VN')}
+                                        {new Date(data.requestDateLabTesting).toLocaleDateString('vi-VN')}
                                     </Text>
                                 </Group>
 

@@ -239,7 +239,7 @@ const AnalysisPage = () => {
                 title: 'Ngày Yêu Cầu',
                 sortable: true,
                 width: 130,
-                render: (record) => new Date(record.requestDate).toLocaleDateString('vi-VN')
+                render: (record) => new Date(record.requestDateAnalysis).toLocaleDateString('vi-VN')
             },
             {
                 accessor: 'latestFastqPairFile.status',

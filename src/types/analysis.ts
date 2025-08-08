@@ -69,7 +69,7 @@ export interface AnalysisSession {
     id: number
     labcode: string[]
     barcode: string
-    requestDate: string
+    requestDateAnalysis: string
     createdAt: string
     metadata: Record<string, any>
     patient: Patient
