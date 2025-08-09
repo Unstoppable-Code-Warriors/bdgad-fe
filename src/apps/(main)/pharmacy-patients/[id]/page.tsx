@@ -19,7 +19,6 @@ import {
     IconArrowLeft,
     IconUser,
     IconPhone,
-    IconCalendar,
     IconStethoscope,
     IconPill,
     IconFileText,
@@ -35,10 +34,10 @@ const PharmacyPatientDetailPage = () => {
     const navigate = useNavigate()
 
     // Get specific patient by ID
-    const { data: patientResponse, isLoading } = usePharmacyPatientById(id || '')
-    console.log('patientResponse pharmacy', patientResponse)
+    const { data, isLoading } = usePharmacyPatientById(id || '')
+    console.log('patientResponse pharmacy', data)
 
-    const patient = patientResponse?.data
+    const patient = data
 
     const handleGoBack = () => {
         navigate('/pharmacy-patients')
@@ -311,7 +310,7 @@ const PharmacyPatientDetailPage = () => {
                     <Grid.Col span={{ base: 12 }}>
                         <Card shadow='sm' padding='lg' radius='md' withBorder>
                             <Group mb='md'>
-                                <IconFileText size={24} color='var(--mantine-color-purple-6)' />
+                                <IconFileText size={24} />
                                 <Text fw={600} size='lg'>
                                     Hồ sơ khám bệnh
                                 </Text>
