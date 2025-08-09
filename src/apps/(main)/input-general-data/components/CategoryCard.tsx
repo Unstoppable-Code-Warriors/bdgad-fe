@@ -13,7 +13,8 @@ import {
     TextInput,
     Textarea,
     Alert,
-    Tooltip
+    Tooltip,
+    Checkbox
 } from '@mantine/core'
 import { IconDots, IconEdit, IconTrash, IconFolder, IconAlertCircle } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
@@ -27,6 +28,9 @@ import {
 interface CategoryCardProps {
     category: CategoryGeneralFile
     onOpenCategory: (category: CategoryGeneralFile) => void
+    isEmrSendMode?: boolean
+    isSelected?: boolean
+    onSelectionChange?: (categoryId: number, checked: boolean) => void
 }
 
 // Validation function for name and description (same as CreateCategoryModal)
@@ -52,7 +56,13 @@ const validateText = (value: string, minLength: number, maxLength: number, field
     return null
 }
 
-const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
+const CategoryCard = ({
+    category,
+    onOpenCategory,
+    isEmrSendMode = false,
+    isSelected = false,
+    onSelectionChange
+}: CategoryCardProps) => {
     const [editModalOpened, setEditModalOpened] = useState(false)
     const [deleteModalOpened, setDeleteModalOpened] = useState(false)
     const [editErrorMessage, setEditErrorMessage] = useState<string | null>(null)
@@ -80,6 +90,30 @@ const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
         setEditErrorMessage(null)
         setEditModalOpened(true)
     }
+
+    const handleCardClick = () => {
+        if (isEmrSendMode) {
+            // Check if category has files and has unsent files before allowing selection
+            if (!category.generalFiles || category.generalFiles.length === 0 || allFilesSentToEmr) {
+                return // Don't allow selection of empty categories or categories with all files sent
+            }
+            // In EMR send mode, toggle selection
+            onSelectionChange?.(category.id, !isSelected)
+        } else {
+            // Normal mode, open category
+            onOpenCategory(category)
+        }
+    }
+
+    const hasFiles = category.generalFiles && category.generalFiles.length > 0
+    const hasEmrSentFiles =
+        category.generalFiles?.some((file) => file.sendEmrAt !== null && file.sendEmrAt !== undefined) || false
+
+    // Calculate EMR status
+    const totalFiles = category.generalFiles?.length || 0
+    const emrSentFiles =
+        category.generalFiles?.filter((file) => file.sendEmrAt !== null && file.sendEmrAt !== undefined).length || 0
+    const allFilesSentToEmr = totalFiles > 0 && emrSentFiles === totalFiles
 
     const handleUpdate = async (values: UpdateCategoryRequest) => {
         try {
@@ -144,11 +178,32 @@ const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
                 padding='lg'
                 radius='md'
                 withBorder
-                style={{ cursor: 'pointer', height: '100%' }}
-                onClick={() => onOpenCategory(category)}
+                style={{
+                    cursor: isEmrSendMode && (!hasFiles || allFilesSentToEmr) ? 'not-allowed' : 'pointer',
+                    height: '100%',
+                    border: isEmrSendMode && isSelected ? '2px solid var(--mantine-color-blue-6)' : undefined,
+                    backgroundColor: isEmrSendMode && isSelected ? 'var(--mantine-color-blue-0)' : undefined,
+                    opacity: isEmrSendMode && (!hasFiles || allFilesSentToEmr) ? 0.6 : 1,
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}
+                onClick={handleCardClick}
             >
                 <Group justify='space-between' mb='xs'>
                     <Group>
+                        {isEmrSendMode && (
+                            <Checkbox
+                                checked={isSelected}
+                                disabled={!hasFiles || allFilesSentToEmr}
+                                onChange={(event) => {
+                                    event.stopPropagation()
+                                    if (hasFiles && !allFilesSentToEmr) {
+                                        onSelectionChange?.(category.id, event.currentTarget.checked)
+                                    }
+                                }}
+                                size='md'
+                            />
+                        )}
                         <IconFolder size={24} color='var(--mantine-color-blue-6)' />
                         <Tooltip label={category.name} position='top' disabled={category.name.length <= 30}>
                             <Text fw={500} size='lg' lineClamp={1} style={{ maxWidth: '200px' }}>
@@ -156,45 +211,73 @@ const CategoryCard = ({ category, onOpenCategory }: CategoryCardProps) => {
                             </Text>
                         </Tooltip>
                     </Group>
-                    <Menu shadow='md' width={200}>
-                        <Menu.Target>
-                            <ActionIcon variant='subtle' color='gray' onClick={(e) => e.stopPropagation()}>
-                                <IconDots style={{ width: rem(16), height: rem(16) }} />
-                            </ActionIcon>
-                        </Menu.Target>
+                    {!isEmrSendMode && (
+                        <Menu shadow='md' width={200}>
+                            <Menu.Target>
+                                <ActionIcon variant='subtle' color='gray' onClick={(e) => e.stopPropagation()}>
+                                    <IconDots style={{ width: rem(16), height: rem(16) }} />
+                                </ActionIcon>
+                            </Menu.Target>
 
-                        <Menu.Dropdown>
-                            <Menu.Item
-                                leftSection={<IconEdit style={{ width: rem(14), height: rem(14) }} />}
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleEdit()
-                                }}
-                            >
-                                Chỉnh sửa
-                            </Menu.Item>
-                            <Menu.Item
-                                color='red'
-                                leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    setDeleteModalOpened(true)
-                                }}
-                            >
-                                Xóa
-                            </Menu.Item>
-                        </Menu.Dropdown>
-                    </Menu>
+                            <Menu.Dropdown>
+                                <Menu.Item
+                                    leftSection={<IconEdit style={{ width: rem(14), height: rem(14) }} />}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleEdit()
+                                    }}
+                                >
+                                    Chỉnh sửa
+                                </Menu.Item>
+                                {!hasEmrSentFiles && (
+                                    <Menu.Item
+                                        color='red'
+                                        leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            setDeleteModalOpened(true)
+                                        }}
+                                    >
+                                        Xóa
+                                    </Menu.Item>
+                                )}
+                            </Menu.Dropdown>
+                        </Menu>
+                    )}
                 </Group>
 
-                <Text size='sm' c='dimmed' mb='md'>
-                    {category.description}
-                </Text>
+                <Tooltip
+                    label={category.description}
+                    position='top'
+                    disabled={category.description.length <= 100}
+                    multiline
+                    style={{ maxWidth: '250px', lineHeight: 1.4 }}
+                >
+                    <Text
+                        size='sm'
+                        c='dimmed'
+                        lineClamp={2}
+                        style={{
+                            flexGrow: 1,
+                            minHeight: '2.5rem', // Ensures consistent height for 2 lines
+                            marginBottom: '1rem'
+                        }}
+                    >
+                        {category.description}
+                    </Text>
+                </Tooltip>
 
-                <Group justify='space-between'>
-                    <Badge color='blue' variant='light'>
-                        {category.generalFiles?.length} tệp tin
-                    </Badge>
+                <Group justify='space-between' style={{ marginTop: 'auto' }}>
+                    <Group>
+                        <Badge color='blue' variant='light'>
+                            {category.generalFiles?.length} tệp tin
+                        </Badge>
+                        {hasEmrSentFiles && (
+                            <Badge color={allFilesSentToEmr ? 'green' : 'yellow'} variant='filled'>
+                                {`EMR đã gửi (${emrSentFiles}/${totalFiles})`}
+                            </Badge>
+                        )}
+                    </Group>
                 </Group>
             </Card>
 

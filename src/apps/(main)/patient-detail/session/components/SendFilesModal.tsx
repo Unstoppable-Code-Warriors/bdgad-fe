@@ -5,6 +5,7 @@ import { notifications } from '@mantine/notifications'
 import { Role } from '@/utils/constant'
 import { authService } from '@/services/function/auth'
 import { useAssignSession } from '@/services/hook/staff-patient-session.hook'
+import { cancerScreeningPackageOptions, niptPackageOptions, cancerPanelOptions } from '@/apps/(main)/input-info/forms'
 
 interface AssignmentItem {
     labcode: string
@@ -23,6 +24,34 @@ interface SendFilesModalProps {
 const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }: SendFilesModalProps) => {
     console.log('Session data from modal:', sessionData)
     console.log('Labcodes extracted:', sessionData?.labcodes)
+
+    // Utility functions for translating package types and sample types
+    const getPackageTypeLabel = (packageType: string): string => {
+        // Check cancer screening packages
+        const cancerScreening = cancerScreeningPackageOptions.find((option) => option.value === packageType)
+        if (cancerScreening) return cancerScreening.label
+
+        // Check NIPT packages
+        const nipt = niptPackageOptions.find((option) => option.value === packageType)
+        if (nipt) return nipt.label
+
+        // Check cancer panels
+        const cancerPanel = cancerPanelOptions.find((option) => option.value === packageType)
+        if (cancerPanel) return cancerPanel.label
+
+        // Return original value if not found
+        return packageType || 'Không xác định'
+    }
+
+    const getSampleTypeLabel = (sampleType: string): string => {
+        const sampleTypeMap: { [key: string]: string } = {
+            biopsy_tissue_ffpe: 'Mô sinh thiết/FFPE',
+            blood_stl_ctdna: 'Máu (STL-ctDNA)',
+            pleural_peritoneal_fluid: 'Dịch màng phổi/bụng'
+        }
+        return sampleTypeMap[sampleType] || sampleType || 'Không xác định'
+    }
+
     const [selectedDoctor, setSelectedDoctor] = useState<string>('')
     const [assignments, setAssignments] = useState<AssignmentItem[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -276,6 +305,12 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                             <Stack gap='md'>
                                 {assignments.map((assignment) => {
                                     const currentLabTechName = getCurrentLabTechName(assignment.labcode)
+                                    // Find the full labcode data from sessionData
+                                    const labcodeData = labcodes.find(
+                                        (item: any) =>
+                                            (item.labcode || item.code || item.name || '') === assignment.labcode
+                                    )
+
                                     return (
                                         <Box
                                             key={assignment.labcode}
@@ -284,9 +319,25 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                                             style={{ borderRadius: '6px' }}
                                         >
                                             <Group justify='space-between' mb='xs'>
-                                                <Text size='sm' fw={500}>
-                                                    Labcode: {assignment.labcode}
-                                                </Text>
+                                                <div>
+                                                    <Text size='sm' fw={500}>
+                                                        Labcode: {assignment.labcode}
+                                                    </Text>
+                                                    {/* Package Type Information */}
+                                                    {labcodeData?.packageType && (
+                                                        <Text size='xs' c='dimmed' mt={2}>
+                                                            <strong>Gói xét nghiệm:</strong>{' '}
+                                                            {getPackageTypeLabel(labcodeData.packageType)}
+                                                        </Text>
+                                                    )}
+                                                    {/* Sample Type Information */}
+                                                    {labcodeData?.sampleType && (
+                                                        <Text size='xs' c='dimmed' mt={2}>
+                                                            <strong>Loại mẫu:</strong>{' '}
+                                                            {getSampleTypeLabel(labcodeData.sampleType)}
+                                                        </Text>
+                                                    )}
+                                                </div>
                                                 {currentLabTechName && (
                                                     <Badge color='green' variant='light' size='xs'>
                                                         Đã có

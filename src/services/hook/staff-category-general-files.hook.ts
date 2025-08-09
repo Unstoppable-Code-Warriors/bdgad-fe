@@ -55,3 +55,15 @@ export const useDeleteCategoryGeneralFile = () => {
         }
     })
 }
+
+export const useSendGeneralFilesToEmr = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation<{ message: string; code?: string }, Error, { categoryGeneralFileIds: number[] }>({
+        mutationFn: (data: { categoryGeneralFileIds: number[] }) => staffService.sendGeneralFilesToEmr(data),
+        onSuccess: () => {
+            // Invalidate and refetch categories to show updated EMR status
+            queryClient.invalidateQueries({ queryKey: ['category-general-files'] })
+        }
+    })
+}

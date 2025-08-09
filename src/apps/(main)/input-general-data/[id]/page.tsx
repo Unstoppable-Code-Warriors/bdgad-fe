@@ -51,6 +51,7 @@ const CategoryDetailPage = () => {
     const [fileToDelete, setFileToDelete] = useState<{ id: string; name: string } | null>(null)
 
     const { data: category, isLoading } = useCategoryGeneralFileDetail(id)
+
     const downloadMutation = useDownloadGeneralFile()
     const deleteMutation = useDeleteGeneralFile()
     const uploadMutation = useUploadGeneralFile()
@@ -221,9 +222,17 @@ const CategoryDetailPage = () => {
                                     <Text size='xl' fw={700} c='dark' mb={4}>
                                         {category?.name || 'Chi tiết danh mục'}
                                     </Text>
-                                    <Text c='dimmed' size='sm' fw={500}>
-                                        {category?.description || 'Không có mô tả'}
-                                    </Text>
+                                    <Tooltip
+                                        label={category?.description || 'Không có mô tả'}
+                                        position='top'
+                                        disabled={(category?.description || '').length <= 100}
+                                        multiline
+                                        style={{ maxWidth: '300px', lineHeight: 1.4 }}
+                                    >
+                                        <Text c='dimmed' size='sm' fw={500} lineClamp={2} w={800}>
+                                            {category?.description || 'Không có mô tả'}
+                                        </Text>
+                                    </Tooltip>
                                     <Badge size='sm' variant='gradient' gradient={{ from: 'blue', to: 'cyan' }} mt={8}>
                                         {category?.generalFiles?.length || 0} tệp tin
                                     </Badge>
@@ -295,6 +304,13 @@ const CategoryDetailPage = () => {
                                                     >
                                                         {file.fileType.toUpperCase()}
                                                     </Badge>
+                                                    {file.sendEmrAt && (
+                                                        <div>
+                                                            <Badge size='xs' color='green' variant='filled' mt={2}>
+                                                                EMR đã gửi
+                                                            </Badge>
+                                                        </div>
+                                                    )}
                                                 </Box>
                                             </Group>
                                         </Group>
@@ -341,13 +357,20 @@ const CategoryDetailPage = () => {
                                                 </ActionIcon>
                                             </Tooltip>
 
-                                            <Tooltip label='Xóa tệp tin'>
+                                            <Tooltip
+                                                label={file.sendEmrAt ? 'Không thể xóa tệp đã gửi EMR' : 'Xóa tệp'}
+                                            >
                                                 <ActionIcon
                                                     variant='gradient'
-                                                    gradient={{ from: 'red', to: 'pink' }}
+                                                    gradient={
+                                                        file.sendEmrAt
+                                                            ? { from: 'gray', to: 'black' }
+                                                            : { from: 'red', to: 'orange' }
+                                                    }
                                                     size='lg'
                                                     radius='md'
                                                     onClick={() => openDeleteConfirmation(file)}
+                                                    disabled={file.sendEmrAt}
                                                 >
                                                     <IconTrash size={18} />
                                                 </ActionIcon>

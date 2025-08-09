@@ -12,6 +12,7 @@ export interface GeneralFile {
     filePath: string
     description: string
     uploadedAt: string
+    sendEmrAt?: string | null
 }
 
 export interface CategoryGeneralFile {
