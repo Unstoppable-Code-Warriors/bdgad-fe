@@ -133,9 +133,7 @@ const PharmacyPatientsPage = () => {
                                 style={{
                                     cursor: 'pointer',
                                     transition: 'all 0.2s ease',
-                                    position: 'relative',
-                                    background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-                                    borderLeft: '4px solid var(--mantine-color-blue-5)'
+                                    position: 'relative'
                                 }}
                                 className='hover:transform hover:-translate-y-1 hover:shadow-lg'
                             >
@@ -146,7 +144,7 @@ const PharmacyPatientsPage = () => {
                                                 {patient.patientFullname}
                                             </Text>
                                             <Text size='xs' fw={500} c='blue' mt='xs'>
-                                                CCCD: {patient.citizenId}
+                                                Mã định danh: {patient.citizenId}
                                             </Text>
                                         </Box>
 
@@ -174,12 +172,12 @@ const PharmacyPatientsPage = () => {
                                                 </Flex>
                                             )}
 
-                                            <Flex align='center' gap='xs' mt='xs'>
+                                            {/* <Flex align='center' gap='xs' mt='xs'>
                                                 <IconCalendarEvent size={14} color='var(--mantine-color-green-6)' />
                                                 <Text size='xs' c='dimmed'>
                                                     Cuộc hẹn: {formatDate(patient.appointment.date)}
                                                 </Text>
-                                            </Flex>
+                                            </Flex> */}
 
                                             {patient.medicalRecord.diagnoses && (
                                                 <Box mt='xs'>
