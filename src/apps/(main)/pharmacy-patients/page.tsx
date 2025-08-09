@@ -16,7 +16,7 @@ import {
     Badge,
     Flex
 } from '@mantine/core'
-import { IconSearch, IconUser, IconStethoscope, IconCalendarEvent } from '@tabler/icons-react'
+import { IconSearch, IconUser, IconStethoscope } from '@tabler/icons-react'
 import { usePharmacyPatients } from '@/services/hook/pharmacy.hook'
 
 const PharmacyPatientsPage = () => {

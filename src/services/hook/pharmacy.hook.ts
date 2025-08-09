@@ -89,7 +89,7 @@ export const usePharmacyPatients = (
 }
 
 export const usePharmacyPatientById = (id: string) => {
-    return useQuery<{ data: PharmacyPatient }>({
+    return useQuery<PharmacyPatient>({
         queryKey: ['pharmacy-patient', id],
         queryFn: () => staffService.getPharmacyPatientById(id),
         enabled: !!id

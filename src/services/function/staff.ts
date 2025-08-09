@@ -280,13 +280,13 @@ export const staffService = {
         if (params?.search) searchParams.append('search', params.search)
 
         const queryString = searchParams.toString()
-        const url = queryString ? `${PREFIX}/pharmacy?${queryString}` : `${PREFIX}/pharmacy`
+        const url = queryString ? `${PREFIX}/pharmacy-patient?${queryString}` : `${PREFIX}/pharmacy-patient`
 
         return backendApi.get(url).json()
     },
 
     // Get pharmacy patient by ID
     getPharmacyPatientById: async (id: string): Promise<any> => {
-        return backendApi.get(`${PREFIX}/pharmacy/${id}`).json()
+        return backendApi.get(`${PREFIX}/pharmacy-patient/${id}`).json()
     }
 }
