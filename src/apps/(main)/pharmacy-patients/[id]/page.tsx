@@ -38,7 +38,7 @@ const PharmacyPatientDetailPage = () => {
     const { data: patientResponse, isLoading } = usePharmacyPatientById(id || '')
     console.log('patientResponse pharmacy', patientResponse)
 
-    const patient = patientResponse
+    const patient = patientResponse?.data
 
     const handleGoBack = () => {
         navigate('/pharmacy-patients')
@@ -115,7 +115,7 @@ const PharmacyPatientDetailPage = () => {
                                     {patient.patientFullname}
                                 </Title>
                                 <Text c='dimmed' size='sm' mt={4}>
-                                    CCCD: {patient.citizenId}
+                                    Mã định danh: {patient.citizenId}
                                 </Text>
                                 <Badge color='blue' variant='light' mt={8}>
                                     Bệnh nhân phòng khám
@@ -282,7 +282,7 @@ const PharmacyPatientDetailPage = () => {
                     </Grid.Col>
 
                     {/* Appointment Information */}
-                    <Grid.Col span={{ base: 12 }}>
+                    {/* <Grid.Col span={{ base: 12 }}>
                         <Card shadow='sm' padding='lg' radius='md' withBorder>
                             <Group mb='md'>
                                 <IconCalendar size={24} color='var(--mantine-color-green-6)' />
@@ -305,7 +305,7 @@ const PharmacyPatientDetailPage = () => {
                                 </Text>
                             </Group>
                         </Card>
-                    </Grid.Col>
+                    </Grid.Col> */}
 
                     {/* Medical Record */}
                     <Grid.Col span={{ base: 12 }}>
