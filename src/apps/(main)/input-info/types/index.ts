@@ -1,6 +1,6 @@
 import type { CommonOCRRes, OCRRes } from '@/types/ocr-file'
+import type { FormValues } from '@/types/prescription-form'
 import type { FileWithPath } from '@mantine/dropzone'
-import type { FormValues } from '../forms'
 
 // Extended OCR result that includes edited form data
 export interface EditedOCRRes extends Partial<OCRRes> {

@@ -12,6 +12,8 @@ export interface LabTestAssignment {
 export interface LabTestSession {
     id: number
     labcode: string
+    packageType?: string
+    sampleType?: string
     barcode: string
     requestDateLabTesting: string
     createdAt: string

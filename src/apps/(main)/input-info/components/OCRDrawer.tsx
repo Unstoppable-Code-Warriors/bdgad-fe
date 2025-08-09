@@ -23,18 +23,18 @@ import type { CategorizedSubmittedFile } from '@/types/categorized-upload'
 import {
     getDefaultFormValues,
     formValidationRules,
-    mapOCRToFormValues,
     formTypeOptions,
     genderOptions,
     cancerScreeningPackageOptions,
     cancerPanelOptions,
     niptPackageOptions,
     supportPackageOptions
-} from '../forms'
-import type { FormValues } from '../forms'
+} from '@/types/prescription-form'
+import type { FormValues } from '@/types/prescription-form'
 import { FormType } from '@/utils/constant'
 import type { CommonOCRRes } from '@/types/ocr-file'
 import type { EditedOCRRes } from '../types'
+import { mapOCRToFormValues } from '../forms'
 
 interface OCRDrawerProps {
     file: CategorizedSubmittedFile

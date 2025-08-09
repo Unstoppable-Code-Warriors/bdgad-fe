@@ -10,6 +10,41 @@ import { labTestService } from '@/services/function/lab-test'
 import { notifications } from '@mantine/notifications'
 import type { LabTestSessionListItem } from '@/types/lab-test'
 import { ListSearchFilter, type SelectOption } from '@/components/ListSearchFilter'
+import { 
+    cancerScreeningPackageOptions, 
+    niptPackageOptions, 
+    cancerPanelOptions,
+    formTypeOptions,
+    sampleTypeOptions 
+} from '@/types/prescription-form'
+
+const createMappingFromOptions = (options: Array<{ value: string; label: string }>): Record<string, string> => {
+    const mapping: Record<string, string> = {}
+    options.forEach(option => {
+        mapping[option.value] = option.label
+    })
+    return mapping
+}
+
+const packageTypeMapping: Record<string, string> = {
+    // Cancer screening packages
+    ...createMappingFromOptions(cancerScreeningPackageOptions),
+    // NIPT packages
+    ...createMappingFromOptions(niptPackageOptions),
+    // Cancer panels
+    ...createMappingFromOptions(cancerPanelOptions),
+    // Form types
+    ...createMappingFromOptions(formTypeOptions)
+}
+
+const sampleTypeMapping = Object.fromEntries(
+    sampleTypeOptions.map(option => [option.value, option.label])
+)
+
+const getDescriptionLabcodeName = (value: string | undefined, mapping: Record<string, string>): string => {
+    if (!value) return '-'
+    return mapping[value] || value
+}
 
 const getStatusColor = (status: string) => {
     return statusConfig[status as keyof typeof statusConfig]?.color || 'gray'
@@ -98,34 +133,6 @@ const LabTestPage = () => {
         }
     }, [])
 
-    // const handleSendToAnalysis = useCallback(async (fastqFileId: number) => {
-    //     if (!fastqFileId) {
-    //         notifications.show({
-    //             title: 'Lỗi',
-    //             message: 'Không tìm thấy file FastQ để gửi phân tích',
-    //             color: 'red'
-    //         })
-    //         return
-    //     }
-
-    //     sendToAnalysisMutation.mutate(fastqFileId, {
-    //         onSuccess: () => {
-    //             notifications.show({
-    //                 title: 'Thành công',
-    //                 message: 'File FastQ đã được gửi phân tích thành công',
-    //                 color: 'green'
-    //             })
-    //         },
-    //         onError: (error: any) => {
-    //             notifications.show({
-    //                 title: 'Lỗi gửi phân tích',
-    //                 message: error.message || 'Không thể gửi file FastQ để phân tích',
-    //                 color: 'red'
-    //             })
-    //         }
-    //     })
-    // }, [])
-
     const recordsPerPageOptions = [5, 10, 20, 50]
 
     // Extract data from response
@@ -145,6 +152,25 @@ const LabTestPage = () => {
                 cellsClassName: 'bg-white'
             },
             {
+                accessor: 'labcodeDescription',
+                title: 'Mô tả Labcode',
+                width: 150,
+                render: (record) => {
+                    const packageName = getDescriptionLabcodeName(record.packageType, packageTypeMapping)
+                    const sampleName = getDescriptionLabcodeName(record.sampleType, sampleTypeMapping)
+
+                    if (packageName !== '-' && sampleName !== '-') {
+                        return <Text size='sm'>{`${packageName} - ${sampleName}`}</Text>
+                    } else if (packageName !== '-') {
+                        return <Text size='sm'>{packageName}</Text>
+                    } else if (sampleName !== '-') {
+                        return <Text size='sm'>{sampleName}</Text>
+                    } else {
+                        return <Text size='sm'>-</Text>
+                    }
+                }
+            },
+            {
                 accessor: 'barcode',
                 title: 'Barcode',
                 width: 120,
@@ -153,7 +179,7 @@ const LabTestPage = () => {
             {
                 accessor: 'doctor.name',
                 title: 'Bác sĩ',
-                width: 150,
+                width: 120,
                 render: (record) => <Text size='sm'>{record?.doctor?.name || 'Chưa được chỉ định'}</Text>
             },
             {
@@ -239,17 +265,6 @@ const LabTestPage = () => {
                                 <IconEye size={16} />
                             </ActionIcon>
                         </Tooltip>
-                        {/* {record.latestFastqFile?.status === 'uploaded' && (
-                            <Tooltip label='Gửi phân tích'>
-                                <ActionIcon
-                                    variant='light'
-                                    color='green'
-                                    onClick={() => handleSendToAnalysis(record.latestFastqFile.id)}
-                                >
-                                    <IconSend size={16} />
-                                </ActionIcon>
-                            </Tooltip>
-                        )} */}
                     </Group>
                 ),
                 titleClassName: 'bg-white',

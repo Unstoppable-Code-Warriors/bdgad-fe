@@ -5,7 +5,8 @@ import { notifications } from '@mantine/notifications'
 import { Role } from '@/utils/constant'
 import { authService } from '@/services/function/auth'
 import { useAssignSession } from '@/services/hook/staff-patient-session.hook'
-import { cancerScreeningPackageOptions, niptPackageOptions, cancerPanelOptions } from '@/apps/(main)/input-info/forms'
+import { cancerPanelOptions, cancerScreeningPackageOptions, niptPackageOptions } from '@/types/prescription-form'
+
 
 interface AssignmentItem {
     labcode: string
