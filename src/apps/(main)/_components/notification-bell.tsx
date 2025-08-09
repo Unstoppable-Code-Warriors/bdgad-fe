@@ -113,13 +113,18 @@ const NotificationBell = () => {
     const formatTime = (dateString: string) => {
         const date = new Date(dateString)
         const now = new Date()
-        const diff = now.getTime() - date.getTime()
+        let diff = now.getTime() - date.getTime()
+
+        // Chống số âm do sai lệch đồng hồ/zone
+        if (diff < 0) diff = 0
 
         const minutes = Math.floor(diff / (1000 * 60))
         const hours = Math.floor(diff / (1000 * 60 * 60))
         const days = Math.floor(diff / (1000 * 60 * 60 * 24))
 
-        if (minutes < 60) {
+        if (minutes < 1) {
+            return 'Vừa xong'
+        } else if (minutes < 60) {
             return `${minutes} phút trước`
         } else if (hours < 24) {
             return `${hours} giờ trước`
