@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Container, Stack, Text, Button, Group, Grid, Center, Checkbox } from '@mantine/core'
+import { Container, Stack, Text, Button, Group, Grid, Center } from '@mantine/core'
 import { IconPlus, IconFolder, IconSend } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import FileStatistics from './components/FileStatistics'
