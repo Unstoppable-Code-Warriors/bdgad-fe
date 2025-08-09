@@ -1,7 +1,7 @@
 import { useUser } from '@/services/hook/auth.hook'
 import { Role } from '@/utils/constant'
 import { AppShell, Loader, Stack, UnstyledButton, Text, Box } from '@mantine/core'
-import { IconUser, IconFlask, IconMicroscope, IconClipboardCheck } from '@tabler/icons-react'
+import { IconUser, IconFlask, IconMicroscope, IconClipboardCheck, IconStethoscope } from '@tabler/icons-react'
 import { Link, useLocation } from 'react-router'
 
 export const navItems = [
@@ -9,6 +9,12 @@ export const navItems = [
         label: 'Danh sách bệnh nhân',
         icon: IconUser,
         href: '/patient-folder',
+        roles: [Role.STAFF]
+    },
+    {
+        label: 'Danh sách bệnh nhân phòng khám',
+        icon: IconStethoscope,
+        href: '/pharmacy-patients',
         roles: [Role.STAFF]
     },
     {
