@@ -266,7 +266,7 @@ export const EtlResultHistory = ({
                                         )}
 
                                         {/* Download Button */}
-                                        {(result.resultPath) && (
+                                        {result.resultPath && (
                                             <>
                                                 <Divider my='xs' />
                                                 <Group gap='sm' justify='flex-end'>
@@ -274,7 +274,9 @@ export const EtlResultHistory = ({
                                                         variant='light'
                                                         color='blue'
                                                         leftSection={<IconDownload size={16} />}
-                                                        onClick={() => handleDownloadETLResult(result.id, result.resultPath)}
+                                                        onClick={() =>
+                                                            handleDownloadETLResult(result.id, result.resultPath)
+                                                        }
                                                         size='sm'
                                                         radius='md'
                                                     >

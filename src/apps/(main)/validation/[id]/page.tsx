@@ -285,11 +285,11 @@ const ValidationDetailPage = () => {
                 </Grid>
 
                 {/* ETL Result History */}
-                <EtlResultHistory 
-                    results={data.etlResults} 
+                <EtlResultHistory
+                    results={data.etlResults}
                     statusConfig={validationEtlStatusConfig}
-                    title="Lịch sử kết quả phân tích"
-                    subtitle="Theo dõi các kết quả phân tích đã hoàn thành"
+                    title='Lịch sử kết quả phân tích'
+                    subtitle='Theo dõi các kết quả phân tích đã hoàn thành'
                 />
             </Stack>
         </Container>

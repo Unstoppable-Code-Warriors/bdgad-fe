@@ -174,7 +174,9 @@ const LabTestPage = () => {
                 accessor: 'requestDate',
                 title: 'Ngày yêu cầu',
                 width: 120,
-                render: (record) => <Text size='sm'>{new Date(record.requestDateLabTesting).toLocaleDateString('vi-VN')}</Text>
+                render: (record) => (
+                    <Text size='sm'>{new Date(record.requestDateLabTesting).toLocaleDateString('vi-VN')}</Text>
+                )
             },
             {
                 accessor: 'fastq',

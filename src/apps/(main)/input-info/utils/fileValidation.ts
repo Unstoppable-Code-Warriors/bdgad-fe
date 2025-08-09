@@ -1,4 +1,10 @@
-import { FileCategory, VALIDATION_RULES, FILE_CATEGORY_OPTIONS, type FileCategoryDto, type CategorizedSubmittedFile } from '@/types/categorized-upload'
+import {
+    FileCategory,
+    VALIDATION_RULES,
+    FILE_CATEGORY_OPTIONS,
+    type FileCategoryDto,
+    type CategorizedSubmittedFile
+} from '@/types/categorized-upload'
 
 export interface ValidationResult {
     isValid: boolean
@@ -8,8 +14,8 @@ export interface ValidationResult {
 }
 
 export const validateCategorizedFiles = (
-    files: File[], 
-    fileCategories: FileCategoryDto[], 
+    files: File[],
+    fileCategories: FileCategoryDto[],
     submittedFiles: CategorizedSubmittedFile[] = []
 ): ValidationResult => {
     const errors: { [index: number]: string } = {}
@@ -69,11 +75,11 @@ export const validateCategorizedFiles = (
 
     // Check if at least one special category is present (including submitted files)
     const hasSpecialFile = specialCategories.length > 0
-    const hasSubmittedSpecialFiles = submittedFiles.some(file => {
-        const categoryOption = FILE_CATEGORY_OPTIONS.find(opt => opt.value === file.category)
+    const hasSubmittedSpecialFiles = submittedFiles.some((file) => {
+        const categoryOption = FILE_CATEGORY_OPTIONS.find((opt) => opt.value === file.category)
         return categoryOption?.isSpecial === true
     })
-    
+
     if (!hasSpecialFile && !hasSubmittedSpecialFiles) {
         globalErrors.push('Cần ít nhất phiếu chỉ định (sàng lọc tiền sinh, ung thư di truyền, đột biến gen)')
     }
@@ -82,11 +88,13 @@ export const validateCategorizedFiles = (
 
     const isValid = Object.keys(errors).length === 0 && globalErrors.length === 0
     const totalFiles = files.length + submittedFiles.length
-    const totalSpecialFiles = specialCategories.length + submittedFiles.filter(file => {
-        const categoryOption = FILE_CATEGORY_OPTIONS.find(opt => opt.value === file.category)
-        return categoryOption?.isSpecial === true
-    }).length
-    
+    const totalSpecialFiles =
+        specialCategories.length +
+        submittedFiles.filter((file) => {
+            const categoryOption = FILE_CATEGORY_OPTIONS.find((opt) => opt.value === file.category)
+            return categoryOption?.isSpecial === true
+        }).length
+
     const summary = isValid
         ? `✓ Hợp lệ: ${files.length} file mới${submittedFiles.length > 0 ? ` (tổng: ${totalFiles} file, ${totalSpecialFiles} phiếu chỉ định)` : `, ${specialCategories.length} phiếu chỉ định`}`
         : `✗ Có ${Object.keys(errors).length + globalErrors.length} lỗi cần khắc phục`

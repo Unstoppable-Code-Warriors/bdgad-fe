@@ -45,7 +45,6 @@ const ImportStep = ({
 }: ImportStepProps) => {
     return (
         <Stack gap='lg' mt='xl'>
-            
             <FileUploadZone onDrop={onFileDrop} existingFiles={submittedFiles} />
 
             {/* File Categorization Step */}

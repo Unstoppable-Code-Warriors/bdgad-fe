@@ -85,7 +85,7 @@ export const LAB_TEST_STATUS = {
     WAIT_FOR_APPROVAL: 'wait_for_approval',
     APPROVED: 'approved',
     REJECTED: 'rejected',
-    NOT_UPLOADED: 'not_uploaded',
+    NOT_UPLOADED: 'not_uploaded'
 } as const
 
 export type LabTestStatus = (typeof LAB_TEST_STATUS)[keyof typeof LAB_TEST_STATUS]
