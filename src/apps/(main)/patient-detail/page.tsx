@@ -322,13 +322,7 @@ const PatientDetailPage = () => {
                                                         Giới tính
                                                     </Text>
                                                     <Text size='md' fw={600} c='dark'>
-                                                        {patientData?.gender === 'Male'
-                                                            ? 'Nam'
-                                                            : patientData?.gender === 'Female'
-                                                              ? 'Nữ'
-                                                              : patientData?.gender === 'Other'
-                                                                ? 'Khác'
-                                                                : 'Chưa có thông tin'}
+                                                        {patientData?.gender || 'Chưa có thông tin'}
                                                     </Text>
                                                 </Box>
                                             </Group>
@@ -360,15 +354,7 @@ const PatientDetailPage = () => {
                                                         Tình trạng hôn nhân
                                                     </Text>
                                                     <Text size='md' fw={600} c='dark'>
-                                                        {patientData?.maritalStatus === 'Single'
-                                                            ? 'Độc thân'
-                                                            : patientData?.maritalStatus === 'Married'
-                                                              ? 'Đã kết hôn'
-                                                              : patientData?.maritalStatus === 'Divorced'
-                                                                ? 'Ly hôn'
-                                                                : patientData?.maritalStatus === 'Widowed'
-                                                                  ? 'Góa phụ'
-                                                                  : 'Chưa có thông tin'}
+                                                        {patientData?.maritalStatus || 'Chưa có thông tin'}
                                                     </Text>
                                                 </Box>
                                             </Group>

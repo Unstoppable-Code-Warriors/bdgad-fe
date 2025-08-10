@@ -237,9 +237,9 @@ const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
                             value={patientData.gender}
                             onChange={(value) => setPatientData((prev) => ({ ...prev, gender: value || '' }))}
                             data={[
-                                { value: 'Male', label: 'Nam' },
-                                { value: 'Female', label: 'Nữ' },
-                                { value: 'Other', label: 'Khác' }
+                                { value: 'Nam', label: 'Nam' },
+                                { value: 'Nữ', label: 'Nữ' },
+                                { value: 'Khác', label: 'Khác' }
                             ]}
                             size='md'
                             clearable
@@ -263,9 +263,9 @@ const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
                             value={patientData.maritalStatus}
                             onChange={(value) => setPatientData((prev) => ({ ...prev, maritalStatus: value || '' }))}
                             data={[
-                                { value: 'Single', label: 'Độc thân' },
-                                { value: 'Married', label: 'Đã kết hôn' },
-                                { value: 'Divorced', label: 'Ly hôn' }
+                                { value: 'Độc thân', label: 'Độc thân' },
+                                { value: 'Đã kết hôn', label: 'Đã kết hôn' },
+                                { value: 'Ly hôn', label: 'Ly hôn' }
                             ]}
                             size='md'
                             clearable
