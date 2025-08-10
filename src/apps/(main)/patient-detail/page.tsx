@@ -31,33 +31,10 @@ import {
     IconHeart,
     IconGenderBigender,
     IconWorld,
-    IconBriefcase
+    IconBriefcase,
+    IconMedicalCross
 } from '@tabler/icons-react'
 import { usePatientLabSessions } from '@/services/hook/staff-patient-session.hook'
-
-const getStatusBadge = (status: string) => {
-    const statusColors = {
-        completed: 'green',
-        processing: 'yellow',
-        pending: 'blue',
-        test: 'blue',
-        validation: 'green'
-    }
-
-    const statusLabels = {
-        completed: 'Hoàn thành',
-        processing: 'Đang xử lý',
-        pending: 'Chờ thẩm định',
-        test: 'Xét nghiệm',
-        validation: 'Thẩm định'
-    }
-
-    return (
-        <Badge color={statusColors[status as keyof typeof statusColors] || 'gray'} variant='light' size='sm'>
-            {statusLabels[status as keyof typeof statusLabels] || status}
-        </Badge>
-    )
-}
 
 const getSessionTypeIcon = (type: string) => {
     if (type === 'test') {
@@ -104,6 +81,10 @@ const PatientDetailPage = () => {
 
     const handleSessionClick = (sessionId: string) => {
         navigate(`/patient-detail/${id}/session/${sessionId}`)
+    }
+
+    const handleClinicInfo = () => {
+        navigate(`/pharmacy-patient-info/${id}`)
     }
 
     if (isLoading) {
@@ -205,22 +186,32 @@ const PatientDetailPage = () => {
                         <Card shadow='sm' padding='xl' withBorder>
                             <Stack gap='lg'>
                                 {/* Header */}
-                                <Group align='center' mb='md'>
-                                    <Box
-                                        p='md'
-                                        bg='linear-gradient(135deg, #4c6ef5 0%, #364fc7 100%)'
-                                        style={{ borderRadius: '12px' }}
+                                <Group justify='space-between' align='center' mb='md'>
+                                    <Group>
+                                        <Box
+                                            p='md'
+                                            bg='linear-gradient(135deg, #4c6ef5 0%, #364fc7 100%)'
+                                            style={{ borderRadius: '12px' }}
+                                        >
+                                            <IconUser size={24} color='white' />
+                                        </Box>
+                                        <div>
+                                            <Text fw={700} size='xl' c='dark'>
+                                                Thông tin bệnh nhân
+                                            </Text>
+                                            <Text size='sm' c='dimmed'>
+                                                Chi tiết hồ sơ cá nhân
+                                            </Text>
+                                        </div>
+                                    </Group>
+                                    <Button
+                                        variant='light'
+                                        color='blue'
+                                        leftSection={<IconMedicalCross size={16} />}
+                                        onClick={handleClinicInfo}
                                     >
-                                        <IconUser size={24} color='white' />
-                                    </Box>
-                                    <div>
-                                        <Text fw={700} size='xl' c='dark'>
-                                            Thông tin bệnh nhân
-                                        </Text>
-                                        <Text size='sm' c='dimmed'>
-                                            Chi tiết hồ sơ cá nhân
-                                        </Text>
-                                    </div>
+                                        Thông tin phòng khám
+                                    </Button>
                                 </Group>
 
                                 <Box>

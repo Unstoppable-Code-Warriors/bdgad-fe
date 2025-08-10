@@ -1,5 +1,5 @@
 import { backendApi } from '@/utils/api'
-import type { MedicalTestRequisitionUploadResponse } from '@/types'
+import type { MedicalTestRequisitionUploadResponse, ClinicPatient } from '@/types'
 import type { GeneralFileDownloadResponse } from '@/types/general-file'
 import type { CommonOCRRes, OCRRes } from '@/types/ocr-file'
 
@@ -288,5 +288,10 @@ export const staffService = {
     // Get pharmacy patient by ID
     getPharmacyPatientById: async (id: string): Promise<any> => {
         return backendApi.get(`${PREFIX}/pharmacy-patient/${id}`).json()
+    },
+
+    // Get patient by ID (clinic information)
+    getPatientById: async (patientId: string): Promise<ClinicPatient> => {
+        return backendApi.get(`${PREFIX}/patients/${patientId}`).json<ClinicPatient>()
     }
 }

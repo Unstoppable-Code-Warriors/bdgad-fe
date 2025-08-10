@@ -27,6 +27,7 @@ import ProfilePage from '@/apps/(main)/profile/page'
 import SessionDetailPage from '@/apps/(main)/patient-detail/session/[sessionId]/page'
 import PharmacyPatientsPage from '@/apps/(main)/pharmacy-patients/page'
 import PharmacyPatientDetailPage from '@/apps/(main)/pharmacy-patients/[id]/page'
+import PharmacyPatientInfoPage from '@/apps/(main)/pharmacy-patient-info/[id]/page'
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -142,6 +143,10 @@ export const router = createBrowserRouter([
                                 element: <PharmacyPatientDetailPage />
                             }
                         ]
+                    },
+                    {
+                        path: '/pharmacy-patient-info/:id',
+                        element: <PharmacyPatientInfoPage />
                     },
                     {
                         path: '/patient-detail/:id',
