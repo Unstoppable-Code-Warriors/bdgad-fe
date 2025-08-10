@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { Modal, TextInput, Group, Stack, Button, Select, Grid, Textarea } from '@mantine/core'
-import { DatePickerInput } from '@mantine/dates'
+import { Modal, TextInput, Group, Stack, Button, Grid } from '@mantine/core'
 import { IconEdit } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { useUpdatePatientFolder } from '@/services/hook/staff-patient-folder.hook'
@@ -72,19 +71,19 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
         onClose()
     }, [onClose])
 
-    const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value
+    // const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const value = e.target.value
 
-        // Allow typing but validate in real-time
-        setEditPatientData((prev) => ({
-            ...prev,
-            phone: value
-        }))
+    //     // Allow typing but validate in real-time
+    //     setEditPatientData((prev) => ({
+    //         ...prev,
+    //         phone: value
+    //     }))
 
-        // Real-time validation
-        const error = validatePhone(value)
-        setPhoneError(error || '')
-    }, [])
+    //     // Real-time validation
+    //     const error = validatePhone(value)
+    //     setPhoneError(error || '')
+    // }, [])
 
     const handleFullNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
