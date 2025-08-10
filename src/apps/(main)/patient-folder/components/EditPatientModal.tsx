@@ -290,8 +290,7 @@ const EditPatientModal = ({ opened, onClose, patient }: EditPatientModalProps) =
                             data={[
                                 { value: 'Single', label: 'Độc thân' },
                                 { value: 'Married', label: 'Đã kết hôn' },
-                                { value: 'Divorced', label: 'Ly hôn' },
-                                { value: 'Widowed', label: 'Góa phụ' }
+                                { value: 'Divorced', label: 'Ly hôn' }
                             ]}
                             size='md'
                             clearable
