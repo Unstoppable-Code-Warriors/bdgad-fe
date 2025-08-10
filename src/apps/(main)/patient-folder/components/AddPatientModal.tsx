@@ -190,7 +190,7 @@ const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
                         />
                     </Grid.Col>
 
-                    <Grid.Col span={6}>
+                    <Grid.Col span={12}>
                         <TextInput
                             label='Số CCCD'
                             placeholder='Nhập số căn cước công dân (12 số)...'
@@ -203,7 +203,7 @@ const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
                         />
                     </Grid.Col>
 
-                    <Grid.Col span={6}>
+                    {/* <Grid.Col span={12}>
                         <DatePickerInput
                             label='Ngày sinh'
                             placeholder='Chọn ngày sinh'
@@ -318,7 +318,7 @@ const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
                             minRows={2}
                             maxRows={4}
                         />
-                    </Grid.Col>
+                    </Grid.Col> */}
                 </Grid>
 
                 <Group justify='flex-end' mt='md'>

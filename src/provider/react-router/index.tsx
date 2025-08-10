@@ -25,8 +25,6 @@ import ValidationPage from '@/apps/(main)/validation/page'
 import ValidationDetailPage from '@/apps/(main)/validation/[id]/page'
 import ProfilePage from '@/apps/(main)/profile/page'
 import SessionDetailPage from '@/apps/(main)/patient-detail/session/[sessionId]/page'
-import PharmacyPatientsPage from '@/apps/(main)/pharmacy-patients/page'
-import PharmacyPatientDetailPage from '@/apps/(main)/pharmacy-patients/[id]/page'
 import PharmacyPatientInfoPage from '@/apps/(main)/pharmacy-patient-info/[id]/page'
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -129,20 +127,6 @@ export const router = createBrowserRouter([
                     {
                         path: '/patient-folder',
                         element: <PatientInfoPage />
-                    },
-                    {
-                        path: '/pharmacy-patients',
-                        element: <Outlet />,
-                        children: [
-                            {
-                                index: true,
-                                element: <PharmacyPatientsPage />
-                            },
-                            {
-                                path: ':id',
-                                element: <PharmacyPatientDetailPage />
-                            }
-                        ]
                     },
                     {
                         path: '/pharmacy-patient-info/:id',

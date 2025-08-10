@@ -16,15 +16,7 @@ import {
     Center,
     Loader
 } from '@mantine/core'
-import {
-    IconArrowLeft,
-    IconCalendar,
-    IconUser,
-    IconMedicalCross,
-    IconFileText,
-    IconTestPipe,
-    IconPill
-} from '@tabler/icons-react'
+import { IconArrowLeft, IconUser, IconMedicalCross, IconFileText, IconTestPipe, IconPill } from '@tabler/icons-react'
 import { usePatientById } from '@/services/hook/staff-patient-folder.hook'
 import { notifications } from '@mantine/notifications'
 
