@@ -1,5 +1,5 @@
 import { backendApi } from '@/utils/api'
-import type { MedicalTestRequisitionUploadResponse } from '@/types'
+import type { MedicalTestRequisitionUploadResponse, ClinicPatient } from '@/types'
 import type { GeneralFileDownloadResponse } from '@/types/general-file'
 import type { CommonOCRRes, OCRRes } from '@/types/ocr-file'
 
@@ -271,22 +271,8 @@ export const staffService = {
             .json()
     },
 
-    // Get pharmacy patients
-    getPharmacyPatients: async (params?: { page?: number; limit?: number; search?: string }): Promise<any> => {
-        const searchParams = new URLSearchParams()
-
-        if (params?.page) searchParams.append('page', params.page.toString())
-        if (params?.limit) searchParams.append('limit', params.limit.toString())
-        if (params?.search) searchParams.append('search', params.search)
-
-        const queryString = searchParams.toString()
-        const url = queryString ? `${PREFIX}/pharmacy-patient?${queryString}` : `${PREFIX}/pharmacy-patient`
-
-        return backendApi.get(url).json()
-    },
-
-    // Get pharmacy patient by ID
-    getPharmacyPatientById: async (id: string): Promise<any> => {
-        return backendApi.get(`${PREFIX}/pharmacy-patient/${id}`).json()
+    // Get patient by ID (clinic information)
+    getPatientById: async (patientId: string): Promise<ClinicPatient> => {
+        return backendApi.get(`${PREFIX}/patients/${patientId}`).json<ClinicPatient>()
     }
 }

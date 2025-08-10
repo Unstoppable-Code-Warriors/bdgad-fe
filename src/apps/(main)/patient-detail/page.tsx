@@ -24,33 +24,17 @@ import {
     IconUser,
     IconPlus,
     IconId,
-    IconBarcode
+    IconBarcode,
+    IconPhone,
+    IconMapPin,
+    IconUsers,
+    IconHeart,
+    IconGenderBigender,
+    IconWorld,
+    IconBriefcase,
+    IconMedicalCross
 } from '@tabler/icons-react'
 import { usePatientLabSessions } from '@/services/hook/staff-patient-session.hook'
-
-const getStatusBadge = (status: string) => {
-    const statusColors = {
-        completed: 'green',
-        processing: 'yellow',
-        pending: 'blue',
-        test: 'blue',
-        validation: 'green'
-    }
-
-    const statusLabels = {
-        completed: 'Hoàn thành',
-        processing: 'Đang xử lý',
-        pending: 'Chờ thẩm định',
-        test: 'Xét nghiệm',
-        validation: 'Thẩm định'
-    }
-
-    return (
-        <Badge color={statusColors[status as keyof typeof statusColors] || 'gray'} variant='light' size='sm'>
-            {statusLabels[status as keyof typeof statusLabels] || status}
-        </Badge>
-    )
-}
 
 const getSessionTypeIcon = (type: string) => {
     if (type === 'test') {
@@ -97,6 +81,10 @@ const PatientDetailPage = () => {
 
     const handleSessionClick = (sessionId: string) => {
         navigate(`/patient-detail/${id}/session/${sessionId}`)
+    }
+
+    const handleClinicInfo = () => {
+        navigate(`/pharmacy-patient-info/${id}`)
     }
 
     if (isLoading) {
@@ -194,114 +182,287 @@ const PatientDetailPage = () => {
 
                 <Grid>
                     {/* Patient Information */}
-                    <Grid.Col span={sessions.length > 0 ? 4 : 12}>
-                        <Card h={sessions.length > 0 ? 350 : '100%'} shadow='sm' padding='lg' withBorder>
-                            <Stack gap='md'>
-                                <Group align='center' mb='sm'>
-                                    <Box p='sm' bg='blue.0' style={{ borderRadius: '8px' }}>
-                                        <IconUser size={20} color='#1971c2' />
-                                    </Box>
-                                    <div>
-                                        <Text fw={600} size='lg'>
-                                            Thông tin bệnh nhân
-                                        </Text>
-                                    </div>
+                    <Grid.Col span={sessions.length > 0 ? 7 : 12}>
+                        <Card shadow='sm' padding='xl' withBorder>
+                            <Stack gap='lg'>
+                                {/* Header */}
+                                <Group justify='space-between' align='center' mb='md'>
+                                    <Group>
+                                        <Box
+                                            p='md'
+                                            bg='linear-gradient(135deg, #4c6ef5 0%, #364fc7 100%)'
+                                            style={{ borderRadius: '12px' }}
+                                        >
+                                            <IconUser size={24} color='white' />
+                                        </Box>
+                                        <div>
+                                            <Text fw={700} size='xl' c='dark'>
+                                                Thông tin bệnh nhân
+                                            </Text>
+                                            <Text size='sm' c='dimmed'>
+                                                Chi tiết hồ sơ cá nhân
+                                            </Text>
+                                        </div>
+                                    </Group>
+                                    <Button
+                                        variant='light'
+                                        color='blue'
+                                        leftSection={<IconMedicalCross size={16} />}
+                                        onClick={handleClinicInfo}
+                                    >
+                                        Thông tin phòng khám
+                                    </Button>
                                 </Group>
 
-                                <Grid>
-                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
-                                        <Stack gap='xs'>
-                                            <Group gap='xs'>
-                                                <IconBarcode size={16} color='#495057' />
-                                                <Text size='sm' fw={500} c='dimmed'>
-                                                    Barcode:
-                                                </Text>
-                                                <Text size='md' fw={600}>
-                                                    {patientData?.barcode || 'Không có thông tin'}
-                                                </Text>
-                                            </Group>
-                                        </Stack>
-                                    </Grid.Col>
-                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
-                                        <Stack gap='xs'>
-                                            <Group gap='xs'>
-                                                <IconUser size={16} color='#495057' />
-                                                <Text size='sm' fw={500} c='dimmed'>
-                                                    Họ và tên:
-                                                </Text>
-                                                <Text size='md' fw={600}>
-                                                    {patientData?.fullName || 'Không có thông tin'}
-                                                </Text>
-                                            </Group>
-                                        </Stack>
-                                    </Grid.Col>
+                                <Box>
+                                    <Grid>
+                                        {/* Basic Information Section */}
+                                        <Grid.Col span={12}>
+                                            <Text
+                                                size='sm'
+                                                fw={600}
+                                                c='blue'
+                                                mb='md'
+                                                tt='uppercase'
+                                                style={{ letterSpacing: 0.5 }}
+                                            >
+                                                Thông tin cơ bản
+                                            </Text>
+                                        </Grid.Col>
 
-                                    {/* <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
-                                        <Stack gap='xs'>
-                                            <Group gap='xs'>
-                                                <IconCalendarEvent size={16} color='#495057' />
-                                                <Text size='sm' fw={500} c='dimmed'>
-                                                    Ngày sinh:
-                                                </Text>
-                                                <Text size='md' fw={600}>
-                                                    {patientData?.dateOfBirth
-                                                        ? new Date(patientData.dateOfBirth).toLocaleDateString('vi-VN')
-                                                        : 'Không có thông tin'}
-                                                </Text>
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconBarcode size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Mã barcode
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark'>
+                                                        {patientData?.barcode || 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
                                             </Group>
-                                        </Stack>
-                                    </Grid.Col> */}
+                                        </Grid.Col>
 
-                                    {/* <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
-                                        <Stack gap='xs'>
-                                            <Group gap='xs'>
-                                                <IconPhone size={16} color='#495057' />
-                                                <Text size='sm' fw={500} c='dimmed'>
-                                                    Số điện thoại:
-                                                </Text>
-                                                <Text size='md' fw={600}>
-                                                    {patientData?.phone || 'Không có thông tin'}
-                                                </Text>
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconUser size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Họ và tên
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark'>
+                                                        {patientData?.fullName || 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
                                             </Group>
-                                        </Stack>
-                                    </Grid.Col> */}
+                                        </Grid.Col>
 
-                                    <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
-                                        <Stack gap='xs'>
-                                            <Group gap='xs'>
-                                                <IconId size={16} color='#495057' />
-                                                <Text size='sm' fw={500} c='dimmed'>
-                                                    CCCD:
-                                                </Text>
-                                                <Text size='md' fw={600}>
-                                                    {patientData?.citizenId || 'Không có thông tin'}
-                                                </Text>
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconId size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Số CCCD
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark'>
+                                                        {patientData?.citizenId || 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
                                             </Group>
-                                        </Stack>
-                                    </Grid.Col>
+                                        </Grid.Col>
 
-                                    {/* <Grid.Col span={{ base: 12, sm: sessions.length > 0 ? 12 : 6 }}>
-                                        <Stack gap='xs'>
-                                            <Group gap='xs'>
-                                                <IconMapPin size={16} color='#495057' />
-                                                <Text size='sm' fw={500} c='dimmed'>
-                                                    Địa chỉ:
-                                                </Text>
-                                                <Text size='md' fw={600}>
-                                                    {patientData?.address || 'Không có thông tin'}
-                                                </Text>
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconCalendarEvent size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Ngày sinh
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark'>
+                                                        {patientData?.dateOfBirth
+                                                            ? new Date(patientData.dateOfBirth).toLocaleDateString(
+                                                                  'vi-VN'
+                                                              )
+                                                            : 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
                                             </Group>
-                                        </Stack>
-                                    </Grid.Col> */}
-                                </Grid>
+                                        </Grid.Col>
+
+                                        {/* Personal Details Section */}
+                                        <Grid.Col span={12} mt='lg'>
+                                            <Text
+                                                size='sm'
+                                                fw={600}
+                                                c='green'
+                                                mb='md'
+                                                tt='uppercase'
+                                                style={{ letterSpacing: 0.5 }}
+                                            >
+                                                Thông tin cá nhân
+                                            </Text>
+                                        </Grid.Col>
+
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconGenderBigender size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Giới tính
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark'>
+                                                        {patientData?.gender || 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
+                                            </Group>
+                                        </Grid.Col>
+
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconUsers size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Dân tộc
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark'>
+                                                        {patientData?.ethnicity || 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
+                                            </Group>
+                                        </Grid.Col>
+
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconHeart size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Tình trạng hôn nhân
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark'>
+                                                        {patientData?.maritalStatus || 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
+                                            </Group>
+                                        </Grid.Col>
+
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconWorld size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Quốc gia
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark'>
+                                                        {patientData?.nation || 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
+                                            </Group>
+                                        </Grid.Col>
+
+                                        {/* Contact Information Section */}
+                                        <Grid.Col span={12} mt='lg'>
+                                            <Text
+                                                size='sm'
+                                                fw={600}
+                                                c='orange'
+                                                mb='md'
+                                                tt='uppercase'
+                                                style={{ letterSpacing: 0.5 }}
+                                            >
+                                                Thông tin liên hệ
+                                            </Text>
+                                        </Grid.Col>
+
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconPhone size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Số điện thoại
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark'>
+                                                        {patientData?.phone || 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
+                                            </Group>
+                                        </Grid.Col>
+
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconMapPin size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Địa chỉ chính
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark' style={{ lineHeight: 1.4 }}>
+                                                        {patientData?.address1 || 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
+                                            </Group>
+                                        </Grid.Col>
+
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconMapPin size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Địa chỉ phụ
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark' style={{ lineHeight: 1.4 }}>
+                                                        {patientData?.address2 || 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
+                                            </Group>
+                                        </Grid.Col>
+
+                                        <Grid.Col span={6}>
+                                            <Group gap='md' align='flex-start'>
+                                                <Box p='xs' bg='gray.0' style={{ borderRadius: '8px' }}>
+                                                    <IconBriefcase size={18} color='#495057' />
+                                                </Box>
+                                                <Box flex={1}>
+                                                    <Text size='sm' fw={500} c='dimmed' mb={2}>
+                                                        Địa chỉ làm việc
+                                                    </Text>
+                                                    <Text size='md' fw={600} c='dark' style={{ lineHeight: 1.4 }}>
+                                                        {patientData?.workAddress || 'Chưa có thông tin'}
+                                                    </Text>
+                                                </Box>
+                                            </Group>
+                                        </Grid.Col>
+                                    </Grid>
+                                </Box>
                             </Stack>
                         </Card>
                     </Grid.Col>
 
                     {/* Sessions List */}
                     {sessions.length > 0 && (
-                        <Grid.Col span={8}>
-                            <Card shadow='sm' padding='lg' withBorder h={550}>
+                        <Grid.Col span={5}>
+                            <Card shadow='sm' padding='lg' withBorder h={715}>
                                 <Stack gap='md' h='100%'>
                                     <Group justify='space-between' align='center'>
                                         <Text fw={600} size='lg'>
@@ -380,8 +541,6 @@ const PatientDetailPage = () => {
                                                                 </Group>
                                                             </div>
                                                         </Group>
-
-                                                        {getStatusBadge(session.typeLabSession)}
                                                     </Group>
                                                 </Card>
                                             ))}

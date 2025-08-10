@@ -64,3 +64,11 @@ export const usePatientFolderDetail = (id: string | undefined) => {
         enabled: !!id
     })
 }
+
+export const usePatientById = (patientId: string | undefined) => {
+    return useQuery({
+        queryKey: ['patient-by-id', patientId],
+        queryFn: () => staffService.getPatientById(patientId!),
+        enabled: !!patientId
+    })
+}
