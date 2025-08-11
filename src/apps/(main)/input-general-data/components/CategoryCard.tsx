@@ -259,7 +259,7 @@ const CategoryCard = ({
                         lineClamp={2}
                         style={{
                             flexGrow: 1,
-                            minHeight: '2.5rem', // Ensures consistent height for 2 lines
+                            minHeight: '2.5rem', 
                             marginBottom: '1rem'
                         }}
                     >

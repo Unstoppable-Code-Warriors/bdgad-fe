@@ -287,7 +287,7 @@ const CategoryDetailPage = () => {
                                                 >
                                                     {getFileIcon(file.fileType)}
                                                 </ThemeIcon>
-                                                <Box style={{ flex: 1, minWidth: 0, height: 60 }}>
+                                                <Box style={{ flex: 1, minWidth: 0, height: 100 }}>
                                                     <Tooltip label={file.fileName} position='top'>
                                                         <Text fw={600} size='sm' lineClamp={2} c='dark'>
                                                             {file.fileName}
@@ -361,12 +361,8 @@ const CategoryDetailPage = () => {
                                                 label={file.sendEmrAt ? 'Không thể xóa tệp đã gửi EMR' : 'Xóa tệp'}
                                             >
                                                 <ActionIcon
-                                                    variant='gradient'
-                                                    gradient={
-                                                        file.sendEmrAt
-                                                            ? { from: 'gray', to: 'black' }
-                                                            : { from: 'red', to: 'orange' }
-                                                    }
+                                                    variant='filled'
+                                                    color={file.sendEmrAt ? 'gray' : 'red'}
                                                     size='lg'
                                                     radius='md'
                                                     onClick={() => openDeleteConfirmation(file)}

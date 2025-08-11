@@ -7,12 +7,13 @@ import type { CategorizedSubmittedFile } from '@/types/categorized-upload'
 interface SubmittedFilesTableProps {
     files: CategorizedSubmittedFile[]
     ocrProgress: { [fileId: string]: number }
+    skipOCR?: boolean
     onStartOCR: (fileId: string) => void
     onViewOCR?: (submittedFile: CategorizedSubmittedFile) => void
     onDelete: (id: string) => void
 }
 
-const SubmittedFilesTable = ({ files, ocrProgress, onStartOCR, onViewOCR, onDelete }: SubmittedFilesTableProps) => {
+const SubmittedFilesTable = ({ files, ocrProgress, skipOCR = false, onStartOCR, onViewOCR, onDelete }: SubmittedFilesTableProps) => {
     if (files.length === 0) return null
 
     const handleDownload = (file: FileWithPath) => {
@@ -24,6 +25,9 @@ const SubmittedFilesTable = ({ files, ocrProgress, onStartOCR, onViewOCR, onDele
         URL.revokeObjectURL(url)
     }
     const getOCRButton = (submittedFile: CategorizedSubmittedFile) => {
+        // Skip OCR functionality if skipOCR is true
+        if (skipOCR) return null
+        
         if (submittedFile.type !== 'image') return null
 
         // Check if any file is currently processing OCR

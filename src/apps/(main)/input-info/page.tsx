@@ -22,6 +22,7 @@ import OCRDrawer from './components/OCRDrawer'
 
 const InputInfoPage = () => {
     const [typeLabSession, setTypeLabSession] = useState<string>('test')
+    const [skipOCR, setSkipOCR] = useState<boolean>(false)
     const [selectedFiles, setSelectedFiles] = useState<FileWithPath[]>([])
     const [fileCategories, setFileCategories] = useState<FileCategoryDto[]>([])
     const [submittedFiles, setSubmittedFiles] = useState<CategorizedSubmittedFile[]>([])
@@ -52,6 +53,13 @@ const InputInfoPage = () => {
         if (location.state?.submittedFiles) {
             console.log('Restoring submitted files from OCR:', location.state.submittedFiles)
             setSubmittedFiles(location.state.submittedFiles)
+        }
+        // Set session type and skip OCR if provided in navigation state
+        if (location.state?.typeLabSession) {
+            setTypeLabSession(location.state.typeLabSession)
+        }
+        if (location.state?.skipOCR) {
+            setSkipOCR(location.state.skipOCR)
         }
     }, [location.state])
 
@@ -611,12 +619,12 @@ const InputInfoPage = () => {
     const sessionTypeOptions = [
         {
             value: 'test',
-            label: 'Xét nghiệm',
+            label: 'Xét nghiệm gen',
             icon: <IconMicroscope size={16} />
         },
         {
             value: 'validation',
-            label: 'Thẩm định',
+            label: 'Kết quả xét nghiệm gen + EHR',
             icon: <IconClipboardCheck size={16} />
         }
     ]
@@ -627,7 +635,7 @@ const InputInfoPage = () => {
                 <Center mb='xl'>
                     <div>
                         <Title order={1} ta='center' mb='sm'>
-                            Tạo lần khám mới
+                            {skipOCR ? 'Tải lên kết quả xét nghiệm' : 'Tạo lần khám mới'}
                         </Title>
                     </div>
                 </Center>
@@ -640,21 +648,22 @@ const InputInfoPage = () => {
                 </Button>
 
                 {/* Session Type Selection */}
-                <Paper p='lg' withBorder mb='xl' style={{ margin: '0 auto' }}>
-                    <Stack gap='md'>
-                        <Select
-                            label='Loại lần khám'
-                            placeholder='Chọn loại lần khám'
-                            value={typeLabSession}
-                            onChange={(value) => setTypeLabSession(value || 'test')}
-                            data={sessionTypeOptions.map((option) => ({
-                                value: option.value,
-                                label: option.label
-                            }))}
-                            size='md'
-                            required
-                            leftSection={
-                                typeLabSession === 'test' ? (
+                {!skipOCR && (
+                    <Paper p='lg' withBorder mb='xl' style={{ margin: '0 auto' }}>
+                        <Stack gap='md'>
+                            <Select
+                                label='Loại lần khám'
+                                placeholder='Chọn loại lần khám'
+                                value={typeLabSession}
+                                onChange={(value) => setTypeLabSession(value || 'test')}
+                                data={sessionTypeOptions.map((option) => ({
+                                    value: option.value,
+                                    label: option.label
+                                }))}
+                                size='md'
+                                required
+                                leftSection={
+                                    typeLabSession === 'test' ? (
                                     <IconMicroscope size={16} />
                                 ) : (
                                     <IconClipboardCheck size={16} />
@@ -663,6 +672,7 @@ const InputInfoPage = () => {
                         />
                     </Stack>
                 </Paper>
+                )}
 
                 {/* File Import and Categorization Section */}
                 <ImportStep
@@ -670,6 +680,7 @@ const InputInfoPage = () => {
                     fileCategories={fileCategories}
                     submittedFiles={submittedFiles}
                     error={error}
+                    skipOCR={skipOCR}
                     ocrProgress={ocrProgress}
                     validationResult={validationResult}
                     onFileDrop={handleFileDrop}

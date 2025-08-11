@@ -14,7 +14,8 @@ import {
     Grid,
     Tooltip,
     Center,
-    Loader
+    Loader,
+    Tabs
 } from '@mantine/core'
 import { IconArrowLeft, IconUser, IconMedicalCross, IconFileText, IconTestPipe, IconPill } from '@tabler/icons-react'
 import { usePatientById } from '@/services/hook/staff-patient-folder.hook'
@@ -161,181 +162,177 @@ const PharmacyPatientInfoPage = () => {
                     </Group>
                 </Paper>
 
-                <Grid>
-                    {/* Patient Information */}
-                    <Grid.Col span={{ base: 12, md: 6 }}>
-                        <Card shadow='sm' padding='lg' radius='md' withBorder>
-                            <Group mb='md'>
-                                <IconUser size={24} color='var(--mantine-color-blue-6)' />
-                                <Text fw={600} size='lg'>
-                                    Thông tin bệnh nhân
-                                </Text>
-                            </Group>
-                            <Stack gap='sm'>
-                                <Group justify='space-between'>
-                                    <Text size='sm' c='dimmed'>
-                                        Họ và tên:
-                                    </Text>
-                                    <Text size='sm' fw={500}>
-                                        {patient.fullName}
-                                    </Text>
-                                </Group>
-                                <Group justify='space-between'>
-                                    <Text size='sm' c='dimmed'>
-                                        Giới tính:
-                                    </Text>
-                                    <Badge size='sm' variant='light' color='cyan'>
-                                        {patient.gender || 'Không xác định'}
-                                    </Badge>
-                                </Group>
-                                <Group justify='space-between'>
-                                    <Text size='sm' c='dimmed'>
-                                        Ngày sinh:
-                                    </Text>
-                                    <Text size='sm' fw={500}>
-                                        {patient.dateOfBirth
-                                            ? new Date(patient.dateOfBirth).toLocaleDateString('vi-VN')
-                                            : 'Chưa có thông tin'}
-                                    </Text>
-                                </Group>
-                                <Group justify='space-between'>
-                                    <Text size='sm' c='dimmed'>
-                                        Dân tộc:
-                                    </Text>
-                                    <Text size='sm' fw={500}>
-                                        {patient.ethnicity || 'Chưa có thông tin'}
-                                    </Text>
-                                </Group>
-                                <Group justify='space-between'>
-                                    <Text size='sm' c='dimmed'>
-                                        Quốc tịch:
-                                    </Text>
-                                    <Text size='sm' fw={500}>
-                                        {patient.nation || 'Chưa có thông tin'}
-                                    </Text>
-                                </Group>
-                                <Group justify='space-between'>
-                                    <Text size='sm' c='dimmed'>
-                                        Tình trạng hôn nhân:
-                                    </Text>
-                                    <Text size='sm' fw={500}>
-                                        {patient.maritalStatus || 'Chưa có thông tin'}
-                                    </Text>
-                                </Group>
-                                {patient.phone && (
-                                    <Group justify='space-between'>
-                                        <Text size='sm' c='dimmed'>
-                                            Điện thoại:
-                                        </Text>
-                                        <Text size='sm' fw={500}>
-                                            {patient.phone}
+                <Tabs defaultValue="patient-info" variant="pills" radius="md">
+                    <Tabs.List grow>
+                        <Tabs.Tab value="patient-info" leftSection={<IconUser size={16} />}>
+                            Thông tin cá nhân
+                        </Tabs.Tab>
+                        {patient.medicalRecord && (
+                            <Tabs.Tab value="medical-record" leftSection={<IconFileText size={16} />}>
+                                Hồ sơ khám bệnh
+                            </Tabs.Tab>
+                        )}
+                        {patient.medicalRecord?.lab_test && patient.medicalRecord.lab_test.length > 0 && (
+                            <Tabs.Tab value="lab-tests" leftSection={<IconTestPipe size={16} />}>
+                                Kết quả xét nghiệm
+                            </Tabs.Tab>
+                        )}
+                        {patient.medicalRecord?.prescription && (
+                            <Tabs.Tab value="prescription" leftSection={<IconPill size={16} />}>
+                                Đơn thuốc
+                            </Tabs.Tab>
+                        )}
+                    </Tabs.List>
+
+                    <Tabs.Panel value="patient-info" pt="lg">
+                        <Grid>
+                            {/* Patient Information */}
+                            <Grid.Col span={{ base: 12, md: 6 }}>
+                                <Card shadow='sm' padding='lg' radius='md' withBorder>
+                                    <Group mb='md'>
+                                        <IconUser size={24} color='var(--mantine-color-blue-6)' />
+                                        <Text fw={600} size='lg'>
+                                            Thông tin bệnh nhân
                                         </Text>
                                     </Group>
-                                )}
-                                {(patient.address1 || patient.address2) && (
-                                    <Group justify='space-between' align='flex-start'>
-                                        <Text size='sm' c='dimmed'>
-                                            Địa chỉ:
-                                        </Text>
-                                        <Text size='sm' fw={500} ta='right' style={{ maxWidth: '60%' }}>
-                                            {[patient.address1, patient.address2].filter(Boolean).join(', ')}
+                                    <Stack gap='sm'>
+                                        <Group justify='space-between'>
+                                            <Text size='sm' c='dimmed'>
+                                                Họ và tên:
+                                            </Text>
+                                            <Text size='sm' fw={500}>
+                                                {patient.fullName}
+                                            </Text>
+                                        </Group>
+                                        <Group justify='space-between'>
+                                            <Text size='sm' c='dimmed'>
+                                                Giới tính:
+                                            </Text>
+                                            <Badge size='sm' variant='light' color='cyan'>
+                                                {patient.gender || 'Không xác định'}
+                                            </Badge>
+                                        </Group>
+                                        <Group justify='space-between'>
+                                            <Text size='sm' c='dimmed'>
+                                                Ngày sinh:
+                                            </Text>
+                                            <Text size='sm' fw={500}>
+                                                {patient.dateOfBirth
+                                                    ? new Date(patient.dateOfBirth).toLocaleDateString('vi-VN')
+                                                    : 'Chưa có thông tin'}
+                                            </Text>
+                                        </Group>
+                                        <Group justify='space-between'>
+                                            <Text size='sm' c='dimmed'>
+                                                Dân tộc:
+                                            </Text>
+                                            <Text size='sm' fw={500}>
+                                                {patient.ethnicity || 'Chưa có thông tin'}
+                                            </Text>
+                                        </Group>
+                                        <Group justify='space-between'>
+                                            <Text size='sm' c='dimmed'>
+                                                Quốc tịch:
+                                            </Text>
+                                            <Text size='sm' fw={500}>
+                                                {patient.nation || 'Chưa có thông tin'}
+                                            </Text>
+                                        </Group>
+                                        <Group justify='space-between'>
+                                            <Text size='sm' c='dimmed'>
+                                                Tình trạng hôn nhân:
+                                            </Text>
+                                            <Text size='sm' fw={500}>
+                                                {patient.maritalStatus || 'Chưa có thông tin'}
+                                            </Text>
+                                        </Group>
+                                        {patient.phone && (
+                                            <Group justify='space-between'>
+                                                <Text size='sm' c='dimmed'>
+                                                    Điện thoại:
+                                                </Text>
+                                                <Text size='sm' fw={500}>
+                                                    {patient.phone}
+                                                </Text>
+                                            </Group>
+                                        )}
+                                        {(patient.address1 || patient.address2) && (
+                                            <Group justify='space-between' align='flex-start'>
+                                                <Text size='sm' c='dimmed'>
+                                                    Địa chỉ:
+                                                </Text>
+                                                <Text size='sm' fw={500} ta='right' style={{ maxWidth: '60%' }}>
+                                                    {[patient.address1, patient.address2].filter(Boolean).join(', ')}
+                                                </Text>
+                                            </Group>
+                                        )}
+                                        {patient.workAddress && (
+                                            <Group justify='space-between' align='flex-start'>
+                                                <Text size='sm' c='dimmed'>
+                                                    Địa chỉ làm việc:
+                                                </Text>
+                                                <Text size='sm' fw={500} ta='right' style={{ maxWidth: '60%' }}>
+                                                    {patient.workAddress}
+                                                </Text>
+                                            </Group>
+                                        )}
+                                    </Stack>
+                                </Card>
+                            </Grid.Col>
+
+                            {/* Medical History */}
+                            <Grid.Col span={{ base: 12, md: 6 }}>
+                                <Card shadow='sm' padding='lg' radius='md' withBorder>
+                                    <Group mb='md'>
+                                        <IconMedicalCross size={24} color='var(--mantine-color-red-6)' />
+                                        <Text fw={600} size='lg'>
+                                            Tiền sử bệnh
                                         </Text>
                                     </Group>
-                                )}
-                                {patient.workAddress && (
-                                    <Group justify='space-between' align='flex-start'>
-                                        <Text size='sm' c='dimmed'>
-                                            Địa chỉ làm việc:
-                                        </Text>
-                                        <Text size='sm' fw={500} ta='right' style={{ maxWidth: '60%' }}>
-                                            {patient.workAddress}
-                                        </Text>
-                                    </Group>
-                                )}
-                            </Stack>
-                        </Card>
-                    </Grid.Col>
+                                    <Stack gap='sm'>
+                                        {patient.allergiesInfo?.allergies && (
+                                            <Box>
+                                                <Text size='sm' c='dimmed' mb={4}>
+                                                    Dị ứng:
+                                                </Text>
+                                                <Text size='sm' fw={500}>
+                                                    {patient.allergiesInfo.allergies}
+                                                </Text>
+                                            </Box>
+                                        )}
+                                        {patient.allergiesInfo?.personal_history && (
+                                            <Box>
+                                                <Text size='sm' c='dimmed' mb={4}>
+                                                    Tiền sử cá nhân:
+                                                </Text>
+                                                <Text size='sm' fw={500}>
+                                                    {patient.allergiesInfo.personal_history}
+                                                </Text>
+                                            </Box>
+                                        )}
+                                        {patient.allergiesInfo?.family_history && (
+                                            <Box>
+                                                <Text size='sm' c='dimmed' mb={4}>
+                                                    Tiền sử gia đình:
+                                                </Text>
+                                                <Text size='sm' fw={500}>
+                                                    {patient.allergiesInfo.family_history}
+                                                </Text>
+                                            </Box>
+                                        )}
+                                        {!patient.allergiesInfo && (
+                                            <Text size='sm' c='dimmed' ta='center' py='md'>
+                                                Không có thông tin tiền sử bệnh
+                                            </Text>
+                                        )}
+                                    </Stack>
+                                </Card>
+                            </Grid.Col>
+                        </Grid>
+                    </Tabs.Panel>
 
-                    {/* Medical History */}
-                    <Grid.Col span={{ base: 12, md: 6 }}>
-                        <Card shadow='sm' padding='lg' radius='md' withBorder>
-                            <Group mb='md'>
-                                <IconMedicalCross size={24} color='var(--mantine-color-red-6)' />
-                                <Text fw={600} size='lg'>
-                                    Tiền sử bệnh
-                                </Text>
-                            </Group>
-                            <Stack gap='sm'>
-                                {patient.allergiesInfo?.allergies && (
-                                    <Box>
-                                        <Text size='sm' c='dimmed' mb={4}>
-                                            Dị ứng:
-                                        </Text>
-                                        <Text size='sm' fw={500}>
-                                            {patient.allergiesInfo.allergies}
-                                        </Text>
-                                    </Box>
-                                )}
-                                {patient.allergiesInfo?.personal_history && (
-                                    <Box>
-                                        <Text size='sm' c='dimmed' mb={4}>
-                                            Tiền sử cá nhân:
-                                        </Text>
-                                        <Text size='sm' fw={500}>
-                                            {patient.allergiesInfo.personal_history}
-                                        </Text>
-                                    </Box>
-                                )}
-                                {patient.allergiesInfo?.family_history && (
-                                    <Box>
-                                        <Text size='sm' c='dimmed' mb={4}>
-                                            Tiền sử gia đình:
-                                        </Text>
-                                        <Text size='sm' fw={500}>
-                                            {patient.allergiesInfo.family_history}
-                                        </Text>
-                                    </Box>
-                                )}
-                                {!patient.allergiesInfo && (
-                                    <Text size='sm' c='dimmed' ta='center' py='md'>
-                                        Không có thông tin tiền sử bệnh
-                                    </Text>
-                                )}
-                            </Stack>
-                        </Card>
-                    </Grid.Col>
-
-                    {/* Appointment Information */}
-                    {/* {patient.appointment && (
-                        <Grid.Col span={{ base: 12 }}>
-                            <Card shadow='sm' padding='lg' radius='md' withBorder>
-                                <Group mb='md'>
-                                    <IconCalendar size={24} color='var(--mantine-color-green-6)' />
-                                    <Text fw={600} size='lg'>
-                                        Thông tin cuộc hẹn
-                                    </Text>
-                                </Group>
-                                <Group>
-                                    <Text size='sm' c='dimmed'>
-                                        Ngày giờ hẹn:
-                                    </Text>
-                                    <Badge size='lg' variant='light' color='green'>
-                                        {formatDate(patient.appointment.date)}
-                                    </Badge>
-                                    <Text size='sm' c='dimmed'>
-                                        ID cuộc hẹn:
-                                    </Text>
-                                    <Text size='sm' fw={500} style={{ fontFamily: 'monospace' }}>
-                                        {patient.appointment.id}
-                                    </Text>
-                                </Group>
-                            </Card>
-                        </Grid.Col>
-                    )} */}
-
-                    {/* Medical Record */}
                     {patient.medicalRecord && (
-                        <Grid.Col span={{ base: 12 }}>
+                        <Tabs.Panel value="medical-record" pt="lg">
                             <Card shadow='sm' padding='lg' radius='md' withBorder>
                                 <Group mb='md'>
                                     <IconFileText size={24} />
@@ -417,12 +414,11 @@ const PharmacyPatientInfoPage = () => {
                                     )}
                                 </Stack>
                             </Card>
-                        </Grid.Col>
+                        </Tabs.Panel>
                     )}
 
-                    {/* Lab Tests */}
                     {patient.medicalRecord?.lab_test && patient.medicalRecord.lab_test.length > 0 && (
-                        <Grid.Col span={{ base: 12 }}>
+                        <Tabs.Panel value="lab-tests" pt="lg">
                             <Card shadow='sm' padding='lg' radius='md' withBorder>
                                 <Group mb='md'>
                                     <IconTestPipe size={24} color='var(--mantine-color-orange-6)' />
@@ -497,12 +493,11 @@ const PharmacyPatientInfoPage = () => {
                                     ))}
                                 </Stack>
                             </Card>
-                        </Grid.Col>
+                        </Tabs.Panel>
                     )}
 
-                    {/* Prescription */}
                     {patient.medicalRecord?.prescription && (
-                        <Grid.Col span={{ base: 12 }}>
+                        <Tabs.Panel value="prescription" pt="lg">
                             <Card shadow='sm' padding='lg' radius='md' withBorder>
                                 <Group mb='md'>
                                     <IconPill size={24} color='var(--mantine-color-teal-6)' />
@@ -581,9 +576,9 @@ const PharmacyPatientInfoPage = () => {
                                     )}
                                 </Stack>
                             </Card>
-                        </Grid.Col>
+                        </Tabs.Panel>
                     )}
-                </Grid>
+                </Tabs>
             </Stack>
         </Container>
     )

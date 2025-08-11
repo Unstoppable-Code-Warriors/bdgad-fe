@@ -102,7 +102,10 @@ const ImportFileModal = ({ opened, onClose, onImport }: ImportFileModalProps) =>
                         'application/pdf': ['.pdf'],
                         'text/plain': ['.txt'],
                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-                        'application/msword': ['.doc']
+                        'application/msword': ['.doc'],
+                        'image/jpeg': ['.jpg', '.jpeg'],
+                        'image/png': ['.png'],
+                        'image/gif': ['.gif']
                     }}
                     maxSize={10 * 1024 * 1024} // 10MB
                 >
@@ -122,7 +125,7 @@ const ImportFileModal = ({ opened, onClose, onImport }: ImportFileModalProps) =>
                                 Kéo thả file vào đây hoặc nhấp để chọn file
                             </Text>
                             <Text size='sm' c='dimmed' inline mt={7}>
-                                Hỗ trợ các định dạng: .xlsx, .xls, .csv, .pdf, .txt, .docx, .doc (tối đa 10MB)
+                                Hỗ trợ các định dạng: .xlsx, .csv, .pdf, .txt, .docx, .jpg, .jpeg, .png, .gif (tối đa 10MB)
                             </Text>
                         </div>
                     </Group>

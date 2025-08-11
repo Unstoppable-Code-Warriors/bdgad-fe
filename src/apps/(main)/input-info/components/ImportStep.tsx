@@ -13,6 +13,7 @@ interface ImportStepProps {
     fileCategories: FileCategoryDto[]
     submittedFiles: CategorizedSubmittedFile[]
     error: string | null
+    skipOCR?: boolean
     ocrProgress: { [fileId: string]: number }
     validationResult: {
         isValid: boolean
@@ -33,6 +34,7 @@ const ImportStep = ({
     selectedFiles,
     fileCategories,
     submittedFiles,
+    skipOCR = false,
     ocrProgress,
     validationResult,
     onFileDrop,
@@ -85,6 +87,7 @@ const ImportStep = ({
             <SubmittedFilesTable
                 files={submittedFiles}
                 ocrProgress={ocrProgress}
+                skipOCR={skipOCR}
                 onStartOCR={onStartOCR}
                 onViewOCR={onViewOCR}
                 onDelete={onDeleteSubmittedFile}
