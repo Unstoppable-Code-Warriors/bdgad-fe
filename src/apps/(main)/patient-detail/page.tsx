@@ -210,7 +210,7 @@ const PatientDetailPage = () => {
                                         leftSection={<IconMedicalCross size={16} />}
                                         onClick={handleClinicInfo}
                                     >
-                                        Thông tin phòng khám
+                                        Thông tin y tế
                                     </Button>
                                 </Group>
 
