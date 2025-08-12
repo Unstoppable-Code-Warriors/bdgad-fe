@@ -7,7 +7,6 @@ import { authService } from '@/services/function/auth'
 import { useAssignSession } from '@/services/hook/staff-patient-session.hook'
 import { cancerPanelOptions, cancerScreeningPackageOptions, niptPackageOptions } from '@/types/prescription-form'
 
-
 interface AssignmentItem {
     labcode: string
     labTestingId: number | null
@@ -211,6 +210,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
 
     // Get current assigned names for display
     const currentDoctorName = labcodes.length > 0 ? labcodes[0].assignment?.doctor?.name : null
+    const currentDoctorGmail = labcodes.length > 0 ? labcodes[0].assignment?.doctor?.email : null
     const getCurrentLabTechName = (labcode: string) => {
         const labcodeItem = labcodes.find((item: any) => item.labcode === labcode)
         return labcodeItem?.assignment?.labTesting?.name
@@ -250,7 +250,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                     variant='light'
                 >
                     <Text size='sm'>
-                        Loại lần khám: <strong>{sessionType === 'test' ? 'Xét nghiệm' : 'Thẩm định'}</strong>
+                        <strong>{sessionType === 'test' ? 'Xét nghiệm gen' : 'Kết quả xét nghiệm'}</strong>
                     </Text>
                 </Alert>
 
@@ -265,29 +265,41 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                 <div>
                     <Text size='sm' fw={500} mb='xs'>
                         Chọn bác sĩ <span style={{ color: 'red' }}>*</span>
-                        {currentDoctorName && (
-                            <Badge ml='xs' color='green' variant='light' size='xs'>
-                                Đã có
-                            </Badge>
-                        )}
                     </Text>
-                    <Select
-                        placeholder='Chọn bác sĩ...'
-                        value={selectedDoctor}
-                        onChange={(value) => {
-                            setSelectedDoctor(value || '')
-                            // Clear error when user makes changes
-                            if (error) {
-                                setError(null)
-                            }
-                        }}
-                        data={doctorOptions}
-                        searchable
-                        nothingFoundMessage='Không tìm thấy bác sĩ'
-                        size='md'
-                        disabled={isLoading}
-                        error={error && !selectedDoctor ? true : false}
-                    />
+                    {!currentDoctorName ? (
+                        <Select
+                            placeholder='Chọn bác sĩ...'
+                            value={selectedDoctor}
+                            onChange={(value) => {
+                                setSelectedDoctor(value || '')
+                                // Clear error when user makes changes
+                                if (error) {
+                                    setError(null)
+                                }
+                            }}
+                            data={doctorOptions}
+                            searchable
+                            nothingFoundMessage='Không tìm thấy bác sĩ'
+                            size='md'
+                            disabled={isLoading}
+                            error={error && !selectedDoctor ? true : false}
+                        />
+                    ) : (
+                        <Text
+                            size='sm'
+                            fw={500}
+                            c='blue'
+                            mt='xs'
+                            p='sm'
+                            bg='blue.0'
+                            style={{
+                                borderRadius: '6px',
+                                border: '1px solid var(--mantine-color-blue-2)'
+                            }}
+                        >
+                            {currentDoctorName} - {currentDoctorGmail}
+                        </Text>
+                    )}
                     {!isLoading && doctorOptions.length === 0 && (
                         <Text size='xs' c='dimmed' mt='xs'>
                             Không có bác sĩ nào trong hệ thống

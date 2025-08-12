@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
-import { Container, Center, Title, Select, Paper, Stack, Button, Group, Drawer, Alert, Text } from '@mantine/core'
-import { IconMicroscope, IconClipboardCheck, IconDeviceFloppy, IconArrowNarrowLeft } from '@tabler/icons-react'
+import { Container, Center, Title, Paper, Button, Group, Drawer, Alert, Text } from '@mantine/core'
+import { IconDeviceFloppy, IconArrowNarrowLeft } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import type { FileWithPath } from '@mantine/dropzone'
 import { useUploadCategorizedFiles } from '@/services/hook/categorized-upload.hook'
+import { useUploadResultRequisition } from '@/services/hook/staff-upload.hook'
 import { staffService } from '@/services/function/staff'
 import { getFileType } from './utils/fileUtils'
 import type { EditedOCRRes } from './types'
@@ -23,6 +24,7 @@ import OCRDrawer from './components/OCRDrawer'
 const InputInfoPage = () => {
     const [typeLabSession, setTypeLabSession] = useState<string>('test')
     const [skipOCR, setSkipOCR] = useState<boolean>(false)
+    const [bypassPrescriptionCheck, setBypassPrescriptionCheck] = useState<boolean>(false)
     const [selectedFiles, setSelectedFiles] = useState<FileWithPath[]>([])
     const [fileCategories, setFileCategories] = useState<FileCategoryDto[]>([])
     const [submittedFiles, setSubmittedFiles] = useState<CategorizedSubmittedFile[]>([])
@@ -45,6 +47,7 @@ const InputInfoPage = () => {
     const patientId = location.state?.patientId || location.state?.patient?.id
 
     const uploadMutation = useUploadCategorizedFiles()
+    const uploadResultMutation = useUploadResultRequisition()
 
     useEffect(() => {
         if (location.state?.ocrResult) {
@@ -61,6 +64,9 @@ const InputInfoPage = () => {
         if (location.state?.skipOCR) {
             setSkipOCR(location.state.skipOCR)
         }
+        if (location.state?.bypassPrescriptionCheck) {
+            setBypassPrescriptionCheck(location.state.bypassPrescriptionCheck)
+        }
     }, [location.state])
 
     const handleOCRComplete = (data: CommonOCRRes<EditedOCRRes>) => {
@@ -70,14 +76,57 @@ const InputInfoPage = () => {
 
     // File handling functions
     const handleFileDrop = (files: FileWithPath[]) => {
-        setSelectedFiles((prev) => [...prev, ...files])
-
-        // Auto-generate file categories for new files
-        const newCategories = generateDefaultFileCategories(files)
-        setFileCategories((prev) => [...prev, ...newCategories])
-
+        const newFiles = [...selectedFiles, ...files]
+        const newCategories = [...fileCategories, ...generateDefaultFileCategories(files)]
+        
+        setSelectedFiles(newFiles)
+        setFileCategories(newCategories)
         setError(null)
-        validateFiles([...selectedFiles, ...files], [...fileCategories, ...newCategories])
+        
+        validateFiles(newFiles, newCategories)
+
+        if (bypassPrescriptionCheck) {
+            setTimeout(() => {
+                autoSubmitFiles(newFiles, newCategories)
+            }, 100)
+        }
+    }
+
+    const autoSubmitFiles = (files: FileWithPath[], categories: FileCategoryDto[]) => {
+        if (files.length === 0) {
+            return
+        }
+
+        const result = validateCategorizedFilesWithBypass(files as File[], categories, submittedFiles)
+        if (!result.isValid) {
+            setError(result.globalErrors[0] || 'Vui lòng khắc phục các lỗi trước khi tiếp tục')
+            return
+        }
+
+        const newSubmittedFiles: CategorizedSubmittedFile[] = files.map((file, index) => {
+            const categoryData = categories[index] || {
+                category: FileCategory.GENERAL,
+                priority: 5,
+                fileName: file.name
+            }
+
+            return {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                file,
+                uploadedAt: new Date().toLocaleString('vi-VN'),
+                status: 'uploaded',
+                type: getFileType(file),
+                ocrStatus: 'idle',
+                category: categoryData.category,
+                priority: categoryData.priority || 5,
+                isRequired: categoryData.category !== FileCategory.GENERAL
+            }
+        })
+
+        setSubmittedFiles((prev) => [...prev, ...newSubmittedFiles])
+        setSelectedFiles([])
+        setFileCategories([])
+        setError(null)
     }
 
     const handleRemoveFile = (index: number) => {
@@ -110,13 +159,67 @@ const InputInfoPage = () => {
     // ...existing code...
 
     const validateFiles = (files: FileWithPath[], categories: FileCategoryDto[]) => {
-        const result = validateCategorizedFiles(files as File[], categories, submittedFiles)
+        const result = bypassPrescriptionCheck 
+            ? validateCategorizedFilesWithBypass(files as File[], categories, submittedFiles)
+            : validateCategorizedFiles(files as File[], categories, submittedFiles)
         setValidationResult(result)
 
         if (result.globalErrors.length > 0) {
             setError(result.globalErrors[0])
         } else {
             setError(null)
+        }
+    }
+
+    const validateCategorizedFilesWithBypass = (
+        files: File[],
+        _fileCategories: FileCategoryDto[],
+        submittedFiles: CategorizedSubmittedFile[] = []
+    ) => {
+        const errors: { [index: number]: string } = {}
+        const globalErrors: string[] = []
+
+        if (files.length === 0 && submittedFiles.length === 0) {
+            globalErrors.push('Cần ít nhất một file')
+        }
+
+        // Basic file validation only
+        files.forEach((file, index) => {
+            // Check file size
+            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                errors[index] = `File quá lớn. Kích thước tối đa: 10MB`
+            }
+
+            // Check file type - allow common file types for test results
+            const allowedTypes = [
+                'application/pdf',
+                'image/jpeg',
+                'image/jpg', 
+                'image/png',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/msword',
+                'text/csv'
+            ]
+            
+            if (!allowedTypes.includes(file.type)) {
+                errors[index] = 'Loại file không được hỗ trợ'
+            }
+        })
+
+        const isValid = Object.keys(errors).length === 0 && globalErrors.length === 0
+        const totalFiles = files.length + submittedFiles.length
+        
+        const summary = isValid
+            ? `✓ Sẵn sàng tải lên: ${files.length} file mới${submittedFiles.length > 0 ? ` (tổng: ${totalFiles} file)` : ``} - Không yêu cầu phân loại`
+            : `✗ Có ${Object.keys(errors).length + globalErrors.length} lỗi cần khắc phục`
+
+        return {
+            isValid,
+            errors,
+            globalErrors,
+            summary
         }
     }
 
@@ -127,7 +230,9 @@ const InputInfoPage = () => {
         }
 
         // Validate before submitting
-        const result = validateCategorizedFiles(selectedFiles as File[], fileCategories, submittedFiles)
+        const result = bypassPrescriptionCheck 
+            ? validateCategorizedFilesWithBypass(selectedFiles as File[], fileCategories, submittedFiles)
+            : validateCategorizedFiles(selectedFiles as File[], fileCategories, submittedFiles)
         if (!result.isValid) {
             setError(result.globalErrors[0] || 'Vui lòng khắc phục các lỗi trước khi tiếp tục')
             return
@@ -173,15 +278,12 @@ const InputInfoPage = () => {
 
     // OCR functions
     const handleOCRClick = async (fileId: string) => {
-        // Set OCR status to processing for this file
         setSubmittedFiles((prev) =>
             prev.map((file) => (file.id === fileId ? { ...file, ocrStatus: 'processing' as const } : file))
         )
 
-        // Initialize progress for this file
         setOcrProgress((prev) => ({ ...prev, [fileId]: 0 }))
 
-        // Simulate progress updates
         const progressInterval = setInterval(() => {
             setOcrProgress((prev) => {
                 const currentProgress = prev[fileId] || 0
@@ -196,7 +298,6 @@ const InputInfoPage = () => {
         if (!fileToProcess) {
             clearInterval(progressInterval)
             setOcrProgress((prev) => {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { [fileId]: _, ...rest } = prev
                 return rest
             })
@@ -204,16 +305,12 @@ const InputInfoPage = () => {
         }
 
         try {
-            // Call OCR API
             const result = await staffService.ocrFile(fileToProcess.file)
 
-            // Complete progress
             setOcrProgress((prev) => ({ ...prev, [fileId]: 100 }))
 
-            // Small delay to show 100% progress
             setTimeout(() => {
                 setOcrProgress((prev) => {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { [fileId]: _, ...rest } = prev
                     return rest
                 })
@@ -283,7 +380,6 @@ const InputInfoPage = () => {
             // Clean up progress after a delay
             setTimeout(() => {
                 setOcrProgress((prev) => {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { [fileId]: _, ...rest } = prev
                     return rest
                 })
@@ -337,16 +433,12 @@ const InputInfoPage = () => {
         }
 
         try {
-            // Call OCR API
             const result = await staffService.ocrFile(fileToProcess.file)
 
-            // Complete progress
             setOcrProgress((prev) => ({ ...prev, [fileId]: 100 }))
 
-            // Small delay to show 100% progress
             setTimeout(() => {
                 setOcrProgress((prev) => {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { [fileId]: _, ...rest } = prev
                     return rest
                 })
@@ -534,7 +626,9 @@ const InputInfoPage = () => {
             return
         }
 
-        const validation = validateCategorizedFiles(fileArray, categoryArray, submittedFiles)
+        const validation = bypassPrescriptionCheck 
+            ? validateCategorizedFilesWithBypass(fileArray, categoryArray, submittedFiles)
+            : validateCategorizedFiles(fileArray, categoryArray, submittedFiles)
         if (!validation.isValid) {
             notifications.show({
                 title: 'Lỗi validation',
@@ -579,11 +673,26 @@ const InputInfoPage = () => {
 
             console.log('Debug - uploadParams:', uploadParams)
 
-            const result = await uploadMutation.mutateAsync(uploadParams)
+            let result
+            if (bypassPrescriptionCheck) {
+                // Use uploadResultRequisition API for test results (bypass workflow)
+                const resultParams = {
+                    files: validSubmittedFiles.map((sf) => sf.file),
+                    patientId: parseInt(patientId),
+                    typeLabSession: 'result_test' // Use 'result_test' for test results
+                }
+                console.log('Debug - using uploadResultRequisition with params:', resultParams)
+                result = await uploadResultMutation.mutateAsync(resultParams)
+            } else {
+                // Use regular categorized upload for examinations
+                result = await uploadMutation.mutateAsync(uploadParams)
+            }
+
+            const uploadCount = result.data?.uploadedFilesCount || result.uploadedFilesCount || validSubmittedFiles.length
 
             notifications.show({
                 title: 'Thành công',
-                message: `Upload thành công ${result.data.uploadedFilesCount} file`,
+                message: `Upload thành công ${uploadCount} file`,
                 color: 'green'
             })
 
@@ -616,19 +725,6 @@ const InputInfoPage = () => {
         }
     }
 
-    const sessionTypeOptions = [
-        {
-            value: 'test',
-            label: 'Xét nghiệm gen',
-            icon: <IconMicroscope size={16} />
-        },
-        {
-            value: 'validation',
-            label: 'Kết quả xét nghiệm gen + EHR',
-            icon: <IconClipboardCheck size={16} />
-        }
-    ]
-
     return (
         <>
             <Container size='xl' py='xl'>
@@ -647,33 +743,6 @@ const InputInfoPage = () => {
                     Quay lại hồ sơ bệnh nhân
                 </Button>
 
-                {/* Session Type Selection */}
-                {!skipOCR && (
-                    <Paper p='lg' withBorder mb='xl' style={{ margin: '0 auto' }}>
-                        <Stack gap='md'>
-                            <Select
-                                label='Loại lần khám'
-                                placeholder='Chọn loại lần khám'
-                                value={typeLabSession}
-                                onChange={(value) => setTypeLabSession(value || 'test')}
-                                data={sessionTypeOptions.map((option) => ({
-                                    value: option.value,
-                                    label: option.label
-                                }))}
-                                size='md'
-                                required
-                                leftSection={
-                                    typeLabSession === 'test' ? (
-                                    <IconMicroscope size={16} />
-                                ) : (
-                                    <IconClipboardCheck size={16} />
-                                )
-                            }
-                        />
-                    </Stack>
-                </Paper>
-                )}
-
                 {/* File Import and Categorization Section */}
                 <ImportStep
                     selectedFiles={selectedFiles}
@@ -681,6 +750,8 @@ const InputInfoPage = () => {
                     submittedFiles={submittedFiles}
                     error={error}
                     skipOCR={skipOCR}
+                    skipCategorization={bypassPrescriptionCheck}
+                    bypassPrescriptionCheck={bypassPrescriptionCheck}
                     ocrProgress={ocrProgress}
                     validationResult={validationResult}
                     onFileDrop={handleFileDrop}

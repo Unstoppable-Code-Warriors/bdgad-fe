@@ -75,13 +75,13 @@ const getStatusBadge = (typeLabSession: string) => {
     if (typeLabSession === 'test') {
         return (
             <Badge color='blue' variant='light' size='sm'>
-                Xét nghiệm
+                Xét nghiệm gen
             </Badge>
         )
-    } else if (typeLabSession === 'validation') {
+    } else if (typeLabSession === 'result_test') {
         return (
             <Badge color='green' variant='light' size='sm'>
-                Thẩm định
+                Kết quả xét nghiệm
             </Badge>
         )
     }
@@ -471,9 +471,12 @@ const SessionDetailPage = () => {
                         <ActionIcon variant='light' size='lg' onClick={handleBack}>
                             <IconArrowLeft size={20} />
                         </ActionIcon>
-                        <div>
-                            <Title order={2}>Lần khám </Title>
-                        </div>
+                        {/* Check type session */}
+                        {sessionData.typeLabSession === 'test' ? (
+                            <Title order={2}>Xét nghiệm gen</Title>
+                        ) : (
+                            <Title order={2}>Kết quả xét nghiệm</Title>
+                        )}
                     </Group>
 
                     {/* Send Files Button */}
@@ -497,7 +500,7 @@ const SessionDetailPage = () => {
                                         ? 'Thông tin người nhận'
                                         : sessionData.typeLabSession === 'test'
                                           ? 'Gửi Xét nghiệm'
-                                          : 'Gửi Thẩm định'}
+                                          : 'Gửi kết quả xét nghiệm'}
                                 </Button>
                             )
                         })()}
@@ -664,7 +667,7 @@ const SessionDetailPage = () => {
                     <Group mb='lg' justify='space-between'>
                         <Group>
                             <Title order={3} c={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}>
-                                File {sessionData.typeLabSession === 'test' ? 'xét nghiệm' : 'thẩm định'}
+                                File {sessionData.typeLabSession === 'test' ? 'xét nghiệm gen' : 'kết quả xét nghiệm'}
                             </Title>
                             <Badge variant='light' color={sessionData.typeLabSession === 'test' ? 'blue' : 'green'}>
                                 {sessionData.patientFiles?.length || 0} file

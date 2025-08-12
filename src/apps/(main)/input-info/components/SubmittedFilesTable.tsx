@@ -13,7 +13,14 @@ interface SubmittedFilesTableProps {
     onDelete: (id: string) => void
 }
 
-const SubmittedFilesTable = ({ files, ocrProgress, skipOCR = false, onStartOCR, onViewOCR, onDelete }: SubmittedFilesTableProps) => {
+const SubmittedFilesTable = ({
+    files,
+    ocrProgress,
+    skipOCR = false,
+    onStartOCR,
+    onViewOCR,
+    onDelete
+}: SubmittedFilesTableProps) => {
     if (files.length === 0) return null
 
     const handleDownload = (file: FileWithPath) => {
@@ -25,16 +32,13 @@ const SubmittedFilesTable = ({ files, ocrProgress, skipOCR = false, onStartOCR, 
         URL.revokeObjectURL(url)
     }
     const getOCRButton = (submittedFile: CategorizedSubmittedFile) => {
-        // Skip OCR functionality if skipOCR is true
         if (skipOCR) return null
-        
+
         if (submittedFile.type !== 'image') return null
 
-        // Check if any file is currently processing OCR
         const isAnyFileProcessing = files.some((file) => file.ocrStatus === 'processing')
         const isThisFileProcessing = submittedFile.ocrStatus === 'processing'
 
-        // Show OCR result if available
         if (submittedFile.ocrStatus === 'success' && submittedFile.ocrResult) {
             return (
                 <Button
@@ -113,6 +117,7 @@ const SubmittedFilesTable = ({ files, ocrProgress, skipOCR = false, onStartOCR, 
                             <Table.Th>Tên file</Table.Th>
                             <Table.Th>Loại</Table.Th>
                             <Table.Th>Kích thước</Table.Th>
+                            <Table.Th>Trạng thái</Table.Th>
                             <Table.Th>Thao tác</Table.Th>
                         </Table.Tr>
                     </Table.Thead>
@@ -164,11 +169,12 @@ const SubmittedFilesTable = ({ files, ocrProgress, skipOCR = false, onStartOCR, 
                                     <Text size='sm'>{formatFileSize(submittedFile.file.size)}</Text>
                                 </Table.Td>
                                 <Table.Td>
+                                    <Box>
+                                        {getOCRButton(submittedFile)}
+                                    </Box>
+                                </Table.Td>
+                                <Table.Td>
                                     <Group gap='xs' align='center' style={{ minHeight: 36 }}>
-                                        <Box style={{ width: 120, flexShrink: 0, marginRight: 45 }}>
-                                            {getOCRButton(submittedFile)}
-                                        </Box>
-
                                         <Group gap='xs' align='center'>
                                             <ActionIcon
                                                 variant='light'

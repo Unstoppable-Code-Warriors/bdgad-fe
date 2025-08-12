@@ -195,6 +195,30 @@ export const staffService = {
             })
             .json<MedicalTestRequisitionUploadResponse>()
     },
+
+    uploadResultRequisition: async (formData: {
+        files: File[]
+        patientId: number
+        typeLabSession: string
+    }): Promise<any> => {
+        const data = new FormData()
+
+        // Append files
+        formData.files.forEach((file) => {
+            data.append('files', file)
+        })
+
+        // Append other fields
+        data.append('patientId', formData.patientId.toString())
+        data.append('typeLabSession', formData.typeLabSession)
+
+        return backendApi
+            .post(`${PREFIX}/patient-files/upload-result-test`, {
+                body: data,
+                headers: {}
+            })
+            .json()
+    },
     // Get all lab sessions of a patient
     getPatientLabSessions: async (patientId: string): Promise<any> => {
         return backendApi.get(`${PREFIX}/patients/${patientId}/sessions`).json()

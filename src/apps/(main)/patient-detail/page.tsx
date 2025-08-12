@@ -46,13 +46,13 @@ const getSessionTypeBadge = (type: string) => {
     if (type === 'test') {
         return (
             <Badge color='blue' variant='light' size='sm'>
-                Xét nghiệm
+                Xét nghiệm gen
             </Badge>
         )
     } else {
         return (
             <Badge color='green' variant='light' size='sm'>
-                Thẩm định
+                Kết quả xét nghiệm
             </Badge>
         )
     }
@@ -69,7 +69,7 @@ const PatientDetailPage = () => {
 
     // Filter sessions by type
     const testSessions = sessions.filter((session: any) => session.typeLabSession === 'test')
-    const validationSessions = sessions.filter((session: any) => session.typeLabSession === 'validation')
+    const resultTestSessions = sessions.filter((session: any) => session.typeLabSession === 'result_test')
 
     const handleBack = () => {
         navigate('/patient-folder')
@@ -85,8 +85,9 @@ const PatientDetailPage = () => {
         navigate('/import-file/input', {
             state: { 
                 patientId: id,
-                typeLabSession: 'validation',
-                skipOCR: true 
+                typeLabSession: 'result_test',
+                skipOCR: true,
+                bypassPrescriptionCheck: true
             }
         })
     }
@@ -173,7 +174,7 @@ const PatientDetailPage = () => {
                                         </Text>
                                     </Group>
                                     <Text size='sm' c='dimmed' fw={500}>
-                                        Xét nghiệm
+                                        Xét nghiệm gen
                                     </Text>
                                 </div>
 
@@ -183,13 +184,13 @@ const PatientDetailPage = () => {
                                         <Text fw={700} size='lg' c='green'>
                                             {
                                                 sessions.filter(
-                                                    (session: any) => session.typeLabSession === 'validation'
+                                                    (session: any) => session.typeLabSession === 'result_test'
                                                 ).length
                                             }
                                         </Text>
                                     </Group>
                                     <Text size='sm' c='dimmed' fw={500}>
-                                        Thẩm định
+                                        Kết quả xét nghiệm
                                     </Text>
                                 </div>
                             </Group>
@@ -456,13 +457,13 @@ const PatientDetailPage = () => {
                                                 Lần khám
                                             </Tabs.Tab>
                                         )}
-                                        {validationSessions.length > 0 && (
+                                        {resultTestSessions.length > 0 && (
                                             <Tabs.Tab 
-                                                value="validation" 
+                                                value="result_test" 
                                                 leftSection={<IconClipboardCheck size={16} />}
                                                 rightSection={
                                                     <Badge variant='light' color='green' size='sm'>
-                                                        {validationSessions.length}
+                                                        {resultTestSessions.length}
                                                     </Badge>
                                                 }
                                             >
@@ -546,9 +547,9 @@ const PatientDetailPage = () => {
                                         </Tabs.Panel>
                                     )}
 
-                                    {/* Validation Sessions Panel */}
-                                    {validationSessions.length > 0 && (
-                                        <Tabs.Panel value="validation" pt="md">
+                                    {/* Result Test Sessions Panel */}
+                                    {resultTestSessions.length > 0 && (
+                                        <Tabs.Panel value="result_test" pt="md">
                                             <ScrollArea
                                                 h={400}
                                                 scrollbarSize={8}
@@ -557,7 +558,7 @@ const PatientDetailPage = () => {
                                                 offsetScrollbars
                                             >
                                                 <Stack gap='md' pr='md'>
-                                                    {validationSessions.map((session: any, index: number) => (
+                                                    {resultTestSessions.map((session: any, index: number) => (
                                                         <Card
                                                             key={session.id}
                                                             shadow='sm'
