@@ -118,7 +118,7 @@ const PharmacyPatientInfoPage = () => {
 
                     <Paper p='xl' ta='center' withBorder>
                         <Text size='lg' fw={600} mt='md'>
-                            Hiện tại chưa có thông tin phòng khám
+                            Hiện tại chưa có thông tin y tế
                         </Text>
                         <Text size='sm' c='dimmed' mt='xs'>
                             Bệnh nhân chưa có dữ liệu từ hệ thống phòng khám
