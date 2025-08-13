@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Modal, Stack, Button, Group, Select, Text, Alert, Divider, Badge, Box } from '@mantine/core'
+import { Modal, Stack, Button, Group, Select, Text, Alert, Divider, Box } from '@mantine/core'
 import { IconSend, IconMicroscope, IconClipboardCheck, IconAlertCircle, IconCheck } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { Role } from '@/utils/constant'
@@ -232,11 +232,6 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
     // Get current assigned names for display
     const currentDoctorName = labcodes.length > 0 ? labcodes[0].assignment?.doctor?.name : null
     const currentDoctorGmail = labcodes.length > 0 ? labcodes[0].assignment?.doctor?.email : null
-    const getCurrentLabTechName = (labcode: string) => {
-        const labcodeItem = labcodes.find((item: any) => item.labcode === labcode)
-        return labcodeItem?.assignment?.labTesting?.name
-    }
-
     return (
         <Modal
             opened={opened}
@@ -287,7 +282,6 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                             value={selectedDoctor}
                             onChange={(value) => {
                                 setSelectedDoctor(value || '')
-                                // Clear error when user makes changes
                                 if (error) {
                                     setError(null)
                                 }
@@ -332,8 +326,6 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                             </Text>
                             <Stack gap='md'>
                                 {assignments.map((assignment) => {
-                                    const currentLabTechName = getCurrentLabTechName(assignment.labcode)
-                                    // Find the full labcode data from sessionData
                                     const labcodeData = labcodes.find(
                                         (item: any) =>
                                             (item.labcode || item.code || item.name || '') === assignment.labcode
@@ -366,23 +358,38 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                                                         </Text>
                                                     )}
                                                 </div>
-                                                {currentLabTechName && (
-                                                    <Badge color='green' variant='light' size='xs'>
-                                                        Đã có
-                                                    </Badge>
-                                                )}
                                             </Group>
-                                            <Select
-                                                placeholder='Chọn kỹ thuật viên...'
-                                                value={assignment.labTestingId?.toString() || ''}
-                                                onChange={(value) => handleLabTestingChange(assignment.labcode, value)}
-                                                data={labTechOptions}
-                                                searchable
-                                                nothingFoundMessage='Không tìm thấy kỹ thuật viên'
-                                                size='md'
-                                                disabled={isLoading}
-                                                error={error && assignment.labTestingId === null ? true : false}
-                                            />
+                                            {labcodeData.fastqFilePairs[0].status === 'not_uploaded' ? (
+                                                <Select
+                                                    placeholder='Chọn kỹ thuật viên...'
+                                                    value={assignment.labTestingId?.toString() || ''}
+                                                    onChange={(value) =>
+                                                        handleLabTestingChange(assignment.labcode, value)
+                                                    }
+                                                    data={labTechOptions}
+                                                    searchable
+                                                    nothingFoundMessage='Không tìm thấy kỹ thuật viên'
+                                                    size='md'
+                                                    disabled={isLoading}
+                                                    error={error && assignment.labTestingId === null ? true : false}
+                                                />
+                                            ) : (
+                                                <Text
+                                                    size='sm'
+                                                    fw={500}
+                                                    c='blue'
+                                                    mt='xs'
+                                                    p='sm'
+                                                    bg='blue.0'
+                                                    style={{
+                                                        borderRadius: '6px',
+                                                        border: '1px solid var(--mantine-color-blue-2)'
+                                                    }}
+                                                >
+                                                    {labcodeData?.assignment?.labTesting?.name} - {' '}
+                                                    {labcodeData?.assignment?.labTesting?.email}
+                                                </Text>
+                                            )}
                                         </Box>
                                     )
                                 })}
