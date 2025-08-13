@@ -244,6 +244,15 @@ export const staffService = {
             .json()
     },
 
+    // Assign result test (for result_test session type)
+    assignResultTest: async (data: { doctorId: number; labcodeLabSessionId: number }): Promise<any> => {
+        return backendApi
+            .post(`${PREFIX}/assign-result-test`, {
+                json: data
+            })
+            .json()
+    },
+
     // OCR file processing
     ocrFile: async (file: File) => {
         const formData = new FormData()
