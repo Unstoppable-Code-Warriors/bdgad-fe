@@ -70,8 +70,6 @@ const UpdateProfileUser: React.FC<UpdateProfileUserProps> = ({ userProfile, onCh
             setIsLoadingUpdateProfile(true)
             setError(null)
 
-            console.log('Calling updateProfile with data:', values) // Debug log
-
             const response = await authService.updateProfile({
                 name: formatName(values.name), // Use formatName to trim and normalize
                 phone: values.phone ? normalizePhone(values.phone) : '',

@@ -55,7 +55,6 @@ const AnalysisDetailPage = () => {
     const { data: validationTechniciansData, isLoading: isLoadingValidationTechnicians } = useUsersByRole(
         Role.VALIDATION_TECHNICIAN
     )
-    console.log('Analysis Detail Data:', data)
     const [selectedValidationId, setSelectedValidationId] = useState<string | null>(
         data?.validation?.id ? String(data.validation.id) : null
     )
@@ -78,7 +77,6 @@ const AnalysisDetailPage = () => {
     // Get the latest ETL result
     const latestEtlResult = data?.etlResults && data.etlResults.length > 0 ? data.etlResults[0] : null
 
-    console.log('Latest Etl File:', latestEtlResult)
     const handleBack = () => {
         navigate('/analysis')
     }

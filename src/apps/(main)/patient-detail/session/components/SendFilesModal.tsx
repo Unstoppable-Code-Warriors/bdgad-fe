@@ -22,10 +22,7 @@ interface SendFilesModalProps {
 }
 
 const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }: SendFilesModalProps) => {
-    console.log('Session data from modal:', sessionData)
-    console.log('Labcodes extracted:', sessionData?.labcodes)
-
-    // Utility functions for translating package types and sample types
+    // Utility functions for translating package types and sample type
     const getPackageTypeLabel = (packageType: string): string => {
         // Check cancer screening packages
         const cancerScreening = cancerScreeningPackageOptions.find((option) => option.value === packageType)
@@ -171,7 +168,6 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                     if (!labcodeLabSessionId) {
                         throw new Error(`Không tìm thấy labcodeLabSessionId cho labcode: ${labcodeItem.labcode}`)
                     }
-                    console.log('Assigning result test for DOCTOR:', selectedDoctor)
 
                     return assignResultTestMutation.mutateAsync({
                         doctorId: Number(selectedDoctor),
@@ -192,7 +188,6 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                         }))
                 }
 
-                console.log('Assign data:', assignData)
                 await assignSessionMutation.mutateAsync({
                     sessionId,
                     data: assignData

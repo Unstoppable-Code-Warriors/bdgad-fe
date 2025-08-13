@@ -63,13 +63,7 @@ const InputGeneralDataPage = () => {
     }
 
     const handleSendEmr = async () => {
-        const selectedCategoryData = categories.filter((category: CategoryGeneralFile) =>
-            selectedCategories.has(category.id)
-        )
-
-        console.log('Sending EMR for categories:', selectedCategoryData)
-        console.log('Selected category IDs:', Array.from(selectedCategories))
-
+  
         try {
             await sendEmrMutation.mutateAsync({
                 categoryGeneralFileIds: Array.from(selectedCategories)

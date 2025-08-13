@@ -78,22 +78,18 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
 
     useEffect(() => {
         // Debug logging - can be removed in production
-        console.log('OCRDrawer received:', { ocrResult, file })
 
         if (ocrResult) {
             // Auto-detect form type from OCR result
             const detectedFormType = detectFormType(ocrResult)
-            console.log('Detected form type:', detectedFormType)
             setSelectedFormType(detectedFormType)
 
             // Auto-fill form with OCR data
             const mappedValues = mapOCRToFormValues(ocrResult)
-            console.log('Mapped values:', mappedValues)
             // Also set the form_type field to match the selected form type
             mappedValues.form_type = detectedFormType
             form.setValues(mappedValues)
         } else {
-            console.log('No OCR result provided to drawer')
             // Reset form when no OCR result is available
             form.reset()
             setSelectedFormType(FormType.HEREDITARY_CANCER)
@@ -107,8 +103,6 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
 
     const handleFormSubmit = () => {
         const formData = form.values
-
-        console.log('Submitting form data:', formData)
 
         // Get the original OCR result data
         const originalData = ocrResult?.ocrResult || {}
@@ -294,7 +288,6 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
             ocrResult: updatedData as unknown as EditedOCRRes
         }
 
-        console.log('Submitting updated OCR result:', updatedOCRResult)
         onUpdate(updatedOCRResult)
         onClose()
     }

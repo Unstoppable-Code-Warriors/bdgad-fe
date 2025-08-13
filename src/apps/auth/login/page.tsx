@@ -85,10 +85,8 @@ const LoginPage = () => {
             } else {
                 loginOutside(response.data.token, response.data.user)
                 authNotifications.loginSuccess()
-                console.log('Login successful, redirecting to:', response.data)
 
                 const defaultRoute = getDefaultRouteByRole(Number(response.data.user.roles[0].code))
-                console.log('Login successful, redirecting to:', defaultRoute)
                 navigate(defaultRoute)
             }
         } catch (err) {

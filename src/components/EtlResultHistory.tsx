@@ -86,7 +86,6 @@ export const EtlResultHistory = ({
     showFastqPair = false,
     resultNamePrefix = 'Kết quả ETL'
 }: EtlResultHistoryProps) => {
-    console.log('EtlResultHistory results:', results)
 
     const getStatusColor = (status: string) => {
         return statusConfig[status]?.color || 'gray'

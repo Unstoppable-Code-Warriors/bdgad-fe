@@ -23,7 +23,6 @@ const ImportFileModal = ({ opened, onClose, onImport }: ImportFileModalProps) =>
     }
 
     const handleFileReject = (rejectedFiles: FileRejection[]) => {
-        console.log('rejected files', rejectedFiles)
 
         const errorMessages = rejectedFiles.map(({ file, errors }) => {
             const fileName = file.name

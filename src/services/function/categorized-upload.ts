@@ -22,13 +22,6 @@ export const uploadCategorizedPatientFiles = async (
 
     // Validate and clean data before sending
     const cleanFileCategories = params.fileCategories.map((cat, index) => {
-        console.log(`Processing category ${index}:`, {
-            originalCategory: cat.category,
-            originalFileName: cat.fileName,
-            originalPriority: cat.priority,
-            categoryType: typeof cat.category,
-            fileNameType: typeof cat.fileName
-        })
 
         // Extract the actual string value from the enum
         let categoryValue: string = cat.category
@@ -41,8 +34,6 @@ export const uploadCategorizedPatientFiles = async (
             priority: Number(cat.priority) || 5,
             fileName: String(cat.fileName || params.files[index]?.name || 'unknown.txt')
         }
-
-        console.log(`Cleaned category ${index}:`, cleanCat)
 
         // Validate that category is one of the expected values
         const validCategories = ['prenatal_screening', 'hereditary_cancer', 'gene_mutation', 'general']
@@ -107,8 +98,6 @@ export const uploadCategorizedPatientFiles = async (
         const testCategories = JSON.parse(JSON.stringify(cleanFileCategories))
         const testOcr = cleanOcrResults.length > 0 ? JSON.parse(JSON.stringify(cleanOcrResults)) : []
 
-        console.log('JSON serialization test - categories:', testCategories)
-        console.log('JSON serialization test - OCR:', testOcr)
 
         // Ensure the deserialized data still has valid values
         if (testCategories.some((cat: any) => !cat.category || !cat.fileName)) {
@@ -131,43 +120,10 @@ export const uploadCategorizedPatientFiles = async (
     const categoriesJson = JSON.stringify(cleanFileCategories)
     formData.append('fileCategories', categoriesJson)
 
-    console.log('=== FINAL DATA BEING SENT ===')
-    console.log('patientId:', String(params.patientId))
-    console.log('typeLabSession:', String(params.typeLabSession))
-    console.log('fileCategories JSON string:', categoriesJson)
-    console.log('fileCategories parsed back:', JSON.parse(categoriesJson))
-    console.log('files count:', params.files.length)
-    console.log(
-        'files names:',
-        params.files.map((f) => f.name)
-    )
-
     if (cleanOcrResults.length > 0) {
         const ocrJson = JSON.stringify(cleanOcrResults)
         formData.append('ocrResults', ocrJson)
-        console.log('ocrResults JSON string:', ocrJson)
-        console.log('ocrResults parsed back:', JSON.parse(ocrJson))
     }
-
-    // Debug FormData contents
-    console.log('=== FormData Debug ===')
-    for (const [key, value] of formData.entries()) {
-        if (value instanceof File) {
-            console.log(`${key}: File(${value.name}, ${value.size} bytes)`)
-        } else {
-            console.log(`${key}: ${value}`)
-            // For JSON fields, parse and log the structure
-            if (key === 'fileCategories' || key === 'ocrResults') {
-                try {
-                    const parsed = JSON.parse(value)
-                    console.log(`${key} parsed:`, parsed)
-                } catch (e) {
-                    console.log(`${key} parse error:`, e)
-                }
-            }
-        }
-    }
-    console.log('========================')
 
     try {
         const response = await backendApi
@@ -176,19 +132,8 @@ export const uploadCategorizedPatientFiles = async (
                 // Don't set headers for FormData - let the browser handle Content-Type
             })
             .json<CategorizedUploadResponse>()
-
-        console.log('Upload successful:', response)
         return response
     } catch (error: any) {
-        console.error('Upload failed with error:', error)
-        console.error('Error details:', {
-            name: error.name,
-            message: error.message,
-            response: error.response,
-            status: error.response?.status,
-            statusText: error.response?.statusText
-        })
-
         // Try to get the error body
         if (error.response) {
             try {

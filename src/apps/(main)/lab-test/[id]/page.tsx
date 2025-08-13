@@ -34,13 +34,10 @@ const LabTestDetailPage = () => {
     const [r1File, setR1File] = useState<File | null>(null)
     const [r2File, setR2File] = useState<File | null>(null)
 
-    console.log('Lab Test Detail Data:', r1File, r2File, data)
     const sendToAnalysisMutation = useSendToAnalysis()
     const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(
         data?.analysis?.id ? String(data.analysis.id) : null
     )
-
-    console.log('Lua chon ktv phan tich:', selectedAnalysisId)
 
     // Get analysis technicians from the hook
     const analysisTechnicians = analysisTechniciansData?.data?.users || []
@@ -78,8 +75,7 @@ const LabTestDetailPage = () => {
 
         // Use selected analysis ID
         const analysisId = selectedAnalysisId ? parseInt(selectedAnalysisId, 10) : undefined
-        console.log('Sending to analysis with ID:', analysisId)
-
+        
         if (!analysisId) {
             notifications.show({
                 title: 'Thiếu thông tin',

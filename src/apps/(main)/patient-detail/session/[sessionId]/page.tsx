@@ -176,7 +176,6 @@ const SessionDetailPage = () => {
     const dropzoneRef = useRef<any>(null)
 
     const { data: sessionData, isLoading, error } = usePatientLabSessionDetail(sessionId!)
-    console.log('Session Data:', sessionData)
 
     const downloadMutation = useDownloadPatientFile()
     const deletePatientFileMutation = useDeletePatientFile()
@@ -372,7 +371,6 @@ const SessionDetailPage = () => {
         }
     }
     const handleFileReject = useCallback((rejectedFiles: FileRejection[]) => {
-        console.log('rejected files', rejectedFiles)
 
         const errorMessages = rejectedFiles.map(({ file, errors }) => {
             const fileName = file.name

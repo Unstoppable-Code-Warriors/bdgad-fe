@@ -54,7 +54,6 @@ const InputInfoPage = () => {
             handleOCRComplete(location.state.ocrResult)
         }
         if (location.state?.submittedFiles) {
-            console.log('Restoring submitted files from OCR:', location.state.submittedFiles)
             setSubmittedFiles(location.state.submittedFiles)
         }
         // Set session type and skip OCR if provided in navigation state
@@ -70,8 +69,7 @@ const InputInfoPage = () => {
     }, [location.state])
 
     const handleOCRComplete = (data: CommonOCRRes<EditedOCRRes>) => {
-        console.log('OCR completed:', data)
-        // The OCR complete handling is now done inline
+        console.log('OCR complete data:', data) 
     }
 
     // File handling functions
@@ -238,9 +236,6 @@ const InputInfoPage = () => {
             return
         }
 
-        console.log('Debug - handleSubmitFiles - selectedFiles:', selectedFiles)
-        console.log('Debug - handleSubmitFiles - fileCategories:', fileCategories)
-
         const newSubmittedFiles: CategorizedSubmittedFile[] = selectedFiles.map((file, index) => {
             const categoryData = fileCategories[index] || {
                 category: FileCategory.GENERAL,
@@ -261,11 +256,11 @@ const InputInfoPage = () => {
             }
         })
 
-        console.log('Debug - newSubmittedFiles:', newSubmittedFiles)
+
 
         const updatedSubmittedFiles = [...submittedFiles, ...newSubmittedFiles]
         setSubmittedFiles(updatedSubmittedFiles)
-        console.log('Debug - updatedSubmittedFiles after setSubmittedFiles:', updatedSubmittedFiles)
+
         setSelectedFiles([])
         setFileCategories([])
         setError(null)
@@ -390,8 +385,7 @@ const InputInfoPage = () => {
     const handleViewOCR = (submittedFile: CategorizedSubmittedFile) => {
         // Always get the latest file data from submittedFiles to ensure we have the most recent OCR result
         const latestFileData = submittedFiles.find((f) => f.id === submittedFile.id) || submittedFile
-        console.log('Opening OCR drawer for file:', latestFileData)
-        console.log('OCR result:', latestFileData.ocrResult)
+
         setSelectedFileForOCR(latestFileData)
         setOcrDrawerOpen(true)
     }
@@ -585,8 +579,6 @@ const InputInfoPage = () => {
             (sf) => sf.file && sf.file.name && sf.category && Object.values(FileCategory).includes(sf.category)
         )
 
-        console.log('Debug - submittedFiles before filtering:', submittedFiles)
-        console.log('Debug - validSubmittedFiles after filtering:', validSubmittedFiles)
 
         if (validSubmittedFiles.length !== submittedFiles.length) {
             console.error('Some files failed validation:', {
@@ -612,7 +604,6 @@ const InputInfoPage = () => {
             fileName: sf.file?.name || 'unknown-file' // Additional safety check
         }))
 
-        console.log('Debug - categoryArray:', categoryArray)
 
         // Additional validation for categoryArray
         const invalidCategories = categoryArray.filter((cat) => !cat.category || !cat.fileName)
@@ -659,8 +650,6 @@ const InputInfoPage = () => {
                 })
                 .filter(Boolean) as OCRResultDto[]
 
-            console.log('Debug - ocrResults:', ocrResults)
-
             const uploadParams = {
                 files: validSubmittedFiles.map((sf) => sf.file),
                 patientId: parseInt(patientId),
@@ -671,8 +660,6 @@ const InputInfoPage = () => {
                 labcode: ['O5123A', 'N5456B'] // Use the same labcode as the old implementation
             }
 
-            console.log('Debug - uploadParams:', uploadParams)
-
             let result
             if (bypassPrescriptionCheck) {
                 // Use uploadResultRequisition API for test results (bypass workflow)
@@ -681,7 +668,6 @@ const InputInfoPage = () => {
                     patientId: parseInt(patientId),
                     typeLabSession: 'result_test' // Use 'result_test' for test results
                 }
-                console.log('Debug - using uploadResultRequisition with params:', resultParams)
                 result = await uploadResultMutation.mutateAsync(resultParams)
             } else {
                 // Use regular categorized upload for examinations
