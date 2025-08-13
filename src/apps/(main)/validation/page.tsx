@@ -1,6 +1,6 @@
 import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, Group, Stack, Paper, Badge, ActionIcon, Alert, Text, Tooltip } from '@mantine/core'
+import { Title, Group, Stack, Paper, Badge, ActionIcon, Alert, Text, Tooltip, Tabs } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
 import { IconAlertCircle, IconDownload, IconCheck, IconX as IconReject, IconEye } from '@tabler/icons-react'
 import {
@@ -11,7 +11,7 @@ import {
 } from '@/types/validation'
 import { useValidationPatients, useDownloadValidationEtlResult } from '@/services/hook/validation.hook'
 import { notifications } from '@mantine/notifications'
-import { ListSearchFilter, type SelectOption } from '@/components/ListSearchFilter'
+import { ListSearchFilter } from '@/components/ListSearchFilter'
 import { useListState } from '@/hooks/use-list-state'
 import { openRejectEtlResultModal } from '@/components/RejectEtlResultModal'
 import { openAcceptEtlResultModal } from '@/components/AcceptEtlResultModal'
@@ -27,6 +27,7 @@ const getStatusLabel = (status: string) => {
 const ValidationPage = () => {
     const navigate = useNavigate()
     const [isDownloading, setIsDownloading] = useState(false)
+    const [activeTab, setActiveTab] = useState<string>('processing')
 
     // Use the new list state hook
     const {
@@ -40,7 +41,6 @@ const ValidationPage = () => {
         sortStatus,
         handleSort,
         filter,
-        updateFilter,
         dateRange,
         setDateRange
     } = useListState<ValidationFilter>({
@@ -48,8 +48,15 @@ const ValidationPage = () => {
         defaultSortOrder: 'DESC'
     })
 
-    // Status filter from the main filter object
-    const statusFilter = filter.status || ''
+    const handleTabChange = useCallback(
+        (value: string | null) => {
+            if (value) {
+                setActiveTab(value)
+                setPage(1)
+            }
+        },
+        [setPage]
+    )
 
     // Fetch data
     const {
@@ -66,27 +73,12 @@ const ValidationPage = () => {
         sortOrder: sortStatus.direction.toUpperCase(),
         filter,
         dateFrom: dateRange[0],
-        dateTo: dateRange[1]
+        dateTo: dateRange[1],
+        filterGroup: activeTab as 'processing' | 'rejected' | 'approved'
     })
 
     // Mutations
     const downloadEtlResultMutation = useDownloadValidationEtlResult()
-
-    // Status options for the filter
-    const statusOptions: SelectOption[] = [
-        {
-            value: ValidationEtlStatus.WAIT_FOR_APPROVAL,
-            label: validationEtlStatusConfig[ValidationEtlStatus.WAIT_FOR_APPROVAL].label
-        },
-        {
-            value: ValidationEtlStatus.REJECTED,
-            label: validationEtlStatusConfig[ValidationEtlStatus.REJECTED].label
-        },
-        {
-            value: ValidationEtlStatus.APPROVED,
-            label: validationEtlStatusConfig[ValidationEtlStatus.APPROVED].label
-        }
-    ]
 
     const handleViewDetail = useCallback(
         (id: number) => {
@@ -291,29 +283,64 @@ const ValidationPage = () => {
                 <Title order={2}>Thẩm định kết quả ETL</Title>
             </Group>
 
-            {/* Reusable Search and Filter Component */}
-            <ListSearchFilter
-                searchValue={search}
-                onSearchChange={setSearch}
-                searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
-                statusFilter={statusFilter}
-                onStatusFilterChange={(value) => updateFilter({ status: value || undefined })}
-                statusOptions={statusOptions}
-                statusPlaceholder='Trạng thái'
-                dateRange={dateRange}
-                onDateRangeChange={setDateRange}
-                onRefresh={handleRefresh}
-                isLoading={isLoading}
-                totalRecords={totalRecords}
-                showRefreshButton={false} // We have it in the header
-            />
-
             {/* Error Alert */}
             {isError && (
                 <Alert icon={<IconAlertCircle size='1rem' />} title='Lỗi!' color='red' variant='light'>
                     {error?.message || 'Đã xảy ra lỗi khi tải dữ liệu'}
                 </Alert>
             )}
+
+            {/* Status Group Tabs */}
+            <Tabs value={activeTab} onChange={handleTabChange}>
+                <Tabs.List>
+                    <Tabs.Tab value='processing'>Đang xử lý</Tabs.Tab>
+                    <Tabs.Tab value='rejected'>Từ chối</Tabs.Tab>
+                    <Tabs.Tab value='approved'>Đã phê duyệt</Tabs.Tab>
+                </Tabs.List>
+
+                <Tabs.Panel value='processing' pt='md'>
+                    {/* No additional filters for processing tab in validation */}
+                    <ListSearchFilter
+                        searchValue={search}
+                        onSearchChange={setSearch}
+                        searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
+                        dateRange={dateRange}
+                        onDateRangeChange={setDateRange}
+                        onRefresh={handleRefresh}
+                        isLoading={isLoading}
+                        totalRecords={totalRecords}
+                        showRefreshButton={false}
+                    />
+                </Tabs.Panel>
+
+                <Tabs.Panel value='rejected' pt='md'>
+                    <ListSearchFilter
+                        searchValue={search}
+                        onSearchChange={setSearch}
+                        searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
+                        dateRange={dateRange}
+                        onDateRangeChange={setDateRange}
+                        onRefresh={handleRefresh}
+                        isLoading={isLoading}
+                        totalRecords={totalRecords}
+                        showRefreshButton={false}
+                    />
+                </Tabs.Panel>
+
+                <Tabs.Panel value='approved' pt='md'>
+                    <ListSearchFilter
+                        searchValue={search}
+                        onSearchChange={setSearch}
+                        searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
+                        dateRange={dateRange}
+                        onDateRangeChange={setDateRange}
+                        onRefresh={handleRefresh}
+                        isLoading={isLoading}
+                        totalRecords={totalRecords}
+                        showRefreshButton={false}
+                    />
+                </Tabs.Panel>
+            </Tabs>
 
             {/* Data Table */}
             <Paper withBorder>

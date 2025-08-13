@@ -13,7 +13,8 @@ export const labTestService = {
         sortOrder = 'DESC',
         filter = {},
         dateFrom = null,
-        dateTo = null
+        dateTo = null,
+        filterGroup = null
     }: {
         page?: number
         limit?: number
@@ -23,6 +24,7 @@ export const labTestService = {
         filter?: Record<string, any>
         dateFrom?: DateValue | null
         dateTo?: DateValue | null
+        filterGroup?: 'processing' | 'rejected' | 'approved' | null
     }): Promise<BaseListResponse<LabTestSessionListItem>> => {
         const queryParams = new URLSearchParams()
         queryParams.set('page', page.toString())
@@ -30,6 +32,11 @@ export const labTestService = {
         queryParams.set('search', search)
         queryParams.set('sortBy', sortBy)
         queryParams.set('sortOrder', sortOrder)
+
+        // Add filter group
+        if (filterGroup) {
+            queryParams.set('filterGroup', filterGroup)
+        }
 
         // Extract specific filters from the filter object
         const { requestDate, ...otherFilters } = filter

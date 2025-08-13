@@ -13,7 +13,8 @@ export const useAnalysisSessions = ({
     sortOrder = 'DESC',
     filter = {},
     dateFrom = null,
-    dateTo = null
+    dateTo = null,
+    filterGroup = null
 }: {
     page?: number
     limit?: number
@@ -23,9 +24,13 @@ export const useAnalysisSessions = ({
     filter?: AnalysisFilter
     dateFrom?: DateValue | null
     dateTo?: DateValue | null
+    filterGroup?: 'processing' | 'rejected' | 'approved' | null
 } = {}) => {
     return useQuery({
-        queryKey: ['analysis-sessions', { page, limit, search, sortBy, sortOrder, filter, dateFrom, dateTo }],
+        queryKey: [
+            'analysis-sessions',
+            { page, limit, search, sortBy, sortOrder, filter, dateFrom, dateTo, filterGroup }
+        ],
         queryFn: () =>
             analysisService.getSessions({
                 page,
@@ -35,7 +40,8 @@ export const useAnalysisSessions = ({
                 sortOrder,
                 filter,
                 dateFrom,
-                dateTo
+                dateTo,
+                filterGroup
             })
     })
 }
