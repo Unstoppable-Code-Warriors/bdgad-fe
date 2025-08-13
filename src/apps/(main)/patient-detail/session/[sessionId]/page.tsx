@@ -540,7 +540,7 @@ const SessionDetailPage = () => {
                                     <Flex align='center' gap='xs'>
                                         <IconUser size={16} />
                                         <Text size='sm' c='dimmed'>
-                                            {sessionData.assignment?.doctor?.name || 'Chưa có bác sĩ'}
+                                            {sessionData.labcodes[0]?.assignment?.doctor?.name || 'Chưa có bác sĩ'}
                                         </Text>
                                     </Flex>
                                     <Text size='sm' c='dimmed'>

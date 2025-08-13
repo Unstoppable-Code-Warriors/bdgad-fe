@@ -31,6 +31,23 @@ export const useAssignSession = () => {
     })
 }
 
+export const useAssignResultTest = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (data: { doctorId: number; labcodeLabSessionId: number }) => staffService.assignResultTest(data),
+        onSuccess: () => {
+            // Invalidate relevant queries that might need refreshing
+            queryClient.invalidateQueries({
+                queryKey: ['patient-lab-sessions']
+            })
+            queryClient.invalidateQueries({
+                queryKey: ['patient-lab-session-detail']
+            })
+        }
+    })
+}
+
 export const useDeletePatientFile = () => {
     const queryClient = useQueryClient()
 

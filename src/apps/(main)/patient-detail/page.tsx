@@ -83,7 +83,7 @@ const PatientDetailPage = () => {
 
     const handleUploadTestResults = () => {
         navigate('/import-file/input', {
-            state: { 
+            state: {
                 patientId: id,
                 typeLabSession: 'result_test',
                 skipOCR: true,
@@ -393,7 +393,6 @@ const PatientDetailPage = () => {
                                                 </Box>
                                             </Group>
                                         </Grid.Col>
-
                                     </Grid>
                                 </Box>
                             </Stack>
@@ -403,14 +402,14 @@ const PatientDetailPage = () => {
                     {/* Empty State for No Sessions - positioned alongside patient info */}
                     {sessions.length === 0 && (
                         <Grid.Col span={6}>
-                            <Card 
-                                shadow='sm' 
-                                padding='xl' 
-                                withBorder 
+                            <Card
+                                shadow='sm'
+                                padding='xl'
+                                withBorder
                                 h='100%'
                                 style={{
                                     background: 'linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%)',
-                                    borderColor: '#e1e5e9',
+                                    borderColor: '#e1e5e9'
                                 }}
                             >
                                 <Stack justify='center' align='center' h='100%' gap='lg'>
@@ -424,12 +423,17 @@ const PatientDetailPage = () => {
                                     >
                                         <IconStethoscope size={48} color='white' />
                                     </Box>
-                                    
+
                                     <Stack align='center' gap='md'>
                                         <Text size='xl' fw={700} c='dark' ta='center'>
                                             Chưa có lần khám nào
                                         </Text>
-                                        <Text size='md' c='dimmed' ta='center' style={{ maxWidth: '380px', lineHeight: 1.6 }}>
+                                        <Text
+                                            size='md'
+                                            c='dimmed'
+                                            ta='center'
+                                            style={{ maxWidth: '380px', lineHeight: 1.6 }}
+                                        >
                                             Bệnh nhân chưa có lịch sử khám bệnh hoặc kết quả xét nghiệm.
                                         </Text>
                                     </Stack>
@@ -441,12 +445,12 @@ const PatientDetailPage = () => {
                     {/* Sessions List with Tabs */}
                     {sessions.length > 0 && (
                         <Grid.Col span={6}>
-                            <Card shadow='sm' padding='lg' withBorder >
-                                <Tabs defaultValue="test" orientation="horizontal">
+                            <Card shadow='sm' padding='lg' withBorder>
+                                <Tabs defaultValue='test' orientation='horizontal'>
                                     <Tabs.List>
                                         {testSessions.length > 0 && (
-                                            <Tabs.Tab 
-                                                value="test" 
+                                            <Tabs.Tab
+                                                value='test'
                                                 leftSection={<IconMicroscope size={16} />}
                                                 rightSection={
                                                     <Badge variant='light' color='blue' size='sm'>
@@ -458,8 +462,8 @@ const PatientDetailPage = () => {
                                             </Tabs.Tab>
                                         )}
                                         {resultTestSessions.length > 0 && (
-                                            <Tabs.Tab 
-                                                value="result_test" 
+                                            <Tabs.Tab
+                                                value='result_test'
                                                 leftSection={<IconClipboardCheck size={16} />}
                                                 rightSection={
                                                     <Badge variant='light' color='green' size='sm'>
@@ -474,7 +478,7 @@ const PatientDetailPage = () => {
 
                                     {/* Test Sessions Panel */}
                                     {testSessions.length > 0 && (
-                                        <Tabs.Panel value="test" pt="md">
+                                        <Tabs.Panel value='test' pt='md'>
                                             <ScrollArea
                                                 h={400}
                                                 scrollbarSize={8}
@@ -514,7 +518,9 @@ const PatientDetailPage = () => {
                                                                             <Text fw={600} size='lg'>
                                                                                 Lần {index + 1}
                                                                             </Text>
-                                                                            {getSessionTypeBadge(session.typeLabSession)}
+                                                                            {getSessionTypeBadge(
+                                                                                session.typeLabSession
+                                                                            )}
                                                                         </Group>
 
                                                                         <Group gap='md'>
@@ -529,7 +535,8 @@ const PatientDetailPage = () => {
                                                                             <Flex align='center' gap='xs'>
                                                                                 <IconUser size={14} />
                                                                                 <Text size='sm' c='dimmed'>
-                                                                                    {session.assignment?.doctor?.name ||
+                                                                                    {session.labcodes[0]?.assignment
+                                                                                        ?.doctor?.name ||
                                                                                         'Chưa có bác sĩ'}
                                                                                 </Text>
                                                                             </Flex>
@@ -549,7 +556,7 @@ const PatientDetailPage = () => {
 
                                     {/* Result Test Sessions Panel */}
                                     {resultTestSessions.length > 0 && (
-                                        <Tabs.Panel value="result_test" pt="md">
+                                        <Tabs.Panel value='result_test' pt='md'>
                                             <ScrollArea
                                                 h={400}
                                                 scrollbarSize={8}
@@ -589,7 +596,9 @@ const PatientDetailPage = () => {
                                                                             <Text fw={600} size='lg'>
                                                                                 Kết quả {index + 1}
                                                                             </Text>
-                                                                            {getSessionTypeBadge(session.typeLabSession)}
+                                                                            {getSessionTypeBadge(
+                                                                                session.typeLabSession
+                                                                            )}
                                                                         </Group>
 
                                                                         <Group gap='md'>
@@ -604,7 +613,8 @@ const PatientDetailPage = () => {
                                                                             <Flex align='center' gap='xs'>
                                                                                 <IconUser size={14} />
                                                                                 <Text size='sm' c='dimmed'>
-                                                                                    {session.assignment?.doctor?.name ||
+                                                                                    {session.labcodes[0]?.assignment
+                                                                                        ?.doctor?.name ||
                                                                                         'Chưa có bác sĩ'}
                                                                                 </Text>
                                                                             </Flex>
@@ -626,7 +636,6 @@ const PatientDetailPage = () => {
                         </Grid.Col>
                     )}
                 </Grid>
-
             </Stack>
         </Container>
     )

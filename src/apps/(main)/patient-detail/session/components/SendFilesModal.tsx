@@ -4,7 +4,7 @@ import { IconSend, IconMicroscope, IconClipboardCheck, IconAlertCircle, IconChec
 import { notifications } from '@mantine/notifications'
 import { Role } from '@/utils/constant'
 import { authService } from '@/services/function/auth'
-import { useAssignSession } from '@/services/hook/staff-patient-session.hook'
+import { useAssignSession, useAssignResultTest } from '@/services/hook/staff-patient-session.hook'
 import { cancerPanelOptions, cancerScreeningPackageOptions, niptPackageOptions } from '@/types/prescription-form'
 
 interface AssignmentItem {
@@ -62,6 +62,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
     const [labTechs, setLabTechs] = useState<any[]>([])
 
     const assignSessionMutation = useAssignSession()
+    const assignResultTestMutation = useAssignResultTest()
 
     // Extract labcodes from sessionData
     const labcodes = Array.isArray(sessionData?.labcodes)
@@ -163,20 +164,40 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
         }
 
         try {
-            const assignData = {
-                doctorId: Number(selectedDoctor),
-                assignment: assignments
-                    .filter((item) => sessionType !== 'test' || item.labTestingId !== null)
-                    .map((item) => ({
-                        labcode: item.labcode,
-                        labTestingId: item.labTestingId!
-                    }))
-            }
+            if (sessionType === 'result_test') {
+                // For result_test, we need to call assignResultTest for each labcode
+                const resultTestPromises = labcodes.map(async (labcodeItem: any) => {
+                    const labcodeLabSessionId = labcodeItem.id || labcodeItem.labcodeLabSessionId
+                    if (!labcodeLabSessionId) {
+                        throw new Error(`Không tìm thấy labcodeLabSessionId cho labcode: ${labcodeItem.labcode}`)
+                    }
+                    console.log('Assigning result test for DOCTOR:', selectedDoctor)
 
-            await assignSessionMutation.mutateAsync({
-                sessionId,
-                data: assignData
-            })
+                    return assignResultTestMutation.mutateAsync({
+                        doctorId: Number(selectedDoctor),
+                        labcodeLabSessionId: Number(labcodeLabSessionId)
+                    })
+                })
+
+                await Promise.all(resultTestPromises)
+            } else {
+                // Original logic for other session types
+                const assignData = {
+                    doctorId: Number(selectedDoctor),
+                    assignment: assignments
+                        .filter((item) => sessionType !== 'test' || item.labTestingId !== null)
+                        .map((item) => ({
+                            labcode: item.labcode,
+                            labTestingId: item.labTestingId!
+                        }))
+                }
+
+                console.log('Assign data:', assignData)
+                await assignSessionMutation.mutateAsync({
+                    sessionId,
+                    data: assignData
+                })
+            }
 
             notifications.show({
                 title: 'Thành công',
@@ -206,7 +227,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
             label: `${labTech.name} (${labTech.email})`
         }))
 
-    const isSending = assignSessionMutation.isPending
+    const isSending = assignSessionMutation.isPending || assignResultTestMutation.isPending
 
     // Get current assigned names for display
     const currentDoctorName = labcodes.length > 0 ? labcodes[0].assignment?.doctor?.name : null
@@ -223,13 +244,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
             title={
                 <Group>
                     {isAlreadyAssigned ? <IconCheck size={20} /> : <IconSend size={20} />}
-                    <Text fw={600}>
-                        {isAlreadyAssigned
-                            ? 'Đã gửi yêu cầu'
-                            : sessionType === 'test'
-                              ? 'Gửi yêu cầu xét nghiệm'
-                              : 'Gửi yêu cầu thẩm định'}
-                    </Text>
+                    <Text fw={600}>{isAlreadyAssigned ? 'Đã gửi yêu cầu' : 'Gửi yêu cầu'}</Text>
                 </Group>
             }
             centered
@@ -390,9 +405,12 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                         leftSection={isAlreadyAssigned ? <IconCheck size={16} /> : <IconSend size={16} />}
                         onClick={handleSendFiles}
                         loading={isSending}
-                        disabled={isSending || isLoading}
+                        disabled={isSending || isLoading || (sessionType === 'result_test' && isAlreadyAssigned)}
                         color={sessionType === 'test' ? 'blue' : 'green'}
                         variant={isAlreadyAssigned ? 'light' : 'filled'}
+                        style={{
+                            display: sessionType === 'result_test' && isAlreadyAssigned ? 'none' : 'block'
+                        }}
                     >
                         {isSending
                             ? isAlreadyAssigned
