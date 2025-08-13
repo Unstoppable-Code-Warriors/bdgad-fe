@@ -33,6 +33,8 @@ const LabTestDetailPage = () => {
     const { data: analysisTechniciansData, isLoading: isLoadingTechnicians } = useUsersByRole(Role.ANALYSIS_TECHNICIAN)
     const [r1File, setR1File] = useState<File | null>(null)
     const [r2File, setR2File] = useState<File | null>(null)
+
+    console.log('Lab Test Detail Data:', r1File, r2File, data)
     const sendToAnalysisMutation = useSendToAnalysis()
     const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(
         data?.analysis?.id ? String(data.analysis.id) : null

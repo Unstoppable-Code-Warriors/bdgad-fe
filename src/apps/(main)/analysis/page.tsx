@@ -1,13 +1,25 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, TextInput, Select, Group, Stack, Paper, Badge, ActionIcon, Alert, Tooltip, Text } from '@mantine/core'
+import {
+    Title,
+    TextInput,
+    Select,
+    Group,
+    Stack,
+    Paper,
+    Badge,
+    ActionIcon,
+    Alert,
+    Tooltip,
+    Text,
+    Tabs
+} from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { DataTable, type DataTableColumn, type DataTableSortStatus } from 'mantine-datatable'
 import {
     IconSearch,
     IconCalendar,
     IconEye,
-    IconFilter,
     IconX,
     IconRefresh,
     IconAlertCircle,
@@ -34,6 +46,7 @@ const getStatusLabel = (status: string) => {
 const AnalysisPage = () => {
     const navigate = useNavigate()
     const [isDownloading, setIsDownloading] = useState(false)
+    const [activeTab, setActiveTab] = useState<string>('processing')
 
     // URL state management
     const [page, setPage] = useSearchParamState({
@@ -58,20 +71,40 @@ const AnalysisPage = () => {
     })
 
     // Filters
-    const [fastqFilePairStatusFilter, setfastqFilePairStatusFilter] = useState<string>('')
-    const [etlStatusFilter, setEtlStatusFilter] = useState<string>('')
     const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
+    const [processingStatusFilter, setProcessingStatusFilter] = useState<string | null>(null)
 
     // Debounced search
     const [debouncedSearch] = useDebouncedValue(search, 1000)
 
+    const handleTabChange = useCallback(
+        (value: string | null) => {
+            if (value) {
+                setActiveTab(value)
+                setPage(1)
+                setProcessingStatusFilter(null) // Reset processing filter when tab changes
+            }
+        },
+        [setPage]
+    )
+
+    // Define processing status options for analysis
+    const processingStatusOptions = [
+        { value: AnalysisStatus.PROCESSING, label: analysisStatusConfig[AnalysisStatus.PROCESSING].label },
+        { value: AnalysisStatus.FAILED, label: analysisStatusConfig[AnalysisStatus.FAILED].label },
+        { value: AnalysisStatus.COMPLETED, label: analysisStatusConfig[AnalysisStatus.COMPLETED].label },
+        { value: AnalysisStatus.WAIT_FOR_APPROVAL, label: analysisStatusConfig[AnalysisStatus.WAIT_FOR_APPROVAL].label }
+    ]
+
     // Build filter object
     const filter: AnalysisFilter = useMemo(() => {
         const filterObj: AnalysisFilter = {}
-        if (fastqFilePairStatusFilter) filterObj.fastqFilePairStatus = fastqFilePairStatusFilter
-        if (etlStatusFilter) filterObj.etlStatus = etlStatusFilter
+        // Add processing status filter when on processing tab
+        if (activeTab === 'processing' && processingStatusFilter) {
+            filterObj.etlStatus = processingStatusFilter
+        }
         return filterObj
-    }, [fastqFilePairStatusFilter, etlStatusFilter])
+    }, [activeTab, processingStatusFilter])
 
     // Fetch data
     const {
@@ -88,7 +121,8 @@ const AnalysisPage = () => {
         sortOrder: sortOrder as string,
         filter,
         dateFrom: dateRange[0],
-        dateTo: dateRange[1]
+        dateTo: dateRange[1],
+        filterGroup: activeTab as 'processing' | 'rejected' | 'approved'
     })
 
     // Mutations
@@ -368,76 +402,93 @@ const AnalysisPage = () => {
                 </Alert>
             )}
 
-            {/* Search and Filters */}
-            <Paper shadow='sm' p='lg' withBorder>
-                <Stack gap='md'>
-                    <Group grow>
-                        <TextInput
-                            placeholder='Tìm kiếm theo mã labcode, barcode'
-                            leftSection={<IconSearch size={16} />}
-                            value={search}
-                            onChange={(event) => setSearch(event.currentTarget.value)}
-                        />
-                        <Select
-                            placeholder='Lọc theo trạng thái FastQ'
-                            leftSection={<IconFilter size={16} />}
-                            data={[
-                                { value: '', label: 'Tất cả trạng thái FastQ' },
-                                { value: FastQFileStatus.UPLOADED, label: 'Đã tải lên' },
-                                { value: FastQFileStatus.WAIT_FOR_APPROVAL, label: 'Chờ phê duyệt' },
-                                { value: FastQFileStatus.APPROVED, label: 'Đã phê duyệt' },
-                                { value: FastQFileStatus.REJECTED, label: 'Từ chối' }
-                            ]}
-                            value={fastqFilePairStatusFilter}
-                            onChange={(value) => setfastqFilePairStatusFilter(value || '')}
-                            clearable
-                            rightSection={
-                                fastqFilePairStatusFilter && (
-                                    <ActionIcon
-                                        size='sm'
-                                        variant='transparent'
-                                        onClick={() => setfastqFilePairStatusFilter('')}
-                                    >
-                                        <IconX size={12} />
-                                    </ActionIcon>
-                                )
-                            }
-                        />
-                        <Select
-                            placeholder='Lọc theo trạng thái ETL'
-                            leftSection={<IconFilter size={16} />}
-                            data={[
-                                { value: '', label: 'Tất cả trạng thái ETL' },
-                                { value: AnalysisStatus.REJECTED, label: 'Từ chối' },
-                                { value: AnalysisStatus.APPROVED, label: 'Đã phê duyệt' },
-                                { value: AnalysisStatus.WAIT_FOR_APPROVAL, label: 'Chờ phê duyệt' },
-                                { value: AnalysisStatus.PROCESSING, label: 'Đang xử lý' },
-                                { value: AnalysisStatus.COMPLETED, label: 'Hoàn thành' },
-                                { value: AnalysisStatus.FAILED, label: 'Thất bại' }
-                            ]}
-                            value={etlStatusFilter}
-                            onChange={(value) => setEtlStatusFilter(value || '')}
-                            clearable
-                            rightSection={
-                                etlStatusFilter && (
-                                    <ActionIcon size='sm' variant='transparent' onClick={() => setEtlStatusFilter('')}>
-                                        <IconX size={12} />
-                                    </ActionIcon>
-                                )
-                            }
-                        />
-                        <DatePickerInput
-                            type='range'
-                            placeholder='Chọn khoảng thời gian'
-                            leftSection={<IconCalendar size={16} />}
-                            value={dateRange}
-                            onChange={setDateRange}
-                            clearable
-                            maxDate={new Date()}
-                        />
-                    </Group>
-                </Stack>
-            </Paper>
+            {/* Status Group Tabs */}
+            <Tabs value={activeTab} onChange={handleTabChange}>
+                <Tabs.List>
+                    <Tabs.Tab value='processing'>Đang xử lý</Tabs.Tab>
+                    <Tabs.Tab value='rejected'>Từ chối</Tabs.Tab>
+                    <Tabs.Tab value='approved'>Đã phê duyệt</Tabs.Tab>
+                </Tabs.List>
+
+                <Tabs.Panel value='processing' pt='md'>
+                    <Paper shadow='sm' p='lg' withBorder>
+                        <Stack gap='md'>
+                            <Group grow>
+                                <TextInput
+                                    placeholder='Tìm kiếm theo mã labcode, barcode'
+                                    leftSection={<IconSearch size={16} />}
+                                    value={search}
+                                    onChange={(event) => setSearch(event.currentTarget.value)}
+                                />
+                                <Select
+                                    placeholder='Lọc theo trạng thái xử lý'
+                                    data={processingStatusOptions}
+                                    value={processingStatusFilter}
+                                    onChange={setProcessingStatusFilter}
+                                    clearable
+                                />
+                                <DatePickerInput
+                                    type='range'
+                                    placeholder='Chọn khoảng thời gian'
+                                    leftSection={<IconCalendar size={16} />}
+                                    value={dateRange}
+                                    onChange={setDateRange}
+                                    clearable
+                                    maxDate={new Date()}
+                                />
+                            </Group>
+                        </Stack>
+                    </Paper>
+                </Tabs.Panel>
+
+                <Tabs.Panel value='rejected' pt='md'>
+                    <Paper shadow='sm' p='lg' withBorder>
+                        <Stack gap='md'>
+                            <Group grow>
+                                <TextInput
+                                    placeholder='Tìm kiếm theo mã labcode, barcode'
+                                    leftSection={<IconSearch size={16} />}
+                                    value={search}
+                                    onChange={(event) => setSearch(event.currentTarget.value)}
+                                />
+                                <DatePickerInput
+                                    type='range'
+                                    placeholder='Chọn khoảng thời gian'
+                                    leftSection={<IconCalendar size={16} />}
+                                    value={dateRange}
+                                    onChange={setDateRange}
+                                    clearable
+                                    maxDate={new Date()}
+                                />
+                            </Group>
+                        </Stack>
+                    </Paper>
+                </Tabs.Panel>
+
+                <Tabs.Panel value='approved' pt='md'>
+                    <Paper shadow='sm' p='lg' withBorder>
+                        <Stack gap='md'>
+                            <Group grow>
+                                <TextInput
+                                    placeholder='Tìm kiếm theo mã labcode, barcode'
+                                    leftSection={<IconSearch size={16} />}
+                                    value={search}
+                                    onChange={(event) => setSearch(event.currentTarget.value)}
+                                />
+                                <DatePickerInput
+                                    type='range'
+                                    placeholder='Chọn khoảng thời gian'
+                                    leftSection={<IconCalendar size={16} />}
+                                    value={dateRange}
+                                    onChange={setDateRange}
+                                    clearable
+                                    maxDate={new Date()}
+                                />
+                            </Group>
+                        </Stack>
+                    </Paper>
+                </Tabs.Panel>
+            </Tabs>
 
             {/* Data Table */}
             <Paper shadow='sm' withBorder>

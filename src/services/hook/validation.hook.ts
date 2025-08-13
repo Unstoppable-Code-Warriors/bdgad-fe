@@ -12,6 +12,7 @@ export const useValidationPatients = ({
     filter = {},
     dateFrom = null,
     dateTo = null,
+    filterGroup = null,
     enabled = true
 }: {
     page?: number
@@ -22,10 +23,14 @@ export const useValidationPatients = ({
     filter?: ValidationFilter
     dateFrom?: DateValue | null
     dateTo?: DateValue | null
+    filterGroup?: 'processing' | 'rejected' | 'approved' | null
     enabled?: boolean
 } = {}) => {
     return useQuery({
-        queryKey: ['validation-patients', { page, limit, search, sortBy, sortOrder, filter, dateFrom, dateTo }],
+        queryKey: [
+            'validation-patients',
+            { page, limit, search, sortBy, sortOrder, filter, dateFrom, dateTo, filterGroup }
+        ],
         queryFn: () =>
             validationService.getPatients({
                 page,
@@ -35,7 +40,8 @@ export const useValidationPatients = ({
                 sortOrder,
                 filter,
                 dateFrom,
-                dateTo
+                dateTo,
+                filterGroup
             }),
         enabled
     })

@@ -37,7 +37,7 @@ export const FileUpload = ({
     const deleteFastQPairMutation = useDeleteFastQPair()
 
     const getCurrentStatus = () => {
-        return latestFastqFilePair?.status || 'uploaded'
+        return latestFastqFilePair?.status || 'not_uploaded'
     }
 
     const getStatusLabel = (status: string) => {
@@ -48,14 +48,21 @@ export const FileUpload = ({
         return statusConfig[status as keyof typeof statusConfig]?.color || 'gray'
     }
 
-    // Show dropzone only when no FastQ file pairs exist OR when latest status is rejected
+    // Show dropzone when:
+    // 1. No FastQ file pairs exist
+    // 2. Latest status is rejected
+    // 3. Latest status is not_uploaded (allowing re-upload)
     const shouldShowDropzone = () => {
-        return fastqFilePairs.length === 0 || latestFastqFilePair?.status === 'rejected'
+        if (fastqFilePairs.length === 0) return true
+        if (!latestFastqFilePair) return true
+
+        const status = latestFastqFilePair.status
+        return status === 'rejected' || status === 'not_uploaded'
     }
 
     const canModifyFiles = () => {
         const status = getCurrentStatus()
-        return status === 'uploaded' || status === 'rejected'
+        return status === 'uploaded' || status === 'rejected' || status === 'not_uploaded'
     }
 
     const handleFileUpload = async () => {

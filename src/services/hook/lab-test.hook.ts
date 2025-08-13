@@ -20,7 +20,8 @@ export const useLabTestSessions = ({
     sortOrder = 'DESC',
     filter = {},
     dateFrom = null,
-    dateTo = null
+    dateTo = null,
+    filterGroup = null
 }: {
     page?: number
     limit?: number
@@ -30,9 +31,10 @@ export const useLabTestSessions = ({
     filter?: Record<string, any>
     dateFrom?: DateValue | null
     dateTo?: DateValue | null
+    filterGroup?: 'processing' | 'rejected' | 'approved' | null
 }) => {
     return useQuery({
-        queryKey: ['lab-test-sessions', page, limit, search, sortBy, sortOrder, filter, dateFrom, dateTo],
+        queryKey: ['lab-test-sessions', page, limit, search, sortBy, sortOrder, filter, dateFrom, dateTo, filterGroup],
         queryFn: () =>
             labTestService.getSessions({
                 page,
@@ -42,7 +44,8 @@ export const useLabTestSessions = ({
                 sortOrder,
                 filter,
                 dateFrom: formatDateToISO(dateFrom),
-                dateTo: formatDateToISO(dateTo)
+                dateTo: formatDateToISO(dateTo),
+                filterGroup
             })
     })
 }
