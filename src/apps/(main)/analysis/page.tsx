@@ -1,19 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import {
-    Title,
-    TextInput,
-    Select,
-    Group,
-    Stack,
-    Paper,
-    Badge,
-    ActionIcon,
-    Alert,
-    Tooltip,
-    Text,
-    Tabs
-} from '@mantine/core'
+import { Title, TextInput, Select, Group, Stack, Paper, Badge, ActionIcon, Alert, Tooltip, Text } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { DataTable, type DataTableColumn, type DataTableSortStatus } from 'mantine-datatable'
 import {
@@ -46,7 +33,6 @@ const getStatusLabel = (status: string) => {
 const AnalysisPage = () => {
     const navigate = useNavigate()
     const [isDownloading, setIsDownloading] = useState(false)
-    const [activeTab, setActiveTab] = useState<string>('processing')
 
     // URL state management
     const [page, setPage] = useSearchParamState({
@@ -72,39 +58,33 @@ const AnalysisPage = () => {
 
     // Filters
     const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
-    const [processingStatusFilter, setProcessingStatusFilter] = useState<string | null>(null)
+    const [filterFastq, setFilterFastq] = useState<string | null>(null)
+    const [filterEtl, setFilterEtl] = useState<string | null>(null)
 
     // Debounced search
     const [debouncedSearch] = useDebouncedValue(search, 1000)
 
-    const handleTabChange = useCallback(
-        (value: string | null) => {
-            if (value) {
-                setActiveTab(value)
-                setPage(1)
-                setProcessingStatusFilter(null) // Reset processing filter when tab changes
-            }
-        },
-        [setPage]
-    )
+    // Filter options
+    const fastqFilterOptions = [
+        { value: 'wait_for_approval', label: 'Chờ phê duyệt' },
+        { value: 'approved', label: 'Đã phê duyệt' },
+        { value: 'rejected', label: 'Từ chối' }
+    ]
 
-    // Define processing status options for analysis
-    const processingStatusOptions = [
-        { value: AnalysisStatus.PROCESSING, label: analysisStatusConfig[AnalysisStatus.PROCESSING].label },
-        { value: AnalysisStatus.FAILED, label: analysisStatusConfig[AnalysisStatus.FAILED].label },
-        { value: AnalysisStatus.COMPLETED, label: analysisStatusConfig[AnalysisStatus.COMPLETED].label },
-        { value: AnalysisStatus.WAIT_FOR_APPROVAL, label: analysisStatusConfig[AnalysisStatus.WAIT_FOR_APPROVAL].label }
+    const etlFilterOptions = [
+        { value: 'processing', label: 'Đang xử lý' },
+        { value: 'completed', label: 'Hoàn thành' },
+        { value: 'failed', label: 'Thất bại' },
+        { value: 'wait_for_approval', label: 'Chờ phê duyệt' },
+        { value: 'rejected', label: 'Từ chối' },
+        { value: 'approved', label: 'Đã phê duyệt' }
     ]
 
     // Build filter object
     const filter: AnalysisFilter = useMemo(() => {
         const filterObj: AnalysisFilter = {}
-        // Add processing status filter when on processing tab
-        if (activeTab === 'processing' && processingStatusFilter) {
-            filterObj.etlStatus = processingStatusFilter
-        }
         return filterObj
-    }, [activeTab, processingStatusFilter])
+    }, [])
 
     // Fetch data
     const {
@@ -122,7 +102,15 @@ const AnalysisPage = () => {
         filter,
         dateFrom: dateRange[0],
         dateTo: dateRange[1],
-        filterGroup: activeTab as 'processing' | 'rejected' | 'approved'
+        filterFastq: filterFastq as 'wait_for_approval' | 'approved' | 'rejected' | null,
+        filterEtl: filterEtl as
+            | 'processing'
+            | 'completed'
+            | 'failed'
+            | 'wait_for_approval'
+            | 'rejected'
+            | 'approved'
+            | null
     })
 
     // Mutations
@@ -132,7 +120,7 @@ const AnalysisPage = () => {
     // Reset page when search or filters change
     useEffect(() => {
         if (page > 1) setPage(1)
-    }, [debouncedSearch, filter, dateRange])
+    }, [debouncedSearch, filter, dateRange, filterFastq, filterEtl])
 
     const handleViewDetail = useCallback(
         (id: number) => {
@@ -402,93 +390,54 @@ const AnalysisPage = () => {
                 </Alert>
             )}
 
-            {/* Status Group Tabs */}
-            <Tabs value={activeTab} onChange={handleTabChange}>
-                <Tabs.List>
-                    <Tabs.Tab value='processing'>Đang xử lý</Tabs.Tab>
-                    <Tabs.Tab value='rejected'>Từ chối</Tabs.Tab>
-                    <Tabs.Tab value='approved'>Đã phê duyệt</Tabs.Tab>
-                </Tabs.List>
-
-                <Tabs.Panel value='processing' pt='md'>
-                    <Paper shadow='sm' p='lg' withBorder>
-                        <Stack gap='md'>
-                            <Group grow>
-                                <TextInput
-                                    placeholder='Tìm kiếm theo mã labcode, barcode'
-                                    leftSection={<IconSearch size={16} />}
-                                    value={search}
-                                    onChange={(event) => setSearch(event.currentTarget.value)}
-                                />
-                                <Select
-                                    placeholder='Lọc theo trạng thái xử lý'
-                                    data={processingStatusOptions}
-                                    value={processingStatusFilter}
-                                    onChange={setProcessingStatusFilter}
-                                    clearable
-                                />
-                                <DatePickerInput
-                                    type='range'
-                                    placeholder='Chọn khoảng thời gian'
-                                    leftSection={<IconCalendar size={16} />}
-                                    value={dateRange}
-                                    onChange={setDateRange}
-                                    clearable
-                                    maxDate={new Date()}
-                                />
-                            </Group>
-                        </Stack>
-                    </Paper>
-                </Tabs.Panel>
-
-                <Tabs.Panel value='rejected' pt='md'>
-                    <Paper shadow='sm' p='lg' withBorder>
-                        <Stack gap='md'>
-                            <Group grow>
-                                <TextInput
-                                    placeholder='Tìm kiếm theo mã labcode, barcode'
-                                    leftSection={<IconSearch size={16} />}
-                                    value={search}
-                                    onChange={(event) => setSearch(event.currentTarget.value)}
-                                />
-                                <DatePickerInput
-                                    type='range'
-                                    placeholder='Chọn khoảng thời gian'
-                                    leftSection={<IconCalendar size={16} />}
-                                    value={dateRange}
-                                    onChange={setDateRange}
-                                    clearable
-                                    maxDate={new Date()}
-                                />
-                            </Group>
-                        </Stack>
-                    </Paper>
-                </Tabs.Panel>
-
-                <Tabs.Panel value='approved' pt='md'>
-                    <Paper shadow='sm' p='lg' withBorder>
-                        <Stack gap='md'>
-                            <Group grow>
-                                <TextInput
-                                    placeholder='Tìm kiếm theo mã labcode, barcode'
-                                    leftSection={<IconSearch size={16} />}
-                                    value={search}
-                                    onChange={(event) => setSearch(event.currentTarget.value)}
-                                />
-                                <DatePickerInput
-                                    type='range'
-                                    placeholder='Chọn khoảng thời gian'
-                                    leftSection={<IconCalendar size={16} />}
-                                    value={dateRange}
-                                    onChange={setDateRange}
-                                    clearable
-                                    maxDate={new Date()}
-                                />
-                            </Group>
-                        </Stack>
-                    </Paper>
-                </Tabs.Panel>
-            </Tabs>
+            {/* Search and Filter Controls */}
+            <Paper shadow='sm' p='lg' withBorder>
+                <Stack gap='md'>
+                    <Group grow>
+                        <TextInput
+                            placeholder='Tìm kiếm theo mã labcode, barcode'
+                            leftSection={<IconSearch size={16} />}
+                            value={search}
+                            onChange={(event) => setSearch(event.currentTarget.value)}
+                        />
+                        <DatePickerInput
+                            type='range'
+                            placeholder='Chọn khoảng thời gian'
+                            leftSection={<IconCalendar size={16} />}
+                            value={dateRange}
+                            onChange={setDateRange}
+                            clearable
+                            maxDate={new Date()}
+                        />
+                    </Group>
+                    <Group grow>
+                        <div>
+                            <Text size='sm' fw={500} mb='xs'>
+                                Lọc theo trạng thái FastQ
+                            </Text>
+                            <Select
+                                placeholder='Chọn trạng thái FastQ'
+                                data={fastqFilterOptions}
+                                value={filterFastq}
+                                onChange={setFilterFastq}
+                                clearable
+                            />
+                        </div>
+                        <div>
+                            <Text size='sm' fw={500} mb='xs'>
+                                Lọc theo trạng thái ETL
+                            </Text>
+                            <Select
+                                placeholder='Chọn trạng thái ETL'
+                                data={etlFilterOptions}
+                                value={filterEtl}
+                                onChange={setFilterEtl}
+                                clearable
+                            />
+                        </div>
+                    </Group>
+                </Stack>
+            </Paper>
 
             {/* Data Table */}
             <Paper shadow='sm' withBorder>
