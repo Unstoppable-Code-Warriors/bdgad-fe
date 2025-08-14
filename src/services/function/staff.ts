@@ -124,6 +124,8 @@ export const staffService = {
         sortOrder?: string
         dateFrom?: string
         dateTo?: string
+        monthPatientFolder?: number
+        yearPatientFolder?: number
     }): Promise<any> => {
         const searchParams = new URLSearchParams()
 
@@ -134,11 +136,19 @@ export const staffService = {
         if (params?.sortOrder) searchParams.append('sortOrder', params.sortOrder)
         if (params?.dateFrom) searchParams.append('dateFrom', params.dateFrom)
         if (params?.dateTo) searchParams.append('dateTo', params.dateTo)
+        if (params?.monthPatientFolder) searchParams.append('monthPatientFolder', params.monthPatientFolder.toString())
+        if (params?.yearPatientFolder) searchParams.append('yearPatientFolder', params.yearPatientFolder.toString())
 
         const queryString = searchParams.toString()
         const url = queryString ? `${PREFIX}/patients?${queryString}` : `${PREFIX}/patients`
 
+        console.log(url)
         return backendApi.get(url).json()
+    },
+
+    // Get patient folders by creation date (years and months breakdown)
+    getPatientFoldersByCreatedDate: async (): Promise<any> => {
+        return backendApi.get(`${PREFIX}/patients/folders-by-created-date`).json()
     },
 
     //Update patient folder by ID
