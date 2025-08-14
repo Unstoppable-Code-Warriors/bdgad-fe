@@ -20,7 +20,8 @@ export const analysisService = {
         filter = {},
         dateFrom = null,
         dateTo = null,
-        filterGroup = null
+        filterFastq = null,
+        filterEtl = null
     }: {
         page?: number
         limit?: number
@@ -30,7 +31,8 @@ export const analysisService = {
         filter?: Record<string, any>
         dateFrom?: DateValue | null
         dateTo?: DateValue | null
-        filterGroup?: 'processing' | 'rejected' | 'approved' | null
+        filterFastq?: 'wait_for_approval' | 'approved' | 'rejected' | null
+        filterEtl?: 'processing' | 'completed' | 'failed' | 'wait_for_approval' | 'rejected' | 'approved' | null
     }): Promise<BaseListResponse<AnalysisSessionListItem>> => {
         const queryParams = new URLSearchParams()
         queryParams.set('page', page.toString())
@@ -39,9 +41,14 @@ export const analysisService = {
         queryParams.set('sortBy', sortBy)
         queryParams.set('sortOrder', sortOrder)
 
-        // Add filter group
-        if (filterGroup) {
-            queryParams.set('filterGroup', filterGroup)
+        // Add filter fastq
+        if (filterFastq) {
+            queryParams.set('filterFastq', filterFastq)
+        }
+
+        // Add filter etl
+        if (filterEtl) {
+            queryParams.set('filterEtl', filterEtl)
         }
 
         // Add date parameters if present
