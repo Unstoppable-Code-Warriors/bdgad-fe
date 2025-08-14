@@ -15,7 +15,7 @@ export interface ListSearchFilterProps {
     searchPlaceholder?: string
 
     // Status filter
-    statusFilter?: string
+    statusFilter?: string | null
     onStatusFilterChange?: (value: string | null) => void
     statusOptions?: SelectOption[]
     statusPlaceholder?: string

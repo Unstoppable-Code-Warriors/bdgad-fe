@@ -1,20 +1,7 @@
 import { useCallback, useState, useMemo } from 'react'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useNavigate } from 'react-router'
-import {
-    Title,
-    Group,
-    Stack,
-    Paper,
-    Button,
-    Badge,
-    Text,
-    ActionIcon,
-    Alert,
-    Tooltip,
-    Tabs,
-    Select
-} from '@mantine/core'
+import { Title, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert, Tooltip, Tabs } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
 import { IconEye, IconAlertCircle, IconDownload } from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
@@ -99,9 +86,9 @@ const LabTestPage = () => {
 
     // Define processing status options for lab testing
     const processingStatusOptions = [
+        { value: LAB_TEST_STATUS.NOT_UPLOADED, label: statusConfig[LAB_TEST_STATUS.NOT_UPLOADED].label },
         { value: LAB_TEST_STATUS.UPLOADED, label: statusConfig[LAB_TEST_STATUS.UPLOADED].label },
-        { value: LAB_TEST_STATUS.WAIT_FOR_APPROVAL, label: statusConfig[LAB_TEST_STATUS.WAIT_FOR_APPROVAL].label },
-        { value: LAB_TEST_STATUS.NOT_UPLOADED, label: statusConfig[LAB_TEST_STATUS.NOT_UPLOADED].label }
+        { value: LAB_TEST_STATUS.WAIT_FOR_APPROVAL, label: statusConfig[LAB_TEST_STATUS.WAIT_FOR_APPROVAL].label }
     ]
 
     const {
@@ -333,44 +320,34 @@ const LabTestPage = () => {
                 </Tabs.List>
 
                 <Tabs.Panel value='processing' pt='md'>
-                    <Stack gap='md'>
-                        {/* Processing Status Filter for Lab Testing */}
-                        <Group>
-                            <Select
-                                placeholder='Lọc theo trạng thái xử lý'
-                                data={processingStatusOptions}
-                                value={processingStatusFilter}
-                                onChange={setProcessingStatusFilter}
-                                clearable
-                                style={{ minWidth: 200 }}
-                            />
-                        </Group>
-
-                        {/* Reusable Search and Filter Component */}
-                        <ListSearchFilter
-                            searchValue={search}
-                            onSearchChange={setSearch}
-                            searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
-                            dateRange={dateRange}
-                            onDateRangeChange={(value) => {
-                                if (
-                                    Array.isArray(value) &&
-                                    (typeof value[0] === 'string' || typeof value[1] === 'string')
-                                ) {
-                                    setDateRange([
-                                        value[0] ? new Date(value[0] as string) : null,
-                                        value[1] ? new Date(value[1] as string) : null
-                                    ])
-                                } else {
-                                    setDateRange(value as [Date | null, Date | null])
-                                }
-                            }}
-                            onRefresh={handleRefresh}
-                            isLoading={isLoading}
-                            totalRecords={totalRecords}
-                            showRefreshButton={false}
-                        />
-                    </Stack>
+                    {/* Reusable Search and Filter Component with Processing Status Filter */}
+                    <ListSearchFilter
+                        searchValue={search}
+                        onSearchChange={setSearch}
+                        searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
+                        statusFilter={processingStatusFilter}
+                        onStatusFilterChange={setProcessingStatusFilter}
+                        statusOptions={processingStatusOptions}
+                        statusPlaceholder='Lọc theo trạng thái xử lý'
+                        dateRange={dateRange}
+                        onDateRangeChange={(value) => {
+                            if (
+                                Array.isArray(value) &&
+                                (typeof value[0] === 'string' || typeof value[1] === 'string')
+                            ) {
+                                setDateRange([
+                                    value[0] ? new Date(value[0] as string) : null,
+                                    value[1] ? new Date(value[1] as string) : null
+                                ])
+                            } else {
+                                setDateRange(value as [Date | null, Date | null])
+                            }
+                        }}
+                        onRefresh={handleRefresh}
+                        isLoading={isLoading}
+                        totalRecords={totalRecords}
+                        showRefreshButton={false}
+                    />
                 </Tabs.Panel>
 
                 <Tabs.Panel value='rejected' pt='md'>
