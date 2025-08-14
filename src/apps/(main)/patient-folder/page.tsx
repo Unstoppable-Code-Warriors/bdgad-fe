@@ -28,10 +28,16 @@ import {
     IconPlus,
     IconDots,
     IconEdit,
-    IconTrash
+    IconTrash,
+    IconFolder,
+    IconArrowLeft
 } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
-import { usePatientFolders, useDeletePatientFolder } from '@/services/hook/staff-patient-folder.hook'
+import {
+    usePatientFolders,
+    useDeletePatientFolder,
+    usePatientFoldersByCreatedDate
+} from '@/services/hook/staff-patient-folder.hook'
 import AddPatientModal from './components/AddPatientModal'
 import EditPatientModal from './components/EditPatientModal'
 
@@ -48,14 +54,31 @@ const PatientFolderPage = () => {
     const [limit, setLimit] = useState(16)
     const [sortOrder, setSortOrder] = useState('desc')
 
-    // Use hooks
+    // New state for month/year view
+    const [selectedYear, setSelectedYear] = useState<number | null>(null)
+    const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
+
+    // Check if we're in search mode (either searching or date filtering)
+    const isSearchMode =
+        searchTerm.trim() !== '' ||
+        dateRange[0] !== null ||
+        dateRange[1] !== null ||
+        selectedYear !== null ||
+        selectedMonth !== null
+
+    // Get year/month breakdown data
+    const { data: yearMonthData, isLoading: isYearMonthLoading } = usePatientFoldersByCreatedDate()
+
+    // Use patient folders hook for search/patient list
     const { data: patientsResponse, isLoading } = usePatientFolders({
         search: searchTerm,
         page: page,
         limit: limit,
         sortOrder: sortOrder,
         dateFrom: dateRange[0] ? dateRange[0].toISOString().split('T')[0] : undefined,
-        dateTo: dateRange[1] ? dateRange[1].toISOString().split('T')[0] : undefined
+        dateTo: dateRange[1] ? dateRange[1].toISOString().split('T')[0] : undefined,
+        monthPatientFolder: selectedMonth || undefined,
+        yearPatientFolder: selectedYear || undefined
     })
 
     const deletePatientMutation = useDeletePatientFolder()
@@ -63,6 +86,22 @@ const PatientFolderPage = () => {
     const patients = patientsResponse?.data || patientsResponse || []
     const totalPages = patientsResponse?.meta?.totalPages || 1
     const totalCount = patientsResponse?.meta?.total || 0
+    const yearMonthBreakdown = yearMonthData?.data || []
+
+    const monthNames = [
+        'Tháng 1',
+        'Tháng 2',
+        'Tháng 3',
+        'Tháng 4',
+        'Tháng 5',
+        'Tháng 6',
+        'Tháng 7',
+        'Tháng 8',
+        'Tháng 9',
+        'Tháng 10',
+        'Tháng 11',
+        'Tháng 12'
+    ]
 
     const displayedPatients = patients
 
@@ -70,6 +109,22 @@ const PatientFolderPage = () => {
         setSearchTerm('')
         setDateRange([null, null])
         setSortOrder('desc')
+        setPage(1)
+        setSelectedYear(null)
+        setSelectedMonth(null)
+    }, [])
+
+    // Handle month folder click
+    const handleMonthClick = useCallback((year: number, month: number) => {
+        setSelectedYear(year)
+        setSelectedMonth(month)
+        setPage(1)
+    }, [])
+
+    // Handle back to year view
+    const handleBackToYearView = useCallback(() => {
+        setSelectedYear(null)
+        setSelectedMonth(null)
         setPage(1)
     }, [])
 
@@ -80,13 +135,6 @@ const PatientFolderPage = () => {
     const handleLimitChange = useCallback((newLimit: string | null) => {
         if (newLimit) {
             setLimit(parseInt(newLimit))
-            setPage(1)
-        }
-    }, [])
-
-    const handleSortOrderChange = useCallback((newSortOrder: string | null) => {
-        if (newSortOrder) {
-            setSortOrder(newSortOrder)
             setPage(1)
         }
     }, [])
@@ -168,7 +216,29 @@ const PatientFolderPage = () => {
             <Stack gap='lg'>
                 {/* Header */}
                 <Group justify='space-between'>
-                    <Title order={2}>Thông tin bệnh nhân</Title>
+                    <Group>
+                        {isSearchMode && selectedYear && selectedMonth && (
+                            <Button
+                                variant='subtle'
+                                leftSection={<IconArrowLeft size={16} />}
+                                onClick={handleBackToYearView}
+                            >
+                                Quay lại
+                            </Button>
+                        )}
+                        <div>
+                            <Title order={2}>
+                                {isSearchMode && selectedYear && selectedMonth
+                                    ? `${monthNames[selectedMonth - 1]} năm ${selectedYear}`
+                                    : 'Thông tin bệnh nhân'}
+                            </Title>
+                            {isSearchMode && selectedYear && selectedMonth && (
+                                <Text size='sm' c='dimmed' mt={2}>
+                                    (Ngày tạo hồ sơ bệnh nhân)
+                                </Text>
+                            )}
+                        </div>
+                    </Group>
                     <Group>
                         <Button leftSection={<IconPlus size={16} />} onClick={handleAddPatient}>
                             Thêm bệnh nhân
@@ -181,13 +251,14 @@ const PatientFolderPage = () => {
                     <Stack gap='md'>
                         <Group grow>
                             <TextInput
+                                label='Tìm kiếm bệnh nhân'
                                 placeholder='Tìm kiếm theo tên, mã định danh...'
                                 leftSection={<IconSearch size={16} />}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.currentTarget.value)}
                             />
-
                             <DatePickerInput
+                                label='Lọc theo ngày khám'
                                 type='range'
                                 placeholder='Chọn khoảng thời gian'
                                 leftSection={<IconCalendar size={16} />}
@@ -200,161 +271,234 @@ const PatientFolderPage = () => {
                                 }}
                                 clearable
                             />
-
-                            <Select
-                                placeholder='Sắp xếp theo'
-                                value={sortOrder}
-                                onChange={handleSortOrderChange}
-                                data={[
-                                    { value: 'asc', label: 'Cũ nhất' },
-                                    { value: 'desc', label: 'Mới nhất' }
-                                ]}
-                                style={{ minWidth: 120 }}
-                            />
-
-                            <Button variant='light' onClick={clearFilters}>
+                            <Button className='mt-6' variant='light' onClick={clearFilters}>
                                 Xóa bộ lọc
                             </Button>
                         </Group>
 
-                        <Group justify='space-between' align='center'>
-                            <Text size='sm' c='dimmed'>
-                                Tổng số: {totalCount} bệnh nhân
-                            </Text>
-                        </Group>
+                        {isSearchMode && (
+                            <Group justify='space-between' align='center'>
+                                <Text size='sm' c='dimmed'>
+                                    Tổng số: {totalCount} bệnh nhân
+                                </Text>
+                            </Group>
+                        )}
                     </Stack>
                 </Paper>
 
-                {/* Patient Cards Grid */}
-                <Grid>
-                    {displayedPatients.map((patient: any) => (
-                        <Grid.Col key={patient.id} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
-                            <Card
-                                shadow='sm'
-                                padding='lg'
-                                withBorder
-                                onClick={() => handlePatientClick(patient.id)}
-                                style={{
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    position: 'relative'
-                                }}
-                                className='hover:transform hover:-translate-y-1 hover:shadow-lg'
-                            >
-                                {/* Menu ba chấm */}
-                                <Menu shadow='md' width={200} position='bottom-start'>
-                                    <Menu.Target>
-                                        <ActionIcon
-                                            variant='subtle'
-                                            color='gray'
-                                            size='sm'
-                                            style={{
-                                                position: 'absolute',
-                                                top: 8,
-                                                right: 8,
-                                                zIndex: 10
-                                            }}
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            <IconDots size={16} />
-                                        </ActionIcon>
-                                    </Menu.Target>
+                {/* Conditional Content */}
+                {isSearchMode ? (
+                    /* Patient List View */
+                    <>
+                        {/* Patient Cards Grid */}
+                        <Grid>
+                            {displayedPatients.map((patient: any) => (
+                                <Grid.Col key={patient.id} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
+                                    <Card
+                                        shadow='sm'
+                                        padding='lg'
+                                        withBorder
+                                        onClick={() => handlePatientClick(patient.id)}
+                                        style={{
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s ease',
+                                            position: 'relative'
+                                        }}
+                                        className='hover:transform hover:-translate-y-1 hover:shadow-lg'
+                                    >
+                                        {/* Menu ba chấm */}
+                                        <Menu shadow='md' width={200} position='bottom-start'>
+                                            <Menu.Target>
+                                                <ActionIcon
+                                                    variant='subtle'
+                                                    color='gray'
+                                                    size='sm'
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: 8,
+                                                        right: 8,
+                                                        zIndex: 10
+                                                    }}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <IconDots size={16} />
+                                                </ActionIcon>
+                                            </Menu.Target>
 
-                                    <Menu.Dropdown>
-                                        <Menu.Item
-                                            leftSection={<IconEdit size={14} />}
-                                            onClick={(e) => handleEditClick(patient, e)}
-                                        >
-                                            Chỉnh sửa
-                                        </Menu.Item>
-                                        <Menu.Item
-                                            leftSection={<IconTrash size={14} />}
-                                            color='red'
-                                            onClick={(e) => handleDeleteClick(patient, e)}
-                                        >
-                                            Xóa
-                                        </Menu.Item>
-                                    </Menu.Dropdown>
-                                </Menu>
+                                            <Menu.Dropdown>
+                                                <Menu.Item
+                                                    leftSection={<IconEdit size={14} />}
+                                                    onClick={(e) => handleEditClick(patient, e)}
+                                                >
+                                                    Chỉnh sửa
+                                                </Menu.Item>
+                                                <Menu.Item
+                                                    leftSection={<IconTrash size={14} />}
+                                                    color='red'
+                                                    onClick={(e) => handleDeleteClick(patient, e)}
+                                                >
+                                                    Xóa
+                                                </Menu.Item>
+                                            </Menu.Dropdown>
+                                        </Menu>
 
-                                <Stack gap='xs' mt='sm'>
-                                    <Stack gap={4}>
-                                        <Box>
-                                            <Text size='sm' fw={600} c='dark'>
-                                                {patient.fullName}
-                                            </Text>
-                                            <Text size='xs' fw={500} c='blue' mt='xs'>
-                                                Mã định danh: {patient.citizenId}
-                                            </Text>
-                                        </Box>
+                                        <Stack gap='xs' mt='sm'>
+                                            <Stack gap={4}>
+                                                <Box>
+                                                    <Text size='sm' fw={600} c='dark'>
+                                                        {patient.fullName}
+                                                    </Text>
+                                                    <Text size='xs' fw={500} c='blue' mt='xs'>
+                                                        Mã định danh: {patient.citizenId}
+                                                    </Text>
+                                                </Box>
 
-                                        <Flex align='center' gap='xs' mt='xs'>
-                                            {patient.latestLabSession && <IconCalendarEvent size={14} />}
-                                            <Text size='xs' c='dimmed'>
-                                                {patient.latestLabSession?.createdAt
-                                                    ? new Date(patient.latestLabSession.createdAt).toLocaleDateString(
-                                                          'vi-VN'
-                                                      )
-                                                    : 'Chưa có lần khám'}
-                                            </Text>
-                                        </Flex>
-                                    </Stack>
-                                </Stack>
-                            </Card>
-                        </Grid.Col>
-                    ))}
-                </Grid>
+                                                <Flex align='center' gap='xs' mt='xs'>
+                                                    {patient.latestLabSession && <IconCalendarEvent size={14} />}
+                                                    <Text size='xs' c='dimmed'>
+                                                        {patient.latestLabSession?.createdAt
+                                                            ? new Date(
+                                                                  patient.latestLabSession.createdAt
+                                                              ).toLocaleDateString('vi-VN')
+                                                            : 'Chưa có lần khám'}
+                                                    </Text>
+                                                </Flex>
+                                            </Stack>
+                                        </Stack>
+                                    </Card>
+                                </Grid.Col>
+                            ))}
+                        </Grid>
 
-                {/* Loading State */}
-                {isLoading && (
-                    <Paper p='xl' ta='center'>
-                        <Text c='dimmed'>Đang tải dữ liệu...</Text>
-                    </Paper>
-                )}
-
-                {/* Empty State */}
-                {!isLoading && displayedPatients.length === 0 && (
-                    <Paper p='xl' ta='center'>
-                        <IconUser size={48} color='gray' />
-                        <Title order={4} mt='md' c='dimmed'>
-                            Không tìm thấy bệnh nhân
-                        </Title>
-                        <Text c='dimmed' mt='xs'>
-                            Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm
-                        </Text>
-                    </Paper>
-                )}
-                <Paper p='md' withBorder style={{ marginTop: '2rem' }}>
-                    <Group justify='space-between' align='center'>
-                        <Group gap='xs'>
-                            <Text size='sm' c='dimmed'>
-                                Hiển thị:
-                            </Text>
-                            <Select
-                                value={limit.toString()}
-                                onChange={handleLimitChange}
-                                data={[
-                                    { value: '8', label: '8' },
-                                    { value: '16', label: '16' }
-                                ]}
-                                style={{ width: 80 }}
-                            />
-                            <Text size='sm' c='dimmed'>
-                                thư mục/trang
-                            </Text>
-                        </Group>
-
-                        {!isLoading && displayedPatients.length > 0 && totalPages > 1 && (
-                            <Pagination
-                                value={page}
-                                onChange={handlePageChange}
-                                total={totalPages}
-                                size='sm'
-                                withEdges
-                            />
+                        {/* Loading State */}
+                        {isLoading && (
+                            <Paper p='xl' ta='center'>
+                                <Text c='dimmed'>Đang tải dữ liệu...</Text>
+                            </Paper>
                         )}
-                    </Group>
-                </Paper>
+
+                        {/* Empty State */}
+                        {!isLoading && displayedPatients.length === 0 && (
+                            <Paper p='xl' ta='center'>
+                                <IconUser size={48} color='gray' />
+                                <Title order={4} mt='md' c='dimmed'>
+                                    Không tìm thấy bệnh nhân
+                                </Title>
+                                <Text c='dimmed' mt='xs'>
+                                    Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm
+                                </Text>
+                            </Paper>
+                        )}
+
+                        {/* Pagination */}
+                        <Paper p='md' withBorder style={{ marginTop: '2rem' }}>
+                            <Group justify='space-between' align='center'>
+                                <Group gap='xs'>
+                                    <Text size='sm' c='dimmed'>
+                                        Hiển thị:
+                                    </Text>
+                                    <Select
+                                        value={limit.toString()}
+                                        onChange={handleLimitChange}
+                                        data={[
+                                            { value: '8', label: '8' },
+                                            { value: '16', label: '16' }
+                                        ]}
+                                        style={{ width: 80 }}
+                                    />
+                                    <Text size='sm' c='dimmed'>
+                                        thư mục/trang
+                                    </Text>
+                                </Group>
+
+                                {!isLoading && displayedPatients.length > 0 && totalPages > 1 && (
+                                    <Pagination
+                                        value={page}
+                                        onChange={handlePageChange}
+                                        total={totalPages}
+                                        size='sm'
+                                        withEdges
+                                    />
+                                )}
+                            </Group>
+                        </Paper>
+                    </>
+                ) : (
+                    /* Year/Month View */
+                    <Stack gap='xl'>
+                        {yearMonthBreakdown.map((yearData: any) => (
+                            <Paper key={yearData.year} p='xl' withBorder>
+                                <Stack gap='lg'>
+                                    <Group justify='space-between' align='center'>
+                                        <div className='flex-col'>
+                                            <Title order={3}>Năm {yearData.year}</Title>
+                                            <Text size='sm' c={'dimmed'}>
+                                                Lưu ý: Thời gian dựa trên ngày tạo hồ sơ bệnh nhân
+                                            </Text>
+                                        </div>
+
+                                        <Text size='lg' fw={600} c='blue'>
+                                            Tổng: {yearData.total} bệnh nhân
+                                        </Text>
+                                    </Group>
+
+                                    <Grid>
+                                        {yearData.months.map((monthData: any) => (
+                                            <Grid.Col key={monthData.month} span={{ base: 6, sm: 4, md: 3, lg: 2 }}>
+                                                <Card
+                                                    shadow='sm'
+                                                    padding='lg'
+                                                    withBorder
+                                                    onClick={() => handleMonthClick(yearData.year, monthData.month)}
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s ease',
+                                                        backgroundColor: monthData.total > 0 ? '#f8f9fa' : '#ffffff'
+                                                    }}
+                                                    className='hover:transform hover:-translate-y-1 hover:shadow-lg'
+                                                >
+                                                    <Stack gap='xs' align='center'>
+                                                        <IconFolder
+                                                            size={40}
+                                                            color={monthData.total > 0 ? '#228be6' : '#adb5bd'}
+                                                        />
+                                                        <Text size='sm' fw={600} ta='center'>
+                                                            {monthNames[monthData.month - 1]}
+                                                        </Text>
+                                                        <Text size='xs' c='dimmed' ta='center'>
+                                                            {monthData.total} bệnh nhân
+                                                        </Text>
+                                                    </Stack>
+                                                </Card>
+                                            </Grid.Col>
+                                        ))}
+                                    </Grid>
+                                </Stack>
+                            </Paper>
+                        ))}
+
+                        {/* Year/Month Loading State */}
+                        {isYearMonthLoading && (
+                            <Paper p='xl' ta='center'>
+                                <Text c='dimmed'>Đang tải dữ liệu...</Text>
+                            </Paper>
+                        )}
+
+                        {/* Year/Month Empty State */}
+                        {!isYearMonthLoading && yearMonthBreakdown.length === 0 && (
+                            <Paper p='xl' ta='center'>
+                                <IconFolder size={48} color='gray' />
+                                <Title order={4} mt='md' c='dimmed'>
+                                    Chưa có dữ liệu
+                                </Title>
+                                <Text c='dimmed' mt='xs'>
+                                    Không có thông tin bệnh nhân theo năm/tháng
+                                </Text>
+                            </Paper>
+                        )}
+                    </Stack>
+                )}
+
                 {/* Add Patient Modal */}
                 <AddPatientModal opened={isAddModalOpen} onClose={handleCloseAddModal} />
 

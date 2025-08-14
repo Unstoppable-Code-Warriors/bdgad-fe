@@ -10,11 +10,21 @@ export const usePatientFolders = (
         sortOrder?: string
         dateFrom?: string
         dateTo?: string
+        monthPatientFolder?: number
+        yearPatientFolder?: number
     } = {}
 ) => {
     return useQuery({
         queryKey: ['patient-folders', params],
         queryFn: () => staffService.getAllPatientFolders(params),
+        enabled: true
+    })
+}
+
+export const usePatientFoldersByCreatedDate = () => {
+    return useQuery({
+        queryKey: ['patient-folders-by-created-date'],
+        queryFn: () => staffService.getPatientFoldersByCreatedDate(),
         enabled: true
     })
 }
