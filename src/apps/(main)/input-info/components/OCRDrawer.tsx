@@ -46,17 +46,15 @@ interface OCRDrawerProps {
 }
 
 const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
-    const [selectedFormType, setSelectedFormType] = useState<FormType>(FormType.HEREDITARY_CANCER)
+    const [selectedFormType, setSelectedFormType] = useState<FormType>(FormType.OTHER)
 
     const form = useForm<FormValues>({
         initialValues: getDefaultFormValues(),
         validate: formValidationRules
     })
 
-    // Function to detect form type from OCR result
     const detectFormType = (ocrResult: CommonOCRRes<EditedOCRRes>): FormType => {
         if (ocrResult?.ocrResult) {
-            // Handle nested ocrResult structure
             const innerResult = ocrResult.ocrResult
             if (innerResult.document_name) {
                 switch (innerResult.document_name) {
@@ -67,47 +65,40 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                     case 'hereditary_cancer':
                         return FormType.HEREDITARY_CANCER
                     default:
-                        return FormType.HEREDITARY_CANCER
+                        return FormType.OTHER
                 }
             }
         }
 
-        // This part is not needed since document_name is inside ocrResult.ocrResult
-        return FormType.HEREDITARY_CANCER
+        return FormType.OTHER
     }
 
     useEffect(() => {
-        // Debug logging - can be removed in production
-
         if (ocrResult) {
-            // Auto-detect form type from OCR result
             const detectedFormType = detectFormType(ocrResult)
             setSelectedFormType(detectedFormType)
 
-            // Auto-fill form with OCR data
             const mappedValues = mapOCRToFormValues(ocrResult)
-            // Also set the form_type field to match the selected form type
-            mappedValues.form_type = detectedFormType
+
+            mappedValues.document_name = detectedFormType
+            
             form.setValues(mappedValues)
         } else {
-            // Reset form when no OCR result is available
             form.reset()
-            setSelectedFormType(FormType.HEREDITARY_CANCER)
+            setSelectedFormType(FormType.OTHER) 
         }
     }, [ocrResult])
 
-    // Update form_type when selectedFormType changes
+    // Update document_name when selectedFormType changes
     useEffect(() => {
-        form.setFieldValue('form_type', selectedFormType)
+        form.setFieldValue('document_name', selectedFormType)
     }, [selectedFormType])
 
     const handleFormSubmit = () => {
         const formData = form.values
 
-        // Get the original OCR result data
         const originalData = ocrResult?.ocrResult || {}
 
-        // Create a deep copy of the original data to avoid mutations
         const updatedData = JSON.parse(JSON.stringify(originalData))
 
         // Map form fields to their corresponding OCR result fields
@@ -298,13 +289,13 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
         <Stack gap='lg' h='100%'>
             {/* Header */}
             <Group justify='space-between' align='center'>
-                <Title order={3}>OCR Result - {file.file.name}</Title>
+                <Title order={3}>Kết quả OCR - {file.file.name}</Title>
             </Group>
 
             {/* Main Content */}
-            <Grid style={{ flex: 1, overflow: 'hidden' }}>
+            <Grid style={{ height: '100%' }}>
                 {/* Image Preview */}
-                <Grid.Col span={6} style={{ height: '100%', overflow: 'auto' }}>
+                <Grid.Col span={6} style={{ height: '100%', position: 'sticky', top: 0, alignSelf: 'flex-start' }}>
                     <Card withBorder h='100%'>
                         <Stack gap='sm' h='100%'>
                             <Group justify='space-between'>
@@ -359,8 +350,8 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                 </Grid.Col>
 
                 {/* Form */}
-                <Grid.Col span={6} style={{ height: '100%', overflow: 'auto' }}>
-                    <Card withBorder h='100%' style={{ position: 'relative' }}>
+                <Grid.Col span={6} style={{ height: '100%', overflowY: 'auto' }}>
+                    <Card withBorder h='100%' style={{ overflowY: 'auto' }}>
                         <Stack gap='md' h='100%'>
                             <Group justify='space-between'>
                                 <Text fw={600} size='lg'>
@@ -390,7 +381,7 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                 value={selectedFormType}
                                                 onChange={(value) =>
                                                     setSelectedFormType(
-                                                        (value as FormType) || FormType.HEREDITARY_CANCER
+                                                        (value as FormType) || FormType.OTHER
                                                     )
                                                 }
                                                 data={formTypeOptions}
@@ -424,20 +415,24 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                     <TextInput label='Địa chỉ' {...form.getInputProps('address')} />
                                                     <Group grow>
                                                         <TextInput
+                                                            label='Số điện thoại'
+                                                            {...form.getInputProps('phone')}
+                                                        />
+                                                        <div />
+                                                    </Group>
+                                                    <Group grow>
+                                                        <TextInput label='Bác sỹ' {...form.getInputProps('doctor')} />
+                                                        <TextInput
                                                             label='Phòng khám/Bệnh viện'
                                                             {...form.getInputProps('clinic')}
                                                         />
-                                                        <TextInput label='Bác sỹ' {...form.getInputProps('doctor')} />
                                                     </Group>
                                                     <Group grow>
                                                         <TextInput
                                                             label='Số điện thoại bác sỹ'
                                                             {...form.getInputProps('doctor_phone')}
                                                         />
-                                                        <TextInput
-                                                            label='Số điện thoại'
-                                                            {...form.getInputProps('phone')}
-                                                        />
+                                                        <div />
                                                     </Group>
                                                     <Group grow>
                                                         <DatePickerInput
@@ -482,11 +477,11 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                     </Group>
                                                     <TextInput label='Địa chỉ' {...form.getInputProps('address')} />
                                                     <Group grow>
+                                                        <TextInput label='Bác sỹ' {...form.getInputProps('doctor')} />
                                                         <TextInput
                                                             label='Phòng khám/Bệnh viện'
                                                             {...form.getInputProps('clinic')}
                                                         />
-                                                        <TextInput label='Bác sỹ' {...form.getInputProps('doctor')} />
                                                     </Group>
                                                     <Group grow>
                                                         <TextInput
@@ -496,14 +491,11 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                         <TextInput label='Email' {...form.getInputProps('email')} />
                                                     </Group>
                                                     <Group grow>
-                                                        <DatePickerInput
-                                                            label='Ngày thu mẫu'
-                                                            {...form.getInputProps('sample_collection_date')}
-                                                        />
                                                         <TextInput
                                                             label='Mã xét nghiệm'
                                                             {...form.getInputProps('test_code')}
                                                         />
+                                                        <div />
                                                     </Group>
                                                     <Checkbox
                                                         label='Hút thuốc'
@@ -563,7 +555,16 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                             />
                                                         </Stack>
                                                     </Radio.Group>
-                                                    <TextInput label='Mã số GPB' {...form.getInputProps('gpb_code')} />
+                                                    <Group grow>
+                                                        <TextInput
+                                                            label='Mã số GPB'
+                                                            {...form.getInputProps('gpb_code')}
+                                                        />
+                                                        <DatePickerInput
+                                                            label='Ngày thu mẫu'
+                                                            {...form.getInputProps('sample_collection_date')}
+                                                        />
+                                                    </Group>
 
                                                     {/* Loại ung thư và panel xét nghiệm */}
                                                     <Title order={5} mt='md'>
@@ -602,11 +603,11 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                     </Group>
                                                     <TextInput label='Địa chỉ' {...form.getInputProps('address')} />
                                                     <Group grow>
+                                                        <TextInput label='Bác sỹ' {...form.getInputProps('doctor')} />
                                                         <TextInput
                                                             label='Phòng khám/Bệnh viện'
                                                             {...form.getInputProps('clinic')}
                                                         />
-                                                        <TextInput label='Bác sỹ' {...form.getInputProps('doctor')} />
                                                     </Group>
                                                     <Group grow>
                                                         <TextInput

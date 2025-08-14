@@ -74,11 +74,20 @@ const SubmittedFilesTable = ({
         if (isThisFileProcessing) {
             const progress = ocrProgress[submittedFile.id] || 0
             return (
-                <Stack gap='xs' style={{ minWidth: '120px' }}>
-                    <Button size='sm' variant='light' color='blue' leftSection={<Loader size={14} />} disabled loading>
+                <Stack gap='xs' align='left' style={{ width: 120 }}>
+                    <Button
+                        size='sm'
+                        variant='light'
+                        color='blue'
+                        leftSection={<Loader size={14} />}
+                        disabled
+                        loading
+                        w='100%'
+                    >
                         Đang xử lý...
                     </Button>
-                    <Progress value={progress} size='sm' color='blue' />
+
+                    <Progress value={progress} size='sm' color='blue' w='100%' />
                 </Stack>
             )
         }
@@ -92,6 +101,7 @@ const SubmittedFilesTable = ({
                 leftSection={<IconScan size={14} />}
                 onClick={() => onStartOCR(submittedFile.id)}
                 disabled={isAnyFileProcessing}
+                style={{ flexShrink: 0, width: 120 }}
             >
                 OCR
             </Button>
@@ -169,12 +179,10 @@ const SubmittedFilesTable = ({
                                     <Text size='sm'>{formatFileSize(submittedFile.file.size)}</Text>
                                 </Table.Td>
                                 <Table.Td>
-                                    <Box>
-                                        {getOCRButton(submittedFile)}
-                                    </Box>
+                                    <Box>{getOCRButton(submittedFile)}</Box>
                                 </Table.Td>
                                 <Table.Td>
-                                    <Group gap='xs' align='center' style={{ minHeight: 36 }}>
+                                    <Group gap='xs' align='center'>
                                         <Group gap='xs' align='center'>
                                             <ActionIcon
                                                 variant='light'

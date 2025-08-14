@@ -793,7 +793,7 @@ const InputInfoPage = () => {
                 onClose={handleOCRDrawerClose}
                 position='right'
                 size='80%'
-                title='OCR Result'
+                title='Kết quả OCR'
                 closeOnClickOutside={false}
                 closeOnEscape={false}
             >

@@ -5,14 +5,13 @@ import { getDefaultFormValues, type FormValues } from '@/types/prescription-form
 export const mapOCRToFormValues = (ocrResult: CommonOCRRes<EditedOCRRes> | undefined): FormValues => {
     const defaultValues = getDefaultFormValues()
 
+    console.log('DEBUG ocr result:', ocrResult?.ocrResult)
     if (!ocrResult) return defaultValues
 
-    // Handle nested ocrResult structure
     const data = ocrResult.ocrResult
 
     if (!data) return defaultValues
 
-    // If there's edited data, prioritize that
     if (data.editedData) {
         return data.editedData
     }
@@ -42,7 +41,7 @@ export const mapOCRToFormValues = (ocrResult: CommonOCRRes<EditedOCRRes> | undef
 
     // Extract basic information
     const basicInfo: Partial<FormValues> = {
-        form_type: data.document_name || '',
+        document_name: data.document_name || '',
         full_name: data.full_name || '',
         clinic: data.clinic || '',
         date_of_birth: safeDateParse(data.date_of_birth),

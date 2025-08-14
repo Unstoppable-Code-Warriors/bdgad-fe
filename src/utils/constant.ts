@@ -29,5 +29,6 @@ export const getDefaultRouteByRole = (roleCode?: number): string => {
 export enum FormType {
     PRENATAL_TESTING = 'prenatal_screening',
     HEREDITARY_CANCER = 'hereditary_cancer',
-    GENE_MUTATION = 'gene_mutation'
+    GENE_MUTATION = 'gene_mutation',
+    OTHER = 'other'
 }

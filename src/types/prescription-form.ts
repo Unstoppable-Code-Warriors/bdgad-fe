@@ -1,6 +1,6 @@
 export interface FormValues {
     // Thông tin cơ bản (chung cho tất cả)
-    form_type: string // Tên loại phiếu
+    document_name: string // Tên loại phiếu
     full_name: string
     clinic: string
     date_of_birth: Date | null
@@ -68,13 +68,17 @@ export const formTypeOptions = [
     {
         value: 'prenatal_screening',
         label: 'Phiếu đồng thuận thực hiện xét nghiệm sàng lọc tiền sinh không xâm lấn'
+    },
+    {
+        value: 'other',
+        label: 'Chọn phiếu chỉ định'
     }
 ]
 
 export const genderOptions = [
-    { value: 'male', label: 'Nam' },
-    { value: 'female', label: 'Nữ' },
-    { value: 'other', label: 'Khác' }
+    { value: 'Male' , label: 'Nam' },
+    { value: 'Female', label: 'Nữ' },
+    { value: 'Other', label: 'Khác' }
 ]
 
 export const cancerScreeningPackageOptions = [
@@ -128,7 +132,7 @@ export const sampleTypeOptions = [
 ]
 
 export const getDefaultFormValues = (): FormValues => ({
-    form_type: '',
+    document_name: '',
     full_name: '',
     clinic: '',
     date_of_birth: null,
