@@ -43,15 +43,39 @@ interface OCRDrawerProps {
     onUpdate: (data: CommonOCRRes<EditedOCRRes>) => void
     onClose: () => void
     onRetryOCR: () => void
+    patientData?: any
 }
 
-const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR }: OCRDrawerProps) => {
+const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR, patientData }: OCRDrawerProps) => {
     const [selectedFormType, setSelectedFormType] = useState<FormType>(FormType.OTHER)
+    const [nameValidationWarning, setNameValidationWarning] = useState<string>('')
 
     const form = useForm<FormValues>({
         initialValues: getDefaultFormValues(),
         validate: formValidationRules
     })
+
+    // Function to validate full name against patient folder name
+    const validateFullName = (fullName: string) => {
+        if (!patientData?.fullName || !fullName) {
+            setNameValidationWarning('')
+            return
+        }
+
+        // Normalize names for comparison (remove extra spaces, convert to lowercase)
+        const normalizeString = (str: string) => str.trim().toLowerCase().replace(/\s+/g, ' ')
+
+        const ocrName = normalizeString(fullName)
+        const patientFolderName = normalizeString(patientData.fullName)
+
+        if (ocrName !== patientFolderName) {
+            setNameValidationWarning(
+                `Tên trong OCR "${fullName}" không khớp với tên trong hồ sơ bệnh nhân "${patientData.fullName}"`
+            )
+        } else {
+            setNameValidationWarning('')
+        }
+    }
 
     const detectFormType = (ocrResult: CommonOCRRes<EditedOCRRes>): FormType => {
         if (ocrResult?.ocrResult) {
@@ -81,11 +105,11 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
             const mappedValues = mapOCRToFormValues(ocrResult)
 
             mappedValues.document_name = detectedFormType
-            
+
             form.setValues(mappedValues)
         } else {
             form.reset()
-            setSelectedFormType(FormType.OTHER) 
+            setSelectedFormType(FormType.OTHER)
         }
     }, [ocrResult])
 
@@ -93,6 +117,13 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
     useEffect(() => {
         form.setFieldValue('document_name', selectedFormType)
     }, [selectedFormType])
+
+    // Validate full name when it changes
+    useEffect(() => {
+        if (form.values.full_name) {
+            validateFullName(form.values.full_name)
+        }
+    }, [form.values.full_name, patientData?.fullName])
 
     const handleFormSubmit = () => {
         const formData = form.values
@@ -380,9 +411,7 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                 label='Loại biểu mẫu'
                                                 value={selectedFormType}
                                                 onChange={(value) =>
-                                                    setSelectedFormType(
-                                                        (value as FormType) || FormType.OTHER
-                                                    )
+                                                    setSelectedFormType((value as FormType) || FormType.OTHER)
                                                 }
                                                 data={formTypeOptions}
                                                 required
@@ -391,7 +420,17 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                             {/* Dynamic Form Fields based on form type */}
                                             {selectedFormType === FormType.HEREDITARY_CANCER && (
                                                 <>
-                                                    <TextInput label='Họ và tên' {...form.getInputProps('full_name')} />
+                                                    <div>
+                                                        <TextInput
+                                                            label='Họ và tên'
+                                                            {...form.getInputProps('full_name')}
+                                                        />
+                                                        {nameValidationWarning && (
+                                                            <Text size='sm' c='orange' mt={4}>
+                                                                ⚠️ {nameValidationWarning}
+                                                            </Text>
+                                                        )}
+                                                    </div>
                                                     <Group grow>
                                                         <DatePickerInput
                                                             label='Ngày sinh'
@@ -454,7 +493,17 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
 
                                             {selectedFormType === FormType.GENE_MUTATION && (
                                                 <>
-                                                    <TextInput label='Họ và tên' {...form.getInputProps('full_name')} />
+                                                    <div>
+                                                        <TextInput
+                                                            label='Họ và tên'
+                                                            {...form.getInputProps('full_name')}
+                                                        />
+                                                        {nameValidationWarning && (
+                                                            <Text size='sm' c='orange' mt={4}>
+                                                                ⚠️ {nameValidationWarning}
+                                                            </Text>
+                                                        )}
+                                                    </div>
                                                     <Group grow>
                                                         <DatePickerInput
                                                             label='Ngày sinh'
@@ -580,7 +629,17 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
 
                                             {selectedFormType === FormType.PRENATAL_TESTING && (
                                                 <>
-                                                    <TextInput label='Họ và tên' {...form.getInputProps('full_name')} />
+                                                    <div>
+                                                        <TextInput
+                                                            label='Họ và tên'
+                                                            {...form.getInputProps('full_name')}
+                                                        />
+                                                        {nameValidationWarning && (
+                                                            <Text size='sm' c='orange' mt={4}>
+                                                                ⚠️ {nameValidationWarning}
+                                                            </Text>
+                                                        )}
+                                                    </div>
                                                     <Group grow>
                                                         <DatePickerInput
                                                             label='Ngày sinh'
