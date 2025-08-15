@@ -55,6 +55,40 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
         validate: formValidationRules
     })
 
+    // Function to convert null values and unwanted strings to empty strings recursively
+    const convertNullToEmptyString = (obj: any): any => {
+        if (obj === null) {
+            return ''
+        }
+        if (typeof obj === 'string') {
+            // Convert "NA", "N/A", and their variations to empty string
+            const trimmed = obj.trim()
+            if (
+                trimmed === 'NA' ||
+                trimmed === 'N/A' ||
+                trimmed === 'na' ||
+                trimmed === 'n/a' ||
+                trimmed === 'string'
+            ) {
+                return ''
+            }
+            return obj
+        }
+        if (Array.isArray(obj)) {
+            return obj.map(convertNullToEmptyString)
+        }
+        if (typeof obj === 'object' && obj !== null) {
+            const converted: any = {}
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    converted[key] = convertNullToEmptyString(obj[key])
+                }
+            }
+            return converted
+        }
+        return obj
+    }
+
     // Function to validate full name against patient folder name
     const validateFullName = (fullName: string) => {
         if (!patientData?.fullName || !fullName) {
@@ -102,7 +136,13 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
             const detectedFormType = detectFormType(ocrResult)
             setSelectedFormType(detectedFormType)
 
-            const mappedValues = mapOCRToFormValues(ocrResult)
+            // Convert null values and unwanted strings to empty strings before mapping
+            const cleanedOcrResult = {
+                ...ocrResult,
+                ocrResult: convertNullToEmptyString(ocrResult.ocrResult)
+            }
+
+            const mappedValues = mapOCRToFormValues(cleanedOcrResult)
 
             mappedValues.document_name = detectedFormType
 
@@ -130,7 +170,9 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
 
         const originalData = ocrResult?.ocrResult || {}
 
-        const updatedData = JSON.parse(JSON.stringify(originalData))
+        // Convert null values and unwanted strings to empty strings in the original data
+        const cleanedOriginalData = convertNullToEmptyString(originalData)
+        const updatedData = JSON.parse(JSON.stringify(cleanedOriginalData))
 
         // Map form fields to their corresponding OCR result fields
         // Basic fields that map directly
