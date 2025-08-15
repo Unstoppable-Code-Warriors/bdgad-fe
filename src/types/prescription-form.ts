@@ -71,12 +71,12 @@ export const formTypeOptions = [
     },
     {
         value: 'other',
-        label: 'Chọn phiếu chỉ định'
+        label: 'Phiếu khác (không có mẫu sẵn)'
     }
 ]
 
 export const genderOptions = [
-    { value: 'Male' , label: 'Nam' },
+    { value: 'Male', label: 'Nam' },
     { value: 'Female', label: 'Nữ' },
     { value: 'Other', label: 'Khác' }
 ]
@@ -185,6 +185,3 @@ export const formValidationRules = {
         return emailRegex.test(value) ? null : 'Email không hợp lệ'
     }
 }
-
-
-
