@@ -6,6 +6,7 @@ import { notifications } from '@mantine/notifications'
 import type { FileWithPath } from '@mantine/dropzone'
 import { useUploadCategorizedFiles } from '@/services/hook/categorized-upload.hook'
 import { useUploadResultRequisition } from '@/services/hook/staff-upload.hook'
+import { usePatientFolderDetail } from '@/services/hook/staff-patient-folder.hook'
 import { staffService } from '@/services/function/staff'
 import { getFileType } from './utils/fileUtils'
 import type { EditedOCRRes } from './types'
@@ -49,6 +50,9 @@ const InputInfoPage = () => {
     const uploadMutation = useUploadCategorizedFiles()
     const uploadResultMutation = useUploadResultRequisition()
 
+    // Fetch patient details to get the patient's name for validation
+    const { data: patientData } = usePatientFolderDetail(patientId)
+
     useEffect(() => {
         if (location.state?.ocrResult) {
             handleOCRComplete(location.state.ocrResult)
@@ -69,18 +73,18 @@ const InputInfoPage = () => {
     }, [location.state])
 
     const handleOCRComplete = (data: CommonOCRRes<EditedOCRRes>) => {
-        console.log('OCR complete data:', data) 
+        console.log('OCR complete data:', data)
     }
 
     // File handling functions
     const handleFileDrop = (files: FileWithPath[]) => {
         const newFiles = [...selectedFiles, ...files]
         const newCategories = [...fileCategories, ...generateDefaultFileCategories(files)]
-        
+
         setSelectedFiles(newFiles)
         setFileCategories(newCategories)
         setError(null)
-        
+
         validateFiles(newFiles, newCategories)
 
         if (bypassPrescriptionCheck) {
@@ -157,7 +161,7 @@ const InputInfoPage = () => {
     // ...existing code...
 
     const validateFiles = (files: FileWithPath[], categories: FileCategoryDto[]) => {
-        const result = bypassPrescriptionCheck 
+        const result = bypassPrescriptionCheck
             ? validateCategorizedFilesWithBypass(files as File[], categories, submittedFiles)
             : validateCategorizedFiles(files as File[], categories, submittedFiles)
         setValidationResult(result)
@@ -184,7 +188,8 @@ const InputInfoPage = () => {
         // Basic file validation only
         files.forEach((file, index) => {
             // Check file size
-            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+            if (file.size > 10 * 1024 * 1024) {
+                // 10MB limit
                 errors[index] = `File quá lớn. Kích thước tối đa: 10MB`
             }
 
@@ -192,7 +197,7 @@ const InputInfoPage = () => {
             const allowedTypes = [
                 'application/pdf',
                 'image/jpeg',
-                'image/jpg', 
+                'image/jpg',
                 'image/png',
                 'application/vnd.ms-excel',
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -200,7 +205,7 @@ const InputInfoPage = () => {
                 'application/msword',
                 'text/csv'
             ]
-            
+
             if (!allowedTypes.includes(file.type)) {
                 errors[index] = 'Loại file không được hỗ trợ'
             }
@@ -208,7 +213,7 @@ const InputInfoPage = () => {
 
         const isValid = Object.keys(errors).length === 0 && globalErrors.length === 0
         const totalFiles = files.length + submittedFiles.length
-        
+
         const summary = isValid
             ? `✓ Sẵn sàng tải lên: ${files.length} file mới${submittedFiles.length > 0 ? ` (tổng: ${totalFiles} file)` : ``} - Không yêu cầu phân loại`
             : `✗ Có ${Object.keys(errors).length + globalErrors.length} lỗi cần khắc phục`
@@ -228,7 +233,7 @@ const InputInfoPage = () => {
         }
 
         // Validate before submitting
-        const result = bypassPrescriptionCheck 
+        const result = bypassPrescriptionCheck
             ? validateCategorizedFilesWithBypass(selectedFiles as File[], fileCategories, submittedFiles)
             : validateCategorizedFiles(selectedFiles as File[], fileCategories, submittedFiles)
         if (!result.isValid) {
@@ -255,8 +260,6 @@ const InputInfoPage = () => {
                 isRequired: categoryData.category !== FileCategory.GENERAL
             }
         })
-
-
 
         const updatedSubmittedFiles = [...submittedFiles, ...newSubmittedFiles]
         setSubmittedFiles(updatedSubmittedFiles)
@@ -579,7 +582,6 @@ const InputInfoPage = () => {
             (sf) => sf.file && sf.file.name && sf.category && Object.values(FileCategory).includes(sf.category)
         )
 
-
         if (validSubmittedFiles.length !== submittedFiles.length) {
             console.error('Some files failed validation:', {
                 totalFiles: submittedFiles.length,
@@ -604,7 +606,6 @@ const InputInfoPage = () => {
             fileName: sf.file?.name || 'unknown-file' // Additional safety check
         }))
 
-
         // Additional validation for categoryArray
         const invalidCategories = categoryArray.filter((cat) => !cat.category || !cat.fileName)
         if (invalidCategories.length > 0) {
@@ -617,7 +618,7 @@ const InputInfoPage = () => {
             return
         }
 
-        const validation = bypassPrescriptionCheck 
+        const validation = bypassPrescriptionCheck
             ? validateCategorizedFilesWithBypass(fileArray, categoryArray, submittedFiles)
             : validateCategorizedFiles(fileArray, categoryArray, submittedFiles)
         if (!validation.isValid) {
@@ -674,7 +675,8 @@ const InputInfoPage = () => {
                 result = await uploadMutation.mutateAsync(uploadParams)
             }
 
-            const uploadCount = result.data?.uploadedFilesCount || result.uploadedFilesCount || validSubmittedFiles.length
+            const uploadCount =
+                result.data?.uploadedFilesCount || result.uploadedFilesCount || validSubmittedFiles.length
 
             notifications.show({
                 title: 'Thành công',
@@ -805,6 +807,7 @@ const InputInfoPage = () => {
                         onUpdate={handleOCRResultUpdate}
                         onClose={handleOCRDrawerClose}
                         onRetryOCR={() => handleOCRRetry(selectedFileForOCR.id)}
+                        patientData={patientData}
                     />
                 )}
             </Drawer>
