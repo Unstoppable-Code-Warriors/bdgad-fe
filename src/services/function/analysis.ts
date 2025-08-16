@@ -32,7 +32,15 @@ export const analysisService = {
         dateFrom?: DateValue | null
         dateTo?: DateValue | null
         filterFastq?: 'wait_for_approval' | 'approved' | 'rejected' | null
-        filterEtl?: 'processing' | 'completed' | 'failed' | 'wait_for_approval' | 'rejected' | 'approved' | null
+        filterEtl?:
+            | 'processing'
+            | 'completed'
+            | 'failed'
+            | 'wait_for_approval'
+            | 'rejected'
+            | 'approved'
+            | 'not_yet_processing'
+            | null
     }): Promise<BaseListResponse<AnalysisSessionListItem>> => {
         const queryParams = new URLSearchParams()
         queryParams.set('page', page.toString())

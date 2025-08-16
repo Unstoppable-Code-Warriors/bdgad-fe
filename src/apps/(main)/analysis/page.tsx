@@ -72,6 +72,7 @@ const AnalysisPage = () => {
     ]
 
     const etlFilterOptions = [
+        { value: 'not_yet_processing', label: 'Chưa xử lý' },
         { value: 'processing', label: 'Đang xử lý' },
         { value: 'completed', label: 'Hoàn thành' },
         { value: 'failed', label: 'Thất bại' },
@@ -110,6 +111,7 @@ const AnalysisPage = () => {
             | 'wait_for_approval'
             | 'rejected'
             | 'approved'
+            | 'not_yet_processing'
             | null
     })
 

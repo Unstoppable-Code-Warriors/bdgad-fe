@@ -110,10 +110,15 @@ export enum AnalysisStatus {
     REJECTED = 'rejected',
     PROCESSING = 'processing',
     COMPLETED = 'completed',
-    FAILED = 'failed'
+    FAILED = 'failed',
+    NOT_YET_PROCESSING = 'not_yet_processing'
 }
 
 export const analysisStatusConfig = {
+    [AnalysisStatus.NOT_YET_PROCESSING]: {
+        label: 'Chưa xử lý',
+        color: 'gray'
+    },
     [AnalysisStatus.WAIT_FOR_APPROVAL]: {
         label: 'Chờ phê duyệt',
         color: 'orange'

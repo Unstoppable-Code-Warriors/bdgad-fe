@@ -26,7 +26,15 @@ export const useAnalysisSessions = ({
     dateFrom?: DateValue | null
     dateTo?: DateValue | null
     filterFastq?: 'wait_for_approval' | 'approved' | 'rejected' | null
-    filterEtl?: 'processing' | 'completed' | 'failed' | 'wait_for_approval' | 'rejected' | 'approved' | null
+    filterEtl?:
+        | 'processing'
+        | 'completed'
+        | 'failed'
+        | 'wait_for_approval'
+        | 'rejected'
+        | 'approved'
+        | 'not_yet_processing'
+        | null
 } = {}) => {
     return useQuery({
         queryKey: [
