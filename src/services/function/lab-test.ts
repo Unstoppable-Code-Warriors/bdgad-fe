@@ -78,8 +78,7 @@ export const labTestService = {
 
         return await backendApi
             .post(`${PREFIX}/session/${sessionId}/fastq-pair`, {
-                body: formData,
-                headers: {}
+                body: formData
             })
             .json<{ message: string }>()
     },
