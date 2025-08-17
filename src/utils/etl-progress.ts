@@ -18,10 +18,13 @@ export const calculateEtlProgress = (startTime: string | null): number => {
     // Convert to hours
     const elapsedHours = elapsedMs / (1000 * 60 * 60)
 
-    // Calculate percentage (max 100%)
+    // Calculate percentage (max 100%) and add 1% minimum
     const progress = Math.min((elapsedHours / targetDurationHours) * 100, 100)
 
-    return Math.round(progress)
+    // Add 1% minimum to show some progress when just started, but cap at 100%
+    const adjustedProgress = Math.min(progress + 1, 100)
+
+    return Math.round(adjustedProgress)
 }
 
 /**

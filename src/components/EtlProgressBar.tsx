@@ -1,5 +1,5 @@
 import { Card, Text, Progress, Group, Stack, ThemeIcon, Box } from '@mantine/core'
-import { IconClock, IconCheck, IconAlertTriangle } from '@tabler/icons-react'
+import { IconClock, IconCheck } from '@tabler/icons-react'
 import { calculateEtlProgress } from '@/utils/etl-progress'
 
 interface EtlProgressBarProps {
@@ -23,9 +23,6 @@ export const EtlProgressBar = ({ startTime, status, etlCompletedAt }: EtlProgres
     if (etlCompletedAt) {
         color = 'green'
         icon = <IconCheck size={20} />
-    } else if (progress >= 90) {
-        color = 'orange'
-        icon = <IconAlertTriangle size={20} />
     }
 
     return (

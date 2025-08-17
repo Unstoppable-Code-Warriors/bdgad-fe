@@ -1,4 +1,4 @@
-import { Button, Group,  Text, Paper } from '@mantine/core'
+import { Button, Group, Text, Paper } from '@mantine/core'
 import { IconExternalLink, IconDownload } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 
@@ -10,12 +10,12 @@ interface EtlResultActionsProps {
     justify?: 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around'
 }
 
-export const EtlResultActions = ({
+export const EtlResultActionsCenter = ({
     htmlResult,
     excelResult,
     status,
     className,
-    justify = 'flex-end'
+    justify = 'center'
 }: EtlResultActionsProps) => {
     console.log('check justify:', justify)
     // Show actions for completed, approved, and wait_for_approval statuses
@@ -73,7 +73,7 @@ export const EtlResultActions = ({
     }
 
     return (
-        <Group gap='md' justify={justify} className={className}>
+        <Group gap='md' grow justify={justify} className={className}>
             {htmlResult && (
                 <Button
                     leftSection={<IconExternalLink size={14} />}

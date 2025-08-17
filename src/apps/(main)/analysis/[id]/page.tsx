@@ -46,6 +46,8 @@ import { statusConfig } from '@/types/lab-test.types'
 import { labTestService } from '@/services/function/lab-test'
 import { openRejectFastqModal } from '@/components/RejectFastqModal'
 import { Role } from '@/utils/constant'
+import { EtlProgressBar } from '@/components'
+import { EtlResultActionsCenter } from '@/components/EtlResultActionsCenter'
 
 const AnalysisDetailPage = () => {
     const { id } = useParams()
@@ -72,8 +74,9 @@ const AnalysisDetailPage = () => {
             ? data.fastqFilePairs.find((f) => f.status === AnalysisStatus.WAIT_FOR_APPROVAL) || data.fastqFilePairs[0]
             : null
 
-    // Get the latest ETL result
-    const latestEtlResult = data?.etlResults && data.etlResults.length > 0 ? data.etlResults[0] : null
+    // Get the latest ETL result (sort by ID descending to get the most recent)
+    const latestEtlResult =
+        data?.etlResults && data.etlResults.length > 0 ? data.etlResults.sort((a, b) => b.id - a.id)[0] : null
 
     const handleBack = () => {
         navigate('/analysis')
@@ -390,24 +393,35 @@ const AnalysisDetailPage = () => {
                                 {(latestEtlResult?.status === AnalysisStatus.COMPLETED ||
                                     latestEtlResult?.status === AnalysisStatus.REJECTED) && (
                                     <Stack gap='md'>
-                                        <Text
-                                            size='sm'
-                                            fw={500}
-                                            c={latestEtlResult?.status === AnalysisStatus.REJECTED ? 'orange' : 'green'}
-                                        >
-                                            {latestEtlResult?.status === AnalysisStatus.REJECTED
-                                                ? 'Kết quả bị từ chối - Sẵn sàng gửi lại'
-                                                : 'Kết quả đã sẵn sàng'}
-                                        </Text>
+                                        {/* ETL Result Actions - show when results are available and FastQ is not waiting for approval */}
+                                        {latestEtlResult &&
+                                            (latestEtlResult.htmlResult || latestEtlResult.excelResult) &&
+                                            latestFastqFilePair &&
+                                            latestFastqFilePair.status !== AnalysisStatus.WAIT_FOR_APPROVAL && (
+                                                <>
+                                                    <Text
+                                                        size='sm'
+                                                        fw={500}
+                                                        c={
+                                                            latestEtlResult?.status === AnalysisStatus.REJECTED
+                                                                ? 'orange'
+                                                                : 'green'
+                                                        }
+                                                    >
+                                                        {latestEtlResult?.status === AnalysisStatus.REJECTED
+                                                            ? 'Kết quả bị từ chối - Sẵn sàng gửi lại'
+                                                            : 'Kết quả đã sẵn sàng'}
+                                                    </Text>
 
-                                        {latestEtlResult?.status === AnalysisStatus.COMPLETED && (
-                                            <Text size='sm' c='green' fw={500} ta='center'>
-                                                Kết quả đã sẵn sàng - Xem trong thông tin phân tích
-                                            </Text>
-                                        )}
-
+                                                    <EtlResultActionsCenter
+                                                        htmlResult={latestEtlResult.htmlResult}
+                                                        excelResult={latestEtlResult.excelResult}
+                                                        status={latestEtlResult.status}
+                                                        justify='center'
+                                                    />
+                                                </>
+                                            )}{' '}
                                         <Divider />
-
                                         <Select
                                             label='Chọn kỹ thuật viên Thẩm Định'
                                             placeholder='Chọn kỹ thuật viên...'
@@ -423,7 +437,6 @@ const AnalysisDetailPage = () => {
                                             onChange={setSelectedValidationId}
                                             required
                                         />
-
                                         <Button
                                             color='blue'
                                             variant='light'
@@ -444,26 +457,25 @@ const AnalysisDetailPage = () => {
                                     </Stack>
                                 )}
 
+                                {/* ETL Progress Bar - show for processing ETL results */}
+                                {latestEtlResult?.startTime &&
+                                    latestEtlResult?.status === AnalysisStatus.PROCESSING && (
+                                        <EtlProgressBar
+                                            startTime={latestEtlResult.startTime}
+                                            status={latestEtlResult.status}
+                                            etlCompletedAt={latestEtlResult.etlCompletedAt}
+                                        />
+                                    )}
+
+                                {/* FastQ Processing indicator */}
                                 {latestFastqFilePair?.status === AnalysisStatus.PROCESSING && (
                                     <Stack gap='md' align='center'>
                                         <Loader size='md' color='blue' />
                                         <Text size='sm' ta='center' c='blue' fw={500}>
-                                            Đang xử lý phân tích...
+                                            Đang xử lý FastQ files...
                                         </Text>
                                         <Text size='xs' ta='center' c='dimmed'>
                                             Quá trình này có thể mất vài phút
-                                        </Text>
-                                    </Stack>
-                                )}
-
-                                {latestEtlResult?.status === AnalysisStatus.PROCESSING && (
-                                    <Stack gap='md' align='center'>
-                                        <Loader size='md' color='orange' />
-                                        <Text size='sm' ta='center' c='orange' fw={500}>
-                                            Đang xử lý phân tích...
-                                        </Text>
-                                        <Text size='xs' ta='center' c='dimmed'>
-                                            Đang tạo kết quả cuối cùng
                                         </Text>
                                     </Stack>
                                 )}
