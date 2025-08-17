@@ -148,6 +148,7 @@ const LabTestPage = () => {
 
     // Extract data from response
     const labTestData = labTestResponse?.data || []
+    console.log('Debug: ', labTestData)
     const totalRecords = labTestResponse?.meta?.total || 0
 
     const columns: DataTableColumn<LabTestSessionListItem>[] = useMemo(
@@ -211,10 +212,26 @@ const LabTestPage = () => {
                 accessor: 'requestDate',
                 title: 'Ngày yêu cầu',
                 width: 120,
-                render: (record) => (
-                    <Text size='sm'>{new Date(record.requestDateLabTesting).toLocaleDateString('vi-VN')}</Text>
-                )
+                render: (record) => {
+                    // chuẩn hóa chuỗi ngày từ DB
+                    const dbDate = record.requestDateLabTesting
+                    const isoDate =
+                        dbDate
+                            .replace(' ', 'T') // đổi " " thành "T"
+                            .replace(/(\.\d{3})\d+$/, '$1')
+
+                    const d = new Date(isoDate)
+
+                    return (
+                        <Text size='sm'>
+                            {d.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}
+                            <br />
+                            {d.toLocaleTimeString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}
+                        </Text>
+                    )
+                }
             },
+
             {
                 accessor: 'fastq',
                 title: 'FastQ Files',

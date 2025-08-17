@@ -220,10 +220,9 @@ const PatientFolderPage = () => {
                         {isSearchMode && selectedYear && selectedMonth && (
                             <Button
                                 variant='subtle'
-                                leftSection={<IconArrowLeft size={16} />}
+                                leftSection={<IconArrowLeft size={28} />}
                                 onClick={handleBackToYearView}
                             >
-                                Quay lại
                             </Button>
                         )}
                         <div>
