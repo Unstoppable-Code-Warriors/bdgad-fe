@@ -10,6 +10,7 @@ import {
 } from '@tabler/icons-react'
 import { RejectionDisplay } from './RejectionDisplay'
 import { ApprovedDisplay } from './ApprovedDisplay'
+import { EtlResultActions } from './EtlResultActions'
 
 interface EtlResultData {
     id: number
@@ -197,9 +198,11 @@ export const EtlResultHistory = ({
                                             <Group gap='xs'>
                                                 <IconClock size={14} color='var(--mantine-color-gray-6)' />
                                                 <Text size='sm' c='dimmed'>
-                                                    {new Date(
-                                                        result.createdAt || result.etlCompletedAt || ''
-                                                    ).toLocaleString('vi-VN')}
+                                                    {result.createdAt || result.etlCompletedAt
+                                                        ? new Date(
+                                                              result.createdAt || result.etlCompletedAt || ''
+                                                          ).toLocaleString('vi-VN')
+                                                        : 'Chưa có thông tin'}
                                                 </Text>
                                             </Group>
                                         )}
@@ -266,8 +269,20 @@ export const EtlResultHistory = ({
                                             />
                                         )}
 
-                                        {/* Download Button */}
-                                        {result.resultPath && (
+                                        {/* ETL Result Actions - show when HTML/Excel results are available */}
+                                        {(result.htmlResult || result.excelResult) && (
+                                            <>
+                                                <Divider my='xs' />
+                                                <EtlResultActions
+                                                    htmlResult={result.htmlResult || null}
+                                                    excelResult={result.excelResult || null}
+                                                    status={result.status}
+                                                />
+                                            </>
+                                        )}
+
+                                        {/* Fallback Download Button for legacy resultPath */}
+                                        {result.resultPath && !result.htmlResult && !result.excelResult && (
                                             <>
                                                 <Divider my='xs' />
                                                 <Group gap='sm' justify='flex-end'>

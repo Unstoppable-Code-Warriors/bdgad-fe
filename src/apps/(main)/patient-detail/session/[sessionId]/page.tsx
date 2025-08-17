@@ -371,7 +371,6 @@ const SessionDetailPage = () => {
         }
     }
     const handleFileReject = useCallback((rejectedFiles: FileRejection[]) => {
-
         const errorMessages = rejectedFiles.map(({ file, errors }) => {
             const fileName = file.name
             const errorList = errors.map((error) => {

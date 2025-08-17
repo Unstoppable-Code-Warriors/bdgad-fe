@@ -1,7 +1,6 @@
 import { Card, Text, Group, Divider, Stack, ThemeIcon, Box, Grid, Paper } from '@mantine/core'
 import { IconShield, IconCalendar } from '@tabler/icons-react'
 import type { ValidationSessionWithLatestEtlResponse } from '@/types/validation'
-import { EtlProgressBar, EtlResultActions } from '@/components'
 
 interface ValidationInfoProps {
     validation: ValidationSessionWithLatestEtlResponse
@@ -147,30 +146,6 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                             </Paper>
                         )}
                     </Stack>
-                </>
-            )}
-
-            {/* ETL Progress Bar */}
-            {etlResult?.startTime && (
-                <>
-                    <Divider my='xl' />
-                    <EtlProgressBar
-                        startTime={etlResult.startTime}
-                        status={etlResult.status}
-                        etlCompletedAt={etlResult.etlCompletedAt}
-                    />
-                </>
-            )}
-
-            {/* ETL Result Actions */}
-            {etlResult && (etlResult.htmlResult || etlResult.excelResult) && (
-                <>
-                    <Divider my='xl' />
-                    <EtlResultActions
-                        htmlResult={etlResult.htmlResult}
-                        excelResult={etlResult.excelResult}
-                        status={etlResult.status}
-                    />
                 </>
             )}
         </Card>

@@ -25,6 +25,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { ValidationEtlStatus, validationEtlStatusConfig } from '@/types/validation'
 import { openRejectEtlResultModal } from '@/components/RejectEtlResultModal'
 import { openAcceptEtlResultModal } from '@/components/AcceptEtlResultModal'
+import { EtlResultActionsCenter } from '@/components/EtlResultActionsCenter'
 
 const ValidationDetailPage = () => {
     const { id } = useParams()
@@ -148,6 +149,20 @@ const ValidationDetailPage = () => {
                                     </Box>
                                 </Group>
 
+                                <Divider />
+                                {/* ETL Result Actions */}
+                                {latestEtlResult && (latestEtlResult.htmlResult || latestEtlResult.excelResult) && (
+                                    <>
+                                        <Text size='sm' fw={500} c='teal'>
+                                            Kết quả phân tích
+                                        </Text>
+                                        <EtlResultActionsCenter
+                                            htmlResult={latestEtlResult.htmlResult}
+                                            excelResult={latestEtlResult.excelResult}
+                                            status={latestEtlResult.status}
+                                        />
+                                    </>
+                                )}
                                 <Divider />
 
                                 {/* Validation Actions */}
