@@ -22,6 +22,7 @@ interface SendFilesModalProps {
 }
 
 const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }: SendFilesModalProps) => {
+    console.log('SendFilesModal sessionData:', sessionData)
     // Utility functions for translating package types and sample type
     const getPackageTypeLabel = (packageType: string): string => {
         // Check cancer screening packages
@@ -354,7 +355,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                                                     )}
                                                 </div>
                                             </Group>
-                                            {labcodeData.fastqFilePairs[0].status === 'not_uploaded' ? (
+                                            {labcodeData.fastqFilePairs.length === 0 ? (
                                                 <Select
                                                     placeholder='Chọn kỹ thuật viên...'
                                                     value={assignment.labTestingId?.toString() || ''}
@@ -381,7 +382,7 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                                                         border: '1px solid var(--mantine-color-blue-2)'
                                                     }}
                                                 >
-                                                    {labcodeData?.assignment?.labTesting?.name} - {' '}
+                                                    {labcodeData?.assignment?.labTesting?.name} -{' '}
                                                     {labcodeData?.assignment?.labTesting?.email}
                                                 </Text>
                                             )}
@@ -407,7 +408,13 @@ const SendFilesModal = ({ opened, onClose, sessionType, sessionId, sessionData }
                         leftSection={isAlreadyAssigned ? <IconCheck size={16} /> : <IconSend size={16} />}
                         onClick={handleSendFiles}
                         loading={isSending}
-                        disabled={isSending || isLoading || (sessionType === 'result_test' && isAlreadyAssigned)}
+                        disabled={
+                            isSending ||
+                            isLoading ||
+                            (sessionType === 'result_test' && isAlreadyAssigned) ||
+                            (sessionType === 'test' &&
+                                sessionData.labcodes.every((labcode: any) => labcode.fastqFilePairs.length > 0))
+                        }
                         color={sessionType === 'test' ? 'blue' : 'green'}
                         variant={isAlreadyAssigned ? 'light' : 'filled'}
                         style={{

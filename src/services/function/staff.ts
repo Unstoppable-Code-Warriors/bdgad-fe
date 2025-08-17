@@ -142,7 +142,6 @@ export const staffService = {
         const queryString = searchParams.toString()
         const url = queryString ? `${PREFIX}/patients?${queryString}` : `${PREFIX}/patients`
 
-        console.log(url)
         return backendApi.get(url).json()
     },
 
