@@ -445,8 +445,11 @@ const PatientDetailPage = () => {
                     {/* Sessions List with Tabs */}
                     {sessions.length > 0 && (
                         <Grid.Col span={6}>
-                            <Card shadow='sm' padding='lg' withBorder>
-                                <Tabs defaultValue='test' orientation='horizontal'>
+                            <Card shadow='sm' padding='lg' withBorder h='519'>
+                                <Tabs
+                                    defaultValue={testSessions.length > 0 ? 'test' : 'result_test'}
+                                    orientation='horizontal'
+                                >
                                     <Tabs.List>
                                         {testSessions.length > 0 && (
                                             <Tabs.Tab
@@ -480,7 +483,7 @@ const PatientDetailPage = () => {
                                     {testSessions.length > 0 && (
                                         <Tabs.Panel value='test' pt='md'>
                                             <ScrollArea
-                                                h={400}
+                                                h={450}
                                                 scrollbarSize={8}
                                                 scrollHideDelay={1000}
                                                 type='scroll'
