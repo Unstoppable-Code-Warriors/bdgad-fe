@@ -532,7 +532,15 @@ const PatientDetailPage = () => {
                                                                                 <Text size='sm' c='dimmed'>
                                                                                     {new Date(
                                                                                         session.createdAt
-                                                                                    ).toLocaleDateString('vi-VN')}
+                                                                                    ).toLocaleDateString('vi-VN', {
+                                                                                        timeZone: 'Asia/Ho_Chi_Minh'
+                                                                                    })}
+                                                                                     -
+                                                                                    {new Date(
+                                                                                        session.createdAt
+                                                                                    ).toLocaleTimeString('vi-VN', {
+                                                                                        timeZone: 'Asia/Ho_Chi_Minh'
+                                                                                    })}
                                                                                 </Text>
                                                                             </Flex>
                                                                             <Flex align='center' gap='xs'>
@@ -610,7 +618,15 @@ const PatientDetailPage = () => {
                                                                                 <Text size='sm' c='dimmed'>
                                                                                     {new Date(
                                                                                         session.createdAt
-                                                                                    ).toLocaleDateString('vi-VN')}
+                                                                                    ).toLocaleDateString('vi-VN', {
+                                                                                        timeZone: 'Asia/Ho_Chi_Minh'
+                                                                                    })}
+                                                                                    -
+                                                                                    {new Date(
+                                                                                        session.createdAt
+                                                                                    ).toLocaleTimeString('vi-VN', {
+                                                                                        timeZone: 'Asia/Ho_Chi_Minh'
+                                                                                    })}
                                                                                 </Text>
                                                                             </Flex>
                                                                             <Flex align='center' gap='xs'>
