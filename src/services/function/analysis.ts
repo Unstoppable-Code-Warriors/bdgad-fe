@@ -1,10 +1,5 @@
 import type { BaseListResponse } from '@/types'
-import type {
-    AnalysisSessionDetail,
-    AnalysisSessionListItem,
-    RejectFastqRequest,
-    EtlResultDownloadResponse
-} from '@/types/analysis'
+import type { AnalysisSessionDetail, AnalysisSessionListItem, RejectFastqRequest } from '@/types/analysis'
 import { backendApi } from '@/utils/api'
 import type { DateValue } from '@mantine/dates'
 
@@ -96,10 +91,6 @@ export const analysisService = {
                 json: data
             })
             .json<{ message: string }>()
-    },
-
-    downloadEtlResult: async (etlResultId: number): Promise<EtlResultDownloadResponse> => {
-        return await backendApi.get(`${PREFIX}/etl-result/${etlResultId}/download`).json<EtlResultDownloadResponse>()
     },
 
     sendEtlResultToValidation: async (etlResultId: number, validataionId: number): Promise<{ message: string }> => {

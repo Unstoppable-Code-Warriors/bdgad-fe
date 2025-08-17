@@ -2,15 +2,14 @@ import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { Title, Group, Stack, Paper, Badge, ActionIcon, Alert, Text, Tooltip, Tabs } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
-import { IconAlertCircle, IconDownload, IconCheck, IconX as IconReject, IconEye } from '@tabler/icons-react'
+import { IconAlertCircle, IconCheck, IconX as IconReject, IconEye } from '@tabler/icons-react'
 import {
     validationEtlStatusConfig,
     ValidationEtlStatus,
     type ValidationFilter,
     type ValidationSessionWithLatestEtlResponse
 } from '@/types/validation'
-import { useValidationPatients, useDownloadValidationEtlResult } from '@/services/hook/validation.hook'
-import { notifications } from '@mantine/notifications'
+import { useValidationPatients } from '@/services/hook/validation.hook'
 import { ListSearchFilter } from '@/components/ListSearchFilter'
 import { useListState } from '@/hooks/use-list-state'
 import { openRejectEtlResultModal } from '@/components/RejectEtlResultModal'
@@ -26,7 +25,6 @@ const getStatusLabel = (status: string) => {
 
 const ValidationPage = () => {
     const navigate = useNavigate()
-    const [isDownloading, setIsDownloading] = useState(false)
     const [activeTab, setActiveTab] = useState<string>('processing')
 
     // Use the new list state hook
@@ -77,9 +75,6 @@ const ValidationPage = () => {
         filterGroup: activeTab as 'processing' | 'rejected' | 'approved'
     })
 
-    // Mutations
-    const downloadEtlResultMutation = useDownloadValidationEtlResult()
-
     const handleViewDetail = useCallback(
         (id: number) => {
             navigate(`/validation/${id}`)
@@ -90,25 +85,6 @@ const ValidationPage = () => {
     const handleRefresh = useCallback(() => {
         refetch()
     }, [refetch])
-
-    const handleDownloadEtlResult = useCallback(
-        async (etlResultId: number) => {
-            try {
-                setIsDownloading(true)
-                const response = await downloadEtlResultMutation.mutateAsync(etlResultId)
-                window.open(response.downloadUrl, '_blank')
-            } catch (error: any) {
-                notifications.show({
-                    title: 'Lỗi tải file',
-                    message: error.message || 'Không thể tạo link tải xuống',
-                    color: 'red'
-                })
-            } finally {
-                setIsDownloading(false)
-            }
-        },
-        [downloadEtlResultMutation]
-    )
 
     const handleOpenRejectModal = useCallback(
         (etlResultId: number) => {
@@ -225,24 +201,6 @@ const ValidationPage = () => {
 
                             {etlResult && (
                                 <>
-                                    {[
-                                        ValidationEtlStatus.WAIT_FOR_APPROVAL,
-                                        ValidationEtlStatus.REJECTED,
-                                        ValidationEtlStatus.APPROVED
-                                    ].includes(etlResult.status as ValidationEtlStatus) && (
-                                        <Tooltip label='Tải xuống kết quả'>
-                                            <ActionIcon
-                                                size='sm'
-                                                variant='light'
-                                                color='blue'
-                                                loading={isDownloading}
-                                                onClick={() => handleDownloadEtlResult(etlResult.id)}
-                                            >
-                                                <IconDownload size={14} />
-                                            </ActionIcon>
-                                        </Tooltip>
-                                    )}
-
                                     {etlResult.status === ValidationEtlStatus.WAIT_FOR_APPROVAL && (
                                         <>
                                             <Tooltip label='Phê duyệt'>
@@ -274,7 +232,7 @@ const ValidationPage = () => {
                 }
             }
         ],
-        [isDownloading, handleDownloadEtlResult, handleOpenAcceptModal, handleOpenRejectModal, handleViewDetail]
+        [handleOpenAcceptModal, handleOpenRejectModal, handleViewDetail]
     )
 
     return (

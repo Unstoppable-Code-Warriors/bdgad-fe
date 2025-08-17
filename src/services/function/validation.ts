@@ -2,8 +2,7 @@ import type { BaseListResponse } from '@/types'
 import type {
     ValidationSessionWithLatestEtlResponse,
     RejectEtlResultRequest,
-    AcceptEtlResultRequest,
-    ValidationEtlResultDownloadResponse
+    AcceptEtlResultRequest
 } from '@/types/validation'
 import { backendApi } from '@/utils/api'
 import type { DateValue } from '@mantine/dates'
@@ -69,12 +68,6 @@ export const validationService = {
             throw new Error('Session ID is required')
         }
         return await backendApi.get<ValidationSessionWithLatestEtlResponse>(`${PREFIX}/${id}`).json()
-    },
-
-    downloadEtlResult: async (etlResultId: number): Promise<ValidationEtlResultDownloadResponse> => {
-        return await backendApi
-            .get(`${PREFIX}/etl-result/${etlResultId}/download`)
-            .json<ValidationEtlResultDownloadResponse>()
     },
 
     rejectEtlResult: async (etlResultId: number, data: RejectEtlResultRequest): Promise<{ message: string }> => {

@@ -55,12 +55,6 @@ export const useValidationSessionDetail = (id: string | undefined) => {
     })
 }
 
-export const useDownloadValidationEtlResult = () => {
-    return useMutation({
-        mutationFn: (etlResultId: number) => validationService.downloadEtlResult(etlResultId)
-    })
-}
-
 export const useRejectEtlResult = () => {
     const queryClient = useQueryClient()
 

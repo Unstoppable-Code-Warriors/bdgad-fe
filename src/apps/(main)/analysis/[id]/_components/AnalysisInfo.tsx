@@ -2,6 +2,7 @@ import { Card, Text, Group, Badge, Divider, Stack, ThemeIcon, Box, Grid, Paper }
 import { IconFlask, IconCalendar, IconBarcode, IconClock } from '@tabler/icons-react'
 import type { AnalysisSessionDetail, FastqFilePairResponse, EtlResultResponse } from '@/types/analysis'
 import { analysisStatusConfig } from '@/types/analysis'
+import { EtlProgressBar, EtlResultActions } from '@/components'
 
 interface AnalysisInfoProps {
     data: AnalysisSessionDetail
@@ -199,6 +200,30 @@ export const AnalysisInfo = ({ data, latestFastqFilePair, latestEtlResult }: Ana
                             </Paper>
                         )}
                     </Stack>
+                </>
+            )}
+
+            {/* ETL Progress Bar */}
+            {latestEtlResult?.startTime && (
+                <>
+                    <Divider my='xl' />
+                    <EtlProgressBar
+                        startTime={latestEtlResult.startTime}
+                        status={latestEtlResult.status}
+                        etlCompletedAt={latestEtlResult.etlCompletedAt}
+                    />
+                </>
+            )}
+
+            {/* ETL Result Actions */}
+            {latestEtlResult && (latestEtlResult.htmlResult || latestEtlResult.excelResult) && (
+                <>
+                    <Divider my='xl' />
+                    <EtlResultActions
+                        htmlResult={latestEtlResult.htmlResult}
+                        excelResult={latestEtlResult.excelResult}
+                        status={latestEtlResult.status}
+                    />
                 </>
             )}
         </Card>

@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { useValidationSessionDetail, useDownloadValidationEtlResult } from '@/services/hook/validation.hook'
+import { useValidationSessionDetail } from '@/services/hook/validation.hook'
 import { useParams, useNavigate } from 'react-router'
 import {
     Container,
@@ -17,8 +17,7 @@ import {
     ThemeIcon,
     Title
 } from '@mantine/core'
-import { IconAlertCircle, IconDownload, IconCheck, IconX, IconShieldCheck, IconXboxX } from '@tabler/icons-react'
-import { notifications } from '@mantine/notifications'
+import { IconAlertCircle, IconCheck, IconX, IconShieldCheck, IconXboxX } from '@tabler/icons-react'
 import { ValidationInfo } from './_components/ValidationInfo'
 import { EtlResultHistory } from '@/components/EtlResultHistory'
 import { PatientInfo } from '@/components/PatientInfo'
@@ -32,37 +31,12 @@ const ValidationDetailPage = () => {
     const navigate = useNavigate()
     const { data, isLoading, error, refetch } = useValidationSessionDetail(id)
 
-    // Mutations
-    const downloadEtlResultMutation = useDownloadValidationEtlResult()
-
     // Get the latest ETL result from the array
     const latestEtlResult = data?.etlResults && data.etlResults.length > 0 ? data.etlResults[0] : null
 
     const handleBack = () => {
         navigate('/validation')
     }
-
-    const handleDownloadEtlResult = useCallback(async () => {
-        if (!latestEtlResult?.id) {
-            notifications.show({
-                title: 'Lỗi',
-                message: 'Không tìm thấy kết quả ETL để tải xuống',
-                color: 'red'
-            })
-            return
-        }
-
-        try {
-            const response = await downloadEtlResultMutation.mutateAsync(latestEtlResult.id)
-            window.open(response.downloadUrl, '_blank')
-        } catch (error: any) {
-            notifications.show({
-                title: 'Lỗi tải file',
-                message: error.message || 'Không thể tạo link tải xuống',
-                color: 'red'
-            })
-        }
-    }, [latestEtlResult?.id, downloadEtlResultMutation])
 
     const handleOpenRejectModal = useCallback(() => {
         if (!latestEtlResult?.id) return
@@ -176,65 +150,34 @@ const ValidationDetailPage = () => {
 
                                 <Divider />
 
-                                {/* Download Section */}
-                                {latestEtlResult &&
-                                    [
-                                        ValidationEtlStatus.WAIT_FOR_APPROVAL,
-                                        ValidationEtlStatus.REJECTED,
-                                        ValidationEtlStatus.APPROVED
-                                    ].includes(latestEtlResult.status as ValidationEtlStatus) && (
-                                        <Stack gap='md'>
-                                            <Text size='sm' fw={500} c='blue'>
-                                                Kết quả phân tích đã sẵn sàng
-                                            </Text>
-                                            <Button
-                                                color='blue'
-                                                onClick={handleDownloadEtlResult}
-                                                leftSection={<IconDownload size={16} />}
-                                                loading={downloadEtlResultMutation.isPending}
-                                                disabled={downloadEtlResultMutation.isPending}
-                                                fullWidth
-                                                size='md'
-                                                radius='lg'
-                                            >
-                                                Tải xuống kết quả
-                                            </Button>
-                                        </Stack>
-                                    )}
-
                                 {/* Validation Actions */}
                                 {latestEtlResult?.status === ValidationEtlStatus.WAIT_FOR_APPROVAL && (
-                                    <>
-                                        {/* Add divider if download section exists */}
-                                        {latestEtlResult && <Divider />}
-
-                                        <Stack gap='md'>
-                                            <Text size='sm' fw={500} c='teal'>
-                                                Chờ thẩm định kết quả
-                                            </Text>
-                                            <Button
-                                                color='green'
-                                                onClick={handleOpenAcceptModal}
-                                                leftSection={<IconCheck size={16} />}
-                                                fullWidth
-                                                size='md'
-                                                radius='lg'
-                                            >
-                                                Phê duyệt
-                                            </Button>
-                                            <Button
-                                                color='red'
-                                                variant='light'
-                                                onClick={handleOpenRejectModal}
-                                                leftSection={<IconX size={16} />}
-                                                fullWidth
-                                                size='md'
-                                                radius='lg'
-                                            >
-                                                Từ chối
-                                            </Button>
-                                        </Stack>
-                                    </>
+                                    <Stack gap='md'>
+                                        <Text size='sm' fw={500} c='teal'>
+                                            Chờ thẩm định kết quả
+                                        </Text>
+                                        <Button
+                                            color='green'
+                                            onClick={handleOpenAcceptModal}
+                                            leftSection={<IconCheck size={16} />}
+                                            fullWidth
+                                            size='md'
+                                            radius='lg'
+                                        >
+                                            Phê duyệt
+                                        </Button>
+                                        <Button
+                                            color='red'
+                                            variant='light'
+                                            onClick={handleOpenRejectModal}
+                                            leftSection={<IconX size={16} />}
+                                            fullWidth
+                                            size='md'
+                                            radius='lg'
+                                        >
+                                            Từ chối
+                                        </Button>
+                                    </Stack>
                                 )}
 
                                 {/* Status Indicators */}

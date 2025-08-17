@@ -15,8 +15,11 @@ interface EtlResultData {
     id: number
     status: string | null
     createdAt?: string
-    etlCompletedAt?: string
-    reasonApprove?: string
+    startTime?: string | null
+    etlCompletedAt?: string | null
+    htmlResult?: string | null
+    excelResult?: string | null
+    reasonApprove?: string | null
     error?: string
     reasonReject?: string | null
     resultPath?: string
@@ -35,12 +38,12 @@ interface EtlResultData {
         id: number
         name: string
         email: string
-    }
+    } | null
     approver?: {
         id: number
         name: string
         email: string
-    }
+    } | null
 }
 
 interface EtlResultAction {
@@ -86,7 +89,6 @@ export const EtlResultHistory = ({
     showFastqPair = false,
     resultNamePrefix = 'Kết quả ETL'
 }: EtlResultHistoryProps) => {
-
     const getStatusColor = (status: string) => {
         return statusConfig[status]?.color || 'gray'
     }

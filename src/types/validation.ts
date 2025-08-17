@@ -22,12 +22,14 @@ export interface ValidationAssign {
 
 export interface ValidationEtlResultResponse {
     id: number
-    resultPath: string
-    etlCompletedAt: string
+    fastqFilePairId: number
+    htmlResult: string | null
+    excelResult: string | null
+    startTime: string | null
+    etlCompletedAt: string | null
     status: string | null
     reasonReject: string | null
-    reasonApprove: string
-    fastqFilePairId: number
+    reasonApprove: string | null
     fastqPair: {
         id: number
         createdAt: string
@@ -37,12 +39,12 @@ export interface ValidationEtlResultResponse {
         id: number
         name: string
         email: string
-    }
+    } | null
     approver?: {
         id: number
         name: string
         email: string
-    }
+    } | null
 }
 
 export interface ValidationSessionResponse {
@@ -60,11 +62,14 @@ export interface ValidationSessionWithLatestEtlResponse extends ValidationSessio
     etlResults: ValidationEtlResultResponse[]
     latestEtlResult: {
         id: number
-        resultPath: string
-        etlCompletedAt: string
+        fastqFilePairId: number
+        htmlResult: string | null
+        excelResult: string | null
+        startTime: string | null
+        etlCompletedAt: string | null
         status: string | null
         reasonReject: string | null
-        reasonApprove: string
+        reasonApprove: string | null
         rejector: {
             id: number
             name: string
@@ -75,6 +80,11 @@ export interface ValidationSessionWithLatestEtlResponse extends ValidationSessio
             name: string
             email: string
         } | null
+        fastqPair: {
+            id: number
+            createdAt: string
+            status: string
+        }
     } | null
 }
 
@@ -84,12 +94,6 @@ export interface RejectEtlResultRequest {
 
 export interface AcceptEtlResultRequest {
     reasonApprove?: string
-}
-
-export interface ValidationEtlResultDownloadResponse {
-    downloadUrl: string
-    expiresIn: number
-    expiresAt: string
 }
 
 // Validation ETL Result status configurations
