@@ -212,7 +212,11 @@ const LabTestPage = () => {
                 title: 'Ngày yêu cầu',
                 width: 120,
                 render: (record) => (
-                    <Text size='sm'>{new Date(record.requestDateLabTesting).toLocaleDateString('vi-VN')}</Text>
+                    <Text size='sm'>
+                        {new Date(record.requestDateLabTesting).toLocaleDateString('vi-VN', {
+                            timeZone: 'Asia/Ho_Chi_Minh'
+                        })}
+                    </Text>
                 )
             },
             {
