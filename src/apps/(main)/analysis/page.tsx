@@ -237,10 +237,14 @@ const AnalysisPage = () => {
             },
             {
                 accessor: 'requestDate',
-                title: 'Ngày Yêu Cầu',
-                sortable: true,
-                width: 130,
-                render: (record) => new Date(record.requestDateAnalysis).toLocaleDateString('vi-VN')
+                title: 'Ngày yêu cầu',
+                width: 120,
+                render: (record) => {
+                    const dbDate = record.requestDateAnalysis
+                    const d = new Date(dbDate)
+
+                    return <Text size='sm'>{d.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}</Text>
+                }
             },
             {
                 accessor: 'latestFastqPairFile.status',

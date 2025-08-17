@@ -213,25 +213,16 @@ const LabTestPage = () => {
                 title: 'Ngày yêu cầu',
                 width: 120,
                 render: (record) => {
-                    // chuẩn hóa chuỗi ngày từ DB
                     const dbDate = record.requestDateLabTesting
-                    const isoDate =
-                        dbDate
-                            .replace(' ', 'T') // đổi " " thành "T"
-                            .replace(/(\.\d{3})\d+$/, '$1')
-
-                    const d = new Date(isoDate)
+                    const d = new Date(dbDate)
 
                     return (
                         <Text size='sm'>
                             {d.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}
-                            <br />
-                            {d.toLocaleTimeString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}
                         </Text>
                     )
                 }
             },
-
             {
                 accessor: 'fastq',
                 title: 'FastQ Files',

@@ -151,9 +151,13 @@ const ValidationPage = () => {
             {
                 accessor: 'requestDate',
                 title: 'Ngày yêu cầu',
-                sortable: true,
                 width: 120,
-                render: (record) => new Date(record.requestDateValidation).toLocaleDateString('vi-VN')
+                render: (record) => {
+                    const dbDate = record.requestDateValidation
+                    const d = new Date(dbDate)
+
+                    return <Text size='sm'>{d.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}</Text>
+                }
             },
             {
                 accessor: 'latestEtlResult.status',
