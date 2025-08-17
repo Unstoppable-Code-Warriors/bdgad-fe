@@ -90,12 +90,6 @@ export const useRejectFastqPair = () => {
     })
 }
 
-export const useDownloadEtlResult = () => {
-    return useMutation({
-        mutationFn: (etlResultId: number) => analysisService.downloadEtlResult(etlResultId)
-    })
-}
-
 export const useSendEtlResultToValidation = () => {
     const queryClient = useQueryClient()
 

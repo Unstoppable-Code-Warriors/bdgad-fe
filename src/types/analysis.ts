@@ -42,12 +42,14 @@ export interface FastqFilePairResponse {
 
 export interface EtlResultResponse {
     id: number
-    resultPath: string
-    etlCompletedAt: string
+    fastqFilePairId: number
+    htmlResult: string | null
+    excelResult: string | null
+    startTime: string | null
+    etlCompletedAt: string | null
     status: string | null
     reasonReject: string | null
-    reasonApprove: string
-    fastqFilePairId: number
+    reasonApprove: string | null
     fastqPair: {
         id: number
         createdAt: string
@@ -57,12 +59,12 @@ export interface EtlResultResponse {
         id: number
         name: string
         email: string
-    }
+    } | null
     approver?: {
         id: number
         name: string
         email: string
-    }
+    } | null
 }
 
 export interface AnalysisSession {
@@ -95,12 +97,6 @@ export interface AnalysisSessionDetail extends AnalysisSession {
 
 export interface RejectFastqRequest {
     redoReason: string
-}
-
-export interface EtlResultDownloadResponse {
-    downloadUrl: string
-    expiresIn: number
-    expiresAt: string
 }
 
 // Analysis status configurations

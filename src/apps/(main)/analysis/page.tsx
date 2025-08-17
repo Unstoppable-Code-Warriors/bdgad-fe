@@ -10,11 +10,10 @@ import {
     IconX,
     IconRefresh,
     IconAlertCircle,
-    IconDownload,
     IconPlayerPlay
 } from '@tabler/icons-react'
 import { analysisStatusConfig, AnalysisStatus, type AnalysisFilter } from '@/types/analysis'
-import { useAnalysisSessions, useProcessAnalysis, useDownloadEtlResult } from '@/services/hook/analysis.hook'
+import { useAnalysisSessions, useProcessAnalysis } from '@/services/hook/analysis.hook'
 import { useDebouncedValue } from '@mantine/hooks'
 import { useSearchParamState } from '@/hooks/use-search-params'
 import { notifications } from '@mantine/notifications'
@@ -32,7 +31,6 @@ const getStatusLabel = (status: string) => {
 
 const AnalysisPage = () => {
     const navigate = useNavigate()
-    const [isDownloading, setIsDownloading] = useState(false)
 
     // URL state management
     const [page, setPage] = useSearchParamState({
@@ -117,7 +115,6 @@ const AnalysisPage = () => {
 
     // Mutations
     const processAnalysisMutation = useProcessAnalysis()
-    const downloadEtlResultMutation = useDownloadEtlResult()
 
     // Reset page when search or filters change
     useEffect(() => {
@@ -159,26 +156,6 @@ const AnalysisPage = () => {
             })
         },
         [processAnalysisMutation]
-    )
-
-    const handleDownloadEtlResult = useCallback(
-        async (etlResultId: number) => {
-            try {
-                setIsDownloading(true)
-                const response = await downloadEtlResultMutation.mutateAsync(etlResultId)
-                // Open the download URL in a new window/tab
-                window.open(response.downloadUrl, '_blank')
-            } catch (error: any) {
-                notifications.show({
-                    title: 'Lỗi tải file',
-                    message: error.message || 'Không thể tạo link tải xuống',
-                    color: 'red'
-                })
-            } finally {
-                setIsDownloading(false)
-            }
-        },
-        [downloadEtlResultMutation]
     )
 
     const handleRetryEtlResult = useCallback(
@@ -333,20 +310,6 @@ const AnalysisPage = () => {
                             </Tooltip>
                         )}
 
-                        {/* Download ETL Result - only show for completed results */}
-                        {record.latestEtlResult?.status === AnalysisStatus.COMPLETED && (
-                            <Tooltip label='Tải xuống kết quả'>
-                                <ActionIcon
-                                    variant='light'
-                                    color='teal'
-                                    onClick={() => handleDownloadEtlResult(record.latestEtlResult!.id)}
-                                    loading={isDownloading}
-                                >
-                                    <IconDownload size={16} />
-                                </ActionIcon>
-                            </Tooltip>
-                        )}
-
                         {/* Retry ETL Result - only show for failed results with available FastQ */}
                         {record.latestEtlResult?.status === AnalysisStatus.FAILED &&
                             record.latestFastqPairFile?.fastqFileR1.id && (
@@ -371,10 +334,8 @@ const AnalysisPage = () => {
             handleViewDetail,
             handleProcessAnalysis,
             handleRejectFastq,
-            handleDownloadEtlResult,
             handleRetryEtlResult,
-            processAnalysisMutation.isPending,
-            isDownloading
+            processAnalysisMutation.isPending
         ]
     )
 

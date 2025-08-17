@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react'
 import {
     useAnalysisSessionDetail,
     useProcessAnalysis,
-    useDownloadEtlResult,
     useSendEtlResultToValidation,
     useRetryEtlProcess
 } from '@/services/hook/analysis.hook'
@@ -64,7 +63,6 @@ const AnalysisDetailPage = () => {
 
     // Mutations
     const processAnalysisMutation = useProcessAnalysis()
-    const downloadEtlResultMutation = useDownloadEtlResult()
     const sendEtlResultToValidationMutation = useSendEtlResultToValidation()
     const retryEtlProcessMutation = useRetryEtlProcess()
 
@@ -116,24 +114,6 @@ const AnalysisDetailPage = () => {
                 refetch()
             }
         })
-    }
-
-    const handleDownloadEtlResult = async (etlResultId: number) => {
-        try {
-            const response = await downloadEtlResultMutation.mutateAsync(etlResultId)
-            window.open(response.downloadUrl, '_blank')
-            notifications.show({
-                title: 'Thành công',
-                message: 'Đang tải xuống kết quả phân tích',
-                color: 'green'
-            })
-        } catch (error: any) {
-            notifications.show({
-                title: 'Lỗi tải file',
-                message: error.message || 'Không thể tải xuống kết quả phân tích',
-                color: 'red'
-            })
-        }
     }
 
     const handleRetryEtlResult = async (etlResultId: number) => {
@@ -421,18 +401,9 @@ const AnalysisDetailPage = () => {
                                         </Text>
 
                                         {latestEtlResult?.status === AnalysisStatus.COMPLETED && (
-                                            <Button
-                                                color='teal'
-                                                onClick={() => handleDownloadEtlResult(latestEtlResult.id)}
-                                                leftSection={<IconDownload size={16} />}
-                                                loading={downloadEtlResultMutation.isPending}
-                                                disabled={downloadEtlResultMutation.isPending}
-                                                fullWidth
-                                                size='md'
-                                                radius='lg'
-                                            >
-                                                Tải xuống kết quả
-                                            </Button>
+                                            <Text size='sm' c='green' fw={500} ta='center'>
+                                                Kết quả đã sẵn sàng - Xem trong thông tin phân tích
+                                            </Text>
                                         )}
 
                                         <Divider />
