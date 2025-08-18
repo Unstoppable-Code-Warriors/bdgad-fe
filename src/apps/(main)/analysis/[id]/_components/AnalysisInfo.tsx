@@ -190,7 +190,7 @@ export const AnalysisInfo = ({ data, latestFastqFilePair, latestEtlResult }: Ana
                             <Paper p='lg' radius='md' bg='blue.0' withBorder>
                                 <Stack gap='xs'>
                                     <Text size='sm' fw={600} c='blue'>
-                                        Ghi chú phê duyệt:
+                                        Kết quả thẩm định
                                     </Text>
                                     <Text size='sm' c='blue.7'>
                                         {latestEtlResult.reasonApprove}

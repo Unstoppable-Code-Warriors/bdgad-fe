@@ -17,7 +17,8 @@ import {
     ActionIcon,
     Modal,
     Pagination,
-    Select
+    Select,
+    Accordion
 } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import {
@@ -25,7 +26,6 @@ import {
     IconCalendar,
     IconUser,
     IconCalendarEvent,
-    IconPlus,
     IconDots,
     IconEdit,
     IconTrash,
@@ -143,10 +143,6 @@ const PatientFolderPage = () => {
         setPage(1)
     }, [searchTerm, dateRange, sortOrder])
 
-    const handleAddPatient = useCallback(() => {
-        setIsAddModalOpen(true)
-    }, [])
-
     const handleCloseAddModal = useCallback(() => {
         setIsAddModalOpen(false)
     }, [])
@@ -238,11 +234,6 @@ const PatientFolderPage = () => {
                             )}
                         </div>
                     </Group>
-                    <Group>
-                        <Button leftSection={<IconPlus size={16} />} onClick={handleAddPatient}>
-                            Thêm bệnh nhân
-                        </Button>
-                    </Group>
                 </Group>
 
                 {/* Search and Filters */}
@@ -305,7 +296,7 @@ const PatientFolderPage = () => {
                                         }}
                                         className='hover:transform hover:-translate-y-1 hover:shadow-lg'
                                     >
-                                        {/* Menu ba chấm */}
+                                        
                                         <Menu shadow='md' width={200} position='bottom-start'>
                                             <Menu.Target>
                                                 <ActionIcon
@@ -425,56 +416,59 @@ const PatientFolderPage = () => {
                 ) : (
                     /* Year/Month View */
                     <Stack gap='xl'>
-                        {yearMonthBreakdown.map((yearData: any) => (
-                            <Paper key={yearData.year} p='xl' withBorder>
-                                <Stack gap='lg'>
-                                    <Group justify='space-between' align='center'>
-                                        <div className='flex-col'>
-                                            <Title order={3}>Năm {yearData.year}</Title>
-                                            <Text size='sm' c={'dimmed'}>
-                                                Lưu ý: Thời gian dựa trên ngày tạo hồ sơ bệnh nhân
+                        <Accordion multiple defaultValue={yearMonthBreakdown.length > 0 ? [`year-${yearMonthBreakdown[0].year}`] : []}>
+                            {yearMonthBreakdown.map((yearData: any) => (
+                                <Accordion.Item key={yearData.year} value={`year-${yearData.year}`}>
+                                    <Accordion.Control>
+                                        <Group justify='space-between' align='center' w='100%' pr='md'>
+                                            <div className='flex-col'>
+                                                <Title order={3}>Năm {yearData.year}</Title>
+                                                <Text size='sm' c={'dimmed'}>
+                                                    Lưu ý: Thời gian dựa trên ngày tạo hồ sơ bệnh nhân
+                                                </Text>
+                                            </div>
+
+                                            <Text size='lg' fw={600} c='blue'>
+                                                Tổng: {yearData.total} bệnh nhân
                                             </Text>
-                                        </div>
-
-                                        <Text size='lg' fw={600} c='blue'>
-                                            Tổng: {yearData.total} bệnh nhân
-                                        </Text>
-                                    </Group>
-
-                                    <Grid>
-                                        {yearData.months.map((monthData: any) => (
-                                            <Grid.Col key={monthData.month} span={{ base: 6, sm: 4, md: 3, lg: 2 }}>
-                                                <Card
-                                                    shadow='sm'
-                                                    padding='lg'
-                                                    withBorder
-                                                    onClick={() => handleMonthClick(yearData.year, monthData.month)}
-                                                    style={{
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.2s ease',
-                                                        backgroundColor: monthData.total > 0 ? '#f8f9fa' : '#ffffff'
-                                                    }}
-                                                    className='hover:transform hover:-translate-y-1 hover:shadow-lg'
-                                                >
-                                                    <Stack gap='xs' align='center'>
-                                                        <IconFolder
-                                                            size={40}
-                                                            color={monthData.total > 0 ? '#228be6' : '#adb5bd'}
-                                                        />
-                                                        <Text size='sm' fw={600} ta='center'>
-                                                            {monthNames[monthData.month - 1]}
-                                                        </Text>
-                                                        <Text size='xs' c='dimmed' ta='center'>
-                                                            {monthData.total} bệnh nhân
-                                                        </Text>
-                                                    </Stack>
-                                                </Card>
-                                            </Grid.Col>
-                                        ))}
-                                    </Grid>
-                                </Stack>
-                            </Paper>
-                        ))}
+                                        </Group>
+                                    </Accordion.Control>
+                                    <Accordion.Panel>
+                                        <Grid mt='md'>
+                                            {yearData.months.map((monthData: any) => (
+                                                <Grid.Col key={monthData.month} span={{ base: 6, sm: 4, md: 3, lg: 2 }}>
+                                                    <Card
+                                                        shadow='sm'
+                                                        padding='lg'
+                                                        withBorder
+                                                        onClick={() => handleMonthClick(yearData.year, monthData.month)}
+                                                        style={{
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.2s ease',
+                                                            backgroundColor: monthData.total > 0 ? '#f8f9fa' : '#ffffff'
+                                                        }}
+                                                        className='hover:transform hover:-translate-y-1 hover:shadow-lg'
+                                                    >
+                                                        <Stack gap='xs' align='center'>
+                                                            <IconFolder
+                                                                size={40}
+                                                                color={monthData.total > 0 ? '#228be6' : '#adb5bd'}
+                                                            />
+                                                            <Text size='sm' fw={600} ta='center'>
+                                                                {monthNames[monthData.month - 1]}
+                                                            </Text>
+                                                            <Text size='xs' c='dimmed' ta='center'>
+                                                                {monthData.total} bệnh nhân
+                                                            </Text>
+                                                        </Stack>
+                                                    </Card>
+                                                </Grid.Col>
+                                            ))}
+                                        </Grid>
+                                    </Accordion.Panel>
+                                </Accordion.Item>
+                            ))}
+                        </Accordion>
 
                         {/* Year/Month Loading State */}
                         {isYearMonthLoading && (

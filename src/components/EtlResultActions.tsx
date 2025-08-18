@@ -83,7 +83,7 @@ export const EtlResultActions = ({
                     size='sm'
                     onClick={handleViewHtml}
                 >
-                    Link
+                    Xem báo cáo
                 </Button>
             )}
 

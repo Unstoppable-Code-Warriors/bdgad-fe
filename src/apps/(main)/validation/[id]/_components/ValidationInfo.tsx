@@ -124,7 +124,7 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                             <Paper p='lg' radius='md' bg='teal.0' withBorder>
                                 <Stack gap='xs'>
                                     <Text size='sm' fw={600} c='teal'>
-                                        Ghi chú phê duyệt:
+                                        Kết quả thẩm định:
                                     </Text>
                                     <Text size='sm' c='teal.7'>
                                         {etlResult.reasonApprove}

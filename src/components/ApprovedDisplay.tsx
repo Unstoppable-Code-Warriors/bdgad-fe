@@ -55,7 +55,7 @@ export const ApprovedDisplay = ({ approver, reasonApprove, approvalDate, compact
                 </Group>
                 <Box mt='xs'>
                     <Text size='xs' fw={500} c='green.7' mb={2}>
-                        Ghi chú phê duyệt:
+                        Kết quả thẩm định:
                     </Text>
                     {reasonApprove ? (
                         <Card
@@ -83,7 +83,7 @@ export const ApprovedDisplay = ({ approver, reasonApprove, approvalDate, compact
                             }}
                         >
                             <Text size='sm' c='gray.6' fs='italic'>
-                                Không có ghi chú được ghi nhận
+                                Không có kết quả thẩm định được ghi nhận
                             </Text>
                         </Card>
                     )}
@@ -127,7 +127,7 @@ export const ApprovedDisplay = ({ approver, reasonApprove, approvalDate, compact
                 {reasonApprove ? (
                     <Box>
                         <Text size='sm' fw={500} c='green.7' mb='xs'>
-                            Ghi chú phê duyệt:
+                            Kết quả thẩm định:
                         </Text>
                         <Card
                             p='sm'
@@ -144,7 +144,7 @@ export const ApprovedDisplay = ({ approver, reasonApprove, approvalDate, compact
                 ) : (
                     <Box>
                         <Text size='sm' fw={500} c='green.7' mb='xs'>
-                            Ghi chú phê duyệt:
+                            Kết quả thẩm định:
                         </Text>
                         <Card
                             p='sm'
@@ -157,7 +157,7 @@ export const ApprovedDisplay = ({ approver, reasonApprove, approvalDate, compact
                             }}
                         >
                             <Text size='sm' c='gray.6' fs='italic'>
-                                Không có ghi chú được ghi nhận
+                                Không có kết quả thẩm định được ghi nhận
                             </Text>
                         </Card>
                     </Box>

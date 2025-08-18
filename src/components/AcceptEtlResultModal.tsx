@@ -78,8 +78,8 @@ const AcceptEtlResultModalContent = ({ etlResultId, onSuccess }: AcceptEtlResult
             </Alert>
 
             <Textarea
-                label='Ghi chú (tùy chọn)'
-                placeholder='Nhập ghi chú về việc phê duyệt...'
+                label='Kết quả thẩm định(tùy chọn)'
+                placeholder='Nhập kết quả thẩm định cho kết quả phân tích gene'
                 minRows={3}
                 maxRows={6}
                 maxLength={300}

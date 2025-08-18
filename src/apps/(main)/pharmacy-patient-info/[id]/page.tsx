@@ -455,7 +455,7 @@ const PharmacyPatientInfoPage = () => {
                                                 )}
                                                 {test.notes && (
                                                     <Text size='sm' c='dimmed'>
-                                                        Ghi chú: {test.notes}
+                                                        Kết quả thẩm định: {test.notes}
                                                     </Text>
                                                 )}
                                                 {test.file_attachments && test.file_attachments.length > 0 && (
@@ -567,7 +567,7 @@ const PharmacyPatientInfoPage = () => {
                                     {patient.medicalRecord.prescription.notes && (
                                         <Box>
                                             <Text size='sm' fw={500} mb={4}>
-                                                Ghi chú:
+                                                Kết quả thẩm định
                                             </Text>
                                             <Paper p='sm' bg='yellow.0' radius='md'>
                                                 <Text size='sm'>{patient.medicalRecord.prescription.notes}</Text>

@@ -49,6 +49,7 @@ const CategoryDetailPage = () => {
     const [importModalOpened, setImportModalOpened] = useState(false)
     const [deleteModalOpened, setDeleteModalOpened] = useState(false)
     const [fileToDelete, setFileToDelete] = useState<{ id: string; name: string } | null>(null)
+    const [downloadingFileId] = useState<string | null>(null)
 
     const { data: category, isLoading } = useCategoryGeneralFileDetail(id)
 
@@ -351,7 +352,8 @@ const CategoryDetailPage = () => {
                                                     size='lg'
                                                     radius='md'
                                                     onClick={() => handleDownloadFile(file.id.toString())}
-                                                    loading={downloadMutation.isPending}
+                                                    loading={downloadingFileId === file.id.toString()}
+                                                    disabled={downloadingFileId !== null}
                                                 >
                                                     <IconDownload size={18} />
                                                 </ActionIcon>
