@@ -1,10 +1,10 @@
 import Dexie, { type Table } from 'dexie'
-import { type Message } from '../apps/(main)/validation/_types/message'
+import type { UIMessage } from '@ai-sdk/react'
 
 // Interface cho một cuộc hội thoại
 export interface ChatConversation {
     id: string // validation ID
-    messages: Message[]
+    messages: UIMessage[]
     createdAt: Date
     updatedAt: Date
 }
@@ -44,7 +44,7 @@ export class ChatHistoryService {
     }
 
     // Thêm message vào cuộc hội thoại
-    async addMessage(validationId: string, message: Message): Promise<void> {
+    async addMessage(validationId: string, message: UIMessage): Promise<void> {
         const conversation = await this.getConversation(validationId)
 
         if (!conversation) {
@@ -62,7 +62,7 @@ export class ChatHistoryService {
     }
 
     // Thêm nhiều messages cùng lúc
-    async addMessages(validationId: string, messages: Message[]): Promise<void> {
+    async addMessages(validationId: string, messages: UIMessage[]): Promise<void> {
         const conversation = await this.getConversation(validationId)
 
         if (!conversation) {
@@ -95,7 +95,7 @@ export class ChatHistoryService {
     }
 
     // Cập nhật toàn bộ mảng messages (thay thế hoàn toàn)
-    async updateMessages(validationId: string, messages: Message[]): Promise<void> {
+    async updateMessages(validationId: string, messages: UIMessage[]): Promise<void> {
         await db.conversations.update(validationId, {
             messages,
             updatedAt: new Date()
