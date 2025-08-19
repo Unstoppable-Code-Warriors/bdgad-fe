@@ -71,15 +71,11 @@ export const authApi = parentApi.extend({
             }
         ],
         afterResponse: [
-            async (request, _, response) => {
+            async (_, __, response) => {
                 // Handle auth-specific responses
                 if (response.status === 401) {
                     // For auth API, 401 might mean refresh token is invalid
-                    const url = request.url
-                    if (url.includes('/refresh')) {
-                        // Refresh token is invalid, logout user
-                        logoutOutside()
-                    }
+                    logoutOutside()
                 }
                 return response
             }
@@ -125,7 +121,7 @@ export const backendApi = parentApi.extend({
                             logoutOutside()
                             // Redirect to login page
                             if (typeof window !== 'undefined') {
-                                window.location.href = '/login'
+                                window.location.href = '/auth/login'
                             }
                             throw refreshError
                         }
@@ -133,7 +129,7 @@ export const backendApi = parentApi.extend({
                         // No refresh token available, logout
                         logoutOutside()
                         if (typeof window !== 'undefined') {
-                            window.location.href = '/login'
+                            window.location.href = '/auth/login'
                         }
                     }
                 }
@@ -163,7 +159,7 @@ export const createAuthenticatedApi = (baseUrl: string, additionalConfig: Option
                     if (response.status === 401) {
                         logoutOutside()
                         if (typeof window !== 'undefined') {
-                            window.location.href = '/login'
+                            window.location.href = '/auth/login'
                         }
                     }
                     return response

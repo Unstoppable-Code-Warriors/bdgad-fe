@@ -240,95 +240,97 @@ const ValidationPage = () => {
     )
 
     return (
-        <Stack>
-            <Group justify='space-between'>
-                <Title order={2}>Thẩm định kết quả ETL</Title>
-            </Group>
+        <>
+            <Stack className='h-full' p='md'>
+                <Group justify='space-between'>
+                    <Title order={2}>Thẩm định kết quả ETL</Title>
+                </Group>
 
-            {/* Error Alert */}
-            {isError && (
-                <Alert icon={<IconAlertCircle size='1rem' />} title='Lỗi!' color='red' variant='light'>
-                    {error?.message || 'Đã xảy ra lỗi khi tải dữ liệu'}
-                </Alert>
-            )}
+                {/* Error Alert */}
+                {isError && (
+                    <Alert icon={<IconAlertCircle size='1rem' />} title='Lỗi!' color='red' variant='light'>
+                        {error?.message || 'Đã xảy ra lỗi khi tải dữ liệu'}
+                    </Alert>
+                )}
 
-            {/* Status Group Tabs */}
-            <Tabs value={activeTab} onChange={handleTabChange}>
-                <Tabs.List>
-                    <Tabs.Tab value='processing'>Đang xử lý</Tabs.Tab>
-                    <Tabs.Tab value='rejected'>Từ chối</Tabs.Tab>
-                    <Tabs.Tab value='approved'>Đã phê duyệt</Tabs.Tab>
-                </Tabs.List>
+                {/* Status Group Tabs */}
+                <Tabs value={activeTab} onChange={handleTabChange}>
+                    <Tabs.List>
+                        <Tabs.Tab value='processing'>Đang xử lý</Tabs.Tab>
+                        <Tabs.Tab value='rejected'>Từ chối</Tabs.Tab>
+                        <Tabs.Tab value='approved'>Đã phê duyệt</Tabs.Tab>
+                    </Tabs.List>
 
-                <Tabs.Panel value='processing' pt='md'>
-                    {/* No additional filters for processing tab in validation */}
-                    <ListSearchFilter
-                        searchValue={search}
-                        onSearchChange={setSearch}
-                        searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
-                        dateRange={dateRange}
-                        onDateRangeChange={setDateRange}
-                        onRefresh={handleRefresh}
-                        isLoading={isLoading}
+                    <Tabs.Panel value='processing' pt='md'>
+                        {/* No additional filters for processing tab in validation */}
+                        <ListSearchFilter
+                            searchValue={search}
+                            onSearchChange={setSearch}
+                            searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
+                            dateRange={dateRange}
+                            onDateRangeChange={setDateRange}
+                            onRefresh={handleRefresh}
+                            isLoading={isLoading}
+                            totalRecords={totalRecords}
+                            showRefreshButton={false}
+                        />
+                    </Tabs.Panel>
+
+                    <Tabs.Panel value='rejected' pt='md'>
+                        <ListSearchFilter
+                            searchValue={search}
+                            onSearchChange={setSearch}
+                            searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
+                            dateRange={dateRange}
+                            onDateRangeChange={setDateRange}
+                            onRefresh={handleRefresh}
+                            isLoading={isLoading}
+                            totalRecords={totalRecords}
+                            showRefreshButton={false}
+                        />
+                    </Tabs.Panel>
+
+                    <Tabs.Panel value='approved' pt='md'>
+                        <ListSearchFilter
+                            searchValue={search}
+                            onSearchChange={setSearch}
+                            searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
+                            dateRange={dateRange}
+                            onDateRangeChange={setDateRange}
+                            onRefresh={handleRefresh}
+                            isLoading={isLoading}
+                            totalRecords={totalRecords}
+                            showRefreshButton={false}
+                        />
+                    </Tabs.Panel>
+                </Tabs>
+
+                {/* Data Table */}
+                <Paper withBorder>
+                    <DataTable
+                        records={validationData}
+                        columns={columns}
                         totalRecords={totalRecords}
-                        showRefreshButton={false}
+                        recordsPerPage={limit}
+                        page={page}
+                        onPageChange={setPage}
+                        recordsPerPageLabel='Số bản ghi mỗi trang'
+                        paginationText={({ from, to, totalRecords }) =>
+                            `Hiển thị ${from} - ${to} của ${totalRecords} bản ghi`
+                        }
+                        recordsPerPageOptions={recordsPerPageOptions}
+                        onRecordsPerPageChange={setLimit}
+                        sortStatus={sortStatus}
+                        onSortStatusChange={handleSort}
+                        fetching={isLoading}
+                        noRecordsText='Không có dữ liệu'
+                        striped
+                        highlightOnHover
+                        minHeight={200}
                     />
-                </Tabs.Panel>
-
-                <Tabs.Panel value='rejected' pt='md'>
-                    <ListSearchFilter
-                        searchValue={search}
-                        onSearchChange={setSearch}
-                        searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
-                        dateRange={dateRange}
-                        onDateRangeChange={setDateRange}
-                        onRefresh={handleRefresh}
-                        isLoading={isLoading}
-                        totalRecords={totalRecords}
-                        showRefreshButton={false}
-                    />
-                </Tabs.Panel>
-
-                <Tabs.Panel value='approved' pt='md'>
-                    <ListSearchFilter
-                        searchValue={search}
-                        onSearchChange={setSearch}
-                        searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
-                        dateRange={dateRange}
-                        onDateRangeChange={setDateRange}
-                        onRefresh={handleRefresh}
-                        isLoading={isLoading}
-                        totalRecords={totalRecords}
-                        showRefreshButton={false}
-                    />
-                </Tabs.Panel>
-            </Tabs>
-
-            {/* Data Table */}
-            <Paper withBorder>
-                <DataTable
-                    records={validationData}
-                    columns={columns}
-                    totalRecords={totalRecords}
-                    recordsPerPage={limit}
-                    page={page}
-                    onPageChange={setPage}
-                    recordsPerPageLabel='Số bản ghi mỗi trang'
-                    paginationText={({ from, to, totalRecords }) =>
-                        `Hiển thị ${from} - ${to} của ${totalRecords} bản ghi`
-                    }
-                    recordsPerPageOptions={recordsPerPageOptions}
-                    onRecordsPerPageChange={setLimit}
-                    sortStatus={sortStatus}
-                    onSortStatusChange={handleSort}
-                    fetching={isLoading}
-                    noRecordsText='Không có dữ liệu'
-                    striped
-                    highlightOnHover
-                    minHeight={200}
-                />
-            </Paper>
-        </Stack>
+                </Paper>
+            </Stack>
+        </>
     )
 }
 
