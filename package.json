@@ -26,6 +26,8 @@
         "@types/react-router-dom": "^5.3.3",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.13",
+        "dexie": "^4.2.0",
+        "dexie-react-hooks": "^4.2.0",
         "eslint-plugin-prettier": "^5.4.0",
         "harden-react-markdown": "^1.0.4",
         "ky": "^1.8.1",

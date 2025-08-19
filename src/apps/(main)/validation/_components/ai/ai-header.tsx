@@ -2,8 +2,13 @@ import { ActionIcon, Button, Text } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { IconLayoutSidebarRightCollapse, IconTrash } from '@tabler/icons-react'
 import { useAppShellStore } from '@/stores/appshell.store'
+import { chatHistoryService } from '@/utils/db'
 
-const AIHeader = () => {
+interface AIHeaderProps {
+    validationId: string
+}
+
+const AIHeader = ({ validationId }: AIHeaderProps) => {
     const toggleAside = useAppShellStore((state) => state.toggleAside)
     const handleOpenConfirmDeleteModal = () => {
         modals.openConfirmModal({
@@ -19,7 +24,10 @@ const AIHeader = () => {
             confirmProps: {
                 color: 'red'
             },
-            onConfirm: () => {}
+            onConfirm: () => {
+                if (!validationId) return
+                chatHistoryService.deleteConversation(validationId)
+            }
         })
     }
 

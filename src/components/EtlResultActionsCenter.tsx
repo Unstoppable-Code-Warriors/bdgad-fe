@@ -17,7 +17,6 @@ export const EtlResultActionsCenter = ({
     className,
     justify = 'center'
 }: EtlResultActionsProps) => {
-    console.log('check justify:', justify)
     // Show actions for completed, approved, and wait_for_approval statuses
     const allowedStatuses = ['completed', 'approved', 'wait_for_approval', 'rejected']
     if (!status || !allowedStatuses.includes(status)) {
