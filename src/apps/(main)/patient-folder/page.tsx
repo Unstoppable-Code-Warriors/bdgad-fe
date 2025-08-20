@@ -218,8 +218,7 @@ const PatientFolderPage = () => {
                                 variant='subtle'
                                 leftSection={<IconArrowLeft size={28} />}
                                 onClick={handleBackToYearView}
-                            >
-                            </Button>
+                            ></Button>
                         )}
                         <div>
                             <Title order={2}>
@@ -296,7 +295,6 @@ const PatientFolderPage = () => {
                                         }}
                                         className='hover:transform hover:-translate-y-1 hover:shadow-lg'
                                     >
-                                        
                                         <Menu shadow='md' width={200} position='bottom-start'>
                                             <Menu.Target>
                                                 <ActionIcon
@@ -416,7 +414,14 @@ const PatientFolderPage = () => {
                 ) : (
                     /* Year/Month View */
                     <Stack gap='xl'>
-                        <Accordion multiple defaultValue={yearMonthBreakdown.length > 0 ? [`year-${yearMonthBreakdown[0].year}`] : []}>
+                        <Accordion
+                            multiple
+                            defaultValue={
+                                yearMonthBreakdown.length > 0
+                                    ? [`year-${Math.max(...yearMonthBreakdown.map((yearData: any) => yearData.year))}`]
+                                    : []
+                            }
+                        >
                             {yearMonthBreakdown.map((yearData: any) => (
                                 <Accordion.Item key={yearData.year} value={`year-${yearData.year}`}>
                                     <Accordion.Control>
