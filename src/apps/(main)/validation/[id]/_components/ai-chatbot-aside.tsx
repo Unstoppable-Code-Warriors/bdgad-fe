@@ -14,7 +14,7 @@ import LoadingMessage from './ai/loading-message'
 
 const AI_API = 'https://ai.bdgad.bio'
 
-const AIChatbotAside = () => {
+const AIChatbotAside = ({ excelFilePath }: { excelFilePath: string }) => {
     const { id } = useParams()
     const viewport = useRef<HTMLDivElement>(null)
     const conversation = useLiveQuery(() => db.conversations.get(id ?? ''))
@@ -53,9 +53,17 @@ const AIChatbotAside = () => {
 
     const handleSendMessage = useCallback(
         (message: string) => {
-            sendMessage({ text: message })
+            sendMessage(
+                { text: message },
+                {
+                    body: {
+                        validationId: id,
+                        excelFilePath
+                    }
+                }
+            )
         },
-        [sendMessage]
+        [sendMessage, id, excelFilePath]
     )
 
     const handleStop = useCallback(() => {
@@ -75,15 +83,13 @@ const AIChatbotAside = () => {
                     const tolerance = 5
                     const bottomY = el.scrollHeight - el.clientHeight
 
-                    console.log(y, bottomY - tolerance)
-
                     if (y < bottomY - tolerance) setIsAtBottom(false)
                     else setIsAtBottom(true)
                 }}
             >
                 <Stack gap='xl' my='xl'>
                     {messages.map((message, index) => (
-                        <MessageBlock key={index} message={message} />
+                        <MessageBlock key={message?.id || index} message={message} />
                     ))}
                     {status === 'submitted' ? <LoadingMessage /> : null}
                 </Stack>

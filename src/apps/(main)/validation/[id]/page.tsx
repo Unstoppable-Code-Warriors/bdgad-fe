@@ -27,9 +27,9 @@ import { openRejectEtlResultModal } from '@/components/RejectEtlResultModal'
 import { openAcceptEtlResultModal } from '@/components/AcceptEtlResultModal'
 import { EtlResultActionsCenter } from '@/components/EtlResultActionsCenter'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
-import AIChatbotAside from '../_components/ai-chatbot-aside'
+import AIChatbotAside from './_components/ai-chatbot-aside'
 import { useAppShell } from '@/stores/appshell.store'
-import AIChatbotButton from '../_components/ai-chatbot-btn'
+import AIChatbotButton from './_components/ai-chatbot-btn'
 
 const ValidationDetailPage = () => {
     const { id } = useParams()
@@ -272,7 +272,7 @@ const ValidationDetailPage = () => {
 
                 <PanelResizeHandle className='ml-4' />
                 <Panel hidden={!aside} maxSize={50} minSize={30} defaultSize={40} className='border-l border-gray-200'>
-                    <AIChatbotAside />
+                    <AIChatbotAside excelFilePath={latestEtlResult?.excelResult || ''} />
                 </Panel>
             </PanelGroup>
             <AIChatbotButton />
