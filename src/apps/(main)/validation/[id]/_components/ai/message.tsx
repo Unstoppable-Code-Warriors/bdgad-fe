@@ -28,7 +28,7 @@ const MessageBlock = ({ message }: MessageBlockProps) => {
     }
 
     return (
-        <div className='flex justify-start'>
+        <div className='flex flex-col gap-2 items-start'>
             {message.parts?.map((part, i) => {
                 switch (part.type) {
                     case 'text':
