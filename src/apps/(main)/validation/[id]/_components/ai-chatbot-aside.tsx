@@ -2,6 +2,7 @@ import { Alert, Button, Group, ScrollArea, Stack } from '@mantine/core'
 import MessageBlock from './ai/message'
 import PromptInput from './ai/prompt-input'
 import AIHeader from './ai/ai-header'
+import WelcomeScreen from './ai/welcome-screen'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useParams } from 'react-router'
 import { chatHistoryService, db } from '@/utils/db'
@@ -50,6 +51,7 @@ const AIChatbotAside = ({ excelFilePath }: { excelFilePath: string }) => {
         if (!id) return
         chatHistoryService.deleteConversation(id)
         setMessages([])
+        setIsAtBottom(true)
     }, [id, setMessages])
 
     const handleSendMessage = useCallback(
@@ -88,36 +90,40 @@ const AIChatbotAside = ({ excelFilePath }: { excelFilePath: string }) => {
                     else setIsAtBottom(true)
                 }}
             >
-                <Stack gap='xl' my='xl'>
-                    {messages.map((message, index) => (
-                        <MessageBlock key={message?.id || index} message={message} />
-                    ))}
-                    {status === 'submitted' ? <LoadingMessage /> : null}
-                    {error ? (
-                        <Alert
-                            title='Có lỗi xảy ra'
-                            color='red'
-                            icon={<IconAlertCircle />}
-                            variant='light'
-                            className='w-full'
-                            radius='lg'
-                        >
-                            <Group justify='space-between' align='flex-start'>
-                                <div style={{ flex: 1 }}>{error.message}</div>
-                                <Button
-                                    size='xs'
-                                    variant='outline'
-                                    color='red'
-                                    onClick={() => regenerate()}
-                                    ml='md'
-                                    radius='md'
-                                >
-                                    Thử lại
-                                </Button>
-                            </Group>
-                        </Alert>
-                    ) : null}
-                </Stack>
+                {messages.length === 0 ? (
+                    <WelcomeScreen />
+                ) : (
+                    <Stack gap='xl' my='xl'>
+                        {messages.map((message, index) => (
+                            <MessageBlock key={message?.id || index} message={message} />
+                        ))}
+                        {status === 'submitted' ? <LoadingMessage /> : null}
+                        {error ? (
+                            <Alert
+                                title='Có lỗi xảy ra'
+                                color='red'
+                                icon={<IconAlertCircle />}
+                                variant='light'
+                                className='w-full'
+                                radius='lg'
+                            >
+                                <Group justify='space-between' align='flex-start'>
+                                    <div style={{ flex: 1 }}>{error.message}</div>
+                                    <Button
+                                        size='xs'
+                                        variant='outline'
+                                        color='red'
+                                        onClick={() => regenerate()}
+                                        ml='md'
+                                        radius='md'
+                                    >
+                                        Thử lại
+                                    </Button>
+                                </Group>
+                            </Alert>
+                        ) : null}
+                    </Stack>
+                )}
                 <ScrollToBottom isAtBottom={isAtBottom} scrollToBottom={scrollToBottom} />
             </ScrollArea.Autosize>
             <PromptInput onSendMessage={handleSendMessage} onStop={handleStop} status={status} />

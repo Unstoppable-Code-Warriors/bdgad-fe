@@ -1,4 +1,4 @@
-import { Accordion, Alert, Avatar, Badge, Code, Group, Paper, Skeleton, Text } from '@mantine/core'
+import { Accordion, Alert, Avatar, Badge, Code, Group, Paper, ScrollArea, Skeleton, Text } from '@mantine/core'
 import { ChatRole } from '../../_types/message'
 import { Response } from './response'
 import type { UIMessage } from '@ai-sdk/react'
@@ -67,31 +67,33 @@ const MessageBlock = ({ message }: MessageBlockProps) => {
                                         </Group>
                                     </Accordion.Control>
                                     <Accordion.Panel>
-                                        {part.state === 'input-available' ? (
-                                            <Skeleton height={100} />
-                                        ) : part.state === 'output-available' ? (
-                                            <Code
-                                                block
-                                                style={{
-                                                    whiteSpace: 'pre-wrap',
-                                                    wordBreak: 'break-word',
-                                                    overflowWrap: 'break-word',
-                                                    maxWidth: '100%',
-                                                    overflow: 'auto'
-                                                }}
-                                            >
-                                                {JSON.stringify(part?.output, null, 2)}
-                                            </Code>
-                                        ) : part.state === 'output-error' ? (
-                                            <Alert
-                                                title='Có lỗi xảy ra'
-                                                color='red'
-                                                icon={<IconAlertCircle />}
-                                                variant='light'
-                                            >
-                                                {part.errorText}
-                                            </Alert>
-                                        ) : null}
+                                        <ScrollArea.Autosize mah={400}>
+                                            {part.state === 'input-available' ? (
+                                                <Skeleton height={100} />
+                                            ) : part.state === 'output-available' ? (
+                                                <Code
+                                                    block
+                                                    style={{
+                                                        whiteSpace: 'pre-wrap',
+                                                        wordBreak: 'break-word',
+                                                        overflowWrap: 'break-word',
+                                                        maxWidth: '100%',
+                                                        overflow: 'auto'
+                                                    }}
+                                                >
+                                                    {JSON.stringify(part?.output, null, 2)}
+                                                </Code>
+                                            ) : part.state === 'output-error' ? (
+                                                <Alert
+                                                    title='Có lỗi xảy ra'
+                                                    color='red'
+                                                    icon={<IconAlertCircle />}
+                                                    variant='light'
+                                                >
+                                                    {part.errorText}
+                                                </Alert>
+                                            ) : null}
+                                        </ScrollArea.Autosize>
                                     </Accordion.Panel>
                                 </Accordion.Item>
                             </Accordion>
