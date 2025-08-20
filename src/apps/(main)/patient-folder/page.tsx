@@ -415,6 +415,7 @@ const PatientFolderPage = () => {
                     /* Year/Month View */
                     <Stack gap='xl'>
                         <Accordion
+                            key={yearMonthBreakdown.length}
                             multiple
                             defaultValue={
                                 yearMonthBreakdown.length > 0
