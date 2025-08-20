@@ -4,7 +4,7 @@ import { Outlet } from 'react-router'
 import Navbar from './_components/navbar'
 import { useAppShell } from '@/stores/appshell.store'
 const MainLayout = () => {
-    const { header, navbar, padding } = useAppShell()
+    const { header, navbar } = useAppShell()
 
     return (
         <AppShell
