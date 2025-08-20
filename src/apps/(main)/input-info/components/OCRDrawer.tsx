@@ -237,11 +237,28 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
         if (formData.test_code !== undefined) updatedData['Test code'] = formData.test_code
 
         // Date fields - convert to ISO string if valid
-        if (formData.date_of_birth && !isNaN(formData.date_of_birth.getTime())) {
-            updatedData.date_of_birth = formData.date_of_birth.toISOString()
+        // if (formData.date_of_birth && !isNaN(formData.date_of_birth.getTime())) {
+        //     updatedData.date_of_birth = formData.date_of_birth.toISOString()
+        // }
+
+        if (formData.date_of_birth) {
+            const dateValue =
+                formData.date_of_birth instanceof Date ? formData.date_of_birth : new Date(formData.date_of_birth)
+
+            if (!isNaN(dateValue.getTime())) {
+                updatedData.date_of_birth = dateValue.toISOString()
+            }
         }
-        if (formData.sample_collection_date && !isNaN(formData.sample_collection_date.getTime())) {
-            updatedData.sample_collection_date = formData.sample_collection_date.toISOString()
+
+        if (formData.sample_collection_date) {
+            const dateValue =
+                formData.sample_collection_date instanceof Date
+                    ? formData.sample_collection_date
+                    : new Date(formData.sample_collection_date)
+
+            if (!isNaN(dateValue.getTime())) {
+                updatedData.sample_collection_date = dateValue.toISOString()
+            }
         }
 
         // Sample collection time
@@ -356,8 +373,15 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                 if (formData.prenatal_screening_risk_nt !== undefined)
                     clinicalInfo.prenatal_screening_risk_nt = formData.prenatal_screening_risk_nt
 
-                if (formData.ultrasound_date && !isNaN(formData.ultrasound_date.getTime())) {
-                    clinicalInfo.ultrasound_date = formData.ultrasound_date.toISOString()
+                if (formData.ultrasound_date) {
+                    const dateValue =
+                        formData.ultrasound_date instanceof Date
+                            ? formData.ultrasound_date
+                            : new Date(formData.ultrasound_date)
+
+                    if (!isNaN(dateValue.getTime())) {
+                        clinicalInfo.ultrasound_date = dateValue.toISOString()
+                    }
                 }
             }
 
