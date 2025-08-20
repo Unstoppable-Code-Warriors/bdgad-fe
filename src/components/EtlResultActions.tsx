@@ -1,4 +1,4 @@
-import { Button, Group,  Text, Paper } from '@mantine/core'
+import { Button, Group, Text, Paper } from '@mantine/core'
 import { IconExternalLink, IconDownload } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 
@@ -17,7 +17,6 @@ export const EtlResultActions = ({
     className,
     justify = 'flex-end'
 }: EtlResultActionsProps) => {
-    console.log('check justify:', justify)
     // Show actions for completed, approved, and wait_for_approval statuses
     const allowedStatuses = ['completed', 'approved', 'wait_for_approval', 'rejected']
     if (!status || !allowedStatuses.includes(status)) {

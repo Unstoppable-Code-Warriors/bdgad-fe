@@ -10,16 +10,19 @@ const MainLayout = () => {
         <AppShell
             header={{ height: 60, collapsed: !header }}
             navbar={{ width: 200, breakpoint: 'sm', collapsed: { mobile: true, desktop: !navbar } }}
-            padding={padding}
+            padding={0}
             styles={{
                 header: {
                     zIndex: 49
                 }
             }}
+            classNames={{
+                root: 'h-full'
+            }}
         >
             <Header />
             <Navbar />
-            <AppShell.Main>
+            <AppShell.Main className='h-full'>
                 <Outlet />
             </AppShell.Main>
         </AppShell>
