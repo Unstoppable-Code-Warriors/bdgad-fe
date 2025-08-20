@@ -275,7 +275,7 @@ const ValidationDetailPage = () => {
                     <AIChatbotAside excelFilePath={latestEtlResult?.excelResult || ''} />
                 </Panel>
             </PanelGroup>
-            <AIChatbotButton />
+            {latestEtlResult?.excelResult ? <AIChatbotButton /> : null}
         </>
     )
 }

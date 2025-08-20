@@ -1,4 +1,4 @@
-import { ScrollArea, Stack } from '@mantine/core'
+import { Alert, Button, Group, ScrollArea, Stack } from '@mantine/core'
 import MessageBlock from './ai/message'
 import PromptInput from './ai/prompt-input'
 import AIHeader from './ai/ai-header'
@@ -11,6 +11,7 @@ import { getAccessToken } from '@/stores/auth.store'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ScrollToBottom from './ai/scroll-to-bottom'
 import LoadingMessage from './ai/loading-message'
+import { IconAlertCircle } from '@tabler/icons-react'
 
 const AI_API = 'https://ai.bdgad.bio'
 
@@ -31,7 +32,7 @@ const AIChatbotAside = ({ excelFilePath }: { excelFilePath: string }) => {
         }, 100)
     }, [conversation])
 
-    const { sendMessage, messages, setMessages, stop, status } = useChat({
+    const { sendMessage, messages, setMessages, stop, status, error, regenerate } = useChat({
         id,
         transport: new DefaultChatTransport({
             api: `${AI_API}/completion`,
@@ -92,6 +93,30 @@ const AIChatbotAside = ({ excelFilePath }: { excelFilePath: string }) => {
                         <MessageBlock key={message?.id || index} message={message} />
                     ))}
                     {status === 'submitted' ? <LoadingMessage /> : null}
+                    {error ? (
+                        <Alert
+                            title='Có lỗi xảy ra'
+                            color='red'
+                            icon={<IconAlertCircle />}
+                            variant='light'
+                            className='w-full'
+                            radius='lg'
+                        >
+                            <Group justify='space-between' align='flex-start'>
+                                <div style={{ flex: 1 }}>{error.message}</div>
+                                <Button
+                                    size='xs'
+                                    variant='outline'
+                                    color='red'
+                                    onClick={() => regenerate()}
+                                    ml='md'
+                                    radius='md'
+                                >
+                                    Thử lại
+                                </Button>
+                            </Group>
+                        </Alert>
+                    ) : null}
                 </Stack>
                 <ScrollToBottom isAtBottom={isAtBottom} scrollToBottom={scrollToBottom} />
             </ScrollArea.Autosize>

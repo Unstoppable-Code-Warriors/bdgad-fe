@@ -1,8 +1,8 @@
-import { Avatar, Group, Paper } from '@mantine/core'
+import { Accordion, Alert, Avatar, Badge, Code, Group, Paper, Skeleton, Text } from '@mantine/core'
 import { ChatRole } from '../../_types/message'
 import { Response } from './response'
 import type { UIMessage } from '@ai-sdk/react'
-import { IconDna2 } from '@tabler/icons-react'
+import { IconAlertCircle, IconDna2, IconZoomScan } from '@tabler/icons-react'
 import React from 'react'
 
 interface MessageBlockProps {
@@ -33,13 +33,70 @@ const MessageBlock = ({ message }: MessageBlockProps) => {
                 switch (part.type) {
                     case 'text':
                         return (
-                            <Group wrap='nowrap' align='flex-start'>
+                            <Group wrap='nowrap' align='flex-start' key={`${message.id}-${i}`}>
                                 <Avatar variant='filled' color='blue'>
                                     <IconDna2 />
                                 </Avatar>
                                 <Response key={`${message.id}-${i}`}>{part.text}</Response>
                             </Group>
                         )
+                    case 'dynamic-tool':
+                        return (
+                            <Accordion variant='filled' key={`${message.id}-${i}`} radius='lg' className='w-full'>
+                                <Accordion.Item value='tool'>
+                                    <Accordion.Control icon={<IconZoomScan size={14} />}>
+                                        <Group wrap='nowrap'>
+                                            <Text size='sm' c='dimmed'>
+                                                Phân tích tổng quan
+                                            </Text>
+                                            {part.state === 'input-available' ? (
+                                                <Badge color='blue' variant='light' size='sm'>
+                                                    Đang phân tích
+                                                </Badge>
+                                            ) : null}
+                                            {part.state === 'output-available' ? (
+                                                <Badge color='green' variant='light' size='sm'>
+                                                    Đã phân tích xong
+                                                </Badge>
+                                            ) : null}
+                                            {part.state === 'output-error' ? (
+                                                <Badge color='red' variant='light' size='sm'>
+                                                    Lỗi phân tích
+                                                </Badge>
+                                            ) : null}
+                                        </Group>
+                                    </Accordion.Control>
+                                    <Accordion.Panel>
+                                        {part.state === 'input-available' ? (
+                                            <Skeleton height={100} />
+                                        ) : part.state === 'output-available' ? (
+                                            <Code
+                                                block
+                                                style={{
+                                                    whiteSpace: 'pre-wrap',
+                                                    wordBreak: 'break-word',
+                                                    overflowWrap: 'break-word',
+                                                    maxWidth: '100%',
+                                                    overflow: 'auto'
+                                                }}
+                                            >
+                                                {JSON.stringify(part?.output, null, 2)}
+                                            </Code>
+                                        ) : part.state === 'output-error' ? (
+                                            <Alert
+                                                title='Có lỗi xảy ra'
+                                                color='red'
+                                                icon={<IconAlertCircle />}
+                                                variant='light'
+                                            >
+                                                {part.errorText}
+                                            </Alert>
+                                        ) : null}
+                                    </Accordion.Panel>
+                                </Accordion.Item>
+                            </Accordion>
+                        )
+
                     default:
                         return null
                 }
