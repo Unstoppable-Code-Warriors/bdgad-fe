@@ -14,12 +14,14 @@ import {
     Select,
     Radio,
     Progress,
-    Checkbox
+    Checkbox,
+    Alert
 } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
-import { IconRefresh, IconCheck } from '@tabler/icons-react'
+import { IconRefresh, IconCheck, IconAlertTriangle } from '@tabler/icons-react'
 import type { CategorizedSubmittedFile } from '@/types/categorized-upload'
+import { FileCategory, FILE_CATEGORY_OPTIONS } from '@/types/categorized-upload'
 import {
     getDefaultFormValues,
     formValidationRules,
@@ -49,6 +51,9 @@ interface OCRDrawerProps {
 const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR, patientData }: OCRDrawerProps) => {
     const [selectedFormType, setSelectedFormType] = useState<FormType>(FormType.OTHER)
     const [nameValidationWarning, setNameValidationWarning] = useState<string>('')
+    const [categoryMismatchWarning, setCategoryMismatchWarning] = useState<string>('')
+    const [categoryLabel, setCategoryLabel] = useState<string>('')
+    const [formTypeLabel, setFormTypeLabel] = useState<string>('')
 
     const form = useForm<FormValues>({
         initialValues: getDefaultFormValues(),
@@ -111,6 +116,50 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
         }
     }
 
+    // Function to validate category mismatch between file category and form type
+    const validateCategoryMismatch = (formType: FormType) => {
+        if (!file.category) {
+            setCategoryMismatchWarning('')
+            return
+        }
+
+        // Create mapping between file categories and form types
+        const categoryToFormTypeMap = {
+            [FileCategory.PRENATAL_SCREENING]: FormType.PRENATAL_TESTING,
+            [FileCategory.HEREDITARY_CANCER]: FormType.HEREDITARY_CANCER,
+            [FileCategory.GENE_MUTATION]: FormType.GENE_MUTATION,
+            [FileCategory.GENERAL]: FormType.OTHER
+        }
+
+        const expectedFormType = categoryToFormTypeMap[file.category]
+
+        if (formType !== expectedFormType && expectedFormType !== FormType.OTHER) {
+            // Get human-readable labels
+            const getCategoryLabel = (category: FileCategory) => {
+                const option = FILE_CATEGORY_OPTIONS.find((opt) => opt.value === category)
+                return option ? option.label : category
+            }
+
+            const getFormTypeLabel = (type: FormType) => {
+                const option = formTypeOptions.find((opt) => opt.value === type)
+                return option ? option.label : type
+            }
+
+            const currentCategoryLabel = getCategoryLabel(file.category)
+            const currentFormTypeLabel = getFormTypeLabel(formType)
+
+            setCategoryLabel(currentCategoryLabel)
+            setFormTypeLabel(currentFormTypeLabel)
+            setCategoryMismatchWarning(
+                `Loại file được chọn là "${currentCategoryLabel}" nhưng loại biểu mẫu được chọn là "${currentFormTypeLabel}". Điều này có thể gây ra sai lệch trong xử lý dữ liệu.`
+            )
+        } else {
+            setCategoryMismatchWarning('')
+            setCategoryLabel('')
+            setFormTypeLabel('')
+        }
+    }
+
     const detectFormType = (ocrResult: CommonOCRRes<EditedOCRRes>): FormType => {
         if (ocrResult?.ocrResult) {
             const innerResult = ocrResult.ocrResult
@@ -156,6 +205,7 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
     // Update document_name when selectedFormType changes
     useEffect(() => {
         form.setFieldValue('document_name', selectedFormType)
+        validateCategoryMismatch(selectedFormType)
     }, [selectedFormType])
 
     // Validate full name when it changes
@@ -458,6 +508,30 @@ const OCRDrawer = ({ file, ocrResult, ocrProgress, onUpdate, onClose, onRetryOCR
                                                 data={formTypeOptions}
                                                 required
                                             />
+
+                                            {/* Category Mismatch Warning */}
+                                            {categoryMismatchWarning && (
+                                                <Alert
+                                                    variant='light'
+                                                    color='orange'
+                                                    icon={<IconAlertTriangle size={16} />}
+                                                >
+                                                    <Text size='sm'>
+                                                        <Text component='span' fw={700}>
+                                                            Cảnh báo:
+                                                        </Text>{' '}
+                                                        Loại file được chọn là{' '}
+                                                        <Text component='span' fw={700}>
+                                                            "{categoryLabel}"
+                                                        </Text>{' '}
+                                                        nhưng loại biểu mẫu được chọn là{' '}
+                                                        <Text component='span' fw={700}>
+                                                            "{formTypeLabel}"
+                                                        </Text>
+                                                        . Điều này có thể gây ra sai lệch trong xử lý dữ liệu.
+                                                    </Text>
+                                                </Alert>
+                                            )}
 
                                             {/* Dynamic Form Fields based on form type */}
                                             {selectedFormType === FormType.HEREDITARY_CANCER && (
