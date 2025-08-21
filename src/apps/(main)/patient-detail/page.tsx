@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router'
+import { useParams, useNavigate, useLocation } from 'react-router'
 import {
     Container,
     Title,
@@ -61,6 +61,7 @@ const getSessionTypeBadge = (type: string) => {
 const PatientDetailPage = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
+    const location = useLocation()
 
     const { data: sessionsResponse, isLoading, error } = usePatientLabSessions(id!)
 
@@ -72,7 +73,24 @@ const PatientDetailPage = () => {
     const resultTestSessions = sessions.filter((session: any) => session.typeLabSession === 'result_test')
 
     const handleBack = () => {
-        navigate('/patient-folder')
+        // Parse query parameters to check where user came from
+        const searchParams = new URLSearchParams(location.search)
+        const from = searchParams.get('from')
+        const year = searchParams.get('year')
+        const month = searchParams.get('month')
+
+        // If user came from a specific folder, navigate back to that folder
+        if (from === 'folder' && year && month) {
+            navigate(`/patient-folder/${year}/${month}`)
+        } else if (from === 'main' && year && month) {
+            // If user came from main page but was viewing a specific month, navigate with selection
+            navigate('/patient-folder', {
+                state: { selectedYear: parseInt(year), selectedMonth: parseInt(month) }
+            })
+        } else {
+            // Default behavior - go back to main patient folder page
+            navigate('/patient-folder')
+        }
     }
 
     const handleImport = () => {

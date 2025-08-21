@@ -121,9 +121,9 @@ const MonthPatientFolderPage = () => {
 
     const handlePatientClick = useCallback(
         (patientId: string) => {
-            navigate(`/patient-detail/${patientId}`)
+            navigate(`/patient-detail/${patientId}?from=folder&year=${year}&month=${month}`)
         },
-        [navigate]
+        [navigate, year, month]
     )
 
     const handleBackToOverview = useCallback(() => {

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useLocation } from 'react-router'
 import {
     Container,
     Title,
@@ -30,7 +30,8 @@ import {
     IconEdit,
     IconTrash,
     IconFolder,
-    IconArrowLeft
+    IconArrowLeft,
+    IconPlus
 } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import {
@@ -43,6 +44,7 @@ import EditPatientModal from './components/EditPatientModal'
 
 const PatientFolderPage = () => {
     const navigate = useNavigate()
+    const location = useLocation()
     const [searchTerm, setSearchTerm] = useState('')
     const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null])
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -58,7 +60,16 @@ const PatientFolderPage = () => {
     const [selectedYear, setSelectedYear] = useState<number | null>(null)
     const [selectedMonth, setSelectedMonth] = useState<number | null>(null)
 
-    // Check if we're in search mode (either searching or date filtering)
+    // Check if we're navigated here with specific year/month selection
+    useEffect(() => {
+        const state = location.state as { selectedYear?: number; selectedMonth?: number } | null
+        if (state?.selectedYear && state?.selectedMonth) {
+            setSelectedYear(state.selectedYear)
+            setSelectedMonth(state.selectedMonth)
+            setPage(1)
+        }
+    }, [location.state])
+
     const isSearchMode =
         searchTerm.trim() !== '' ||
         dateRange[0] !== null ||
@@ -66,11 +77,9 @@ const PatientFolderPage = () => {
         selectedYear !== null ||
         selectedMonth !== null
 
-    // Get year/month breakdown data
-    const { data: yearMonthData, isLoading: isYearMonthLoading } = usePatientFoldersByCreatedDate()
+    const { data: yearMonthData, isLoading: isYearMonthLoading, refetch: refetchYearMonth } = usePatientFoldersByCreatedDate()
 
-    // Use patient folders hook for search/patient list
-    const { data: patientsResponse, isLoading } = usePatientFolders({
+    const { data: patientsResponse, isLoading, refetch: refetchPatients } = usePatientFolders({
         search: searchTerm,
         page: page,
         limit: limit,
@@ -149,9 +158,14 @@ const PatientFolderPage = () => {
 
     const handlePatientClick = useCallback(
         (patientId: string) => {
-            navigate(`/patient-detail/${patientId}`)
+            // Add query params to track where user came from
+            let url = `/patient-detail/${patientId}?from=main`
+            if (selectedYear && selectedMonth) {
+                url += `&year=${selectedYear}&month=${selectedMonth}`
+            }
+            navigate(url)
         },
-        [navigate]
+        [navigate, selectedYear, selectedMonth]
     )
 
     // Handle Edit
@@ -220,7 +234,7 @@ const PatientFolderPage = () => {
                                 onClick={handleBackToYearView}
                             ></Button>
                         )}
-                        <div>
+                        <div className='mt-8'>
                             <Title order={2}>
                                 {isSearchMode && selectedYear && selectedMonth
                                     ? `${monthNames[selectedMonth - 1]} năm ${selectedYear}`
@@ -233,6 +247,14 @@ const PatientFolderPage = () => {
                             )}
                         </div>
                     </Group>
+                    {!isSearchMode && (
+                        <Button className='mr-3'
+                            leftSection={<IconPlus size={16} />}
+                            onClick={() => setIsAddModalOpen(true)}
+                        >
+                            Thêm thư mục bệnh nhân
+                        </Button>
+                    )}
                 </Group>
 
                 {/* Search and Filters */}
@@ -499,7 +521,14 @@ const PatientFolderPage = () => {
                 )}
 
                 {/* Add Patient Modal */}
-                <AddPatientModal opened={isAddModalOpen} onClose={handleCloseAddModal} />
+                <AddPatientModal 
+                    opened={isAddModalOpen} 
+                    onClose={handleCloseAddModal}
+                    onSuccess={() => {
+                        refetchYearMonth()
+                        refetchPatients()
+                    }}
+                />
 
                 {/* Edit Patient Modal */}
                 <EditPatientModal opened={isEditModalOpen} onClose={handleCloseEditModal} patient={selectedPatient} />

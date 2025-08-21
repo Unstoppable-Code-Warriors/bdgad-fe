@@ -10,9 +10,10 @@ import { validatePhone } from '@/utils/validatePhone'
 interface AddPatientModalProps {
     opened: boolean
     onClose: () => void
+    onSuccess?: () => void
 }
 
-const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
+const AddPatientModal = ({ opened, onClose, onSuccess }: AddPatientModalProps) => {
     const [patientData, setPatientData] = useState({
         fullName: '',
         citizenId: '',
@@ -154,6 +155,7 @@ const AddPatientModal = ({ opened, onClose }: AddPatientModalProps) => {
                     color: 'green'
                 })
 
+                onSuccess?.() // Call success callback to refetch data
                 handleClose()
             } catch (error) {
                 console.error('Error creating patient:', error)
