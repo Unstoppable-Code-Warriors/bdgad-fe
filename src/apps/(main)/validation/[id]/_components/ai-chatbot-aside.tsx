@@ -14,8 +14,8 @@ import ScrollToBottom from './ai/scroll-to-bottom'
 import LoadingMessage from './ai/loading-message'
 import { IconAlertCircle } from '@tabler/icons-react'
 
-// const AI_API = 'https://ai.bdgad.bio'
-const AI_API = 'http://localhost:4000/api/v1/ai-chat'
+const AI_API = 'https://ai.bdgad.bio'
+// const AI_API = 'http://localhost:4000/api/v1/ai-chat'
 
 const AIChatbotAside = ({ excelFilePath }: { excelFilePath: string }) => {
     const { id } = useParams()
