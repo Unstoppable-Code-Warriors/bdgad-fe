@@ -36,7 +36,7 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                             </Group>
 
                             <Stack gap='sm'>
-                                <Group justify='space-between'>
+                                <Group>
                                     <Text size='sm' c='dimmed'>
                                         Mã lần khám:
                                     </Text>
@@ -45,7 +45,7 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                                     </Text>
                                 </Group>
 
-                                <Group justify='space-between'>
+                                <Group>
                                     <Text size='sm' c='dimmed'>
                                         Labcode:
                                     </Text>
@@ -56,7 +56,7 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                                     </Text>
                                 </Group>
 
-                                <Group justify='space-between'>
+                                <Group>
                                     <Text size='sm' c='dimmed'>
                                         Barcode:
                                     </Text>
@@ -81,7 +81,7 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                             </Group>
 
                             <Stack gap='sm'>
-                                <Group justify='space-between'>
+                                <Group>
                                     <Text size='sm' c='dimmed'>
                                         Ngày yêu cầu:
                                     </Text>
@@ -90,7 +90,7 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                                     </Text>
                                 </Group>
 
-                                <Group justify='space-between'>
+                                <Group>
                                     <Text size='sm' c='dimmed'>
                                         Ngày tạo:
                                     </Text>
@@ -100,7 +100,7 @@ export const ValidationInfo = ({ validation }: ValidationInfoProps) => {
                                 </Group>
 
                                 {etlResult?.etlCompletedAt && (
-                                    <Group justify='space-between'>
+                                    <Group>
                                         <Text size='sm' c='dimmed'>
                                             ETL hoàn thành:
                                         </Text>

@@ -31,13 +31,10 @@ const WelcomeScreen = () => {
                     </Text>
                     <Stack gap={4}>
                         <Text size='sm' c='dimmed'>
-                            • Phân tích dữ liệu validation
+                            • Phân tích dữ liệu kết quả gen
                         </Text>
                         <Text size='sm' c='dimmed'>
                             • Giải thích kết quả kiểm tra
-                        </Text>
-                        <Text size='sm' c='dimmed'>
-                            • Hướng dẫn xử lý lỗi
                         </Text>
                         <Text size='sm' c='dimmed'>
                             • Các câu hỏi khác

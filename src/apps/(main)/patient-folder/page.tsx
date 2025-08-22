@@ -18,7 +18,8 @@ import {
     Modal,
     Pagination,
     Select,
-    Accordion
+    Accordion,
+    Tooltip
 } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import {
@@ -31,7 +32,8 @@ import {
     IconTrash,
     IconFolder,
     IconArrowLeft,
-    IconPlus
+    IconPlus,
+    IconFilterX
 } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import {
@@ -260,32 +262,45 @@ const PatientFolderPage = () => {
                 {/* Search and Filters */}
                 <Paper p='md' withBorder>
                     <Stack gap='md'>
-                        <Group grow>
-                            <TextInput
-                                label='Tìm kiếm bệnh nhân'
-                                placeholder='Tìm kiếm theo tên, mã định danh...'
-                                leftSection={<IconSearch size={16} />}
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.currentTarget.value)}
-                            />
-                            <DatePickerInput
-                                label='Lọc theo ngày khám'
-                                type='range'
-                                placeholder='Chọn khoảng thời gian'
-                                leftSection={<IconCalendar size={16} />}
-                                value={dateRange}
-                                onChange={(value) => {
-                                    setDateRange([
-                                        value[0] ? new Date(value[0]) : null,
-                                        value[1] ? new Date(value[1]) : null
-                                    ])
-                                }}
-                                clearable
-                            />
-                            <Button className='mt-6' variant='light' onClick={clearFilters}>
-                                Xóa bộ lọc
-                            </Button>
-                        </Group>
+                        <Grid align='end'>
+                            <Grid.Col span={{ base: 12, sm: 12, md: 5 }}>
+                                <TextInput
+                                    label='Tìm kiếm bệnh nhân'
+                                    placeholder='Tìm kiếm theo tên, mã định danh...'
+                                    leftSection={<IconSearch size={16} />}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.currentTarget.value)}
+                                />
+                            </Grid.Col>
+                            <Grid.Col span={{ base: 12, sm: 12, md: 5 }}>
+                                <DatePickerInput
+                                    label='Lọc theo ngày xét nghiệm'
+                                    type='range'
+                                    placeholder='Chọn khoảng thời gian'
+                                    leftSection={<IconCalendar size={16} />}
+                                    value={dateRange}
+                                    onChange={(value) => {
+                                        setDateRange([
+                                            value[0] ? new Date(value[0]) : null,
+                                            value[1] ? new Date(value[1]) : null
+                                        ])
+                                    }}
+                                    clearable
+                                />
+                            </Grid.Col>
+                            <Grid.Col span={{ base: 12, sm: 12, md: 2 }}>
+                                <Tooltip label="Xóa bộ lọc" withArrow>
+                                    <ActionIcon 
+                                        variant='light' 
+                                        onClick={clearFilters}
+                                        size='lg'
+                                        color='gray'
+                                    >
+                                        <IconFilterX size={18} />
+                                    </ActionIcon>
+                                </Tooltip>
+                            </Grid.Col>
+                        </Grid>
 
                         {isSearchMode && (
                             <Group justify='space-between' align='center'>

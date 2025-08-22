@@ -18,9 +18,9 @@ const FileStatistics = ({ totalFiles, totalCategories }: FileStatisticsProps) =>
                     <div>
                         Tổng danh mục: <Badge> {totalCategories} danh mục </Badge>
                     </div>
-                    <div>
+                    {/* <div>
                         Tổng tệp tin: <Badge> {totalFiles} tệp tin </Badge>
-                    </div>
+                    </div> */}
                 </div>
             </Group>
         </Card>

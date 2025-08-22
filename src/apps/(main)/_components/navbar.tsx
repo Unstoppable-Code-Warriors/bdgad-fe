@@ -1,7 +1,7 @@
 import { useUser } from '@/services/hook/auth.hook'
 import { Role } from '@/utils/constant'
 import { AppShell, Loader, Stack, UnstyledButton, Text, Box } from '@mantine/core'
-import { IconUser, IconFlask, IconMicroscope, IconClipboardCheck } from '@tabler/icons-react'
+import { IconUser, IconFlask, IconMicroscope, IconClipboardCheck, IconFile } from '@tabler/icons-react'
 import { Link, useLocation } from 'react-router'
 
 export const navItems = [
@@ -13,7 +13,7 @@ export const navItems = [
     },
     {
         label: 'Tải lên dữ liệu chung',
-        icon: IconUser,
+        icon: IconFile,
         href: '/input-general-data',
         roles: [Role.STAFF]
     },
