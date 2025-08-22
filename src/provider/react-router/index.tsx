@@ -21,6 +21,8 @@ import LabTestPage from '@/apps/(main)/lab-test/page'
 import LabTestDetailPage from '@/apps/(main)/lab-test/[id]/page'
 import AnalysisPage from '@/apps/(main)/analysis/page'
 import AnalysisDetailPage from '@/apps/(main)/analysis/[id]/page'
+import FastQManagementPage from '@/apps/(main)/analysis/fastq/page'
+import EtlManagementPage from '@/apps/(main)/analysis/etl/page'
 import ValidationPage from '@/apps/(main)/validation/page'
 import ValidationDetailPage from '@/apps/(main)/validation/[id]/page'
 import ProfilePage from '@/apps/(main)/profile/page'
@@ -161,6 +163,14 @@ export const router = createBrowserRouter([
                             {
                                 index: true,
                                 element: <AnalysisPage />
+                            },
+                            {
+                                path: 'fastq',
+                                element: <FastQManagementPage />
+                            },
+                            {
+                                path: 'etl',
+                                element: <EtlManagementPage />
                             },
                             {
                                 path: ':id',

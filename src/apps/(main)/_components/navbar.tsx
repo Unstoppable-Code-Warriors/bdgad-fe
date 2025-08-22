@@ -1,7 +1,7 @@
 import { useUser } from '@/services/hook/auth.hook'
 import { Role } from '@/utils/constant'
 import { AppShell, Loader, Stack, UnstyledButton, Text, Box } from '@mantine/core'
-import { IconUser, IconFlask, IconMicroscope, IconClipboardCheck, IconFile } from '@tabler/icons-react'
+import { IconUser, IconFlask, IconClipboardCheck, IconFile, IconDna, IconChartLine } from '@tabler/icons-react'
 import { Link, useLocation } from 'react-router'
 
 export const navItems = [
@@ -24,9 +24,15 @@ export const navItems = [
         roles: [Role.LAB_TESTING_TECHNICIAN]
     },
     {
-        label: 'Quản lý kêt quả phân tích',
-        icon: IconMicroscope,
-        href: '/analysis',
+        label: 'Quản lý FastQ',
+        icon: IconChartLine,
+        href: '/analysis/fastq',
+        roles: [Role.ANALYSIS_TECHNICIAN]
+    },
+    {
+        label: 'Quản lý kết quả ETL',
+        icon: IconDna,
+        href: '/analysis/etl',
         roles: [Role.ANALYSIS_TECHNICIAN]
     },
     {

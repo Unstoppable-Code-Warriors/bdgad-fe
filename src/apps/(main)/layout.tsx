@@ -22,7 +22,7 @@ const MainLayout = () => {
         >
             <Header />
             <Navbar />
-            <AppShell.Main className='h-full ml-2 mt-2'>
+            <AppShell.Main className='h-full'>
                 <Outlet />
             </AppShell.Main>
         </AppShell>

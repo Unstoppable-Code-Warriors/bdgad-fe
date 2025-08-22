@@ -2,7 +2,7 @@ import { useCallback, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 import { Title, Group, Stack, Paper, Badge, ActionIcon, Alert, Text, Tooltip, Tabs } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
-import { IconAlertCircle, IconCheck, IconX as IconReject, IconEye } from '@tabler/icons-react'
+import { IconAlertCircle, IconCheck, IconX as IconReject, IconEye, IconLoader, IconBan } from '@tabler/icons-react'
 import {
     validationEtlStatusConfig,
     ValidationEtlStatus,
@@ -256,9 +256,15 @@ const ValidationPage = () => {
                 {/* Status Group Tabs */}
                 <Tabs value={activeTab} onChange={handleTabChange}>
                     <Tabs.List>
-                        <Tabs.Tab value='processing'>Đang xử lý</Tabs.Tab>
-                        <Tabs.Tab value='rejected'>Từ chối</Tabs.Tab>
-                        <Tabs.Tab value='approved'>Đã phê duyệt</Tabs.Tab>
+                        <Tabs.Tab value='processing' leftSection={<IconLoader size={16} />}>
+                            Đang xử lý
+                        </Tabs.Tab>
+                        <Tabs.Tab value='rejected' leftSection={<IconBan size={16} />}>
+                            Từ chối
+                        </Tabs.Tab>
+                        <Tabs.Tab value='approved' leftSection={<IconCheck size={16} />}>
+                            Đã phê duyệt
+                        </Tabs.Tab>
                     </Tabs.List>
 
                     <Tabs.Panel value='processing' pt='md'>

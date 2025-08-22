@@ -3,7 +3,14 @@ import { useDebouncedValue } from '@mantine/hooks'
 import { useNavigate } from 'react-router'
 import { Title, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert, Tooltip, Tabs } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
-import { IconEye, IconAlertCircle, IconDownload } from '@tabler/icons-react'
+import {
+    IconEye,
+    IconAlertCircle,
+    IconDownload,
+    IconBan,
+    IconCheck,
+    IconLoader,
+} from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
 import { useLabTestSessions } from '@/services/hook/lab-test.hook'
 import { labTestService } from '@/services/function/lab-test'
@@ -148,7 +155,6 @@ const LabTestPage = () => {
 
     // Extract data from response
     const labTestData = labTestResponse?.data || []
-    console.log('Debug: ', labTestData)
     const totalRecords = labTestResponse?.meta?.total || 0
 
     const columns: DataTableColumn<LabTestSessionListItem>[] = useMemo(
@@ -216,11 +222,7 @@ const LabTestPage = () => {
                     const dbDate = record.requestDateLabTesting
                     const d = new Date(dbDate)
 
-                    return (
-                        <Text size='sm'>
-                            {d.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}
-                        </Text>
-                    )
+                    return <Text size='sm'>{d.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}</Text>
                 }
             },
             {
@@ -306,146 +308,154 @@ const LabTestPage = () => {
     }, [])
 
     return (
-        <Stack gap='lg'>
-            {/* Header */}
-            <Group justify='space-between'>
-                <Title order={2}>Quản lý xét nghiệm</Title>
-            </Group>
+        <>
+            <Stack gap='lg' p='md'>
+                {/* Header */}
+                <Group justify='space-between'>
+                    <Title order={2}>Quản lý xét nghiệm</Title>
+                </Group>
 
-            {/* Error Alert */}
-            {isError && (
-                <Alert icon={<IconAlertCircle size={16} />} title='Lỗi tải dữ liệu' color='red' variant='light'>
-                    {error?.message || 'Không thể tải danh sách xét nghiệm. Vui lòng thử lại.'}
-                </Alert>
-            )}
+                {/* Error Alert */}
+                {isError && (
+                    <Alert icon={<IconAlertCircle size={16} />} title='Lỗi tải dữ liệu' color='red' variant='light'>
+                        {error?.message || 'Không thể tải danh sách xét nghiệm. Vui lòng thử lại.'}
+                    </Alert>
+                )}
 
-            {/* Status Group Tabs */}
-            <Tabs value={activeTab} onChange={handleTabChange}>
-                <Tabs.List>
-                    <Tabs.Tab value='processing'>Đang xử lý</Tabs.Tab>
-                    <Tabs.Tab value='rejected'>Từ chối</Tabs.Tab>
-                    <Tabs.Tab value='approved'>Đã phê duyệt</Tabs.Tab>
-                </Tabs.List>
+                {/* Status Group Tabs */}
+                <Tabs value={activeTab} onChange={handleTabChange}>
+                    <Tabs.List>
+                        <Tabs.Tab value='processing' leftSection={<IconLoader size={16} />}>
+                            Đang xử lý
+                        </Tabs.Tab>
+                        <Tabs.Tab value='rejected' leftSection={<IconBan size={16} />}>
+                            Từ chối
+                        </Tabs.Tab>
+                        <Tabs.Tab value='approved' leftSection={<IconCheck size={16} />}>
+                            Đã phê duyệt
+                        </Tabs.Tab>
+                    </Tabs.List>
 
-                <Tabs.Panel value='processing' pt='md'>
-                    {/* Reusable Search and Filter Component with Processing Status Filter */}
-                    <ListSearchFilter
-                        searchValue={search}
-                        onSearchChange={setSearch}
-                        searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
-                        statusFilter={processingStatusFilter}
-                        onStatusFilterChange={setProcessingStatusFilter}
-                        statusOptions={processingStatusOptions}
-                        statusPlaceholder='Lọc theo trạng thái xử lý'
-                        dateRange={dateRange}
-                        onDateRangeChange={(value) => {
-                            if (
-                                Array.isArray(value) &&
-                                (typeof value[0] === 'string' || typeof value[1] === 'string')
-                            ) {
-                                setDateRange([
-                                    value[0] ? new Date(value[0] as string) : null,
-                                    value[1] ? new Date(value[1] as string) : null
-                                ])
-                            } else {
-                                setDateRange(value as [Date | null, Date | null])
-                            }
-                        }}
-                        onRefresh={handleRefresh}
-                        isLoading={isLoading}
+                    <Tabs.Panel value='processing' pt='md'>
+                        {/* Reusable Search and Filter Component with Processing Status Filter */}
+                        <ListSearchFilter
+                            searchValue={search}
+                            onSearchChange={setSearch}
+                            searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
+                            statusFilter={processingStatusFilter}
+                            onStatusFilterChange={setProcessingStatusFilter}
+                            statusOptions={processingStatusOptions}
+                            statusPlaceholder='Lọc theo trạng thái xử lý'
+                            dateRange={dateRange}
+                            onDateRangeChange={(value) => {
+                                if (
+                                    Array.isArray(value) &&
+                                    (typeof value[0] === 'string' || typeof value[1] === 'string')
+                                ) {
+                                    setDateRange([
+                                        value[0] ? new Date(value[0] as string) : null,
+                                        value[1] ? new Date(value[1] as string) : null
+                                    ])
+                                } else {
+                                    setDateRange(value as [Date | null, Date | null])
+                                }
+                            }}
+                            onRefresh={handleRefresh}
+                            isLoading={isLoading}
+                            totalRecords={totalRecords}
+                            showRefreshButton={false}
+                        />
+                    </Tabs.Panel>
+
+                    <Tabs.Panel value='rejected' pt='md'>
+                        {/* Reusable Search and Filter Component */}
+                        <ListSearchFilter
+                            searchValue={search}
+                            onSearchChange={setSearch}
+                            searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
+                            dateRange={dateRange}
+                            onDateRangeChange={(value) => {
+                                if (
+                                    Array.isArray(value) &&
+                                    (typeof value[0] === 'string' || typeof value[1] === 'string')
+                                ) {
+                                    setDateRange([
+                                        value[0] ? new Date(value[0] as string) : null,
+                                        value[1] ? new Date(value[1] as string) : null
+                                    ])
+                                } else {
+                                    setDateRange(value as [Date | null, Date | null])
+                                }
+                            }}
+                            onRefresh={handleRefresh}
+                            isLoading={isLoading}
+                            totalRecords={totalRecords}
+                            showRefreshButton={false}
+                        />
+                    </Tabs.Panel>
+
+                    <Tabs.Panel value='approved' pt='md'>
+                        {/* Reusable Search and Filter Component */}
+                        <ListSearchFilter
+                            searchValue={search}
+                            onSearchChange={setSearch}
+                            searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
+                            dateRange={dateRange}
+                            onDateRangeChange={(value) => {
+                                if (
+                                    Array.isArray(value) &&
+                                    (typeof value[0] === 'string' || typeof value[1] === 'string')
+                                ) {
+                                    setDateRange([
+                                        value[0] ? new Date(value[0] as string) : null,
+                                        value[1] ? new Date(value[1] as string) : null
+                                    ])
+                                } else {
+                                    setDateRange(value as [Date | null, Date | null])
+                                }
+                            }}
+                            onRefresh={handleRefresh}
+                            isLoading={isLoading}
+                            totalRecords={totalRecords}
+                            showRefreshButton={false}
+                        />
+                    </Tabs.Panel>
+                </Tabs>
+
+                {/* Data Table */}
+                <Paper withBorder shadow='sm'>
+                    <DataTable
+                        records={labTestData}
+                        columns={columns}
                         totalRecords={totalRecords}
-                        showRefreshButton={false}
+                        recordsPerPage={limit}
+                        recordsPerPageOptions={recordsPerPageOptions}
+                        onRecordsPerPageChange={handleLimitChange}
+                        page={page}
+                        onPageChange={handlePageChange}
+                        paginationActiveBackgroundColor='blue'
+                        loadingText='Đang tải...'
+                        noRecordsText='Không có dữ liệu'
+                        recordsPerPageLabel='Số bản ghi mỗi trang'
+                        paginationText={({ from, to, totalRecords }) =>
+                            `Hiển thị ${from} - ${to} của ${totalRecords} bản ghi`
+                        }
+                        minHeight={200}
+                        verticalSpacing='sm'
+                        horizontalSpacing='md'
+                        highlightOnHover
+                        withTableBorder
+                        withColumnBorders
+                        striped
+                        fetching={isLoading}
+                        sortStatus={sortStatus}
+                        onSortStatusChange={handleSort}
+                        pinFirstColumn
+                        pinLastColumn
                     />
-                </Tabs.Panel>
-
-                <Tabs.Panel value='rejected' pt='md'>
-                    {/* Reusable Search and Filter Component */}
-                    <ListSearchFilter
-                        searchValue={search}
-                        onSearchChange={setSearch}
-                        searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
-                        dateRange={dateRange}
-                        onDateRangeChange={(value) => {
-                            if (
-                                Array.isArray(value) &&
-                                (typeof value[0] === 'string' || typeof value[1] === 'string')
-                            ) {
-                                setDateRange([
-                                    value[0] ? new Date(value[0] as string) : null,
-                                    value[1] ? new Date(value[1] as string) : null
-                                ])
-                            } else {
-                                setDateRange(value as [Date | null, Date | null])
-                            }
-                        }}
-                        onRefresh={handleRefresh}
-                        isLoading={isLoading}
-                        totalRecords={totalRecords}
-                        showRefreshButton={false}
-                    />
-                </Tabs.Panel>
-
-                <Tabs.Panel value='approved' pt='md'>
-                    {/* Reusable Search and Filter Component */}
-                    <ListSearchFilter
-                        searchValue={search}
-                        onSearchChange={setSearch}
-                        searchPlaceholder='Tìm kiếm theo mã labcode, barcode...'
-                        dateRange={dateRange}
-                        onDateRangeChange={(value) => {
-                            if (
-                                Array.isArray(value) &&
-                                (typeof value[0] === 'string' || typeof value[1] === 'string')
-                            ) {
-                                setDateRange([
-                                    value[0] ? new Date(value[0] as string) : null,
-                                    value[1] ? new Date(value[1] as string) : null
-                                ])
-                            } else {
-                                setDateRange(value as [Date | null, Date | null])
-                            }
-                        }}
-                        onRefresh={handleRefresh}
-                        isLoading={isLoading}
-                        totalRecords={totalRecords}
-                        showRefreshButton={false}
-                    />
-                </Tabs.Panel>
-            </Tabs>
-
-            {/* Data Table */}
-            <Paper withBorder shadow='sm'>
-                <DataTable
-                    records={labTestData}
-                    columns={columns}
-                    totalRecords={totalRecords}
-                    recordsPerPage={limit}
-                    recordsPerPageOptions={recordsPerPageOptions}
-                    onRecordsPerPageChange={handleLimitChange}
-                    page={page}
-                    onPageChange={handlePageChange}
-                    paginationActiveBackgroundColor='blue'
-                    loadingText='Đang tải...'
-                    noRecordsText='Không có dữ liệu'
-                    recordsPerPageLabel='Số bản ghi mỗi trang'
-                    paginationText={({ from, to, totalRecords }) =>
-                        `Hiển thị ${from} - ${to} của ${totalRecords} bản ghi`
-                    }
-                    minHeight={200}
-                    verticalSpacing='sm'
-                    horizontalSpacing='md'
-                    highlightOnHover
-                    withTableBorder
-                    withColumnBorders
-                    striped
-                    fetching={isLoading}
-                    sortStatus={sortStatus}
-                    onSortStatusChange={handleSort}
-                    pinFirstColumn
-                    pinLastColumn
-                />
-            </Paper>
-        </Stack>
+                </Paper>
+            </Stack>
+        </>
     )
 }
 

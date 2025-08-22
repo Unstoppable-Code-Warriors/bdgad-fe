@@ -81,7 +81,7 @@ export const EtlResultActionsCenter = ({
                     color='blue'
                     size='sm'
                     onClick={handleViewHtml}
-                    style={{ whiteSpace: 'nowrap', minWidth: 'fit-content' }}
+                    style={{ whiteSpace: 'nowrap', minWidth: '180px', width: '180px' }}
                 >
                     Xem kết quả ETL
                 </Button>
@@ -95,7 +95,7 @@ export const EtlResultActionsCenter = ({
                     color='green'
                     size='sm'
                     onClick={handleDownloadExcel}
-                    style={{ whiteSpace: 'nowrap', minWidth: 'fit-content' }}
+                    style={{ whiteSpace: 'nowrap', minWidth: '180px', width: '180px' }}
                 >
                     Tải Excel
                 </Button>
