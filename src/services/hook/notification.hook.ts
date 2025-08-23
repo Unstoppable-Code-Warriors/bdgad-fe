@@ -77,23 +77,26 @@ export const useNotifications = (params?: NotificationParams, options: UseNotifi
                                 console.log('📥 Fetched initial notifications:', initialData.length)
 
                                 // Merge with existing data and deduplicate by ID
-                                queryClient.setQueryData(['notifications'], (oldData: Notification[] | undefined) => {
-                                    if (!oldData) return initialData
+                                queryClient.setQueryData(
+                                    ['notifications', params],
+                                    (oldData: Notification[] | undefined) => {
+                                        if (!oldData) return initialData
 
-                                    // Merge and deduplicate by ID
-                                    const merged = [...initialData, ...oldData]
-                                    const unique = merged.filter(
-                                        (item, index, self) => index === self.findIndex((t) => t.id === item.id)
-                                    )
+                                        // Merge and deduplicate by ID
+                                        const merged = [...initialData, ...oldData]
+                                        const unique = merged.filter(
+                                            (item, index, self) => index === self.findIndex((t) => t.id === item.id)
+                                        )
 
-                                    console.log('📥 Merged notifications:', {
-                                        initial: initialData.length,
-                                        existing: oldData.length,
-                                        total: unique.length
-                                    })
+                                        console.log('📥 Merged notifications:', {
+                                            initial: initialData.length,
+                                            existing: oldData.length,
+                                            total: unique.length
+                                        })
 
-                                    return unique
-                                })
+                                        return unique
+                                    }
+                                )
 
                                 // Invalidate unread count to refresh
                                 queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] })
@@ -115,14 +118,14 @@ export const useNotifications = (params?: NotificationParams, options: UseNotifi
 
             switch (event.type) {
                 case 'notification_created':
-                    queryClient.setQueryData(['notifications'], (oldData: Notification[] | undefined) => {
+                    queryClient.setQueryData(['notifications', params], (oldData: Notification[] | undefined) => {
                         if (!oldData) return [notification]
                         return [notification, ...oldData]
                     })
                     queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] })
                     break
                 case 'notification_updated':
-                    queryClient.setQueryData(['notifications'], (oldData: Notification[] | undefined) => {
+                    queryClient.setQueryData(['notifications', params], (oldData: Notification[] | undefined) => {
                         if (!oldData) return []
                         return oldData.map((n) => (n.id === notification.id ? notification : n))
                     })
@@ -146,7 +149,7 @@ export const useNotifications = (params?: NotificationParams, options: UseNotifi
                 clearTimeout(retryTimeout)
             }
         }
-    }, [enableSse, userId, fallbackToPolling, queryClient])
+    }, [enableSse, userId, fallbackToPolling, queryClient, params])
 
     // HTTP polling query (used as fallback or when SSE is disabled)
     const httpQuery = useQuery({
@@ -191,7 +194,7 @@ export const useMarkNotificationAsRead = () => {
     return useMutation({
         mutationFn: (notificationId: number) => notificationService.markNotificationAsRead(notificationId),
         onSuccess: () => {
-            // Invalidate and refetch notifications after marking as read
+            // Invalidate and refetch all notifications queries
             queryClient.invalidateQueries({ queryKey: ['notifications'] })
             queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] })
         }
