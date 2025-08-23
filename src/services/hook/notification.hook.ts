@@ -176,7 +176,7 @@ export const useCombinedNotifications = (params?: NotificationParams, options: U
     const userId = user?.data?.user?.id
     const sseNotifications = useSseNotifications(userId)
 
-    // Merge notifications: SSE real-time + REST API (if polling)
+    // Merge notifications: Always combine SSE real-time + REST API data
     const combinedNotifications = useMemo(() => {
         const sseData = sseNotifications.realTimeNotifications || []
         const restData = restNotifications.data || []
@@ -186,17 +186,13 @@ export const useCombinedNotifications = (params?: NotificationParams, options: U
             return restData
         }
 
-        if (sseNotifications.sse.connected) {
-            // SSE connected: use SSE data as primary, merge with REST if needed
-            const merged = [...sseData, ...restData]
-            // Remove duplicates by ID, prioritize SSE data
-            const unique = merged.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id))
-            return unique
-        } else {
-            // SSE not connected: fallback to REST API
-            return restData
-        }
-    }, [sseNotifications.realTimeNotifications, restNotifications.data, sseNotifications.sse.connected, enableSse])
+        // Always merge SSE + REST data when SSE is enabled
+        const merged = [...sseData, ...restData]
+        // Remove duplicates by ID, prioritize SSE data (newer)
+        const unique = merged.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id))
+
+        return unique
+    }, [sseNotifications.realTimeNotifications, restNotifications.data, enableSse])
 
     return {
         // Combined data
