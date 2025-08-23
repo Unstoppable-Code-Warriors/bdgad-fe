@@ -235,19 +235,6 @@ const NotificationBell = () => {
         }
     }
 
-    // SSE connection indicator
-    const getSseStatusColor = () => {
-        if (sse?.connected) return 'green'
-        if (sse?.usingPolling) return 'orange'
-        return 'red'
-    }
-
-    const getSseStatusText = () => {
-        if (sse?.connected) return 'SSE'
-        if (sse?.usingPolling) return 'Polling'
-        return 'Offline'
-    }
-
     if (isLoading) {
         return (
             <ActionIcon variant='light' size='lg' radius='md' loading>
@@ -277,11 +264,6 @@ const NotificationBell = () => {
                         Thông báo
                     </Text>
                     <Group gap='xs'>
-                        {sse && (
-                            <Badge size='xs' color={getSseStatusColor()} variant='light'>
-                                {getSseStatusText()}
-                            </Badge>
-                        )}
                         {unreadCount > 0 && (
                             <UnstyledButton onClick={handleMarkAllAsRead} disabled={markAsReadMutation.isPending}>
                                 <Text size='xs' c='blue'>
