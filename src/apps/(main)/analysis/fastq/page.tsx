@@ -162,8 +162,8 @@ const FastQManagementPage = () => {
                 title: 'Kỹ thuật viên xét nghiệm',
                 sortable: true,
                 width: 180,
-                render: () => {
-                    return ''
+                render: (record) => {
+                    return <Text>{record?.labTesting?.name || '-'}</Text>
                 }
             },
             {
