@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { notificationService } from '../function/notification'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useUser } from './auth.hook'
 import { FEATURE_FLAGS } from '@/utils/feature-flags'
 import type { SseConnectionStatus, SseNotificationEvent } from '@/services/sse.service'
@@ -37,7 +37,16 @@ export const useNotifications = (params?: NotificationParams, options: UseNotifi
     // Ref to track if initial notifications have been fetched
     const initialNotificationsFetched = useRef(false)
 
-    // SSE connection management
+    // Stabilize params object to prevent infinite loop
+    const stableParams = useMemo(
+        () => params,
+        [params?.receiverId, params?.sortOrder, params?.isRead, params?.taskType]
+    )
+
+    // Stable query key for cache operations
+    const stableQueryKey = useMemo(() => ['notifications', stableParams], [stableParams])
+
+    // SSE connection management - separate from params dependency
     useEffect(() => {
         if (!enableSse || !userId) return
 
@@ -75,28 +84,32 @@ export const useNotifications = (params?: NotificationParams, options: UseNotifi
                         .then((initialData) => {
                             if (initialData && initialData.length > 0) {
                                 console.log('📥 Fetched initial notifications:', initialData.length)
+                                console.log('📥 Cache key being used:', stableQueryKey)
 
                                 // Merge with existing data and deduplicate by ID
-                                queryClient.setQueryData(
-                                    ['notifications', params],
-                                    (oldData: Notification[] | undefined) => {
-                                        if (!oldData) return initialData
+                                queryClient.setQueryData(stableQueryKey, (oldData: Notification[] | undefined) => {
+                                    console.log('📥 Merging with existing data:', {
+                                        initial: initialData.length,
+                                        existing: oldData?.length || 0
+                                    })
 
-                                        // Merge and deduplicate by ID
-                                        const merged = [...initialData, ...oldData]
-                                        const unique = merged.filter(
-                                            (item, index, self) => index === self.findIndex((t) => t.id === item.id)
-                                        )
+                                    if (!oldData) return initialData
 
-                                        console.log('📥 Merged notifications:', {
-                                            initial: initialData.length,
-                                            existing: oldData.length,
-                                            total: unique.length
-                                        })
+                                    // Merge and deduplicate by ID
+                                    const merged = [...initialData, ...oldData]
+                                    const unique = merged.filter(
+                                        (item, index, self) => index === self.findIndex((t) => t.id === item.id)
+                                    )
 
-                                        return unique
-                                    }
-                                )
+                                    console.log('📥 Final merged result:', {
+                                        initial: initialData.length,
+                                        existing: oldData.length,
+                                        total: unique.length,
+                                        unique: unique.length
+                                    })
+
+                                    return unique
+                                })
 
                                 // Invalidate unread count to refresh
                                 queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] })
@@ -118,14 +131,14 @@ export const useNotifications = (params?: NotificationParams, options: UseNotifi
 
             switch (event.type) {
                 case 'notification_created':
-                    queryClient.setQueryData(['notifications', params], (oldData: Notification[] | undefined) => {
+                    queryClient.setQueryData(stableQueryKey, (oldData: Notification[] | undefined) => {
                         if (!oldData) return [notification]
                         return [notification, ...oldData]
                     })
                     queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] })
                     break
                 case 'notification_updated':
-                    queryClient.setQueryData(['notifications', params], (oldData: Notification[] | undefined) => {
+                    queryClient.setQueryData(stableQueryKey, (oldData: Notification[] | undefined) => {
                         if (!oldData) return []
                         return oldData.map((n) => (n.id === notification.id ? notification : n))
                     })
@@ -149,12 +162,12 @@ export const useNotifications = (params?: NotificationParams, options: UseNotifi
                 clearTimeout(retryTimeout)
             }
         }
-    }, [enableSse, userId, fallbackToPolling, queryClient, params])
+    }, [enableSse, userId, fallbackToPolling, queryClient, stableQueryKey]) // Remove params dependency
 
     // HTTP polling query (used as fallback or when SSE is disabled)
     const httpQuery = useQuery({
-        queryKey: ['notifications', params],
-        queryFn: () => notificationService.getAllNotificationByQuery(params),
+        queryKey: stableQueryKey,
+        queryFn: () => notificationService.getAllNotificationByQuery(stableParams),
         refetchInterval: usePolling ? 30000 : false, // Only poll when needed
         staleTime: usePolling ? 10000 : Infinity, // Cache longer when using SSE
         enabled: usePolling || !enableSse

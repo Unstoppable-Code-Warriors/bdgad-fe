@@ -49,6 +49,12 @@ const NotificationBell = () => {
                 subType: notificationsResponse[0].subType,
                 taskType: notificationsResponse[0].taskType
             })
+        } else {
+            console.log('🔔 No notifications in response:', {
+                notificationsResponse,
+                length: notificationsResponse?.length,
+                type: typeof notificationsResponse
+            })
         }
         return notificationsResponse || []
     }, [notificationsResponse])
@@ -77,6 +83,21 @@ const NotificationBell = () => {
             console.log('📥 Initial notifications loaded:', notifications.length)
         }
     }, [isLoadingInitial, notifications.length])
+
+    // Debug logging for React Query cache
+    useEffect(() => {
+        console.log('🔔 React Query Debug:', {
+            isLoading,
+            isLoadingInitial,
+            dataLength: notificationsResponse?.length || 0,
+            notificationsLength: notifications.length,
+            sseStatus: sse,
+            params: {
+                receiverId: userProfile?.id?.toString(),
+                sortOrder: 'DESC'
+            }
+        })
+    }, [isLoading, isLoadingInitial, notificationsResponse, notifications.length, sse, userProfile?.id])
 
     const unreadCount = useMemo(() => notifications.filter((n: Notification) => !n.isRead).length, [notifications])
 
