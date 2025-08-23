@@ -13,7 +13,7 @@ import {
 import { IconBell, IconCheck } from '@tabler/icons-react'
 import { useNotifications, useMarkNotificationAsRead } from '@/services/hook/notification.hook'
 import { useUser } from '@/services/hook/auth.hook'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { showErrorNotification } from '@/utils/notifications'
 import type { Notification } from '@/types/notification'
@@ -29,7 +29,8 @@ const NotificationBell = () => {
         data: notificationsResponse,
         isLoading,
         error,
-        sse
+        sse,
+        isLoadingInitial
     } = useNotifications({
         receiverId: userProfile?.id?.toString(),
         sortOrder: 'DESC'
@@ -56,6 +57,26 @@ const NotificationBell = () => {
     if (error) {
         console.error('Error loading notifications:', error)
     }
+
+    // Debug logging for SSE status
+    useEffect(() => {
+        if (sse) {
+            console.log('🔔 SSE Status:', {
+                connected: sse.connected,
+                usingPolling: sse.usingPolling,
+                error: sse.error
+            })
+        }
+    }, [sse])
+
+    // Debug logging for initial loading
+    useEffect(() => {
+        if (isLoadingInitial) {
+            console.log('📥 Initial notifications loading started')
+        } else if (notifications.length > 0) {
+            console.log('📥 Initial notifications loaded:', notifications.length)
+        }
+    }, [isLoadingInitial, notifications.length])
 
     const unreadCount = useMemo(() => notifications.filter((n: Notification) => !n.isRead).length, [notifications])
 
@@ -273,7 +294,11 @@ const NotificationBell = () => {
                 <Divider />
 
                 <ScrollArea h={300}>
-                    {notifications.length === 0 ? (
+                    {isLoadingInitial ? (
+                        <Text ta='center' c='dimmed' p='md'>
+                            Đang tải thông báo cũ...
+                        </Text>
+                    ) : notifications.length === 0 ? (
                         <Text ta='center' c='dimmed' p='md'>
                             Không có thông báo nào
                         </Text>

@@ -20,3 +20,11 @@ export interface Notification {
 }
 
 export type NotificationApiResponse = Notification[]
+
+// New type for initial notifications response from BE
+export interface InitialNotificationsResponse {
+    notifications: Notification[]
+    totalCount: number
+    userId: number
+    limit: number
+}

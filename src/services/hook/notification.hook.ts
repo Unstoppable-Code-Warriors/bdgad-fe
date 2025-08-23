@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { notificationService } from '../function/notification'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useUser } from './auth.hook'
 import { FEATURE_FLAGS } from '@/utils/feature-flags'
 import type { SseConnectionStatus, SseNotificationEvent } from '@/services/sse.service'
@@ -27,11 +27,15 @@ export const useNotifications = (params?: NotificationParams, options: UseNotifi
         connecting: false,
         error: null
     })
+    const [isLoadingInitial, setIsLoadingInitial] = useState(false)
 
     const { data: user } = useUser()
     const userProfile = user?.data?.user
     const userId = userProfile?.id
     const queryClient = useQueryClient()
+
+    // Ref to track if initial notifications have been fetched
+    const initialNotificationsFetched = useRef(false)
 
     // SSE connection management
     useEffect(() => {
@@ -58,6 +62,50 @@ export const useNotifications = (params?: NotificationParams, options: UseNotifi
                 // Switch off polling when SSE connects
                 setUsePolling(false)
                 console.log('SSE connected successfully')
+
+                // Fetch initial notifications when SSE connects for the first time
+                if (!initialNotificationsFetched.current) {
+                    initialNotificationsFetched.current = true
+                    setIsLoadingInitial(true)
+
+                    console.log('📥 Fetching initial notifications for user:', userId)
+
+                    notificationService
+                        .getInitialNotifications(userId, 50)
+                        .then((initialData) => {
+                            if (initialData && initialData.length > 0) {
+                                console.log('📥 Fetched initial notifications:', initialData.length)
+
+                                // Merge with existing data and deduplicate by ID
+                                queryClient.setQueryData(['notifications'], (oldData: Notification[] | undefined) => {
+                                    if (!oldData) return initialData
+
+                                    // Merge and deduplicate by ID
+                                    const merged = [...initialData, ...oldData]
+                                    const unique = merged.filter(
+                                        (item, index, self) => index === self.findIndex((t) => t.id === item.id)
+                                    )
+
+                                    console.log('📥 Merged notifications:', {
+                                        initial: initialData.length,
+                                        existing: oldData.length,
+                                        total: unique.length
+                                    })
+
+                                    return unique
+                                })
+
+                                // Invalidate unread count to refresh
+                                queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] })
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Failed to fetch initial notifications:', error)
+                        })
+                        .finally(() => {
+                            setIsLoadingInitial(false)
+                        })
+                }
             }
         }
 
@@ -112,12 +160,13 @@ export const useNotifications = (params?: NotificationParams, options: UseNotifi
     // Determine which data to return
     return {
         ...httpQuery,
-        // Add SSE connection info
+        // Add SSE connection info and initial loading state
         sse: {
             connected: sseStatus.connected,
             error: sseStatus.error,
             usingPolling: usePolling
-        }
+        },
+        isLoadingInitial
     }
 }
 
