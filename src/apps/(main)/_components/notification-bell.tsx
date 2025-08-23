@@ -11,95 +11,120 @@ import {
     Badge
 } from '@mantine/core'
 import { IconBell, IconCheck } from '@tabler/icons-react'
-import { useCombinedNotifications, useMarkNotificationAsRead } from '@/services/hook/notification.hook'
+import { useMarkNotificationAsRead } from '@/services/hook/notification.hook'
 import { useUser } from '@/services/hook/auth.hook'
 import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { showErrorNotification } from '@/utils/notifications'
 import type { Notification } from '@/types/notification'
 import { Role } from '@/utils/constant'
+import { notificationService } from '@/services/function/notification'
 
 const NotificationBell = () => {
     const navigate = useNavigate()
     const [opened, setOpened] = useState(false)
+    const [notifications, setNotifications] = useState<Notification[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+
     const { data: user } = useUser()
     const userProfile = user?.data?.user
 
-    const {
-        data: notificationsResponse,
-        isLoading,
-        error,
-        sse,
-        isLoadingInitial
-    } = useCombinedNotifications({
-        receiverId: userProfile?.id?.toString(),
-        sortOrder: 'DESC'
-    })
-
     const markAsReadMutation = useMarkNotificationAsRead()
 
-    const notifications = useMemo(() => {
-        // Debug logging để kiểm tra notification
-        if (notificationsResponse && notificationsResponse.length > 0) {
-            console.log('🔔 Notifications received:', notificationsResponse)
-            console.log('🔔 First notification structure:', {
-                id: notificationsResponse[0].id,
-                title: notificationsResponse[0].title,
-                type: notificationsResponse[0].type,
-                subType: notificationsResponse[0].subType,
-                taskType: notificationsResponse[0].taskType
-            })
-        } else {
-            console.log('🔔 No notifications in response:', {
-                notificationsResponse,
-                length: notificationsResponse?.length,
-                type: typeof notificationsResponse
-            })
-        }
-        return notificationsResponse || []
-    }, [notificationsResponse])
-
-    // Handle errors
-    if (error) {
-        console.error('Error loading notifications:', error)
-    }
-
-    // Debug logging for SSE status
+    // Fetch initial notifications
     useEffect(() => {
-        if (sse) {
-            console.log('🔔 SSE Status:', {
-                connected: sse.connected,
-                usingPolling: sse.usingPolling,
-                error: sse.error
-            })
-        }
-    }, [sse])
+        if (!userProfile?.id) return
 
-    // Debug logging for initial loading
-    useEffect(() => {
-        if (isLoadingInitial) {
-            console.log('📥 Initial notifications loading started')
-        } else if (notifications.length > 0) {
-            console.log('📥 Initial notifications loaded:', notifications.length)
-        }
-    }, [isLoadingInitial, notifications.length])
+        const fetchInitialNotifications = async () => {
+            try {
+                setIsLoading(true)
+                console.log('📥 Fetching initial notifications for user:', userProfile.id)
 
-    // Debug logging for React Query cache
+                const initialNotifications = await notificationService.getAllNotificationByQuery({
+                    receiverId: userProfile.id.toString(),
+                    sortOrder: 'DESC'
+                })
+
+                console.log('📥 Fetched initial notifications:', initialNotifications.length)
+                setNotifications(initialNotifications || [])
+            } catch (error) {
+                console.error('Failed to fetch initial notifications:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchInitialNotifications()
+    }, [userProfile?.id])
+
+    // Setup SSE connection
     useEffect(() => {
-        console.log('🔔 React Query Debug:', {
-            isLoading,
-            isLoadingInitial,
-            dataLength: notificationsResponse?.length || 0,
-            notificationsLength: notifications.length,
-            sseStatus: sse,
-            params: {
-                receiverId: userProfile?.id?.toString(),
-                sortOrder: 'DESC'
+        if (!userProfile?.id) return
+
+        console.log('🔗 Setting up SSE connection for user:', userProfile.id)
+
+        // Connect to SSE
+        notificationService.connectSse(userProfile.id)
+
+        // Handle SSE connection status
+        const unsubConnection = notificationService.onSseConnectionChange((status) => {
+            console.log('🔗 SSE connection status:', status)
+        })
+
+        // Handle SSE notifications
+        const unsubNotification = notificationService.onSseNotification((event) => {
+            console.log('🔔 SSE notification received:', event.type, event.data)
+
+            if (event.type === 'notification_created') {
+                const newNotification = event.data as Notification
+                console.log('🆕 Adding new notification to local state:', newNotification.id)
+
+                setNotifications((prev) => {
+                    // Add new notification at the beginning, avoid duplicates
+                    const exists = prev.some((n) => n.id === newNotification.id)
+                    if (exists) {
+                        console.log('⚠️ Notification already exists, skipping')
+                        return prev
+                    }
+
+                    const updated = [newNotification, ...prev]
+                    console.log('✅ Updated notifications count:', updated.length)
+                    return updated
+                })
+            } else if (event.type === 'notification_updated') {
+                const updatedNotification = event.data as Notification
+                console.log('🔄 Updating notification in local state:', updatedNotification.id)
+
+                setNotifications((prev) => prev.map((n) => (n.id === updatedNotification.id ? updatedNotification : n)))
             }
         })
-    }, [isLoading, isLoadingInitial, notificationsResponse, notifications.length, sse, userProfile?.id])
+
+        return () => {
+            console.log('🧹 Cleaning up SSE connection')
+            unsubConnection()
+            unsubNotification()
+            notificationService.disconnectSse()
+        }
+    }, [userProfile?.id])
+
+    // Debug logging
+    useEffect(() => {
+        console.log('🔔 Notifications state updated:', {
+            count: notifications.length,
+            notifications: notifications.map((n) => ({ id: n.id, title: n.title, createdAt: n.createdAt }))
+        })
+    }, [notifications])
 
     const unreadCount = useMemo(() => notifications.filter((n: Notification) => !n.isRead).length, [notifications])
+
+    // Handle errors
+    if (isLoading) {
+        return (
+            <ActionIcon variant='light' size='lg' radius='md' loading>
+                <IconBell size={18} />
+            </ActionIcon>
+        )
+    }
 
     const handleMarkAsRead = async (notificationId: number) => {
         try {
@@ -256,14 +281,6 @@ const NotificationBell = () => {
         }
     }
 
-    if (isLoading) {
-        return (
-            <ActionIcon variant='light' size='lg' radius='md' loading>
-                <IconBell size={18} />
-            </ActionIcon>
-        )
-    }
-
     return (
         <Menu shadow='md' width={400} position='bottom-end' opened={opened} onChange={setOpened}>
             <Menu.Target>
@@ -297,7 +314,7 @@ const NotificationBell = () => {
                 <Divider />
 
                 <ScrollArea h={300}>
-                    {isLoadingInitial ? (
+                    {isLoading ? (
                         <Text ta='center' c='dimmed' p='md'>
                             Đang tải thông báo cũ...
                         </Text>
