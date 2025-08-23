@@ -79,9 +79,17 @@ const PatientFolderPage = () => {
         selectedYear !== null ||
         selectedMonth !== null
 
-    const { data: yearMonthData, isLoading: isYearMonthLoading, refetch: refetchYearMonth } = usePatientFoldersByCreatedDate()
+    const {
+        data: yearMonthData,
+        isLoading: isYearMonthLoading,
+        refetch: refetchYearMonth
+    } = usePatientFoldersByCreatedDate()
 
-    const { data: patientsResponse, isLoading, refetch: refetchPatients } = usePatientFolders({
+    const {
+        data: patientsResponse,
+        isLoading,
+        refetch: refetchPatients
+    } = usePatientFolders({
         search: searchTerm,
         page: page,
         limit: limit,
@@ -250,7 +258,8 @@ const PatientFolderPage = () => {
                         </div>
                     </Group>
                     {!isSearchMode && (
-                        <Button className='mr-3'
+                        <Button
+                            className='mr-3'
                             leftSection={<IconPlus size={16} />}
                             onClick={() => setIsAddModalOpen(true)}
                         >
@@ -289,13 +298,8 @@ const PatientFolderPage = () => {
                                 />
                             </Grid.Col>
                             <Grid.Col span={{ base: 12, sm: 12, md: 2 }}>
-                                <Tooltip label="Xóa bộ lọc" withArrow>
-                                    <ActionIcon 
-                                        variant='light' 
-                                        onClick={clearFilters}
-                                        size='lg'
-                                        color='gray'
-                                    >
+                                <Tooltip label='Xóa bộ lọc' withArrow>
+                                    <ActionIcon variant='light' onClick={clearFilters} size='lg' color='gray'>
                                         <IconFilterX size={18} />
                                     </ActionIcon>
                                 </Tooltip>
@@ -536,8 +540,8 @@ const PatientFolderPage = () => {
                 )}
 
                 {/* Add Patient Modal */}
-                <AddPatientModal 
-                    opened={isAddModalOpen} 
+                <AddPatientModal
+                    opened={isAddModalOpen}
                     onClose={handleCloseAddModal}
                     onSuccess={() => {
                         refetchYearMonth()

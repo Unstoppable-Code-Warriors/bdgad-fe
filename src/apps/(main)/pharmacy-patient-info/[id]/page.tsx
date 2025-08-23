@@ -162,29 +162,29 @@ const PharmacyPatientInfoPage = () => {
                     </Group>
                 </Paper>
 
-                <Tabs defaultValue="patient-info" variant="pills" radius="md">
+                <Tabs defaultValue='patient-info' variant='pills' radius='md'>
                     <Tabs.List grow>
-                        <Tabs.Tab value="patient-info" leftSection={<IconUser size={16} />}>
+                        <Tabs.Tab value='patient-info' leftSection={<IconUser size={16} />}>
                             Thông tin cá nhân
                         </Tabs.Tab>
                         {patient.medicalRecord && (
-                            <Tabs.Tab value="medical-record" leftSection={<IconFileText size={16} />}>
+                            <Tabs.Tab value='medical-record' leftSection={<IconFileText size={16} />}>
                                 Hồ sơ khám bệnh
                             </Tabs.Tab>
                         )}
                         {patient.medicalRecord?.lab_test && patient.medicalRecord.lab_test.length > 0 && (
-                            <Tabs.Tab value="lab-tests" leftSection={<IconTestPipe size={16} />}>
+                            <Tabs.Tab value='lab-tests' leftSection={<IconTestPipe size={16} />}>
                                 Kết quả xét nghiệm
                             </Tabs.Tab>
                         )}
                         {patient.medicalRecord?.prescription && (
-                            <Tabs.Tab value="prescription" leftSection={<IconPill size={16} />}>
+                            <Tabs.Tab value='prescription' leftSection={<IconPill size={16} />}>
                                 Đơn thuốc
                             </Tabs.Tab>
                         )}
                     </Tabs.List>
 
-                    <Tabs.Panel value="patient-info" pt="lg">
+                    <Tabs.Panel value='patient-info' pt='lg'>
                         <Grid>
                             {/* Patient Information */}
                             <Grid.Col span={{ base: 12, md: 6 }}>
@@ -332,7 +332,7 @@ const PharmacyPatientInfoPage = () => {
                     </Tabs.Panel>
 
                     {patient.medicalRecord && (
-                        <Tabs.Panel value="medical-record" pt="lg">
+                        <Tabs.Panel value='medical-record' pt='lg'>
                             <Card shadow='sm' padding='lg' radius='md' withBorder>
                                 <Group mb='md'>
                                     <IconFileText size={24} />
@@ -418,7 +418,7 @@ const PharmacyPatientInfoPage = () => {
                     )}
 
                     {patient.medicalRecord?.lab_test && patient.medicalRecord.lab_test.length > 0 && (
-                        <Tabs.Panel value="lab-tests" pt="lg">
+                        <Tabs.Panel value='lab-tests' pt='lg'>
                             <Card shadow='sm' padding='lg' radius='md' withBorder>
                                 <Group mb='md'>
                                     <IconTestPipe size={24} color='var(--mantine-color-orange-6)' />
@@ -497,7 +497,7 @@ const PharmacyPatientInfoPage = () => {
                     )}
 
                     {patient.medicalRecord?.prescription && (
-                        <Tabs.Panel value="prescription" pt="lg">
+                        <Tabs.Panel value='prescription' pt='lg'>
                             <Card shadow='sm' padding='lg' radius='md' withBorder>
                                 <Group mb='md'>
                                     <IconPill size={24} color='var(--mantine-color-teal-6)' />

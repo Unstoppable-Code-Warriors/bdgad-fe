@@ -75,7 +75,7 @@ const LabTestDetailPage = () => {
 
         // Use selected analysis ID
         const analysisId = selectedAnalysisId ? parseInt(selectedAnalysisId, 10) : undefined
-        
+
         if (!analysisId) {
             notifications.show({
                 title: 'Thiếu thông tin',

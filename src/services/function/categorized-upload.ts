@@ -22,7 +22,6 @@ export const uploadCategorizedPatientFiles = async (
 
     // Validate and clean data before sending
     const cleanFileCategories = params.fileCategories.map((cat, index) => {
-
         // Extract the actual string value from the enum
         let categoryValue: string = cat.category
         if (typeof categoryValue === 'object' && categoryValue !== null) {
@@ -97,7 +96,6 @@ export const uploadCategorizedPatientFiles = async (
     try {
         const testCategories = JSON.parse(JSON.stringify(cleanFileCategories))
         const testOcr = cleanOcrResults.length > 0 ? JSON.parse(JSON.stringify(cleanOcrResults)) : []
-
 
         // Ensure the deserialized data still has valid values
         if (testCategories.some((cat: any) => !cat.category || !cat.fileName)) {

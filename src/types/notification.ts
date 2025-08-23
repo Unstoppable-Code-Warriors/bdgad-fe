@@ -8,8 +8,9 @@ export interface Notification {
     id: number
     title: string
     message: string
-    taskType: 'system' | 'lab_task' | 'analysis_task' | 'validation_task'
+    type: 'INFO' | 'WARNING' | 'ERROR' | 'SUCCESS'
     subType?: 'reject' | 'accept'
+    taskType: 'system' | 'lab_task' | 'analysis_task' | 'validation_task'
     sender: NotificationUser
     receiver: NotificationUser
     isRead: boolean

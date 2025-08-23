@@ -25,14 +25,37 @@ const NotificationBell = () => {
     const { data: user } = useUser()
     const userProfile = user?.data?.user
 
-    const { data: notificationsResponse, isLoading } = useNotifications({
+    const {
+        data: notificationsResponse,
+        isLoading,
+        error,
+        sse
+    } = useNotifications({
         receiverId: userProfile?.id?.toString(),
         sortOrder: 'DESC'
     })
 
     const markAsReadMutation = useMarkNotificationAsRead()
 
-    const notifications = useMemo(() => notificationsResponse || [], [notificationsResponse])
+    const notifications = useMemo(() => {
+        // Debug logging để kiểm tra notification
+        if (notificationsResponse && notificationsResponse.length > 0) {
+            console.log('🔔 Notifications received:', notificationsResponse)
+            console.log('🔔 First notification structure:', {
+                id: notificationsResponse[0].id,
+                title: notificationsResponse[0].title,
+                type: notificationsResponse[0].type,
+                subType: notificationsResponse[0].subType,
+                taskType: notificationsResponse[0].taskType
+            })
+        }
+        return notificationsResponse || []
+    }, [notificationsResponse])
+
+    // Handle errors
+    if (error) {
+        console.error('Error loading notifications:', error)
+    }
 
     const unreadCount = useMemo(() => notifications.filter((n: Notification) => !n.isRead).length, [notifications])
 
@@ -144,34 +167,64 @@ const NotificationBell = () => {
         if (subType === 'accept') return 'green'
         if (subType === 'reject') return 'red'
 
-        // Default type colors
+        // Use type field from BE for color (INFO, WARNING, ERROR, SUCCESS)
         switch (type) {
-            case 'system':
+            case 'INFO':
                 return 'blue'
-            case 'lab_task':
-                return 'green'
-            case 'analysis_task':
-                return 'purple'
-            case 'validation_task':
+            case 'WARNING':
                 return 'orange'
+            case 'ERROR':
+                return 'red'
+            case 'SUCCESS':
+                return 'green'
             default:
                 return 'gray'
         }
     }
 
     const getNotificationTypeLabel = (type: string) => {
+        // Use type field from BE for display label
         switch (type) {
-            case 'system':
-                return 'Hệ thống'
+            case 'INFO':
+                return 'Thông tin'
+            case 'WARNING':
+                return 'Cảnh báo'
+            case 'ERROR':
+                return 'Lỗi'
+            case 'SUCCESS':
+                return 'Thành công'
+            default:
+                return 'Khác'
+        }
+    }
+
+    const getTaskTypeLabel = (taskType?: string) => {
+        if (!taskType) return 'Khác'
+        switch (taskType) {
             case 'lab_task':
                 return 'Xét nghiệm'
             case 'analysis_task':
                 return 'Phân tích'
             case 'validation_task':
                 return 'Thẩm định'
+            case 'system':
+                return 'Hệ thống'
             default:
                 return 'Khác'
         }
+    }
+
+    // SSE connection indicator
+    const getSseStatusColor = () => {
+        if (sse?.connected) return 'green'
+        if (sse?.usingPolling) return 'orange'
+        return 'red'
+    }
+
+    const getSseStatusText = () => {
+        if (sse?.connected) return 'SSE'
+        if (sse?.usingPolling) return 'Polling'
+        return 'Offline'
     }
 
     if (isLoading) {
@@ -202,13 +255,20 @@ const NotificationBell = () => {
                     <Text fw={600} size='sm'>
                         Thông báo
                     </Text>
-                    {unreadCount > 0 && (
-                        <UnstyledButton onClick={handleMarkAllAsRead} disabled={markAsReadMutation.isPending}>
-                            <Text size='xs' c='blue'>
-                                {markAsReadMutation.isPending ? 'Đang xử lý...' : 'Đánh dấu đã đọc tất cả'}
-                            </Text>
-                        </UnstyledButton>
-                    )}
+                    <Group gap='xs'>
+                        {sse && (
+                            <Badge size='xs' color={getSseStatusColor()} variant='light'>
+                                {getSseStatusText()}
+                            </Badge>
+                        )}
+                        {unreadCount > 0 && (
+                            <UnstyledButton onClick={handleMarkAllAsRead} disabled={markAsReadMutation.isPending}>
+                                <Text size='xs' c='blue'>
+                                    {markAsReadMutation.isPending ? 'Đang xử lý...' : 'Đánh dấu đã đọc tất cả'}
+                                </Text>
+                            </UnstyledButton>
+                        )}
+                    </Group>
                 </Group>
                 <Divider />
 
@@ -235,7 +295,7 @@ const NotificationBell = () => {
                                 <Group gap='sm' align='flex-start'>
                                     <Badge
                                         size='xs'
-                                        color={getNotificationColor(notification.taskType, notification.subType)}
+                                        color={getNotificationColor(notification.type, notification.subType)}
                                         variant='dot'
                                     />
                                     <Stack gap={2} style={{ flex: 1 }}>
@@ -248,16 +308,21 @@ const NotificationBell = () => {
                                                     </Text>
                                                 )}
                                             </Text>
-                                            <Badge
-                                                size='xs'
-                                                color={getNotificationColor(
-                                                    notification.taskType,
-                                                    notification.subType
-                                                )}
-                                                variant='light'
-                                            >
-                                                {getNotificationTypeLabel(notification.taskType)}
-                                            </Badge>
+                                            <Group gap='xs'>
+                                                <Badge
+                                                    size='xs'
+                                                    color={getNotificationColor(
+                                                        notification.type,
+                                                        notification.subType
+                                                    )}
+                                                    variant='light'
+                                                >
+                                                    {getNotificationTypeLabel(notification.type)}
+                                                </Badge>
+                                                <Badge size='xs' color='gray' variant='outline'>
+                                                    {getTaskTypeLabel(notification.taskType)}
+                                                </Badge>
+                                            </Group>
                                         </Group>
                                         <Text size='xs' c='dimmed' lineClamp={2} mr='lg'>
                                             {notification.message}
