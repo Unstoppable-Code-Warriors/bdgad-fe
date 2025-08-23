@@ -68,10 +68,11 @@ export const useSseNotifications = (userId?: number) => {
         let retryTimeout: NodeJS.Timeout
 
         const handleConnectionChange = (status: SseConnectionStatus) => {
+            console.log('🔗 SSE connection status changed:', status)
             setSseStatus(status)
 
             if (status.connected) {
-                console.log('SSE connected successfully')
+                console.log('✅ SSE connected successfully')
 
                 // Fetch initial notifications when SSE connects for the first time
                 if (!initialNotificationsFetched.current) {
@@ -88,6 +89,7 @@ export const useSseNotifications = (userId?: number) => {
 
                                 // Set initial notifications to local state (not TanStack Query)
                                 setRealTimeNotifications(initialData)
+                                console.log('📊 Set initial realTimeNotifications:', initialData.length)
                             }
                         })
                         .catch((error) => {
@@ -116,19 +118,39 @@ export const useSseNotifications = (userId?: number) => {
 
             switch (event.type) {
                 case 'notification_created':
+                    console.log('🆕 Processing notification_created event')
                     setRealTimeNotifications((prev) => {
+                        console.log(
+                            '📊 Previous realTimeNotifications:',
+                            prev.length,
+                            prev.map((n) => ({ id: n.id, title: n.title }))
+                        )
+
                         // Add new notification at the beginning
                         const updated = [notification, ...prev]
+                        console.log('📦 Updated with new notification:', updated.length)
+
                         // Remove duplicates by ID
                         const unique = updated.filter(
                             (item, index, self) => index === self.findIndex((t) => t.id === item.id)
                         )
+                        console.log(
+                            '✨ Final unique realTimeNotifications:',
+                            unique.length,
+                            unique.map((n) => ({ id: n.id, title: n.title }))
+                        )
+
                         return unique
                     })
                     break
 
                 case 'notification_updated':
-                    setRealTimeNotifications((prev) => prev.map((n) => (n.id === notification.id ? notification : n)))
+                    console.log('🔄 Processing notification_updated event')
+                    setRealTimeNotifications((prev) => {
+                        const updated = prev.map((n) => (n.id === notification.id ? notification : n))
+                        console.log('🔄 Updated notification in realTimeNotifications:', updated.length)
+                        return updated
+                    })
                     break
             }
         }
@@ -181,15 +203,29 @@ export const useCombinedNotifications = (params?: NotificationParams, options: U
         const sseData = sseNotifications.realTimeNotifications || []
         const restData = restNotifications.data || []
 
+        console.log('🔄 Merging notifications:', {
+            sseDataLength: sseData.length,
+            restDataLength: restData.length,
+            sseData: sseData.map((n) => ({ id: n.id, title: n.title, createdAt: n.createdAt })),
+            restData: restData.map((n) => ({ id: n.id, title: n.title, createdAt: n.createdAt }))
+        })
+
         if (!enableSse) {
-            // Only REST API when SSE is disabled
+            console.log('⚠️ SSE disabled, using only REST API data')
             return restData
         }
 
         // Always merge SSE + REST data when SSE is enabled
         const merged = [...sseData, ...restData]
+        console.log('📦 Merged data length:', merged.length)
+
         // Remove duplicates by ID, prioritize SSE data (newer)
         const unique = merged.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id))
+        console.log(
+            '✨ Final unique notifications:',
+            unique.length,
+            unique.map((n) => ({ id: n.id, title: n.title, createdAt: n.createdAt }))
+        )
 
         return unique
     }, [sseNotifications.realTimeNotifications, restNotifications.data, enableSse])
