@@ -68,12 +68,12 @@ const NotificationBell = () => {
 
         // Handle SSE connection status
         const unsubConnection = notificationService.onSseConnectionChange((status) => {
-            console.log('🔗 SSE connection status:', status)
+            console.log('🔗 SSE connection status received in component:', status)
         })
 
         // Handle SSE notifications
         const unsubNotification = notificationService.onSseNotification((event) => {
-            console.log('🔔 SSE notification received:', event.type, event.data)
+            console.log('🔔 SSE notification received in component:', event.type, event.data)
 
             if (event.type === 'notification_created') {
                 const newNotification = event.data as Notification
@@ -98,6 +98,8 @@ const NotificationBell = () => {
                 setNotifications((prev) => prev.map((n) => (n.id === updatedNotification.id ? updatedNotification : n)))
             }
         })
+
+        console.log('🔗 SSE callbacks registered successfully')
 
         return () => {
             console.log('🧹 Cleaning up SSE connection')
