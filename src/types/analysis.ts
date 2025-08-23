@@ -77,6 +77,10 @@ export interface AnalysisSession {
     patient: Patient
     doctor: User
     validation: ValidationAssign
+    labTesting: {
+        id: number
+        name: string
+    }
 }
 
 export interface AnalysisAssign {
