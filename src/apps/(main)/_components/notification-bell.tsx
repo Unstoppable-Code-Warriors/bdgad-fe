@@ -11,7 +11,7 @@ import {
     Badge
 } from '@mantine/core'
 import { IconBell, IconCheck } from '@tabler/icons-react'
-import { useNotifications, useMarkNotificationAsRead } from '@/services/hook/notification.hook'
+import { useCombinedNotifications, useMarkNotificationAsRead } from '@/services/hook/notification.hook'
 import { useUser } from '@/services/hook/auth.hook'
 import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
@@ -31,7 +31,7 @@ const NotificationBell = () => {
         error,
         sse,
         isLoadingInitial
-    } = useNotifications({
+    } = useCombinedNotifications({
         receiverId: userProfile?.id?.toString(),
         sortOrder: 'DESC'
     })
