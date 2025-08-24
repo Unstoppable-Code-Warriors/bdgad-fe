@@ -3,14 +3,7 @@ import { useDebouncedValue } from '@mantine/hooks'
 import { useNavigate } from 'react-router'
 import { Title, Group, Stack, Paper, Button, Badge, Text, ActionIcon, Alert, Tooltip, Tabs } from '@mantine/core'
 import { DataTable, type DataTableColumn } from 'mantine-datatable'
-import {
-    IconEye,
-    IconAlertCircle,
-    IconDownload,
-    IconBan,
-    IconCheck,
-    IconLoader,
-} from '@tabler/icons-react'
+import { IconEye, IconAlertCircle, IconDownload, IconBan, IconCheck, IconLoader } from '@tabler/icons-react'
 import { statusConfig, LAB_TEST_STATUS, type LabTestFilter, type LabTestStatus } from '@/types/lab-test.types'
 import { useLabTestSessions } from '@/services/hook/lab-test.hook'
 import { labTestService } from '@/services/function/lab-test'

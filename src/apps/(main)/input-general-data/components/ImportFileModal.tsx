@@ -23,7 +23,6 @@ const ImportFileModal = ({ opened, onClose, onImport }: ImportFileModalProps) =>
     }
 
     const handleFileReject = (rejectedFiles: FileRejection[]) => {
-
         const errorMessages = rejectedFiles.map(({ file, errors }) => {
             const fileName = file.name
             const errorList = errors.map((error) => {
@@ -124,7 +123,8 @@ const ImportFileModal = ({ opened, onClose, onImport }: ImportFileModalProps) =>
                                 Kéo thả file vào đây hoặc nhấp để chọn file
                             </Text>
                             <Text size='sm' c='dimmed' inline mt={7}>
-                                Hỗ trợ các định dạng: .xlsx, .csv, .pdf, .txt, .docx, .jpg, .jpeg, .png, .gif (tối đa 10MB)
+                                Hỗ trợ các định dạng: .xlsx, .csv, .pdf, .txt, .docx, .jpg, .jpeg, .png, .gif (tối đa
+                                10MB)
                             </Text>
                         </div>
                     </Group>

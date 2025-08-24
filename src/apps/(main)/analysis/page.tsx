@@ -11,7 +11,10 @@ const AnalysisPage = () => {
     }, [navigate])
 
     return (
-        <Container size='xl' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <Container
+            size='xl'
+            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}
+        >
             <Loader />
         </Container>
     )

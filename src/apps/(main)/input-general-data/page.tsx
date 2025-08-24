@@ -63,7 +63,6 @@ const InputGeneralDataPage = () => {
     }
 
     const handleSendEmr = async () => {
-  
         try {
             await sendEmrMutation.mutateAsync({
                 categoryGeneralFileIds: Array.from(selectedCategories)

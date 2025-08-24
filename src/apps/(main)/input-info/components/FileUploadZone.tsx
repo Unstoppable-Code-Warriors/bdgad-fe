@@ -53,7 +53,6 @@ const FileUploadZone = ({ onDrop, onReject, existingFiles = [] }: FileUploadZone
     }
 
     const handleFileReject = (rejectedFiles: FileRejection[]) => {
-
         const errorMessages = rejectedFiles.map(({ file, errors }) => {
             const fileName = file.name
             const errorList = errors.map((error) => {

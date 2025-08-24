@@ -11,30 +11,122 @@ import {
     Badge
 } from '@mantine/core'
 import { IconBell, IconCheck } from '@tabler/icons-react'
-import { useNotifications, useMarkNotificationAsRead } from '@/services/hook/notification.hook'
+import { useMarkNotificationAsRead } from '@/services/hook/notification.hook'
 import { useUser } from '@/services/hook/auth.hook'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { showErrorNotification } from '@/utils/notifications'
 import type { Notification } from '@/types/notification'
 import { Role } from '@/utils/constant'
+import { notificationService } from '@/services/function/notification'
 
 const NotificationBell = () => {
     const navigate = useNavigate()
     const [opened, setOpened] = useState(false)
+    const [notifications, setNotifications] = useState<Notification[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+
     const { data: user } = useUser()
     const userProfile = user?.data?.user
 
-    const { data: notificationsResponse, isLoading } = useNotifications({
-        receiverId: userProfile?.id?.toString(),
-        sortOrder: 'DESC'
-    })
-
     const markAsReadMutation = useMarkNotificationAsRead()
 
-    const notifications = useMemo(() => notificationsResponse || [], [notificationsResponse])
+    // Fetch initial notifications
+    useEffect(() => {
+        if (!userProfile?.id) return
+
+        const fetchInitialNotifications = async () => {
+            try {
+                setIsLoading(true)
+                console.log('📥 Fetching initial notifications for user:', userProfile.id)
+
+                const initialNotifications = await notificationService.getAllNotificationByQuery({
+                    receiverId: userProfile.id.toString(),
+                    sortOrder: 'DESC'
+                })
+
+                console.log('📥 Fetched initial notifications:', initialNotifications.length)
+                setNotifications(initialNotifications || [])
+            } catch (error) {
+                console.error('Failed to fetch initial notifications:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchInitialNotifications()
+    }, [userProfile?.id])
+
+    // Setup SSE connection
+    useEffect(() => {
+        if (!userProfile?.id) return
+
+        console.log('🔗 Setting up SSE connection for user:', userProfile.id)
+
+        // Connect to SSE
+        notificationService.connectSse(userProfile.id)
+
+        // Handle SSE connection status
+        const unsubConnection = notificationService.onSseConnectionChange((status) => {
+            console.log('🔗 SSE connection status received in component:', status)
+        })
+
+        // Handle SSE notifications
+        const unsubNotification = notificationService.onSseNotification((event) => {
+            console.log('🔔 SSE notification received in component:', event.type, event.data)
+
+            if (event.type === 'notification_created') {
+                const newNotification = event.data as Notification
+                console.log('🆕 Adding new notification to local state:', newNotification.id)
+
+                setNotifications((prev) => {
+                    // Add new notification at the beginning, avoid duplicates
+                    const exists = prev.some((n) => n.id === newNotification.id)
+                    if (exists) {
+                        console.log('⚠️ Notification already exists, skipping')
+                        return prev
+                    }
+
+                    const updated = [newNotification, ...prev]
+                    console.log('✅ Updated notifications count:', updated.length)
+                    return updated
+                })
+            } else if (event.type === 'notification_updated') {
+                const updatedNotification = event.data as Notification
+                console.log('🔄 Updating notification in local state:', updatedNotification.id)
+
+                setNotifications((prev) => prev.map((n) => (n.id === updatedNotification.id ? updatedNotification : n)))
+            }
+        })
+
+        console.log('🔗 SSE callbacks registered successfully')
+
+        return () => {
+            console.log('🧹 Cleaning up SSE connection')
+            unsubConnection()
+            unsubNotification()
+            notificationService.disconnectSse()
+        }
+    }, [userProfile?.id])
+
+    // Debug logging
+    useEffect(() => {
+        console.log('🔔 Notifications state updated:', {
+            count: notifications.length,
+            notifications: notifications.map((n) => ({ id: n.id, title: n.title, createdAt: n.createdAt }))
+        })
+    }, [notifications])
 
     const unreadCount = useMemo(() => notifications.filter((n: Notification) => !n.isRead).length, [notifications])
+
+    // Handle errors
+    if (isLoading) {
+        return (
+            <ActionIcon variant='light' size='lg' radius='md' loading>
+                <IconBell size={18} />
+            </ActionIcon>
+        )
+    }
 
     const handleMarkAsRead = async (notificationId: number) => {
         try {
@@ -144,42 +236,51 @@ const NotificationBell = () => {
         if (subType === 'accept') return 'green'
         if (subType === 'reject') return 'red'
 
-        // Default type colors
+        // Use type field from BE for color (INFO, WARNING, ERROR, SUCCESS)
         switch (type) {
-            case 'system':
+            case 'INFO':
                 return 'blue'
-            case 'lab_task':
-                return 'green'
-            case 'analysis_task':
-                return 'purple'
-            case 'validation_task':
+            case 'WARNING':
                 return 'orange'
+            case 'ERROR':
+                return 'red'
+            case 'SUCCESS':
+                return 'green'
             default:
                 return 'gray'
         }
     }
 
     const getNotificationTypeLabel = (type: string) => {
+        // Use type field from BE for display label
         switch (type) {
-            case 'system':
-                return 'Hệ thống'
+            case 'INFO':
+                return 'Thông tin'
+            case 'WARNING':
+                return 'Cảnh báo'
+            case 'ERROR':
+                return 'Lỗi'
+            case 'SUCCESS':
+                return 'Thành công'
+            default:
+                return 'Khác'
+        }
+    }
+
+    const getTaskTypeLabel = (taskType?: string) => {
+        if (!taskType) return 'Khác'
+        switch (taskType) {
             case 'lab_task':
                 return 'Xét nghiệm'
             case 'analysis_task':
                 return 'Phân tích'
             case 'validation_task':
                 return 'Thẩm định'
+            case 'system':
+                return 'Hệ thống'
             default:
                 return 'Khác'
         }
-    }
-
-    if (isLoading) {
-        return (
-            <ActionIcon variant='light' size='lg' radius='md' loading>
-                <IconBell size={18} />
-            </ActionIcon>
-        )
     }
 
     return (
@@ -202,18 +303,24 @@ const NotificationBell = () => {
                     <Text fw={600} size='sm'>
                         Thông báo
                     </Text>
-                    {unreadCount > 0 && (
-                        <UnstyledButton onClick={handleMarkAllAsRead} disabled={markAsReadMutation.isPending}>
-                            <Text size='xs' c='blue'>
-                                {markAsReadMutation.isPending ? 'Đang xử lý...' : 'Đánh dấu đã đọc tất cả'}
-                            </Text>
-                        </UnstyledButton>
-                    )}
+                    <Group gap='xs'>
+                        {unreadCount > 0 && (
+                            <UnstyledButton onClick={handleMarkAllAsRead} disabled={markAsReadMutation.isPending}>
+                                <Text size='xs' c='blue'>
+                                    {markAsReadMutation.isPending ? 'Đang xử lý...' : 'Đánh dấu đã đọc tất cả'}
+                                </Text>
+                            </UnstyledButton>
+                        )}
+                    </Group>
                 </Group>
                 <Divider />
 
                 <ScrollArea h={300}>
-                    {notifications.length === 0 ? (
+                    {isLoading ? (
+                        <Text ta='center' c='dimmed' p='md'>
+                            Đang tải thông báo cũ...
+                        </Text>
+                    ) : notifications.length === 0 ? (
                         <Text ta='center' c='dimmed' p='md'>
                             Không có thông báo nào
                         </Text>
@@ -235,7 +342,7 @@ const NotificationBell = () => {
                                 <Group gap='sm' align='flex-start'>
                                     <Badge
                                         size='xs'
-                                        color={getNotificationColor(notification.taskType, notification.subType)}
+                                        color={getNotificationColor(notification.type, notification.subType)}
                                         variant='dot'
                                     />
                                     <Stack gap={2} style={{ flex: 1 }}>
@@ -248,16 +355,21 @@ const NotificationBell = () => {
                                                     </Text>
                                                 )}
                                             </Text>
-                                            <Badge
-                                                size='xs'
-                                                color={getNotificationColor(
-                                                    notification.taskType,
-                                                    notification.subType
-                                                )}
-                                                variant='light'
-                                            >
-                                                {getNotificationTypeLabel(notification.taskType)}
-                                            </Badge>
+                                            <Group gap='xs'>
+                                                <Badge
+                                                    size='xs'
+                                                    color={getNotificationColor(
+                                                        notification.type,
+                                                        notification.subType
+                                                    )}
+                                                    variant='light'
+                                                >
+                                                    {getNotificationTypeLabel(notification.type)}
+                                                </Badge>
+                                                <Badge size='xs' color='gray' variant='outline'>
+                                                    {getTaskTypeLabel(notification.taskType)}
+                                                </Badge>
+                                            </Group>
                                         </Group>
                                         <Text size='xs' c='dimmed' lineClamp={2} mr='lg'>
                                             {notification.message}
