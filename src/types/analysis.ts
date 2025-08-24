@@ -145,4 +145,7 @@ export interface AnalysisFilter {
     fastqFilePairStatus?: string
     etlStatus?: string
     etlApprovalStatus?: string
+    search?: string
+    dateFrom?: string
+    dateTo?: string
 }

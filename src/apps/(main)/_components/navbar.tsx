@@ -25,13 +25,13 @@ export const navItems = [
     },
     {
         label: 'Quản lý FastQ',
-        icon: IconChartLine,
+        icon: IconDna,
         href: '/analysis/fastq',
         roles: [Role.ANALYSIS_TECHNICIAN]
     },
     {
         label: 'Quản lý kết quả ETL',
-        icon: IconDna,
+        icon: IconChartLine,
         href: '/analysis/etl',
         roles: [Role.ANALYSIS_TECHNICIAN]
     },

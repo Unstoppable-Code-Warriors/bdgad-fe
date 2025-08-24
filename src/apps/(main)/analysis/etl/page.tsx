@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
-import { Title, TextInput, Group, Stack, Paper, Badge, ActionIcon, Alert, Tooltip, Text, Tabs } from '@mantine/core'
+import { Title, TextInput, Group, Stack, Paper, Badge, ActionIcon, Alert, Tooltip, Text, Tabs, Select } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
 import { DataTable, type DataTableColumn, type DataTableSortStatus } from 'mantine-datatable'
 import {
@@ -11,9 +11,6 @@ import {
     IconAlertCircle,
     IconLoader,
     IconCheck,
-    IconClock,
-    IconBan,
-    IconAlertTriangle
 } from '@tabler/icons-react'
 import { analysisStatusConfig, AnalysisStatus, type AnalysisFilter } from '@/types/analysis'
 import { useAnalysisSessions, useProcessAnalysis } from '@/services/hook/analysis.hook'
@@ -40,7 +37,11 @@ const ETLManagementPage = () => {
     const [search, setSearch] = useSearchParamState({ key: 'search', initValue: '' })
     const [sortBy, setSortBy] = useSearchParamState({ key: 'sortBy', initValue: 'createdAt' })
     const [sortOrder, setSortOrder] = useSearchParamState({ key: 'sortOrder', initValue: 'DESC' })
-    const [activeTab, setActiveTab] = useSearchParamState({ key: 'status', initValue: 'processing' })
+    const [activeTab, setActiveTab] = useSearchParamState({ key: 'tab', initValue: 'processing' })
+    const [statusFilter, setStatusFilter] = useSearchParamState({ 
+        key: 'status', 
+        initValue: '' 
+    })
 
     // Filters
     const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
@@ -50,21 +51,51 @@ const ETLManagementPage = () => {
 
     // Build filter object
     const filter: AnalysisFilter = useMemo(() => {
-        return {}
-    }, [])
+        const filterObj: AnalysisFilter = {}
+        
+        if (debouncedSearch) {
+            filterObj.search = debouncedSearch
+        }
+        
+        if (dateRange[0] && dateRange[1]) {
+            filterObj.dateFrom = dateRange[0]
+            filterObj.dateTo = dateRange[1]
+        }
+        
+        return filterObj
+    }, [debouncedSearch, dateRange])
 
-    // Map activeTab to filterEtl
-    const filterEtl =
-        activeTab === 'all'
-            ? null
-            : (activeTab as
-                  | 'not_yet_processing'
-                  | 'processing'
-                  | 'completed'
-                  | 'failed'
-                  | 'wait_for_approval'
-                  | 'rejected'
-                  | 'approved')
+    // Map activeTab and statusFilter to filterEtl
+    const getFilterEtl = () => {
+        if (!statusFilter) return null
+        
+        if (activeTab === 'processing') {
+            return statusFilter as 'not_yet_processing' | 'processing' | 'completed' | 'failed'
+        } else if (activeTab === 'results') {
+            return statusFilter as 'wait_for_approval' | 'approved' | 'rejected'
+        }
+        return null
+    }
+    
+    const filterEtl = getFilterEtl()
+
+    // Get status options based on active tab
+    const getStatusOptions = () => {
+        if (activeTab === 'processing') {
+            return [
+                { value: 'not_yet_processing', label: 'Chưa xử lý' },
+                { value: 'processing', label: 'Đang xử lý' },
+                { value: 'completed', label: 'Hoàn thành' },
+                { value: 'failed', label: 'Thất bại' }
+            ]
+        } else {
+            return [
+                { value: 'wait_for_approval', label: 'Chờ phê duyệt' },
+                { value: 'approved', label: 'Đã phê duyệt' },
+                { value: 'rejected', label: 'Từ chối' }
+            ]
+        }
+    }
 
     // Fetch data
     const {
@@ -78,7 +109,6 @@ const ETLManagementPage = () => {
         search: debouncedSearch as string,
         sortBy: sortBy as string,
         sortOrder: sortOrder as string,
-        filter,
         dateFrom: dateRange[0],
         dateTo: dateRange[1],
         filterFastq: null,
@@ -91,7 +121,18 @@ const ETLManagementPage = () => {
     // Reset page when search or filters change
     useEffect(() => {
         if (page > 1) setPage(1)
-    }, [debouncedSearch, filter, dateRange, activeTab])
+    }, [debouncedSearch, filter, dateRange, activeTab, statusFilter])
+
+    // Set default status on initial load
+    useEffect(() => {
+        if (!statusFilter) {
+            if (activeTab === 'processing') {
+                setStatusFilter('not_yet_processing')
+            } else if (activeTab === 'results') {
+                setStatusFilter('wait_for_approval')
+            }
+        }
+    }, [activeTab, statusFilter, setStatusFilter])
 
     const handleViewDetail = useCallback(
         (id: number) => {
@@ -254,29 +295,14 @@ const ETLManagementPage = () => {
                     </Alert>
                 )}
 
-                {/* Tabs for different ETL statuses */}
+                {/* Tabs for different ETL categories */}
                 <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'processing')}>
                     <Tabs.List>
-                        <Tabs.Tab value='not_yet_processing' leftSection={<IconClock size={16} />}>
-                            Chưa xử lý
-                        </Tabs.Tab>
                         <Tabs.Tab value='processing' leftSection={<IconLoader size={16} />}>
                             Đang xử lý
                         </Tabs.Tab>
-                        <Tabs.Tab value='completed' leftSection={<IconCheck size={16} />}>
-                            Hoàn thành
-                        </Tabs.Tab>
-                        <Tabs.Tab value='failed' leftSection={<IconAlertTriangle size={16} />}>
-                            Thất bại
-                        </Tabs.Tab>
-                        <Tabs.Tab value='wait_for_approval' leftSection={<IconClock size={16} />}>
-                            Chờ phê duyệt
-                        </Tabs.Tab>
-                        <Tabs.Tab value='approved' leftSection={<IconCheck size={16} />}>
-                            Đã phê duyệt
-                        </Tabs.Tab>
-                        <Tabs.Tab value='rejected' leftSection={<IconBan size={16} />}>
-                            Từ chối
+                        <Tabs.Tab value='results' leftSection={<IconCheck size={16} />}>
+                            Kết quả ETL
                         </Tabs.Tab>
                     </Tabs.List>
 
@@ -298,6 +324,13 @@ const ETLManagementPage = () => {
                                     onChange={setDateRange}
                                     clearable
                                     maxDate={new Date()}
+                                />
+                                <Select
+                                    placeholder='Chọn trạng thái'
+                                    data={getStatusOptions()}
+                                    value={statusFilter}
+                                    onChange={(value) => setStatusFilter(value || '')}
+                                    clearable
                                 />
                             </Group>
                         </Paper>
@@ -323,7 +356,7 @@ const ETLManagementPage = () => {
                                 }
                                 onSortStatusChange={handleSort}
                                 fetching={isLoading}
-                                noRecordsText='Không có dữ liệu kết quả ETL'
+                                noRecordsText='Không có dữ liệu'
                                 minHeight={150}
                                 verticalSpacing='md'
                                 striped

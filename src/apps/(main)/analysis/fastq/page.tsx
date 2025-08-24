@@ -305,7 +305,7 @@ const FastQManagementPage = () => {
                                 }
                                 onSortStatusChange={handleSort}
                                 fetching={isLoading}
-                                noRecordsText='Không có dữ liệu FastQ'
+                                noRecordsText='Không có dữ liệu'
                                 minHeight={150}
                                 verticalSpacing='md'
                                 striped
