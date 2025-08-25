@@ -111,7 +111,11 @@ const ValidationDetailPage = () => {
     return (
         <>
             <PanelGroup direction='horizontal'>
-                <Panel>
+                <Panel
+                    style={{
+                        overflow: 'auto'
+                    }}
+                >
                     <Container size='xl' py='lg'>
                         <Stack gap='xl'>
                             {/* Page Header */}
