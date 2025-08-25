@@ -187,7 +187,7 @@ const MessageBlock = ({ message }: MessageBlockProps) => {
                                 </Accordion.Item>
                             </Accordion>
                         )
-                    case 'tool-createAnalysisStrategy':
+                    case 'tool-createGeneAnalysisStrategy':
                         return (
                             <Accordion variant='filled' key={`${message.id}-${i}`} radius='lg' className='w-full'>
                                 <Accordion.Item value='tool'>
@@ -204,7 +204,7 @@ const MessageBlock = ({ message }: MessageBlockProps) => {
                                     >
                                         <Group wrap='nowrap'>
                                             <Text size='sm' c='dimmed'>
-                                                Phân tích chuyên sâu
+                                                Phân tích biến thể
                                             </Text>
                                             {part.state === 'input-available' ? (
                                                 <Badge color='blue' variant='light' size='sm'>
@@ -319,7 +319,7 @@ const MessageBlock = ({ message }: MessageBlockProps) => {
                                 </Accordion.Item>
                             </Accordion>
                         )
-                    case 'tool-prepareWebSearch':
+                    case 'tool-prepareVariantSearch':
                         return (
                             <Accordion variant='filled' key={`${message.id}-${i}`} radius='lg' className='w-full'>
                                 <Accordion.Item value='tool'>
@@ -336,7 +336,7 @@ const MessageBlock = ({ message }: MessageBlockProps) => {
                                     >
                                         <Group wrap='nowrap'>
                                             <Text size='sm' c='dimmed'>
-                                                Chuẩn bị tìm kiếm
+                                                Lấy thông tin phân tích biến thể
                                             </Text>
                                             {part.state === 'input-available' ? (
                                                 <Badge color='blue' variant='light' size='sm'>
@@ -345,12 +345,12 @@ const MessageBlock = ({ message }: MessageBlockProps) => {
                                             ) : null}
                                             {part.state === 'output-available' ? (
                                                 <Badge color='green' variant='light' size='sm'>
-                                                    Đã chuẩn bị xong
+                                                    Đã có thông tin
                                                 </Badge>
                                             ) : null}
                                             {part.state === 'output-error' ? (
                                                 <Badge color='red' variant='light' size='sm'>
-                                                    Lỗi chuẩn bị
+                                                    Lỗi lấy thông tin
                                                 </Badge>
                                             ) : null}
                                         </Group>
@@ -402,7 +402,7 @@ const MessageBlock = ({ message }: MessageBlockProps) => {
                                     >
                                         <Group wrap='nowrap'>
                                             <Text size='sm' c='dimmed'>
-                                                Tra cứu cơ sở dữ liệu y khoa
+                                                Tra cứu cơ sở dữ liệu y sinh
                                             </Text>
                                             {part.state === 'input-available' ? (
                                                 <Badge color='blue' variant='light' size='sm'>
