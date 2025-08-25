@@ -31,7 +31,7 @@ export const openAcceptEtlResultModal = ({ etlResultId, onSuccess }: AcceptEtlRe
             </Group>
         ),
         children: <AcceptEtlResultModalContent etlResultId={etlResultId} onSuccess={onSuccess} />,
-        size: 'md',
+        size: 'lg',
         radius: 'lg',
         centered: true,
         closeOnClickOutside: false,
