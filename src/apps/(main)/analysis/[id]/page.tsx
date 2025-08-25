@@ -79,7 +79,18 @@ const AnalysisDetailPage = () => {
         data?.etlResults && data.etlResults.length > 0 ? data.etlResults.sort((a, b) => b.id - a.id)[0] : null
 
     const handleBack = () => {
-        navigate('/analysis')
+        const urlParams = new URLSearchParams(window.location.search)
+        const returnTo = urlParams.get('returnTo')
+        
+        if (returnTo) {
+            // Lấy tất cả params trừ returnTo
+            urlParams.delete('returnTo')
+            const queryString = urlParams.toString()
+            const backUrl = queryString ? `${returnTo}?${queryString}` : returnTo
+            navigate(backUrl)
+        } else {
+            navigate('/analysis')
+        }
     }
 
     const handleProcessAnalysis = async () => {

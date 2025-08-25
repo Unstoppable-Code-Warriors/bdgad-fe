@@ -31,17 +31,30 @@ const getStatusLabel = (status: string) => {
 const ETLManagementPage = () => {
     const navigate = useNavigate()
 
-    // URL state management
+    // URL state management - separate search for each tab
     const [page, setPage] = useSearchParamState({ key: 'page', initValue: 1 })
     const [limit, setLimit] = useSearchParamState({ key: 'limit', initValue: 10 })
-    const [search, setSearch] = useSearchParamState({ key: 'search', initValue: '' })
+    const [searchProcessing, setSearchProcessing] = useSearchParamState({ key: 'searchProcessing', initValue: '' })
+    const [searchResults, setSearchResults] = useSearchParamState({ key: 'searchResults', initValue: '' })
     const [sortBy, setSortBy] = useSearchParamState({ key: 'sortBy', initValue: 'createdAt' })
     const [sortOrder, setSortOrder] = useSearchParamState({ key: 'sortOrder', initValue: 'DESC' })
     const [activeTab, setActiveTab] = useSearchParamState({ key: 'tab', initValue: 'processing' })
-    const [statusFilter, setStatusFilter] = useSearchParamState({ 
-        key: 'status', 
+    const [statusFilterProcessing, setStatusFilterProcessing] = useSearchParamState({ 
+        key: 'statusProcessing', 
         initValue: '' 
     })
+    const [statusFilterResults, setStatusFilterResults] = useSearchParamState({ 
+        key: 'statusResults', 
+        initValue: '' 
+    })
+
+    // Get current status filter based on active tab
+    const statusFilter = activeTab === 'processing' ? statusFilterProcessing : statusFilterResults
+    const setStatusFilter = activeTab === 'processing' ? setStatusFilterProcessing : setStatusFilterResults
+
+    // Get current search based on active tab
+    const search = activeTab === 'processing' ? searchProcessing : searchResults
+    const setSearch = activeTab === 'processing' ? setSearchProcessing : setSearchResults
 
     // Filters
     const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
@@ -83,6 +96,7 @@ const ETLManagementPage = () => {
     const getStatusOptions = () => {
         if (activeTab === 'processing') {
             return [
+                { value: '', label: 'Tất cả' },
                 { value: 'not_yet_processing', label: 'Chưa xử lý' },
                 { value: 'processing', label: 'Đang xử lý' },
                 { value: 'completed', label: 'Hoàn thành' },
@@ -90,6 +104,7 @@ const ETLManagementPage = () => {
             ]
         } else {
             return [
+                { value: '', label: 'Tất cả' },
                 { value: 'wait_for_approval', label: 'Chờ phê duyệt' },
                 { value: 'approved', label: 'Đã phê duyệt' },
                 { value: 'rejected', label: 'Từ chối' }
@@ -123,22 +138,27 @@ const ETLManagementPage = () => {
         if (page > 1) setPage(1)
     }, [debouncedSearch, filter, dateRange, activeTab, statusFilter])
 
-    // Set default status on initial load
-    useEffect(() => {
-        if (!statusFilter) {
-            if (activeTab === 'processing') {
-                setStatusFilter('not_yet_processing')
-            } else if (activeTab === 'results') {
-                setStatusFilter('wait_for_approval')
-            }
-        }
-    }, [activeTab, statusFilter, setStatusFilter])
+    // No need to reset status filter when tab changes - each tab has its own filter
+    // useEffect removed to preserve individual tab filters
 
     const handleViewDetail = useCallback(
         (id: number) => {
-            navigate(`/analysis/${id}`)
+            const currentParams = new URLSearchParams()
+            currentParams.set('page', String(page))
+            currentParams.set('limit', String(limit))
+            currentParams.set('tab', String(activeTab))
+            if (searchProcessing) currentParams.set('searchProcessing', String(searchProcessing))
+            if (searchResults) currentParams.set('searchResults', String(searchResults))
+            if (statusFilterProcessing) currentParams.set('statusProcessing', String(statusFilterProcessing))
+            if (statusFilterResults) currentParams.set('statusResults', String(statusFilterResults))
+            if (sortBy) currentParams.set('sortBy', String(sortBy))
+            if (sortOrder) currentParams.set('sortOrder', String(sortOrder))
+            if (dateRange[0]) currentParams.set('dateFrom', dateRange[0])
+            if (dateRange[1]) currentParams.set('dateTo', dateRange[1])
+            
+            navigate(`/analysis/${id}?returnTo=/analysis/etl&${currentParams.toString()}`)
         },
-        [navigate]
+        [navigate, page, limit, activeTab, searchProcessing, searchResults, statusFilterProcessing, statusFilterResults, sortBy, sortOrder, dateRange]
     )
 
     const handleSort = useCallback(
