@@ -41,11 +41,11 @@ const ETLManagementPage = () => {
     const [activeTab, setActiveTab] = useSearchParamState({ key: 'tab', initValue: 'processing' })
     const [statusFilterProcessing, setStatusFilterProcessing] = useSearchParamState({ 
         key: 'statusProcessing', 
-        initValue: '' 
+        initValue: 'not_yet_processing' 
     })
     const [statusFilterResults, setStatusFilterResults] = useSearchParamState({ 
         key: 'statusResults', 
-        initValue: '' 
+        initValue: 'wait_for_approval' 
     })
 
     // Get current status filter based on active tab
@@ -56,8 +56,13 @@ const ETLManagementPage = () => {
     const search = activeTab === 'processing' ? searchProcessing : searchResults
     const setSearch = activeTab === 'processing' ? setSearchProcessing : setSearchResults
 
-    // Filters
-    const [dateRange, setDateRange] = useState<[string | null, string | null]>([null, null])
+    // Separate date range state for each tab
+    const [dateRangeProcessing, setDateRangeProcessing] = useState<[string | null, string | null]>([null, null])
+    const [dateRangeResults, setDateRangeResults] = useState<[string | null, string | null]>([null, null])
+    
+    // Get current date range based on active tab
+    const dateRange = activeTab === 'processing' ? dateRangeProcessing : dateRangeResults
+    const setDateRange = activeTab === 'processing' ? setDateRangeProcessing : setDateRangeResults
 
     // Debounced search
     const [debouncedSearch] = useDebouncedValue(search, 1000)
@@ -96,7 +101,6 @@ const ETLManagementPage = () => {
     const getStatusOptions = () => {
         if (activeTab === 'processing') {
             return [
-                { value: '', label: 'Tất cả' },
                 { value: 'not_yet_processing', label: 'Chưa xử lý' },
                 { value: 'processing', label: 'Đang xử lý' },
                 { value: 'completed', label: 'Hoàn thành' },
@@ -104,7 +108,6 @@ const ETLManagementPage = () => {
             ]
         } else {
             return [
-                { value: '', label: 'Tất cả' },
                 { value: 'wait_for_approval', label: 'Chờ phê duyệt' },
                 { value: 'approved', label: 'Đã phê duyệt' },
                 { value: 'rejected', label: 'Từ chối' }
@@ -138,9 +141,6 @@ const ETLManagementPage = () => {
         if (page > 1) setPage(1)
     }, [debouncedSearch, filter, dateRange, activeTab, statusFilter])
 
-    // No need to reset status filter when tab changes - each tab has its own filter
-    // useEffect removed to preserve individual tab filters
-
     const handleViewDetail = useCallback(
         (id: number) => {
             const currentParams = new URLSearchParams()
@@ -153,12 +153,14 @@ const ETLManagementPage = () => {
             if (statusFilterResults) currentParams.set('statusResults', String(statusFilterResults))
             if (sortBy) currentParams.set('sortBy', String(sortBy))
             if (sortOrder) currentParams.set('sortOrder', String(sortOrder))
-            if (dateRange[0]) currentParams.set('dateFrom', dateRange[0])
-            if (dateRange[1]) currentParams.set('dateTo', dateRange[1])
+            if (dateRangeProcessing[0]) currentParams.set('dateFromProcessing', dateRangeProcessing[0])
+            if (dateRangeProcessing[1]) currentParams.set('dateToProcessing', dateRangeProcessing[1])
+            if (dateRangeResults[0]) currentParams.set('dateFromResults', dateRangeResults[0])
+            if (dateRangeResults[1]) currentParams.set('dateToResults', dateRangeResults[1])
             
             navigate(`/analysis/${id}?returnTo=/analysis/etl&${currentParams.toString()}`)
         },
-        [navigate, page, limit, activeTab, searchProcessing, searchResults, statusFilterProcessing, statusFilterResults, sortBy, sortOrder, dateRange]
+        [navigate, page, limit, activeTab, searchProcessing, searchResults, statusFilterProcessing, statusFilterResults, sortBy, sortOrder, dateRangeProcessing, dateRangeResults]
     )
 
     const handleSort = useCallback(
