@@ -39,14 +39,14 @@ import {
 } from '@tabler/icons-react'
 import {
     usePatientLabSessionDetail,
-    useDeletePatientFile,
+    // useDeletePatientFile,
     useUploadPatientFiles,
     useDownloadEtlResult
 } from '@/services/hook/staff-patient-session.hook'
 import SendFilesModal from '../components/SendFilesModal'
 import { notifications } from '@mantine/notifications'
 import { useDownloadPatientFile } from '@/services/hook/staff-general-files.hook'
-import { modals } from '@mantine/modals'
+// import { modals } from '@mantine/modals'
 
 const getFileIcon = (fileType: string) => {
     switch (fileType.toLowerCase()) {
@@ -178,7 +178,7 @@ const SessionDetailPage = () => {
     const { data: sessionData, isLoading, error } = usePatientLabSessionDetail(sessionId!)
 
     const downloadMutation = useDownloadPatientFile()
-    const deletePatientFileMutation = useDeletePatientFile()
+    // const deletePatientFileMutation = useDeletePatientFile()
     const uploadPatientFilesMutation = useUploadPatientFiles()
     const downloadEtlResultMutation = useDownloadEtlResult()
 
@@ -286,41 +286,41 @@ const SessionDetailPage = () => {
         setIsSendModalOpen(false)
     }
 
-    const handleDeleteFile = useCallback(
-        (fileId: string, fileName: string) => {
-            modals.openConfirmModal({
-                title: 'Xác nhận xóa file',
-                children: (
-                    <Text size='sm'>
-                        Bạn có chắc chắn muốn xóa file <strong>{fileName}</strong>? Hành động này không thể hoàn tác.
-                    </Text>
-                ),
-                labels: { confirm: 'Xóa', cancel: 'Hủy' },
-                confirmProps: { color: 'red' },
-                onConfirm: async () => {
-                    try {
-                        await deletePatientFileMutation.mutateAsync({
-                            patientFileId: fileId,
-                            sessionId: sessionId!
-                        })
+    // const handleDeleteFile = useCallback(
+    //     (fileId: string, fileName: string) => {
+    //         modals.openConfirmModal({
+    //             title: 'Xác nhận xóa file',
+    //             children: (
+    //                 <Text size='sm'>
+    //                     Bạn có chắc chắn muốn xóa file <strong>{fileName}</strong>? Hành động này không thể hoàn tác.
+    //                 </Text>
+    //             ),
+    //             labels: { confirm: 'Xóa', cancel: 'Hủy' },
+    //             confirmProps: { color: 'red' },
+    //             onConfirm: async () => {
+    //                 try {
+    //                     await deletePatientFileMutation.mutateAsync({
+    //                         patientFileId: fileId,
+    //                         sessionId: sessionId!
+    //                     })
 
-                        notifications.show({
-                            title: 'Thành công',
-                            message: `Đã xóa file ${fileName}`,
-                            color: 'green'
-                        })
-                    } catch (error) {
-                        notifications.show({
-                            title: 'Lỗi',
-                            message: `Không thể xóa file: ${error instanceof Error ? error.message : 'Unknown error'}`,
-                            color: 'red'
-                        })
-                    }
-                }
-            })
-        },
-        [deletePatientFileMutation, sessionId]
-    )
+    //                     notifications.show({
+    //                         title: 'Thành công',
+    //                         message: `Đã xóa file ${fileName}`,
+    //                         color: 'green'
+    //                     })
+    //                 } catch (error) {
+    //                     notifications.show({
+    //                         title: 'Lỗi',
+    //                         message: `Không thể xóa file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    //                         color: 'red'
+    //                     })
+    //                 }
+    //             }
+    //         })
+    //     },
+    //     [deletePatientFileMutation, sessionId]
+    // )
 
     const handleUploadFiles = useCallback(
         async (files: File[]) => {
@@ -671,7 +671,7 @@ const SessionDetailPage = () => {
                             </Badge>
                         </Group>
 
-                        <Group>
+                        {/* <Group>
                             <Button
                                 leftSection={<IconUpload size={16} />}
                                 onClick={handleOpenUploadModal}
@@ -680,7 +680,7 @@ const SessionDetailPage = () => {
                             >
                                 Tải lên file
                             </Button>
-                        </Group>
+                        </Group> */}
                     </Group>
 
                     {sessionData.patientFiles && sessionData.patientFiles.length > 0 ? (
@@ -730,9 +730,10 @@ const SessionDetailPage = () => {
                                                         flex={1}
                                                         title='Tải xuống'
                                                     >
-                                                        <IconDownload size={14} />
+                                                        <Text size='sm'>Tải xuống</Text>
+                                                        <IconDownload size={14} className='ml-3' />
                                                     </ActionIcon>
-                                                    <ActionIcon
+                                                    {/* <ActionIcon
                                                         variant='light'
                                                         color='red'
                                                         size='sm'
@@ -741,7 +742,7 @@ const SessionDetailPage = () => {
                                                         title='Xóa file'
                                                     >
                                                         <IconTrash size={14} />
-                                                    </ActionIcon>
+                                                    </ActionIcon> */}
                                                 </Group>
                                             </Stack>
                                         </Card>
