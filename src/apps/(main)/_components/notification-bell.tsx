@@ -14,14 +14,11 @@ import { IconBell, IconCheck } from '@tabler/icons-react'
 import { useMarkNotificationAsRead } from '@/services/hook/notification.hook'
 import { useUser } from '@/services/hook/auth.hook'
 import { useMemo, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router'
 import { showErrorNotification } from '@/utils/notifications'
 import type { Notification } from '@/types/notification'
-import { Role } from '@/utils/constant'
 import { notificationService } from '@/services/function/notification'
 
 const NotificationBell = () => {
-    const navigate = useNavigate()
     const [opened, setOpened] = useState(false)
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [isLoading, setIsLoading] = useState(true)
@@ -131,6 +128,15 @@ const NotificationBell = () => {
     const handleMarkAsRead = async (notificationId: number) => {
         try {
             await markAsReadMutation.mutateAsync(notificationId)
+            
+            // Update local state immediately after successful API call
+            setNotifications(prev => 
+                prev.map(notification => 
+                    notification.id === notificationId 
+                        ? { ...notification, isRead: true }
+                        : notification
+                )
+            )
         } catch (error) {
             console.error('Error marking notification as read:', error)
             showErrorNotification({
@@ -147,6 +153,15 @@ const NotificationBell = () => {
             const promises = unreadNotifications.map((notification) => markAsReadMutation.mutateAsync(notification.id))
 
             await Promise.all(promises)
+            
+            // Update all unread notifications to read in local state
+            setNotifications(prev => 
+                prev.map(notification => 
+                    !notification.isRead 
+                        ? { ...notification, isRead: true }
+                        : notification
+                )
+            )
         } catch (error) {
             console.error('Error marking all notifications as read:', error)
             showErrorNotification({
@@ -156,50 +171,6 @@ const NotificationBell = () => {
         }
     }
 
-    const handleNotificationClick = (notification: Notification) => {
-        if (!notification.isRead) {
-            handleMarkAsRead(notification.id)
-        }
-
-        setOpened(false)
-
-        const userRole = Number(userProfile?.roles[0].code)
-
-        switch (userRole) {
-            case Role.LAB_TESTING_TECHNICIAN:
-                if (notification.labcode) {
-                    navigate(`/lab-test?search=${notification.labcode}`)
-                } else {
-                    navigate('/lab-test')
-                }
-                break
-
-            case Role.ANALYSIS_TECHNICIAN:
-                if (notification.labcode) {
-                    navigate(`/analysis?search=${notification.labcode}`)
-                } else {
-                    navigate('/analysis')
-                }
-                break
-
-            case Role.VALIDATION_TECHNICIAN:
-                if (notification.labcode) {
-                    navigate(`/validation?search=${notification.labcode}`)
-                } else {
-                    navigate('/validation')
-                }
-                break
-
-            case Role.STAFF:
-            default:
-                if (notification.labcode) {
-                    navigate(`/lab-test?search=${notification.labcode}`)
-                } else {
-                    navigate('/lab-test')
-                }
-                break
-        }
-    }
 
     // Helper function để format thời gian
     const formatTime = (dateString: string) => {
@@ -284,7 +255,7 @@ const NotificationBell = () => {
     }
 
     return (
-        <Menu shadow='md' width={400} position='bottom-end' opened={opened} onChange={setOpened}>
+        <Menu shadow='md' width={450} position='bottom-end' opened={opened} onChange={setOpened}>
             <Menu.Target>
                 <ActionIcon variant='light' size='lg' radius='md'>
                     <Indicator
@@ -330,7 +301,6 @@ const NotificationBell = () => {
                                 key={notification.id}
                                 w='100%'
                                 p='sm'
-                                onClick={() => handleNotificationClick(notification)}
                                 style={{
                                     backgroundColor: notification.isRead
                                         ? 'transparent'
